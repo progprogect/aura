@@ -36,20 +36,21 @@ async function getSpecialist(slug: string) {
   return specialist
 }
 
-// SSG: генерация статических параметров
-export async function generateStaticParams() {
-  const specialists = await prisma.specialist.findMany({
-    where: { verified: true },
-    select: { slug: true },
-  })
-
-  return specialists.map(specialist => ({
-    slug: specialist.slug,
-  }))
-}
-
-// Ревалидация каждые 60 секунд
+// ISR: страницы генерируются по требованию и кешируются на 60 секунд
+// БД не нужна во время build - страницы создаются при первом визите
 export const revalidate = 60
+
+// SSG отключен - используем ISR для совместимости с Railway
+// export async function generateStaticParams() {
+//   const specialists = await prisma.specialist.findMany({
+//     where: { verified: true },
+//     select: { slug: true },
+//   })
+//
+//   return specialists.map(specialist => ({
+//     slug: specialist.slug,
+//   }))
+// }
 
 // SEO: генерация metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
