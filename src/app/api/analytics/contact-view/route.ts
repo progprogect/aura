@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { incrementContactView } from '@/lib/redis'
 
-export const runtime = 'edge'
-
 export async function POST(request: NextRequest) {
   try {
     const { specialistId, contactType } = await request.json()
