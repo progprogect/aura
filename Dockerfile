@@ -22,10 +22,16 @@ RUN echo "deb http://deb.debian.org/debian bullseye main" >> /etc/apt/sources.li
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Build arguments (Railway передаст автоматически)
+ARG DATABASE_URL
+ARG REDIS_URL
+ENV DATABASE_URL=$DATABASE_URL
+ENV REDIS_URL=$REDIS_URL
+
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build Next.js
+# Build Next.js (теперь DATABASE_URL доступен для SSG)
 RUN npm run build
 
 # Production image, copy all the files and run next
