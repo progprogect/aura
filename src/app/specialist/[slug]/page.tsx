@@ -48,6 +48,9 @@ export async function generateStaticParams() {
   }))
 }
 
+// Ревалидация каждые 60 секунд
+export const revalidate = 60
+
 // SEO: генерация metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const specialist = await getSpecialist(params.slug)
