@@ -24,8 +24,6 @@ export interface SpecialistHeroProps {
   yearsOfPractice?: number | null
   verified: boolean
   profileViews: number
-  onContactClick?: () => void
-  onShowContactsClick?: () => void
 }
 
 export function SpecialistHero({
@@ -42,10 +40,20 @@ export function SpecialistHero({
   yearsOfPractice,
   verified,
   profileViews,
-  onContactClick,
-  onShowContactsClick,
 }: SpecialistHeroProps) {
   const fullName = `${firstName} ${lastName}`
+
+  // Скролл к форме связи
+  const handleContactClick = () => {
+    const contactSection = document.getElementById('contact')
+    contactSection?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // Показать контакты (заглушка на будущее)
+  const handleShowContactsClick = () => {
+    // TODO: Показать модалку с контактами + аналитика
+    alert('Показать контакты - функция в разработке')
+  }
 
   return (
     <motion.div
@@ -187,7 +195,7 @@ export function SpecialistHero({
             >
               <Button
                 size="lg"
-                onClick={onContactClick}
+                onClick={handleContactClick}
                 className="gap-2 shadow-sm"
               >
                 <MessageCircle className="h-4 w-4" />
@@ -197,7 +205,7 @@ export function SpecialistHero({
               <Button
                 size="lg"
                 variant="outline"
-                onClick={onShowContactsClick}
+                onClick={handleShowContactsClick}
                 className="gap-2"
               >
                 <Phone className="h-4 w-4" />

@@ -144,14 +144,6 @@ export default async function SpecialistPage({ params }: PageProps) {
         yearsOfPractice={specialist.yearsOfPractice}
         verified={specialist.verified}
         profileViews={specialist.profileViews}
-        onContactClick={() => {
-          // Скролл к форме
-          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-        }}
-        onShowContactsClick={() => {
-          // TODO: Показать модалку с контактами + аналитика
-          alert('Показать контакты')
-        }}
       />
 
       {/* Профиль с табами и контентом */}
