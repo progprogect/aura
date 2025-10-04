@@ -1,0 +1,119 @@
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+
+export interface Tab {
+  id: string
+  label: string
+  icon?: string
+}
+
+export interface SpecialistTabsProps {
+  tabs: Tab[]
+  activeTab?: string
+  onTabChange?: (tabId: string) => void
+}
+
+export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsProps) {
+  const [isSticky, setIsSticky] = React.useState(false)
+  const tabsRef = React.useRef<HTMLDivElement>(null)
+
+  // Отслеживание прокрутки для sticky эффекта
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (tabsRef.current) {
+        const rect = tabsRef.current.getBoundingClientRect()
+        setIsSticky(rect.top <= 0)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Скролл к секции
+  const scrollToSection = (tabId: string) => {
+    const element = document.getElementById(tabId)
+    if (element) {
+      const offset = 80 // Высота sticky табов
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      })
+    }
+    onTabChange?.(tabId)
+  }
+
+  return (
+    <div
+      ref={tabsRef}
+      className={cn(
+        'sticky top-0 z-40 border-b bg-white transition-shadow',
+        isSticky ? 'shadow-sm' : 'border-gray-200'
+      )}
+    >
+      <div className="container mx-auto max-w-5xl px-4">
+        <div className="scrollbar-hide flex space-x-6 overflow-x-auto md:space-x-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => scrollToSection(tab.id)}
+              className={cn(
+                'relative flex items-center gap-2 whitespace-nowrap py-4 text-sm font-medium transition-colors',
+                'hover:text-gray-900',
+                activeTab === tab.id
+                  ? 'text-gray-900'
+                  : 'text-gray-500'
+              )}
+            >
+              {tab.icon && <span>{tab.icon}</span>}
+              <span>{tab.label}</span>
+
+              {/* Активная линия снизу */}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Хук для отслеживания активного таба при скролле
+export function useActiveTab(tabs: Tab[]) {
+  const [activeTab, setActiveTab] = React.useState<string>(tabs[0]?.id || '')
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      // Найти активную секцию по позиции скролла
+      const scrollPosition = window.scrollY + 100
+
+      for (const tab of tabs) {
+        const element = document.getElementById(tab.id)
+        if (element) {
+          const { offsetTop, offsetHeight } = element
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveTab(tab.id)
+            break
+          }
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Инициализация
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [tabs])
+
+  return activeTab
+}
+
+
+
