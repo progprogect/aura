@@ -68,7 +68,7 @@ export function SpecialistHero({
               transition={{ duration: 0.8 }}
               src={avatar}
               alt={fullName}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-cover"
             />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary-400 to-primary-600" />
