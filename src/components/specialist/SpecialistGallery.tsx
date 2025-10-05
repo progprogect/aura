@@ -82,8 +82,8 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Квадратная сетка 3x3 (Instagram-style) */}
-            <div className="grid grid-cols-3 gap-1">
+            {/* Адаптивная сетка: 2 колонки на мобилке, 3 на десктопе */}
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-1">
               {items.map((item, index) => (
                 <motion.div
                   key={item.id}
@@ -99,7 +99,7 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
                     src={item.thumbnailUrl || item.url}
                     alt={item.caption || `Фото ${index + 1}`}
                     fill
-                    sizes="(max-width: 768px) 33vw, 20vw"
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
 

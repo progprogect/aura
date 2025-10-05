@@ -79,29 +79,24 @@ export function SpecialistHero({
           
           {/* Контент поверх фото */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            {/* Верификация badge */}
-            {verified && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mb-3"
-              >
-                <Badge variant="verified" className="gap-1 bg-white/30 backdrop-blur-sm text-blue-700 border-blue-200 hover:bg-white/40">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Верифицирован
-                </Badge>
-              </motion.div>
-            )}
-            
-            {/* Имя */}
+            {/* Имя с галочкой верификации */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-3xl font-bold drop-shadow-lg"
+              className="text-3xl font-bold drop-shadow-lg flex items-center gap-2"
             >
               {fullName}
+              {verified && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="rounded-full bg-blue-500 p-1 shadow-lg"
+                >
+                  <CheckCircle2 className="h-4 w-4 text-white" />
+                </motion.div>
+              )}
             </motion.h1>
             
             {/* Специализация, опыт, локация */}
@@ -227,14 +222,24 @@ export function SpecialistHero({
 
             {/* Основная информация */}
             <div className="flex-1 text-center md:text-left">
-              {/* Имя */}
+              {/* Имя с галочкой верификации */}
               <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-semibold text-gray-900 md:text-3xl lg:text-4xl"
+                className="text-2xl font-semibold text-gray-900 md:text-3xl lg:text-4xl flex items-center gap-3"
               >
                 {fullName}
+                {verified && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="rounded-full bg-blue-500 p-1.5 shadow-md"
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  </motion.div>
+                )}
               </motion.h1>
 
               {/* Специализации и локация */}
@@ -293,22 +298,13 @@ export function SpecialistHero({
                 </motion.p>
               )}
 
-              {/* Бейджи (верификация и просмотры) */}
+              {/* Просмотры */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="mt-4 flex flex-wrap items-center justify-center gap-3 md:justify-start"
+                className="mt-4 flex flex-wrap items-center justify-center md:justify-start"
               >
-                {/* Верификация */}
-                {verified && (
-                  <Badge variant="verified" className="gap-1">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Верифицирован
-                  </Badge>
-                )}
-
-                {/* Просмотры */}
                 <span className="flex items-center gap-1.5 text-sm text-gray-500">
                   <Eye className="h-4 w-4" />
                   {formatNumber(profileViews)} просмотров
