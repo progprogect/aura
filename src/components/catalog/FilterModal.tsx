@@ -11,12 +11,13 @@
 
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/ui/icons/Icon'
 import { X } from '@/components/ui/icons/catalog-icons'
 import { useCategoryMap } from '@/hooks/useCategories'
 import { useScrollLock } from '@/hooks/useScrollLock'
 import { FilterState } from '@/lib/catalog/types'
+import { areFiltersEqual } from '@/lib/catalog/utils'
 import {
   EXPERIENCE_OPTIONS,
   FORMAT_OPTIONS,
@@ -45,6 +46,31 @@ export function FilterModal({
   const modalRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
+  // Draft state - локальное состояние фильтров
+  const [draftFilters, setDraftFilters] = useState<FilterState>(filters)
+
+  // Синхронизация draft с props при открытии
+  useEffect(() => {
+    if (isOpen) {
+      setDraftFilters(filters)
+    }
+  }, [isOpen, filters])
+
+  // Проверка наличия несохранённых изменений
+  const hasChanges = !areFiltersEqual(draftFilters, filters)
+
+  // Применение фильтров
+  const handleApply = useCallback(() => {
+    onFilterChange(draftFilters)
+    onClose()
+  }, [draftFilters, onFilterChange, onClose])
+
+  // Закрытие модалки (сбрасывает draft)
+  const handleClose = useCallback(() => {
+    setDraftFilters(filters) // Возвращаем к текущим фильтрам
+    onClose()
+  }, [filters, onClose])
+
   // Блокировка скролла основной страницы
   useScrollLock(isOpen)
 
@@ -58,42 +84,58 @@ export function FilterModal({
     }
   }, [isOpen])
 
-  // Закрытие по Escape
+  // Keyboard shortcuts
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
+    const handleKeyboard = (e: KeyboardEvent) => {
+      if (!isOpen) return
+
+      // Escape - закрыть
+      if (e.key === 'Escape') {
+        handleClose()
+      }
+
+      // Enter - применить (если есть изменения)
+      if (e.key === 'Enter' && hasChanges && !e.shiftKey) {
+        e.preventDefault()
+        handleApply()
       }
     }
 
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen, onClose])
+    document.addEventListener('keydown', handleKeyboard)
+    return () => document.removeEventListener('keydown', handleKeyboard)
+  }, [isOpen, hasChanges, handleClose, handleApply])
 
-  // Обработчики
+  // Обработчики изменяют только draft (не применяют!)
   const handleCategoryChange = (category: string) => {
-    onFilterChange({ category })
+    setDraftFilters((prev) => ({ ...prev, category }))
   }
 
   const handleExperienceChange = (experience: string) => {
-    onFilterChange({ experience })
+    setDraftFilters((prev) => ({ ...prev, experience }))
   }
 
   const handleFormatToggle = (format: string) => {
-    const isSelected = filters.format.includes(format)
-    const newFormats = isSelected
-      ? filters.format.filter((f) => f !== format)
-      : [...filters.format, format]
-
-    onFilterChange({ format: newFormats })
+    setDraftFilters((prev) => {
+      const isSelected = prev.format.includes(format)
+      const newFormats = isSelected
+        ? prev.format.filter((f) => f !== format)
+        : [...prev.format, format]
+      return { ...prev, format: newFormats }
+    })
   }
 
   const handleVerifiedChange = (verified: boolean) => {
-    onFilterChange({ verified })
+    setDraftFilters((prev) => ({ ...prev, verified }))
   }
 
   const handleSortChange = (sortBy: string) => {
-    onFilterChange({ sortBy })
+    setDraftFilters((prev) => ({ ...prev, sortBy }))
+  }
+
+  // Сброс фильтров (только draft)
+  const handleResetClick = () => {
+    onReset() // Вызываем родительский reset для получения defaults
+    // Draft обновится через useEffect при изменении filters
   }
 
   if (!isOpen) return null
@@ -109,14 +151,14 @@ export function FilterModal({
         {/* Overlay */}
         <div
           className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm transition-opacity"
-          onClick={onClose}
+          onClick={handleClose}
           aria-hidden="true"
         />
 
         {/* Modal */}
         <div
           ref={modalRef}
-          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:rounded-2xl max-sm:min-h-screen max-sm:w-full"
+          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:w-full sm:max-w-2xl lg:max-w-3xl sm:rounded-2xl max-sm:min-h-screen max-sm:w-full max-sm:rounded-none"
           role="document"
           tabIndex={-1}
         >
@@ -129,14 +171,14 @@ export function FilterModal({
               >
                 <span>Все фильтры</span>
                 {/* Показываем активную сортировку */}
-                {filters.sortBy !== 'relevance' && (
+                {draftFilters.sortBy !== 'relevance' && (
                   <span className="text-sm font-normal text-blue-600">
-                    · {SORT_OPTIONS.find((opt) => opt.value === filters.sortBy)?.label}
+                    · {SORT_OPTIONS.find((opt) => opt.value === draftFilters.sortBy)?.label}
                   </span>
                 )}
               </h3>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Закрыть модальное окно"
               >
@@ -156,11 +198,11 @@ export function FilterModal({
                 {loading ? (
                   <div className="text-sm text-gray-500">Загрузка...</div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="radiogroup">
                     <FilterRadioButton
                       label="Все специалисты"
                       value="all"
-                      checked={filters.category === 'all'}
+                      checked={draftFilters.category === 'all'}
                       onChange={handleCategoryChange}
                     />
 
@@ -169,7 +211,7 @@ export function FilterModal({
                         key={category.key}
                         label={category.name}
                         value={category.key}
-                        checked={filters.category === category.key}
+                        checked={draftFilters.category === category.key}
                         onChange={handleCategoryChange}
                         icon={category.emoji}
                       />
@@ -189,7 +231,7 @@ export function FilterModal({
                       key={option.value}
                       label={option.label}
                       value={option.value}
-                      checked={filters.experience === option.value}
+                      checked={draftFilters.experience === option.value}
                       onChange={handleExperienceChange}
                     />
                   ))}
@@ -200,9 +242,9 @@ export function FilterModal({
               <fieldset className="pb-6 border-b border-gray-100">
                 <legend className="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-between">
                   <span>Формат работы</span>
-                  {filters.format.length > 0 && (
+                  {draftFilters.format.length > 0 && (
                     <span className="text-xs font-medium text-blue-600">
-                      {filters.format.length} выбрано
+                      {draftFilters.format.length} выбрано
                     </span>
                   )}
                 </legend>
@@ -211,7 +253,7 @@ export function FilterModal({
                     <FilterChip
                       key={format.value}
                       label={format.label}
-                      selected={filters.format.includes(format.value)}
+                      selected={draftFilters.format.includes(format.value)}
                       onToggle={() => handleFormatToggle(format.value)}
                     />
                   ))}
@@ -225,7 +267,7 @@ export function FilterModal({
                 </legend>
                 <FilterToggle
                   label="Только верифицированные"
-                  checked={filters.verified}
+                  checked={draftFilters.verified}
                   onChange={handleVerifiedChange}
                   description="Показывать специалистов с подтверждённым образованием"
                 />
@@ -242,7 +284,7 @@ export function FilterModal({
                       key={sort.value}
                       label={sort.label}
                       value={sort.value}
-                      checked={filters.sortBy === sort.value}
+                      checked={draftFilters.sortBy === sort.value}
                       onChange={handleSortChange}
                     />
                   ))}
@@ -254,7 +296,7 @@ export function FilterModal({
           {/* Footer */}
           <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button
-              onClick={onReset}
+              onClick={handleResetClick}
               className="
                 w-full sm:w-auto px-6 py-2.5 rounded-lg border-2 border-gray-200
                 bg-white text-gray-700 font-medium text-sm
@@ -266,15 +308,18 @@ export function FilterModal({
               Сбросить
             </button>
             <button
-              onClick={onClose}
-              className="
-                w-full sm:w-auto px-6 py-2.5 rounded-lg
-                bg-blue-600 text-white font-medium text-sm
-                hover:bg-blue-700 active:bg-blue-800
+              onClick={handleApply}
+              disabled={!hasChanges}
+              className={`
+                w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium text-sm
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                 transition-all duration-200
-                shadow-sm hover:shadow-md
-              "
+                ${
+                  hasChanges
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow-md'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }
+              `}
             >
               Применить
             </button>
