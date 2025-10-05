@@ -6,6 +6,7 @@ import { incrementProfileView } from '@/lib/redis'
 import { categoryConfigService } from '@/lib/category-config'
 import { SpecialistHero } from '@/components/specialist/SpecialistHero'
 import { SpecialistProfile } from '@/components/specialist/SpecialistProfile'
+import { SpecialistNavigation } from '@/components/navigation/SpecialistNavigation'
 import type { Tab } from '@/components/specialist/SpecialistTabs'
 
 interface PageProps {
@@ -132,6 +133,12 @@ export default async function SpecialistPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation (breadcrumbs + FAB) */}
+      <SpecialistNavigation
+        specialistName={fullName}
+        category={specialist.category}
+      />
+
       {/* Hero */}
       <SpecialistHero
         firstName={specialist.firstName}

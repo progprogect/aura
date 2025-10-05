@@ -6,6 +6,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { SearchBar } from './SearchBar'
 import { FilterButton } from './FilterButton'
 import { FilterModal } from './FilterModal'
@@ -14,6 +15,7 @@ import { LoadingSpinner } from './LoadingSpinner'
 import { useToast, ToastContainer } from '@/components/ui/toast'
 import { useSpecialists } from '@/hooks/useSpecialists'
 import { useCatalogFilters } from '@/hooks/useCatalogFilters'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { SORT_OPTIONS } from '@/lib/catalog/constants'
 
 /**
@@ -32,6 +34,11 @@ export function CatalogContent() {
   // Состояние модального окна фильтров
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   
+  // Текущий route для scroll restoration
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const currentRoute = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '')
+  
   // Централизованное управление фильтрами
   const {
     filters,
@@ -43,6 +50,9 @@ export function CatalogContent() {
 
   // API запросы с кэшированием
   const { specialists, pagination, loading, error, loadMore } = useSpecialists(filters)
+
+  // Восстановление позиции скролла при возврате
+  useScrollRestoration(currentRoute, !loading && specialists.length > 0)
 
   // Обработка ошибок
   if (error && !loading) {

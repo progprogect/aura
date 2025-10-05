@@ -20,6 +20,8 @@ import { formatExperience } from '@/lib/formatters/experience'
 import { getCategoryLabel, getCategoryEmoji, getCategoryColor } from '@/lib/formatters/category'
 import { Icon } from '@/components/ui/icons/Icon'
 import { CheckCircle2, Clock, MapPin } from '@/components/ui/icons/catalog-icons'
+import { saveCatalogState } from '@/lib/navigation/scroll-restoration'
+import { getCatalogLabel } from '@/lib/navigation/utils'
 
 interface SpecialistCardProps {
   specialist: SpecialistViewModel
@@ -44,6 +46,30 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
   // Форматирование опыта
   const formattedExperience = formatExperience(specialist.yearsOfPractice)
 
+  // Сохранение состояния и построение returnUrl
+  const handleCardClick = () => {
+    if (typeof window === 'undefined') return
+
+    const currentRoute = window.location.pathname + window.location.search
+    const scrollPosition = window.scrollY
+
+    // Получаем label категории для FAB
+    const params = new URLSearchParams(window.location.search)
+    const categoryParam = params.get('category')
+    const categoryLabel = getCatalogLabel(categoryParam || specialist.category)
+
+    // Сохраняем состояние в localStorage
+    saveCatalogState(currentRoute, scrollPosition, categoryLabel)
+  }
+
+  // Построение URL с returnUrl
+  const profileUrl =
+    typeof window !== 'undefined'
+      ? `/specialist/${specialist.slug}?returnUrl=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`
+      : `/specialist/${specialist.slug}`
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -53,7 +79,8 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
       className="group h-full"
     >
       <Link
-        href={`/specialist/${specialist.slug}`}
+        href={profileUrl}
+        onClick={handleCardClick}
         className="block h-full"
         aria-label={`Профиль специалиста ${specialist.fullName}`}
       >
