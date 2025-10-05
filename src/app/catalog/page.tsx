@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Metadata } from 'next'
-import { CatalogContentOptimized } from '@/components/catalog/CatalogContentOptimized'
+import { CatalogContent } from '@/components/catalog/CatalogContent'
 import { CatalogPageSkeleton } from '@/components/catalog/SkeletonLoader'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -93,7 +93,7 @@ export default function CatalogPage() {
           
           <ErrorBoundary>
             <Suspense fallback={<CatalogPageSkeleton />}>
-              <CatalogContentOptimized />
+              <CatalogContent />
             </Suspense>
           </ErrorBoundary>
         </div>

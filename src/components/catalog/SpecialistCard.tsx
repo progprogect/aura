@@ -1,182 +1,181 @@
+/**
+ * Карточка специалиста в каталоге
+ * Версия 3.0 с полным рефакторингом:
+ * - Использует форматтеры из lib/formatters
+ * - Использует categoryMap для категорий
+ * - Lucide-react иконки
+ * - Улучшенная accessibility
+ */
+
 'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Specialist } from './CatalogContent'
+import { SpecialistViewModel } from '@/lib/catalog/types'
+import { useCategoryMap } from '@/hooks/useCategories'
+import { formatPriceRange } from '@/lib/formatters/price'
+import { formatExperience } from '@/lib/formatters/experience'
+import { getCategoryLabel, getCategoryEmoji, getCategoryColor } from '@/lib/formatters/category'
+import { Icon } from '@/components/ui/icons/Icon'
+import { CheckCircle2, Clock, MapPin } from '@/components/ui/icons/catalog-icons'
 
 interface SpecialistCardProps {
-  specialist: Specialist
+  specialist: SpecialistViewModel
 }
 
 export function SpecialistCard({ specialist }: SpecialistCardProps) {
   const [imageError, setImageError] = useState(false)
-  
-  // Получение эмодзи для категории
-  const getCategoryEmoji = (category: string) => {
-    const emojiMap: Record<string, string> = {
-      psychology: '🧠',
-      fitness: '💪',
-      nutrition: '🥗',
-      massage: '🤲',
-      wellness: '🧘',
-      coaching: '💼',
-      medicine: '⚕️',
-      other: '👨‍⚕️',
-    }
-    return emojiMap[category] || '👨‍⚕️'
-  }
-  
+  const { categoryMap } = useCategoryMap()
+
+  // Получение данных категории
+  const categoryEmoji = getCategoryEmoji(specialist.category, categoryMap)
+  const categoryLabel = getCategoryLabel(specialist.category, categoryMap)
+  const categoryColor = getCategoryColor(specialist.category)
+
   // Форматирование цены
-  const formatPrice = () => {
-    if (!specialist.priceFrom) return null
-    
-    const from = Math.round(specialist.priceFrom / 100)
-    const to = specialist.priceTo ? Math.round(specialist.priceTo / 100) : null
-    
-    if (to && to !== from) {
-      return `${from} - ${to}₽`
-    }
-    return `${from}₽`
-  }
-  
+  const formattedPrice = formatPriceRange(
+    specialist.priceFrom,
+    specialist.priceTo,
+    specialist.currency
+  )
+
   // Форматирование опыта
-  const formatExperience = () => {
-    if (!specialist.yearsOfPractice) return null
-    
-    const years = specialist.yearsOfPractice
-    if (years === 1) return '1 год'
-    if (years < 5) return `${years} года`
-    return `${years} лет`
-  }
-  
+  const formattedExperience = formatExperience(specialist.yearsOfPractice)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="group"
+      className="group h-full"
     >
-      <Link href={`/specialist/${specialist.slug}`}>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
+      <Link
+        href={`/specialist/${specialist.slug}`}
+        className="block h-full"
+        aria-label={`Профиль специалиста ${specialist.fullName}`}
+      >
+        <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
           {/* Фото специалиста */}
-          <div className="relative h-48 bg-gray-100">
+          <div className="relative h-48 bg-gray-100 flex-shrink-0">
             {specialist.avatar && !imageError ? (
               <Image
                 src={specialist.avatar}
-                alt={`${specialist.fullName} фото`}
+                alt={`Фото ${specialist.fullName}`}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={() => setImageError(true)}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             ) : (
-              <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-100">
-                <div className="text-6xl text-gray-400">
-                  {getCategoryEmoji(specialist.category)}
+              <div
+                className={`flex items-center justify-center h-full bg-gradient-to-br ${categoryColor}`}
+              >
+                <div className="text-6xl text-gray-400" aria-hidden="true">
+                  {categoryEmoji}
                 </div>
               </div>
             )}
-            
+
             {/* Verified badge */}
             {specialist.verified && (
-              <div className="absolute top-3 right-3">
+              <div
+                className="absolute top-3 right-3"
+                aria-label="Верифицирован"
+              >
                 <div className="bg-blue-500 rounded-full p-1.5 shadow-lg">
-                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <Icon
+                    icon={CheckCircle2}
+                    size={16}
+                    className="text-white"
+                    aria-hidden
+                  />
                 </div>
               </div>
             )}
           </div>
-          
+
           {/* Информация о специалисте */}
-          <div className="p-4">
+          <div className="p-4 flex flex-col flex-grow">
             {/* Имя и категория */}
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2">
               <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
                 {specialist.fullName}
               </h3>
-              {specialist.verified && (
-                <div className="flex items-center">
-                  <svg className="h-4 w-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
             </div>
-            
+
             {/* Категория с эмодзи */}
             <div className="flex items-center gap-1 mb-2">
-              <span className="text-lg">{getCategoryEmoji(specialist.category)}</span>
-              <span className="text-sm text-gray-600 capitalize">
-                {specialist.category === 'psychology' && 'Психология'}
-                {specialist.category === 'fitness' && 'Фитнес'}
-                {specialist.category === 'nutrition' && 'Питание'}
-                {specialist.category === 'massage' && 'Массаж'}
-                {specialist.category === 'wellness' && 'Велнес'}
-                {specialist.category === 'coaching' && 'Коучинг'}
-                {specialist.category === 'medicine' && 'Медицина'}
-                {specialist.category === 'other' && 'Другое'}
+              <span className="text-lg" aria-hidden="true">
+                {categoryEmoji}
               </span>
+              <span className="text-sm text-gray-600">{categoryLabel}</span>
             </div>
-            
+
             {/* Специализации */}
             {specialist.specializations.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3">
+              <div className="flex flex-wrap gap-1 mb-3" role="list" aria-label="Специализации">
                 {specialist.specializations.slice(0, 2).map((spec, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    role="listitem"
                   >
                     {spec}
                   </span>
                 ))}
                 {specialist.specializations.length > 2 && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  <span
+                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
+                    aria-label={`И ещё ${specialist.specializations.length - 2} специализаций`}
+                  >
                     +{specialist.specializations.length - 2}
                   </span>
                 )}
               </div>
             )}
-            
+
             {/* Описание */}
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-              {specialist.shortAbout}
-            </p>
-            
+            {specialist.shortAbout && (
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
+                {specialist.shortAbout}
+              </p>
+            )}
+
             {/* Дополнительная информация */}
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
               <div className="flex items-center gap-3">
-                {formatExperience() && (
-                  <span className="flex items-center gap-1">
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {formatExperience()}
+                {/* Опыт */}
+                {formattedExperience && (
+                  <span className="flex items-center gap-1" aria-label={`Опыт работы: ${formattedExperience}`}>
+                    <Icon icon={Clock} size={12} aria-hidden />
+                    <span>{formattedExperience}</span>
                   </span>
                 )}
-                
+
+                {/* Город */}
                 {specialist.city && (
-                  <span className="flex items-center gap-1">
-                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {specialist.city}
+                  <span className="flex items-center gap-1" aria-label={`Город: ${specialist.city}`}>
+                    <Icon icon={MapPin} size={12} aria-hidden />
+                    <span>{specialist.city}</span>
                   </span>
                 )}
               </div>
-              
-              {formatPrice() && (
-                <span className="font-medium text-gray-900">
-                  {formatPrice()}
+
+              {/* Цена */}
+              {formattedPrice && (
+                <span
+                  className="font-medium text-gray-900"
+                  aria-label={`Цена: ${formattedPrice}`}
+                >
+                  {formattedPrice}
                 </span>
               )}
             </div>
           </div>
-        </div>
+        </article>
       </Link>
     </motion.div>
   )

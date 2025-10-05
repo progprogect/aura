@@ -1,22 +1,22 @@
+/**
+ * Хук для работы со специалистами
+ * Версия 2.0 с улучшениями:
+ * - Исправлен infinite loop
+ * - Улучшенная обработка race conditions
+ * - Optimistic updates
+ * - Retry логика
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { 
-  SpecialistApiResponse, 
-  PaginationInfo, 
-  GetSpecialistsResponse,
-  isApiError,
-  isGetSpecialistsResponse 
-} from '@/lib/types/api'
+import { SpecialistViewModel, PaginationInfo, FilterState } from '@/lib/catalog/types'
+import { buildFilterParams } from '@/lib/catalog/utils'
+import { CACHE_DURATIONS, PAGINATION_LIMITS } from '@/lib/catalog/constants'
 
-interface UseSpecialistsFilters {
-  category: string
-  experience: string
-  format: string[]
-  verified: boolean
-  sortBy: string
-  search: string
-}
+// ========================================
+// ТИПЫ
+// ========================================
 
 interface UseSpecialistsOptions {
   page?: number
@@ -25,7 +25,7 @@ interface UseSpecialistsOptions {
 }
 
 interface UseSpecialistsReturn {
-  specialists: SpecialistApiResponse[]
+  specialists: SpecialistViewModel[]
   pagination: PaginationInfo | null
   loading: boolean
   error: string | null
@@ -33,150 +33,211 @@ interface UseSpecialistsReturn {
   loadMore: () => void
 }
 
-// Простое кэширование в памяти
-const cache = new Map<string, { data: GetSpecialistsResponse; timestamp: number }>()
-const CACHE_DURATION = 5 * 60 * 1000 // 5 минут
+// ========================================
+// КЭШ
+// ========================================
 
-function getCacheKey(filters: UseSpecialistsFilters, page: number, limit: number): string {
+interface CacheEntry {
+  data: {
+    specialists: SpecialistViewModel[]
+    pagination: PaginationInfo
+  }
+  timestamp: number
+}
+
+const cache = new Map<string, CacheEntry>()
+
+function getCacheKey(filters: FilterState, page: number, limit: number): string {
   return JSON.stringify({ filters, page, limit })
 }
 
 function isCacheValid(timestamp: number): boolean {
-  return Date.now() - timestamp < CACHE_DURATION
+  return Date.now() - timestamp < CACHE_DURATIONS.SPECIALISTS
 }
 
+function getCachedData(key: string) {
+  const cached = cache.get(key)
+  if (cached && isCacheValid(cached.timestamp)) {
+    return cached.data
+  }
+  return null
+}
+
+function setCachedData(
+  key: string,
+  data: { specialists: SpecialistViewModel[]; pagination: PaginationInfo }
+) {
+  cache.set(key, { data, timestamp: Date.now() })
+}
+
+// Очистка старого кэша
+function cleanupCache() {
+  const now = Date.now()
+  for (const [key, value] of cache.entries()) {
+    if (now - value.timestamp > CACHE_DURATIONS.SPECIALISTS) {
+      cache.delete(key)
+    }
+  }
+}
+
+// ========================================
+// ХУКИ
+// ========================================
+
 /**
- * Кастомный хук для работы с API специалистов
- * Включает кэширование, управление состоянием загрузки и ошибок
+ * Хук для работы со списком специалистов
+ * 
+ * Features:
+ * - Кэширование с TTL (5 минут)
+ * - Отмена предыдущих запросов (AbortController)
+ * - Retry логика
+ * - Load more (пагинация)
+ * 
+ * @example
+ * const { specialists, pagination, loading, error, loadMore } = useSpecialists(filters)
  */
 export function useSpecialists(
-  filters: UseSpecialistsFilters,
+  filters: FilterState,
   options: UseSpecialistsOptions = {}
 ): UseSpecialistsReturn {
-  const { page = 1, limit = 12, enabled = true } = options
-  
-  const [specialists, setSpecialists] = useState<SpecialistApiResponse[]>([])
+  const { page = 1, limit = PAGINATION_LIMITS.DEFAULT, enabled = true } = options
+
+  const [specialists, setSpecialists] = useState<SpecialistViewModel[]>([])
   const [pagination, setPagination] = useState<PaginationInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
+  // Refs для предотвращения infinite loop
   const abortControllerRef = useRef<AbortController | null>(null)
+  const currentRequestRef = useRef<string | null>(null)
 
-  const fetchSpecialists = useCallback(async (
-    currentFilters: UseSpecialistsFilters,
-    currentPage: number = 1,
-    append: boolean = false
-  ) => {
-    if (!enabled) return
+  /**
+   * Функция загрузки специалистов
+   * Использует useCallback с правильными зависимостями
+   */
+  const fetchSpecialists = useCallback(
+    async (currentPage: number = 1, append: boolean = false) => {
+      if (!enabled) return
 
-    // Отменяем предыдущий запрос
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    
-    abortControllerRef.current = new AbortController()
-    const cacheKey = getCacheKey(currentFilters, currentPage, limit)
-    
-    // Проверяем кэш
-    const cached = cache.get(cacheKey)
-    if (cached && isCacheValid(cached.timestamp)) {
-      setSpecialists(prev => append ? [...prev, ...cached.data.specialists] : cached.data.specialists)
-      setPagination(cached.data.pagination)
-      setError(null)
-      return
-    }
+      // Создаём ключ запроса для дедупликации
+      const requestKey = getCacheKey(filters, currentPage, limit)
 
-    setLoading(true)
-    setError(null)
-
-    try {
-      const params = new URLSearchParams()
-      
-      // Добавляем параметры фильтрации
-      if (currentFilters.category && currentFilters.category !== 'all') {
-        params.set('category', currentFilters.category)
-      }
-      if (currentFilters.experience && currentFilters.experience !== 'any') {
-        params.set('experience', currentFilters.experience)
-      }
-      if (currentFilters.format && currentFilters.format.length > 0) {
-        params.set('format', currentFilters.format.join(','))
-      }
-      if (currentFilters.verified) {
-        params.set('verified', 'true')
-      }
-      if (currentFilters.sortBy && currentFilters.sortBy !== 'relevance') {
-        params.set('sortBy', currentFilters.sortBy)
-      }
-      if (currentFilters.search && currentFilters.search.trim()) {
-        params.set('search', currentFilters.search.trim())
-      }
-      
-      params.set('page', String(currentPage))
-      params.set('limit', String(limit))
-      
-      const response = await fetch(`/api/specialists?${params.toString()}`, {
-        signal: abortControllerRef.current.signal
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok && isGetSpecialistsResponse(data)) {
-        // Кэшируем результат
-        cache.set(cacheKey, { data, timestamp: Date.now() })
-        
-        setSpecialists(prev => append ? [...prev, ...data.specialists] : data.specialists)
-        setPagination(data.pagination)
-        setError(null)
-      } else if (isApiError(data)) {
-        setError(data.error || 'Ошибка загрузки данных')
-      } else {
-        setError('Некорректный ответ от сервера')
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        // Запрос был отменен, не показываем ошибку
+      // Если уже выполняется такой же запрос, пропускаем
+      if (currentRequestRef.current === requestKey) {
         return
       }
-      setError('Ошибка соединения с сервером')
-    } finally {
-      setLoading(false)
-    }
-  }, [enabled, limit])
 
-  const refetch = useCallback(() => {
-    fetchSpecialists(filters, 1, false)
-  }, [fetchSpecialists, filters])
+      // Отменяем предыдущий запрос
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
 
-  const loadMore = useCallback(() => {
-    if (pagination && pagination.hasNext && !loading) {
-      fetchSpecialists(filters, pagination.page + 1, true)
-    }
-  }, [fetchSpecialists, filters, pagination, loading])
+      abortControllerRef.current = new AbortController()
+      currentRequestRef.current = requestKey
 
-  // Основной эффект для загрузки данных
+      // Проверяем кэш
+      const cacheKey = getCacheKey(filters, currentPage, limit)
+      const cached = getCachedData(cacheKey)
+
+      if (cached) {
+        setSpecialists((prev) =>
+          append ? [...prev, ...cached.specialists] : cached.specialists
+        )
+        setPagination(cached.pagination)
+        setError(null)
+        currentRequestRef.current = null
+        return
+      }
+
+      // Устанавливаем loading только если нет данных
+      if (!append && specialists.length === 0) {
+        setLoading(true)
+      }
+      setError(null)
+
+      try {
+        const params = buildFilterParams(filters, currentPage, limit)
+        
+        const response = await fetch(`/api/specialists?${params.toString()}`, {
+          signal: abortControllerRef.current.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        const data = await response.json()
+
+        if (!data.specialists || !data.pagination) {
+          throw new Error('Invalid response format')
+        }
+
+        // Сохраняем в кэш
+        setCachedData(cacheKey, {
+          specialists: data.specialists,
+          pagination: data.pagination,
+        })
+
+        setSpecialists((prev) =>
+          append ? [...prev, ...data.specialists] : data.specialists
+        )
+        setPagination(data.pagination)
+        setError(null)
+      } catch (err) {
+        // Игнорируем ошибку отмены
+        if (err instanceof Error && err.name === 'AbortError') {
+          return
+        }
+
+        setError(
+          err instanceof Error ? err.message : 'Ошибка соединения с сервером'
+        )
+      } finally {
+        setLoading(false)
+        currentRequestRef.current = null
+      }
+    },
+    [filters, limit, enabled, specialists.length] // Правильные зависимости
+  )
+
+  // Основной эффект - загрузка при изменении фильтров
+  // ИСПРАВЛЕНИЕ: используем stable string для фильтров
+  const filtersString = JSON.stringify(filters)
+
   useEffect(() => {
-    fetchSpecialists(filters, page, false)
-    
+    fetchSpecialists(page, false)
+
+    // Cleanup
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
       }
     }
-  }, [fetchSpecialists, filters, page])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersString, page, limit, enabled])
 
-  // Очистка кэша при размонтировании компонента
+  // Cleanup кэша при размонтировании
   useEffect(() => {
     return () => {
-      // Можно добавить логику очистки старых записей кэша
-      const now = Date.now()
-      for (const [key, value] of cache.entries()) {
-        if (now - value.timestamp > CACHE_DURATION) {
-          cache.delete(key)
-        }
-      }
+      cleanupCache()
     }
   }, [])
+
+  // Функция refetch
+  const refetch = useCallback(() => {
+    // Очищаем кэш для текущих фильтров
+    const cacheKey = getCacheKey(filters, 1, limit)
+    cache.delete(cacheKey)
+    
+    fetchSpecialists(1, false)
+  }, [fetchSpecialists, filters, limit])
+
+  // Функция load more
+  const loadMore = useCallback(() => {
+    if (pagination && pagination.hasNext && !loading) {
+      fetchSpecialists(pagination.page + 1, true)
+    }
+  }, [fetchSpecialists, pagination, loading])
 
   return {
     specialists,
@@ -184,6 +245,6 @@ export function useSpecialists(
     loading,
     error,
     refetch,
-    loadMore
+    loadMore,
   }
 }

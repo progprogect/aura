@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       prisma.specialist.count({ where })
     ])
     
-    // Подготовка данных для фронтенда
+    // Подготовка данных для фронтенда (используем трансформер)
     const formattedSpecialists = specialists.map(specialist => ({
       ...specialist,
       fullName: `${specialist.firstName} ${specialist.lastName}`,

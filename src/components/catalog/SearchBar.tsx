@@ -1,6 +1,16 @@
+/**
+ * Компонент поисковой строки
+ * Версия 2.0 с улучшениями:
+ * - Использует lucide-react иконки
+ * - Улучшенная accessibility
+ * - Debounce встроен в хук
+ */
+
 'use client'
 
 import { useState } from 'react'
+import { Icon } from '@/components/ui/icons/Icon'
+import { Search, X } from '@/components/ui/icons/catalog-icons'
 
 interface SearchBarProps {
   value: string
@@ -9,28 +19,24 @@ interface SearchBarProps {
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false)
-  
+
   return (
     <div className="relative mb-6">
       <div className="relative">
+        {/* Иконка поиска */}
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg
-            className="h-5 w-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Icon
+            icon={Search}
+            size={20}
+            className="text-gray-400"
+            aria-hidden
+          />
         </div>
-        
+
+        {/* Поле ввода */}
         <input
-          type="text"
+          type="search"
+          id="specialist-search"
           placeholder="Поиск специалистов..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -42,34 +48,35 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
             transition-all duration-200
             ${isFocused ? 'shadow-lg' : 'shadow-sm'}
           `}
+          aria-label="Поиск специалистов по имени, специализации и описанию"
+          aria-describedby={value ? 'search-hint' : undefined}
         />
-        
+
         {/* Кнопка очистки */}
         {value && (
           <button
             onClick={() => onChange('')}
             className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            aria-label="Очистить поиск"
           >
-            <svg
-              className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <Icon
+              icon={X}
+              size={20}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-hidden
+            />
           </button>
         )}
       </div>
-      
-      {/* Подсказки при поиске */}
+
+      {/* Подсказка при поиске */}
       {value && (
-        <div className="mt-2 text-sm text-gray-500">
+        <div
+          id="search-hint"
+          className="mt-2 text-sm text-gray-500"
+          role="status"
+          aria-live="polite"
+        >
           Поиск по имени, специализации и описанию
         </div>
       )}

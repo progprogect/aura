@@ -1,286 +1,118 @@
+/**
+ * Главный компонент каталога специалистов
+ * Версия 3.0 - полностью рефакторенная
+ */
+
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useState } from 'react'
 import { SearchBar } from './SearchBar'
 import { FilterButton } from './FilterButton'
 import { FilterModal } from './FilterModal'
 import { SpecialistGrid } from './SpecialistGrid'
 import { LoadingSpinner } from './LoadingSpinner'
 import { useToast, ToastContainer } from '@/components/ui/toast'
-import { 
-  SpecialistApiResponse, 
-  PaginationInfo, 
-  GetSpecialistsResponse,
-  isApiError,
-  isGetSpecialistsResponse 
-} from '@/lib/types/api'
+import { useSpecialists } from '@/hooks/useSpecialists'
+import { useCatalogFilters } from '@/hooks/useCatalogFilters'
+import { SORT_OPTIONS } from '@/lib/catalog/constants'
 
-// Используем типы из API
-export type Specialist = SpecialistApiResponse
-
-export interface FilterState {
-  category: string
-  experience: string
-  format: string[]
-  verified: boolean
-  sortBy: string
-  search: string
-}
-
-// Экспортируем типы для использования в других компонентах
-export type { PaginationInfo }
-
+/**
+ * Компонент каталога специалистов
+ * 
+ * Features:
+ * - Централизованное управление фильтрами
+ * - Автоматическая синхронизация с URL
+ * - Оптимизированный рендеринг
+ * - Accessibility support
+ */
 export function CatalogContent() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  
   // Toast уведомления
   const { toasts, addToast, removeToast } = useToast()
   
-  // Состояние фильтров
-  const [filters, setFilters] = useState<FilterState>({
-    category: searchParams.get('category') || 'all',
-    experience: searchParams.get('experience') || 'any',
-    format: searchParams.get('format')?.split(',').filter(Boolean) || [],
-    verified: searchParams.get('verified') === 'true',
-    sortBy: searchParams.get('sortBy') || 'relevance',
-    search: searchParams.get('search') || '',
-  })
-  
-  // Состояние данных
-  const [specialists, setSpecialists] = useState<Specialist[]>([])
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Состояние модального окна фильтров
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   
-  // Debounced поиск
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
-  
-  // Функция для обновления URL
-  const updateURL = useCallback((newFilters: Partial<FilterState>) => {
-    const updatedFilters = { ...filters, ...newFilters }
-    const params = new URLSearchParams()
-    
-    Object.entries(updatedFilters).forEach(([key, value]) => {
-      if (value !== 'all' && value !== 'any' && value !== '' && 
-          !(Array.isArray(value) && value.length === 0) && 
-          !(key === 'verified' && !value)) {
-        if (Array.isArray(value)) {
-          params.set(key, value.join(','))
-        } else {
-          params.set(key, String(value))
-        }
-      }
+  // Централизованное управление фильтрами
+  const {
+    filters,
+    setters,
+    updateFilters,
+    resetFilters,
+    activeFiltersCount,
+  } = useCatalogFilters()
+
+  // API запросы с кэшированием
+  const { specialists, pagination, loading, error, loadMore } = useSpecialists(filters)
+
+  // Обработка ошибок
+  if (error && !loading) {
+    addToast({
+      type: 'error',
+      title: 'Ошибка загрузки',
+      description: error,
     })
-    
-    const queryString = params.toString()
-    const newUrl = queryString ? `${pathname}?${queryString}` : pathname
-    router.push(newUrl)
-  }, [filters, pathname, router])
-  
-  // Функция для загрузки специалистов
-  const fetchSpecialists = useCallback(async (currentFilters: FilterState, page: number = 1) => {
-    setLoading(true)
-    
-    try {
-      const params = new URLSearchParams()
-      
-      // Добавляем параметры фильтрации
-      if (currentFilters.category && currentFilters.category !== 'all') {
-        params.set('category', currentFilters.category)
-      }
-      if (currentFilters.experience && currentFilters.experience !== 'any') {
-        params.set('experience', currentFilters.experience)
-      }
-      if (currentFilters.format && currentFilters.format.length > 0) {
-        params.set('format', currentFilters.format.join(','))
-      }
-      if (currentFilters.verified) {
-        params.set('verified', 'true')
-      }
-      if (currentFilters.sortBy && currentFilters.sortBy !== 'relevance') {
-        params.set('sortBy', currentFilters.sortBy)
-      }
-      if (currentFilters.search && currentFilters.search.trim()) {
-        params.set('search', currentFilters.search.trim())
-      }
-      
-      params.set('page', String(page))
-      params.set('limit', '12')
-      
-      const response = await fetch(`/api/specialists?${params.toString()}`)
-      const data = await response.json()
-      
-      if (response.ok && isGetSpecialistsResponse(data)) {
-        setSpecialists(data.specialists)
-        setPagination(data.pagination)
-      } else if (isApiError(data)) {
-        console.error('Error fetching specialists:', data.error)
-        addToast({
-          type: 'error',
-          title: 'Ошибка загрузки',
-          description: data.error || 'Не удалось загрузить список специалистов. Попробуйте обновить страницу.',
-        })
-      } else {
-        console.error('Unexpected response format:', data)
-        addToast({
-          type: 'error',
-          title: 'Ошибка загрузки',
-          description: 'Получен некорректный ответ от сервера. Попробуйте обновить страницу.',
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching specialists:', error)
-      addToast({
-        type: 'error',
-        title: 'Ошибка соединения',
-        description: 'Проверьте подключение к интернету и попробуйте снова.',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [addToast])
-  
-  // Обработчик изменения фильтров
-  const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
-    setFilters(prev => {
-      const updatedFilters = { ...prev, ...newFilters }
-      updateURL(newFilters)
-      fetchSpecialists(updatedFilters)
-      return updatedFilters
-    })
-  }, [updateURL, fetchSpecialists])
-  
-  // Обработчик поиска с debounce
-  const handleSearchChange = useCallback((search: string) => {
-    setFilters(prev => ({ ...prev, search }))
-    
-    if (searchTimeout) {
-      clearTimeout(searchTimeout)
-    }
-    
-    const timeout = setTimeout(() => {
-      const trimmedSearch = search.trim()
-      updateURL({ search: trimmedSearch })
-      setFilters(prev => {
-        const updatedFilters = { ...prev, search: trimmedSearch }
-        fetchSpecialists(updatedFilters)
-        return updatedFilters
-      })
-    }, 300)
-    
-    setSearchTimeout(timeout)
-  }, [searchTimeout, updateURL, fetchSpecialists])
-  
-  // Обработчик сброса фильтров
-  const handleResetFilters = useCallback(() => {
-    const resetFilters: FilterState = {
-      category: 'all',
-      experience: 'any',
-      format: [],
-      verified: false,
-      sortBy: 'relevance',
-      search: '',
-    }
-    
-    setFilters(resetFilters)
-    router.push(pathname)
-    fetchSpecialists(resetFilters)
-    setIsFilterModalOpen(false)
-  }, [pathname, router, fetchSpecialists])
-  
-  // Загрузка данных при монтировании и изменении URL
-  useEffect(() => {
-    const urlFilters: FilterState = {
-      category: searchParams.get('category') || 'all',
-      experience: searchParams.get('experience') || 'any',
-      format: searchParams.get('format')?.split(',').filter(Boolean) || [],
-      verified: searchParams.get('verified') === 'true',
-      sortBy: searchParams.get('sortBy') || 'relevance',
-      search: searchParams.get('search') || '',
-    }
-    
-    // Обновляем фильтры только если они изменились
-    const filtersChanged = Object.keys(urlFilters).some(key => {
-      const urlValue = urlFilters[key as keyof FilterState]
-      const currentValue = filters[key as keyof FilterState]
-      
-      // Специальная обработка для массивов
-      if (Array.isArray(urlValue) && Array.isArray(currentValue)) {
-        return urlValue.length !== currentValue.length || 
-               urlValue.some((val, index) => val !== currentValue[index])
-      }
-      
-      return urlValue !== currentValue
-    })
-    
-    if (filtersChanged) {
-      setFilters(urlFilters)
-      fetchSpecialists(urlFilters)
-    }
-  }, [searchParams, fetchSpecialists, filters]) // Добавляем filters для корректности
-  
-  // Очистка timeout при размонтировании
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout)
-      }
-    }
-  }, [searchTimeout])
-  
+  }
+
   return (
     <>
       {/* Toast уведомления */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
-      
+
       {/* Поисковая строка */}
-      <SearchBar 
+      <SearchBar
         value={filters.search}
-        onChange={handleSearchChange}
+        onChange={setters.setSearch}
       />
-      
+
       {/* Панель фильтров */}
       <div className="flex items-center justify-between mb-6">
-        <FilterButton 
-          filters={filters}
+        <FilterButton
+          activeFiltersCount={activeFiltersCount}
           totalCount={pagination?.totalCount || 0}
           onClick={() => setIsFilterModalOpen(true)}
         />
-        
+
         {/* Сортировка */}
+        <label htmlFor="sort-select" className="sr-only">
+          Сортировка результатов
+        </label>
         <select
+          id="sort-select"
           value={filters.sortBy}
-          onChange={(e) => handleFilterChange({ sortBy: e.target.value })}
+          onChange={(e) => setters.setSortBy(e.target.value)}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          aria-label="Сортировка результатов"
         >
-          <option value="relevance">По релевантности</option>
-          <option value="rating">По рейтингу</option>
-          <option value="experience">По опыту</option>
-          <option value="price">По цене</option>
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
-      
+
       {/* Сетка специалистов */}
-      {loading ? (
+      {loading && specialists.length === 0 ? (
         <LoadingSpinner />
       ) : (
-        <SpecialistGrid 
+        <SpecialistGrid
           specialists={specialists}
           pagination={pagination}
-          onLoadMore={(page) => fetchSpecialists(filters, page)}
+          onLoadMore={loadMore}
+          loading={loading}
         />
       )}
-      
+
       {/* Модальное окно фильтров */}
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={handleResetFilters}
+        onFilterChange={updateFilters}
+        onReset={() => {
+          resetFilters()
+          setIsFilterModalOpen(false)
+        }}
       />
     </>
   )
