@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { SearchBar } from './SearchBar'
 import { FilterButton } from './FilterButton'
+import { SortButton } from './SortButton'
 import { FilterModal } from './FilterModal'
 import { SpecialistGrid } from './SpecialistGrid'
 import { LoadingSpinner } from './LoadingSpinner'
@@ -16,7 +17,6 @@ import { useToast, ToastContainer } from '@/components/ui/toast'
 import { useSpecialists } from '@/hooks/useSpecialists'
 import { useCatalogFilters } from '@/hooks/useCatalogFilters'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
-import { SORT_OPTIONS } from '@/lib/catalog/constants'
 
 /**
  * Компонент каталога специалистов
@@ -83,22 +83,7 @@ export function CatalogContent() {
         />
 
         {/* Сортировка */}
-        <label htmlFor="sort-select" className="sr-only">
-          Сортировка результатов
-        </label>
-        <select
-          id="sort-select"
-          value={filters.sortBy}
-          onChange={(e) => setters.setSortBy(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          aria-label="Сортировка результатов"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <SortButton value={filters.sortBy} onChange={setters.setSortBy} />
       </div>
 
       {/* Сетка специалистов */}
