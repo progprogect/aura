@@ -49,12 +49,16 @@ export function FilterModal({
   // Draft state - локальное состояние фильтров
   const [draftFilters, setDraftFilters] = useState<FilterState>(filters)
 
-  // Синхронизация draft с props при открытии
+  // Синхронизация draft с props ТОЛЬКО при открытии модалки
+  const prevIsOpenRef = useRef(isOpen)
+  
   useEffect(() => {
-    if (isOpen) {
-      console.log('🔵 FilterModal opened, syncing draft with filters:', filters)
+    // Обновляем draft ТОЛЬКО когда модалка открывается (false → true)
+    // Это предотвращает перезапись draft при изменении filters в процессе работы
+    if (isOpen && !prevIsOpenRef.current) {
       setDraftFilters(filters)
     }
+    prevIsOpenRef.current = isOpen
   }, [isOpen, filters])
 
   // Проверка наличия несохранённых изменений
@@ -117,14 +121,10 @@ export function FilterModal({
 
   const handleFormatToggle = (format: string) => {
     setDraftFilters((prev) => {
-      console.log('🔵 handleFormatToggle:', format)
-      console.log('  prev.format:', prev.format)
       const isSelected = prev.format.includes(format)
-      console.log('  isSelected:', isSelected)
       const newFormats = isSelected
         ? prev.format.filter((f) => f !== format)
         : [...prev.format, format]
-      console.log('  newFormats:', newFormats)
       return { ...prev, format: newFormats }
     })
   }
@@ -164,9 +164,9 @@ export function FilterModal({
         <div
           ref={modalRef}
           className="
-            inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all
-            sm:my-8 sm:align-middle sm:w-full sm:max-w-3xl lg:max-w-4xl sm:rounded-2xl
-            max-sm:fixed max-sm:inset-0 max-sm:z-50 max-sm:w-full max-sm:h-full max-sm:rounded-none
+            inline-block align-bottom bg-white text-left shadow-2xl transform transition-all
+            sm:my-8 sm:align-middle sm:w-full sm:max-w-3xl lg:max-w-4xl sm:rounded-2xl sm:overflow-hidden
+            max-sm:fixed max-sm:inset-0 max-sm:z-50 max-sm:w-full max-sm:h-full max-sm:rounded-none max-sm:flex max-sm:flex-col
           "
           role="document"
           tabIndex={-1}
@@ -197,7 +197,7 @@ export function FilterModal({
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 sm:px-8 py-6 max-h-[60vh] max-sm:max-h-none overflow-y-auto">
+          <div className="bg-white px-6 sm:px-8 py-6 overflow-y-auto sm:max-h-[60vh] max-sm:flex-1">
             <div className="space-y-8">
               {/* Специализация */}
               <fieldset>

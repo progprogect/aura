@@ -84,39 +84,25 @@ export function useURLState<T>(
   // Выполнение обновления URL (определяем ДО updateURL)
   const performURLUpdate = useCallback(
     (value: T) => {
-      console.log(`🔵 performURLUpdate for key="${key}":`, value)
-      
       const params = new URLSearchParams(searchParams.toString())
       const serialized = serialize(value)
 
-      console.log(`  serialized:`, serialized)
-      console.log(`  defaultValue serialized:`, serialize(defaultValue))
-      
       // Удаляем параметр если он равен дефолтному значению
       if (serialized === serialize(defaultValue)) {
-        console.log(`  → Removing param (matches default)`)
         params.delete(key)
       } else {
-        console.log(`  → Setting param`)
         params.set(key, serialized)
       }
 
       const queryString = params.toString()
       const newUrl = queryString ? `${pathname}?${queryString}` : pathname
 
-      console.log(`  newUrl:`, newUrl)
-      console.log(`  replace:`, replace, `shallow:`, shallow)
-
       // Используем replaceState или pushState в зависимости от настроек
       if (replace) {
-        console.log(`  → Calling router.replace()`)
         router.replace(newUrl, { scroll: !shallow })
       } else {
-        console.log(`  → Calling router.push()`)
         router.push(newUrl, { scroll: !shallow })
       }
-      
-      console.log(`✅ performURLUpdate done for "${key}"`)
     },
     [key, searchParams, pathname, router, serialize, defaultValue, shallow, replace]
   )

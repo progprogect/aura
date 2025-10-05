@@ -168,7 +168,6 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
       const queryString = params.toString()
       const newUrl = queryString ? `${pathname}?${queryString}` : pathname
       
-      console.log('🔵 updateFilters: pushing URL:', newUrl)
       router.push(newUrl, { scroll: false })
     },
     [router, pathname, searchParams]
