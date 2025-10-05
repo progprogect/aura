@@ -310,18 +310,13 @@ export function FilterModal({
             </button>
             <button
               onClick={handleApply}
-              disabled={!hasChanges}
-              className={`
+              className="
                 w-full sm:w-auto px-6 py-3 rounded-xl font-medium text-sm sm:text-base
+                bg-gray-900 text-white hover:bg-gray-800 shadow-sm hover:shadow-md
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2
                 active:scale-[0.98]
                 transition-all duration-200 ease-out
-                ${
-                  hasChanges
-                    ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-sm hover:shadow-md'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }
-              `}
+              "
             >
               Применить
             </button>

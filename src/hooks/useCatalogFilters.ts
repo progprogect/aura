@@ -117,15 +117,37 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   // Batch update нескольких фильтров
   const updateFilters = useCallback(
     (updates: Partial<FilterState>) => {
+      console.log('🟢 updateFilters called with:', updates)
+      
       // Применяем все обновления за раз
       // Каждый setter обновляет URL независимо, но благодаря debounce
       // они объединятся в один history entry
-      if (updates.category !== undefined) setCategory(updates.category)
-      if (updates.experience !== undefined) setExperience(updates.experience)
-      if (updates.format !== undefined) setFormat(updates.format)
-      if (updates.verified !== undefined) setVerified(updates.verified)
-      if (updates.sortBy !== undefined) setSortBy(updates.sortBy)
-      if (updates.search !== undefined) setSearch(updates.search)
+      if (updates.category !== undefined) {
+        console.log('  → Setting category:', updates.category)
+        setCategory(updates.category)
+      }
+      if (updates.experience !== undefined) {
+        console.log('  → Setting experience:', updates.experience)
+        setExperience(updates.experience)
+      }
+      if (updates.format !== undefined) {
+        console.log('  → Setting format:', updates.format)
+        setFormat(updates.format)
+      }
+      if (updates.verified !== undefined) {
+        console.log('  → Setting verified:', updates.verified)
+        setVerified(updates.verified)
+      }
+      if (updates.sortBy !== undefined) {
+        console.log('  → Setting sortBy:', updates.sortBy)
+        setSortBy(updates.sortBy)
+      }
+      if (updates.search !== undefined) {
+        console.log('  → Setting search:', updates.search)
+        setSearch(updates.search)
+      }
+      
+      console.log('✅ All setters called')
     },
     [setCategory, setExperience, setFormat, setVerified, setSortBy, setSearch]
   )
