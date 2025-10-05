@@ -108,7 +108,9 @@ export default async function SpecialistPage({ params }: PageProps) {
   }
 
   // Инкремент просмотров (не блокирующий)
-  incrementProfileView(specialist.id).catch(console.error)
+  incrementProfileView(specialist.id).catch((error) => {
+    console.error('Failed to increment profile view:', error)
+  })
 
   const fullName = `${specialist.firstName} ${specialist.lastName}`
 

@@ -6,7 +6,7 @@ const getRedisClient = () => {
   // В production используем REDIS_PUBLIC_URL для внешнего доступа
   // В development используем REDIS_URL для локального подключения
   const redisUrl = process.env.NODE_ENV === 'production' 
-    ? process.env.REDIS_PUBLIC_URL || process.env.REDIS_URL
+    ? process.env.REDIS_PUBLIC_URL
     : process.env.REDIS_URL
 
   if (!redisUrl) {
