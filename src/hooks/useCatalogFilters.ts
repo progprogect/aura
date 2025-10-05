@@ -143,7 +143,7 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
 
   // Проверка наличия активных фильтров
   const hasActiveFilters = useMemo(() => {
-    return activeFiltersCount > 0 || (search && search.trim().length > 0)
+    return activeFiltersCount > 0 || search.trim().length > 0
   }, [activeFiltersCount, search])
 
   return {

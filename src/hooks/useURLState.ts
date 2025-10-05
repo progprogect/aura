@@ -81,6 +81,32 @@ export function useURLState<T>(
     setState(urlValue)
   }, [getCurrentValue])
 
+  // Выполнение обновления URL (определяем ДО updateURL)
+  const performURLUpdate = useCallback(
+    (value: T) => {
+      const params = new URLSearchParams(searchParams.toString())
+      const serialized = serialize(value)
+
+      // Удаляем параметр если он равен дефолтному значению
+      if (serialized === serialize(defaultValue)) {
+        params.delete(key)
+      } else {
+        params.set(key, serialized)
+      }
+
+      const queryString = params.toString()
+      const newUrl = queryString ? `${pathname}?${queryString}` : pathname
+
+      // Используем replaceState или pushState в зависимости от настроек
+      if (replace) {
+        router.replace(newUrl, { scroll: !shallow })
+      } else {
+        router.push(newUrl, { scroll: !shallow })
+      }
+    },
+    [key, searchParams, pathname, router, serialize, defaultValue, shallow, replace]
+  )
+
   // Обновление URL с debounce
   const updateURL = useCallback(
     (value: T) => {
@@ -107,33 +133,7 @@ export function useURLState<T>(
         performURLUpdate(value)
       }
     },
-    [key, pathname, router, serialize, defaultValue, validate, debounce, shallow, replace]
-  )
-
-  // Выполнение обновления URL
-  const performURLUpdate = useCallback(
-    (value: T) => {
-      const params = new URLSearchParams(searchParams.toString())
-      const serialized = serialize(value)
-
-      // Удаляем параметр если он равен дефолтному значению
-      if (serialized === serialize(defaultValue)) {
-        params.delete(key)
-      } else {
-        params.set(key, serialized)
-      }
-
-      const queryString = params.toString()
-      const newUrl = queryString ? `${pathname}?${queryString}` : pathname
-
-      // Используем replaceState или pushState в зависимости от настроек
-      if (replace) {
-        router.replace(newUrl, { scroll: !shallow })
-      } else {
-        router.push(newUrl, { scroll: !shallow })
-      }
-    },
-    [key, searchParams, pathname, router, serialize, defaultValue, shallow, replace]
+    [performURLUpdate, validate, debounce]
   )
 
   // Сброс к дефолтному значению
