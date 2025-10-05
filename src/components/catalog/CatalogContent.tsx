@@ -8,31 +8,16 @@ import { FilterModal } from './FilterModal'
 import { SpecialistGrid } from './SpecialistGrid'
 import { LoadingSpinner } from './LoadingSpinner'
 import { useToast, ToastContainer } from '@/components/ui/toast'
+import { 
+  SpecialistApiResponse, 
+  PaginationInfo, 
+  GetSpecialistsResponse,
+  isApiError,
+  isGetSpecialistsResponse 
+} from '@/lib/types/api'
 
-export interface Specialist {
-  id: string
-  firstName: string
-  lastName: string
-  fullName: string
-  avatar: string | null
-  slug: string
-  category: string
-  specializations: string[]
-  tagline: string | null
-  about: string
-  shortAbout: string
-  city: string | null
-  country: string
-  workFormats: string[]
-  yearsOfPractice: number | null
-  priceFrom: number | null
-  priceTo: number | null
-  currency: string
-  priceDescription: string | null
-  verified: boolean
-  profileViews: number
-  customFields: any
-}
+// Используем типы из API
+export type Specialist = SpecialistApiResponse
 
 export interface FilterState {
   category: string
@@ -43,14 +28,8 @@ export interface FilterState {
   search: string
 }
 
-export interface PaginationInfo {
-  page: number
-  limit: number
-  totalCount: number
-  totalPages: number
-  hasNext: boolean
-  hasPrev: boolean
-}
+// Экспортируем типы для использования в других компонентах
+export type { PaginationInfo }
 
 export function CatalogContent() {
   const searchParams = useSearchParams()
@@ -134,15 +113,22 @@ export function CatalogContent() {
       const response = await fetch(`/api/specialists?${params.toString()}`)
       const data = await response.json()
       
-      if (response.ok) {
+      if (response.ok && isGetSpecialistsResponse(data)) {
         setSpecialists(data.specialists)
         setPagination(data.pagination)
-      } else {
+      } else if (isApiError(data)) {
         console.error('Error fetching specialists:', data.error)
         addToast({
           type: 'error',
           title: 'Ошибка загрузки',
-          description: 'Не удалось загрузить список специалистов. Попробуйте обновить страницу.',
+          description: data.error || 'Не удалось загрузить список специалистов. Попробуйте обновить страницу.',
+        })
+      } else {
+        console.error('Unexpected response format:', data)
+        addToast({
+          type: 'error',
+          title: 'Ошибка загрузки',
+          description: 'Получен некорректный ответ от сервера. Попробуйте обновить страницу.',
         })
       }
     } catch (error) {
@@ -289,3 +275,4 @@ export function CatalogContent() {
     </>
   )
 }
+

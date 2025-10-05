@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { ConsultationRequestSchema } from '@/lib/validations/api'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { specialistId, name, contact, message } = body
-
-    // Валидация
-    if (!specialistId || !name || !contact) {
+    
+    // Валидация входных данных
+    const validationResult = ConsultationRequestSchema.safeParse(body)
+    
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Не все обязательные поля заполнены' },
+        { 
+          error: 'Некорректные данные запроса', 
+          details: validationResult.error.issues 
+        },
         { status: 400 }
       )
     }
+    
+    const { specialistId, name, contact, message } = validationResult.data
 
     // Проверяем, что специалист существует
     const specialist = await prisma.specialist.findUnique({

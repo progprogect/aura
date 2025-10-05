@@ -1,19 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { GetSpecialistsQuerySchema } from '@/lib/validations/api'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     
-    // Параметры фильтрации
-    const category = searchParams.get('category')
-    const experience = searchParams.get('experience')
-    const format = searchParams.get('format')?.split(',') || []
-    const verified = searchParams.get('verified') === 'true'
-    const sortBy = searchParams.get('sortBy') || 'relevance'
-    const search = searchParams.get('search') || ''
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '12')
+    // Валидация параметров запроса
+    const validationResult = GetSpecialistsQuerySchema.safeParse({
+      category: searchParams.get('category'),
+      experience: searchParams.get('experience'),
+      format: searchParams.get('format'),
+      verified: searchParams.get('verified'),
+      sortBy: searchParams.get('sortBy'),
+      search: searchParams.get('search'),
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+    })
+    
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Некорректные параметры запроса', details: validationResult.error.issues },
+        { status: 400 }
+      )
+    }
+    
+    const {
+      category,
+      experience,
+      format: formatParam,
+      verified,
+      sortBy,
+      search,
+      page,
+      limit,
+    } = validationResult.data
+    
+    // Парсинг параметров
+    const format = formatParam ? formatParam.split(',').filter(Boolean) : []
+    const isVerified = verified === 'true'
+    const finalSortBy = sortBy || 'relevance'
+    const finalSearch = search || ''
+    const finalPage = page || 1
+    const finalLimit = limit || 12
     
     // Построение фильтров для Prisma
     const where: any = {
@@ -46,24 +75,26 @@ export async function GET(request: NextRequest) {
     }
     
     // Фильтр по верификации
-    if (verified) {
+    if (isVerified) {
       where.verified = true
     }
     
-    // Поиск по тексту
-    if (search) {
+    // Поиск по тексту (с защитой от SQL injection через Prisma)
+    if (finalSearch) {
+      // Экранируем специальные символы для безопасности
+      const escapedSearch = finalSearch.replace(/[%_]/g, '\\$&')
       where.OR = [
-        { firstName: { contains: search, mode: 'insensitive' } },
-        { lastName: { contains: search, mode: 'insensitive' } },
-        { tagline: { contains: search, mode: 'insensitive' } },
-        { about: { contains: search, mode: 'insensitive' } },
-        { specializations: { hasSome: [search] } },
+        { firstName: { contains: escapedSearch, mode: 'insensitive' } },
+        { lastName: { contains: escapedSearch, mode: 'insensitive' } },
+        { tagline: { contains: escapedSearch, mode: 'insensitive' } },
+        { about: { contains: escapedSearch, mode: 'insensitive' } },
+        { specializations: { hasSome: [escapedSearch] } },
       ]
     }
     
     // Сортировка
     let orderBy: any = {}
-    switch (sortBy) {
+    switch (finalSortBy) {
       case 'rating':
         // Пока нет рейтинга, сортируем по верификации и просмотрам
         orderBy = [
@@ -92,8 +123,8 @@ export async function GET(request: NextRequest) {
       prisma.specialist.findMany({
         where,
         orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (finalPage - 1) * finalLimit,
+        take: finalLimit,
         select: {
           id: true,
           firstName: true,
@@ -133,12 +164,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       specialists: formattedSpecialists,
       pagination: {
-        page,
-        limit,
+        page: finalPage,
+        limit: finalLimit,
         totalCount,
-        totalPages: Math.ceil(totalCount / limit),
-        hasNext: page * limit < totalCount,
-        hasPrev: page > 1,
+        totalPages: Math.ceil(totalCount / finalLimit),
+        hasNext: finalPage * finalLimit < totalCount,
+        hasPrev: finalPage > 1,
       }
     })
     
