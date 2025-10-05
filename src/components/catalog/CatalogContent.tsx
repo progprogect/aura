@@ -7,6 +7,7 @@ import { FilterButton } from './FilterButton'
 import { FilterModal } from './FilterModal'
 import { SpecialistGrid } from './SpecialistGrid'
 import { LoadingSpinner } from './LoadingSpinner'
+import { useToast, ToastContainer } from '@/components/ui/toast'
 
 export interface Specialist {
   id: string
@@ -55,6 +56,9 @@ export function CatalogContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  
+  // Toast уведомления
+  const { toasts, addToast, removeToast } = useToast()
   
   // Состояние фильтров
   const [filters, setFilters] = useState<FilterState>({
@@ -135,13 +139,23 @@ export function CatalogContent() {
         setPagination(data.pagination)
       } else {
         console.error('Error fetching specialists:', data.error)
+        addToast({
+          type: 'error',
+          title: 'Ошибка загрузки',
+          description: 'Не удалось загрузить список специалистов. Попробуйте обновить страницу.',
+        })
       }
     } catch (error) {
       console.error('Error fetching specialists:', error)
+      addToast({
+        type: 'error',
+        title: 'Ошибка соединения',
+        description: 'Проверьте подключение к интернету и попробуйте снова.',
+      })
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [addToast])
   
   // Обработчик изменения фильтров
   const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
@@ -188,7 +202,29 @@ export function CatalogContent() {
   // Загрузка данных при монтировании
   useEffect(() => {
     fetchSpecialists(filters)
-  }, [fetchSpecialists, filters])
+  }, [fetchSpecialists, filters]) // Загружаем при монтировании и изменении фильтров
+  
+  // Отдельный эффект для отслеживания изменений фильтров через URL
+  useEffect(() => {
+    const urlFilters: FilterState = {
+      category: searchParams.get('category') || 'all',
+      experience: searchParams.get('experience') || 'any',
+      format: searchParams.get('format')?.split(',').filter(Boolean) || [],
+      verified: searchParams.get('verified') === 'true',
+      sortBy: searchParams.get('sortBy') || 'relevance',
+      search: searchParams.get('search') || '',
+    }
+    
+    // Обновляем фильтры только если они изменились
+    const filtersChanged = Object.keys(urlFilters).some(key => 
+      urlFilters[key as keyof FilterState] !== filters[key as keyof FilterState]
+    )
+    
+    if (filtersChanged) {
+      setFilters(urlFilters)
+      fetchSpecialists(urlFilters)
+    }
+  }, [searchParams, fetchSpecialists, filters])
   
   // Очистка timeout при размонтировании
   useEffect(() => {
@@ -201,6 +237,9 @@ export function CatalogContent() {
   
   return (
     <>
+      {/* Toast уведомления */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+      
       {/* Поисковая строка */}
       <SearchBar 
         value={filters.search}
