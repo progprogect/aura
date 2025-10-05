@@ -84,8 +84,8 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   const [sortBy, setSortBy] = useURLString('sortBy', FILTER_DEFAULTS.SORT_BY)
   const [search, setSearch] = useURLString(
     'search',
-    FILTER_DEFAULTS.SEARCH,
-    DEBOUNCE_DELAYS.SEARCH // Поиск с debounce
+    FILTER_DEFAULTS.SEARCH
+    // Debounce убран - поиск только по Enter/кнопке
   )
 
   // Мемоизированное состояние фильтров
