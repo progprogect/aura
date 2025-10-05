@@ -150,7 +150,7 @@ export function FilterModal({
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Overlay */}
         <div
-          className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-gray-900/20 backdrop-blur-md transition-opacity duration-300"
           onClick={handleClose}
           aria-hidden="true"
         />
@@ -158,47 +158,47 @@ export function FilterModal({
         {/* Modal */}
         <div
           ref={modalRef}
-          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:w-full sm:max-w-2xl lg:max-w-3xl sm:rounded-2xl max-sm:min-h-screen max-sm:w-full max-sm:rounded-none"
+          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:w-full sm:max-w-3xl lg:max-w-4xl sm:rounded-2xl max-sm:min-h-screen max-sm:w-full max-sm:rounded-none"
           role="document"
           tabIndex={-1}
         >
           {/* Header */}
-          <div className="bg-white px-6 pt-6 pb-4">
+          <div className="bg-white px-6 sm:px-8 pt-6 pb-5 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h3
                 id="filter-modal-title"
-                className="text-xl font-semibold text-gray-900 flex items-center gap-2"
+                className="text-xl sm:text-2xl font-semibold text-gray-900 tracking-tight flex items-center gap-2"
               >
                 <span>Все фильтры</span>
                 {/* Показываем активную сортировку */}
                 {draftFilters.sortBy !== 'relevance' && (
-                  <span className="text-sm font-normal text-blue-600">
+                  <span className="text-sm sm:text-base font-normal text-gray-600">
                     · {SORT_OPTIONS.find((opt) => opt.value === draftFilters.sortBy)?.label}
                   </span>
                 )}
               </h3>
               <button
                 onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-2 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900"
                 aria-label="Закрыть модальное окно"
               >
-                <Icon icon={X} size={20} aria-hidden />
+                <Icon icon={X} size={24} aria-hidden />
               </button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 pb-4 max-h-[60vh] overflow-y-auto">
-            <div className="space-y-6">
+          <div className="bg-white px-6 sm:px-8 py-6 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-8">
               {/* Специализация */}
-              <fieldset className="pb-6 border-b border-gray-100">
-                <legend className="text-sm font-semibold text-gray-900 mb-3">
+              <fieldset>
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4">
                   Специализация
                 </legend>
                 {loading ? (
                   <div className="text-sm text-gray-500">Загрузка...</div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="radiogroup">
+                  <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))]" role="radiogroup">
                     <FilterRadioButton
                       label="Все специалисты"
                       value="all"
@@ -221,11 +221,11 @@ export function FilterModal({
               </fieldset>
 
               {/* Опыт работы */}
-              <fieldset className="pb-6 border-b border-gray-100">
-                <legend className="text-sm font-semibold text-gray-900 mb-3">
+              <fieldset>
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4">
                   Опыт работы
                 </legend>
-                <div className="space-y-2" role="radiogroup">
+                <div className="space-y-3" role="radiogroup">
                   {EXPERIENCE_OPTIONS.map((option) => (
                     <FilterRadioButton
                       key={option.value}
@@ -239,16 +239,16 @@ export function FilterModal({
               </fieldset>
 
               {/* Формат работы */}
-              <fieldset className="pb-6 border-b border-gray-100">
-                <legend className="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-between">
+              <fieldset>
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4 flex items-center justify-between">
                   <span>Формат работы</span>
                   {draftFilters.format.length > 0 && (
-                    <span className="text-xs font-medium text-blue-600">
+                    <span className="text-xs font-medium text-gray-600 normal-case tracking-normal">
                       {draftFilters.format.length} выбрано
                     </span>
                   )}
                 </legend>
-                <div className="flex flex-wrap gap-2" role="group">
+                <div className="flex flex-wrap gap-3" role="group">
                   {FORMAT_OPTIONS.map((format) => (
                     <FilterChip
                       key={format.value}
@@ -261,8 +261,8 @@ export function FilterModal({
               </fieldset>
 
               {/* Верификация */}
-              <fieldset className="pb-6 border-b border-gray-100">
-                <legend className="text-sm font-semibold text-gray-900 mb-3">
+              <fieldset>
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4">
                   Верификация
                 </legend>
                 <FilterToggle
@@ -275,10 +275,10 @@ export function FilterModal({
 
               {/* Сортировка */}
               <fieldset>
-                <legend className="text-sm font-semibold text-gray-900 mb-3">
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4">
                   Сортировка
                 </legend>
-                <div className="space-y-2" role="radiogroup">
+                <div className="space-y-3" role="radiogroup">
                   {SORT_OPTIONS.map((sort) => (
                     <FilterRadioButton
                       key={sort.value}
@@ -293,16 +293,17 @@ export function FilterModal({
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+          {/* Footer - Sticky */}
+          <div className="sticky bottom-0 z-10 bg-white border-t border-gray-200 px-6 sm:px-8 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button
               onClick={handleResetClick}
               className="
-                w-full sm:w-auto px-6 py-2.5 rounded-lg border-2 border-gray-200
-                bg-white text-gray-700 font-medium text-sm
-                hover:bg-gray-50 hover:border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                transition-all duration-200
+                w-full sm:w-auto px-6 py-3 rounded-xl border border-gray-300
+                bg-white text-gray-700 font-medium text-sm sm:text-base
+                hover:bg-gray-50 hover:border-gray-400
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2
+                active:scale-[0.98]
+                transition-all duration-200 ease-out
               "
             >
               Сбросить
@@ -311,12 +312,13 @@ export function FilterModal({
               onClick={handleApply}
               disabled={!hasChanges}
               className={`
-                w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium text-sm
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                transition-all duration-200
+                w-full sm:w-auto px-6 py-3 rounded-xl font-medium text-sm sm:text-base
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2
+                active:scale-[0.98]
+                transition-all duration-200 ease-out
                 ${
                   hasChanges
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow-md'
+                    ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-sm hover:shadow-md'
                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }
               `}

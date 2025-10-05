@@ -32,13 +32,18 @@ export function FilterRadioButton({
       type="button"
       onClick={() => onChange(value)}
       className={`
-        w-full px-4 py-2.5 rounded-lg border-2 text-left text-sm
-        transition-all duration-200
-        flex items-center gap-2
+        w-full text-left
+        px-3.5 py-2.5 sm:px-4 sm:py-3
+        rounded-xl border
+        font-medium text-sm sm:text-base
+        transition-all duration-200 ease-out
+        flex items-center gap-2.5
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2
+        active:scale-[0.98]
         ${
           checked
-            ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
-            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+            ? 'border-gray-800 bg-gray-50 text-gray-900 ring-2 ring-gray-800/10 shadow-sm'
+            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50/50 hover:shadow-sm'
         }
       `}
       role="radio"
@@ -46,11 +51,11 @@ export function FilterRadioButton({
     >
       {/* Галочка у выбранной */}
       {checked && (
-        <Icon icon={Check} size={16} className="flex-shrink-0 text-blue-600" aria-hidden />
+        <Icon icon={Check} size={18} className="flex-shrink-0 text-gray-900" aria-hidden />
       )}
       
       {/* Иконка (если есть) */}
-      {icon && <span aria-hidden="true">{icon}</span>}
+      {icon && <span className="text-lg" aria-hidden="true">{icon}</span>}
       
       {/* Label */}
       <span className="flex-1">{label}</span>
