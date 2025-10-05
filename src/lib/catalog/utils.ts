@@ -114,7 +114,7 @@ export function validateFilters(filters: Partial<FilterState>): boolean {
 }
 
 /**
- * Подсчёт активных фильтров
+ * Подсчёт активных фильтров (включая сортировку)
  */
 export function countActiveFilters(filters: FilterState): number {
   let count = 0
@@ -123,7 +123,7 @@ export function countActiveFilters(filters: FilterState): number {
   if (filters.experience !== FILTER_DEFAULTS.EXPERIENCE) count++
   if (filters.format.length > 0) count++
   if (filters.verified) count++
-  if (filters.sortBy !== FILTER_DEFAULTS.SORT_BY) count++
+  if (filters.sortBy !== FILTER_DEFAULTS.SORT_BY) count++ // Сортировка считается
 
   return count
 }

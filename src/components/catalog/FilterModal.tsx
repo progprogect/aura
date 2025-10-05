@@ -116,7 +116,7 @@ export function FilterModal({
         {/* Modal */}
         <div
           ref={modalRef}
-          className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:rounded-2xl max-sm:min-h-screen max-sm:w-full"
           role="document"
           tabIndex={-1}
         >
@@ -125,9 +125,15 @@ export function FilterModal({
             <div className="flex items-center justify-between">
               <h3
                 id="filter-modal-title"
-                className="text-xl font-semibold text-gray-900"
+                className="text-xl font-semibold text-gray-900 flex items-center gap-2"
               >
-                Все фильтры
+                <span>Все фильтры</span>
+                {/* Показываем активную сортировку */}
+                {filters.sortBy !== 'relevance' && (
+                  <span className="text-sm font-normal text-blue-600">
+                    · {SORT_OPTIONS.find((opt) => opt.value === filters.sortBy)?.label}
+                  </span>
+                )}
               </h3>
               <button
                 onClick={onClose}

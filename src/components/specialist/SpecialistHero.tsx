@@ -213,10 +213,10 @@ export function SpecialistHero({
               <Avatar
                 src={avatar || undefined}
                 alt={fullName}
-                size={120}
+                size={140}
                 verified={verified}
                 fallback={`${firstName[0]}${lastName[0]}`}
-                className="md:size-32 lg:size-40"
+                className="md:size-40 lg:size-48 xl:size-56"
               />
             </motion.div>
 
