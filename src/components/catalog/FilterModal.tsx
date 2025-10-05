@@ -1,10 +1,12 @@
 /**
  * Модальное окно фильтров
- * Версия 2.0 с улучшениями:
- * - Использует централизованные типы
- * - Lucide-react иконки
- * - Улучшенная accessibility
- * - useCategoryMap для категорий
+ * Версия 3.0 - полностью стилизованная:
+ * - Button-style radio опции
+ * - Chip-style checkbox опции
+ * - Toggle switch для verified
+ * - Grid layout для категорий
+ * - Scroll lock (не скроллит основную страницу)
+ * - Консистентный дизайн
  */
 
 'use client'
@@ -13,12 +15,16 @@ import { useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/icons/Icon'
 import { X } from '@/components/ui/icons/catalog-icons'
 import { useCategoryMap } from '@/hooks/useCategories'
+import { useScrollLock } from '@/hooks/useScrollLock'
 import { FilterState } from '@/lib/catalog/types'
 import {
   EXPERIENCE_OPTIONS,
   FORMAT_OPTIONS,
   SORT_OPTIONS,
 } from '@/lib/catalog/constants'
+import { FilterRadioButton } from './filters/FilterRadioButton'
+import { FilterChip } from './filters/FilterChip'
+import { FilterToggle } from './filters/FilterToggle'
 
 interface FilterModalProps {
   isOpen: boolean
@@ -39,18 +45,15 @@ export function FilterModal({
   const modalRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
-  // Focus management при открытии/закрытии
+  // Блокировка скролла основной страницы
+  useScrollLock(isOpen)
+
+  // Focus management
   useEffect(() => {
     if (isOpen) {
-      // Сохраняем предыдущий фокус
       previousFocusRef.current = document.activeElement as HTMLElement
-
-      // Фокусируемся на модалке
-      setTimeout(() => {
-        modalRef.current?.focus()
-      }, 100)
+      setTimeout(() => modalRef.current?.focus(), 100)
     } else {
-      // Возвращаем фокус на предыдущий элемент
       previousFocusRef.current?.focus()
     }
   }, [isOpen])
@@ -67,7 +70,7 @@ export function FilterModal({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Обработчики изменения фильтров
+  // Обработчики
   const handleCategoryChange = (category: string) => {
     onFilterChange({ category })
   }
@@ -76,10 +79,11 @@ export function FilterModal({
     onFilterChange({ experience })
   }
 
-  const handleFormatChange = (format: string, checked: boolean) => {
-    const newFormats = checked
-      ? [...filters.format, format]
-      : filters.format.filter((f) => f !== format)
+  const handleFormatToggle = (format: string) => {
+    const isSelected = filters.format.includes(format)
+    const newFormats = isSelected
+      ? filters.format.filter((f) => f !== format)
+      : [...filters.format, format]
 
     onFilterChange({ format: newFormats })
   }
@@ -90,10 +94,6 @@ export function FilterModal({
 
   const handleSortChange = (sortBy: string) => {
     onFilterChange({ sortBy })
-  }
-
-  const handleApply = () => {
-    onClose()
   }
 
   if (!isOpen) return null
@@ -108,7 +108,7 @@ export function FilterModal({
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Overlay */}
         <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm transition-opacity"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -116,174 +116,129 @@ export function FilterModal({
         {/* Modal */}
         <div
           ref={modalRef}
-          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+          className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
           role="document"
           tabIndex={-1}
         >
           {/* Header */}
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div className="bg-white px-6 pt-6 pb-4">
             <div className="flex items-center justify-between">
               <h3
                 id="filter-modal-title"
-                className="text-lg font-medium text-gray-900"
+                className="text-xl font-semibold text-gray-900"
               >
                 Все фильтры
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Закрыть модальное окно"
               >
-                <Icon icon={X} size={24} aria-hidden />
+                <Icon icon={X} size={20} aria-hidden />
               </button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="bg-white px-4 pb-4 sm:p-6 max-h-[60vh] overflow-y-auto">
+          <div className="bg-white px-6 pb-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-6">
               {/* Специализация */}
-              <fieldset>
-                <legend className="text-sm font-medium text-gray-900 mb-3">
-                  Специализация:
+              <fieldset className="pb-6 border-b border-gray-100">
+                <legend className="text-sm font-semibold text-gray-900 mb-3">
+                  Специализация
                 </legend>
-                <div className="space-y-2">
-                  {loading ? (
-                    <div className="text-sm text-gray-500">Загрузка...</div>
-                  ) : (
-                    <>
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          name="category"
-                          value="all"
-                          checked={filters.category === 'all'}
-                          onChange={(e) => handleCategoryChange(e.target.value)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          Все специалисты
-                        </span>
-                      </label>
+                {loading ? (
+                  <div className="text-sm text-gray-500">Загрузка...</div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup">
+                    <FilterRadioButton
+                      label="Все специалисты"
+                      value="all"
+                      checked={filters.category === 'all'}
+                      onChange={handleCategoryChange}
+                    />
 
-                      {Array.from(categories.values()).map((category) => (
-                        <label
-                          key={category.key}
-                          className="flex items-center cursor-pointer"
-                        >
-                          <input
-                            type="radio"
-                            name="category"
-                            value={category.key}
-                            checked={filters.category === category.key}
-                            onChange={(e) => handleCategoryChange(e.target.value)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                          />
-                          <span className="ml-2 text-sm text-gray-700">
-                            {category.emoji} {category.name}
-                          </span>
-                        </label>
-                      ))}
-                    </>
-                  )}
-                </div>
+                    {Array.from(categories.values()).map((category) => (
+                      <FilterRadioButton
+                        key={category.key}
+                        label={category.name}
+                        value={category.key}
+                        checked={filters.category === category.key}
+                        onChange={handleCategoryChange}
+                        icon={category.emoji}
+                      />
+                    ))}
+                  </div>
+                )}
               </fieldset>
 
               {/* Опыт работы */}
-              <fieldset>
-                <legend className="text-sm font-medium text-gray-900 mb-3">
-                  Опыт работы:
+              <fieldset className="pb-6 border-b border-gray-100">
+                <legend className="text-sm font-semibold text-gray-900 mb-3">
+                  Опыт работы
                 </legend>
-                <div className="space-y-2">
+                <div className="space-y-2" role="radiogroup">
                   {EXPERIENCE_OPTIONS.map((option) => (
-                    <label
+                    <FilterRadioButton
                       key={option.value}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="experience"
-                        value={option.value}
-                        checked={filters.experience === option.value}
-                        onChange={(e) => handleExperienceChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {option.label}
-                      </span>
-                    </label>
+                      label={option.label}
+                      value={option.value}
+                      checked={filters.experience === option.value}
+                      onChange={handleExperienceChange}
+                    />
                   ))}
                 </div>
               </fieldset>
 
               {/* Формат работы */}
-              <fieldset>
-                <legend className="text-sm font-medium text-gray-900 mb-3">
-                  Формат работы:
+              <fieldset className="pb-6 border-b border-gray-100">
+                <legend className="text-sm font-semibold text-gray-900 mb-3 flex items-center justify-between">
+                  <span>Формат работы</span>
+                  {filters.format.length > 0 && (
+                    <span className="text-xs font-medium text-blue-600">
+                      {filters.format.length} выбрано
+                    </span>
+                  )}
                 </legend>
-                <div className="space-y-2">
+                <div className="flex flex-wrap gap-2" role="group">
                   {FORMAT_OPTIONS.map((format) => (
-                    <label
+                    <FilterChip
                       key={format.value}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.format.includes(format.value)}
-                        onChange={(e) =>
-                          handleFormatChange(format.value, e.target.checked)
-                        }
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {format.label}
-                      </span>
-                    </label>
+                      label={format.label}
+                      selected={filters.format.includes(format.value)}
+                      onToggle={() => handleFormatToggle(format.value)}
+                    />
                   ))}
                 </div>
               </fieldset>
 
               {/* Верификация */}
-              <fieldset>
-                <legend className="text-sm font-medium text-gray-900 mb-3">
-                  Верификация:
+              <fieldset className="pb-6 border-b border-gray-100">
+                <legend className="text-sm font-semibold text-gray-900 mb-3">
+                  Верификация
                 </legend>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.verified}
-                    onChange={(e) => handleVerifiedChange(e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">
-                    Только верифицированные
-                  </span>
-                </label>
+                <FilterToggle
+                  label="Только верифицированные"
+                  checked={filters.verified}
+                  onChange={handleVerifiedChange}
+                  description="Показывать специалистов с подтверждённым образованием"
+                />
               </fieldset>
 
               {/* Сортировка */}
               <fieldset>
-                <legend className="text-sm font-medium text-gray-900 mb-3">
-                  Сортировка:
+                <legend className="text-sm font-semibold text-gray-900 mb-3">
+                  Сортировка
                 </legend>
-                <div className="space-y-2">
+                <div className="space-y-2" role="radiogroup">
                   {SORT_OPTIONS.map((sort) => (
-                    <label
+                    <FilterRadioButton
                       key={sort.value}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="sort"
-                        value={sort.value}
-                        checked={filters.sortBy === sort.value}
-                        onChange={(e) => handleSortChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        {sort.label}
-                      </span>
-                    </label>
+                      label={sort.label}
+                      value={sort.value}
+                      checked={filters.sortBy === sort.value}
+                      onChange={handleSortChange}
+                    />
                   ))}
                 </div>
               </fieldset>
@@ -291,18 +246,31 @@ export function FilterModal({
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-            <button
-              onClick={handleApply}
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm transition-colors"
-            >
-              Применить
-            </button>
+          <div className="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button
               onClick={onReset}
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors"
+              className="
+                w-full sm:w-auto px-6 py-2.5 rounded-lg border-2 border-gray-200
+                bg-white text-gray-700 font-medium text-sm
+                hover:bg-gray-50 hover:border-gray-300
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                transition-all duration-200
+              "
             >
               Сбросить
+            </button>
+            <button
+              onClick={onClose}
+              className="
+                w-full sm:w-auto px-6 py-2.5 rounded-lg
+                bg-blue-600 text-white font-medium text-sm
+                hover:bg-blue-700 active:bg-blue-800
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                transition-all duration-200
+                shadow-sm hover:shadow-md
+              "
+            >
+              Применить
             </button>
           </div>
         </div>
