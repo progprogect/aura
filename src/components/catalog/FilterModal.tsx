@@ -52,6 +52,7 @@ export function FilterModal({
   // Синхронизация draft с props при открытии
   useEffect(() => {
     if (isOpen) {
+      console.log('🔵 FilterModal opened, syncing draft with filters:', filters)
       setDraftFilters(filters)
     }
   }, [isOpen, filters])
@@ -116,10 +117,14 @@ export function FilterModal({
 
   const handleFormatToggle = (format: string) => {
     setDraftFilters((prev) => {
+      console.log('🔵 handleFormatToggle:', format)
+      console.log('  prev.format:', prev.format)
       const isSelected = prev.format.includes(format)
+      console.log('  isSelected:', isSelected)
       const newFormats = isSelected
         ? prev.format.filter((f) => f !== format)
         : [...prev.format, format]
+      console.log('  newFormats:', newFormats)
       return { ...prev, format: newFormats }
     })
   }
@@ -158,7 +163,11 @@ export function FilterModal({
         {/* Modal */}
         <div
           ref={modalRef}
-          className="inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:w-full sm:max-w-3xl lg:max-w-4xl sm:rounded-2xl max-sm:min-h-screen max-sm:w-full max-sm:rounded-none"
+          className="
+            inline-block align-bottom bg-white text-left overflow-hidden shadow-2xl transform transition-all
+            sm:my-8 sm:align-middle sm:w-full sm:max-w-3xl lg:max-w-4xl sm:rounded-2xl
+            max-sm:fixed max-sm:inset-0 max-sm:z-50 max-sm:w-full max-sm:h-full max-sm:rounded-none
+          "
           role="document"
           tabIndex={-1}
         >
@@ -188,7 +197,7 @@ export function FilterModal({
           </div>
 
           {/* Content */}
-          <div className="bg-white px-6 sm:px-8 py-6 max-h-[60vh] overflow-y-auto">
+          <div className="bg-white px-6 sm:px-8 py-6 max-h-[60vh] max-sm:max-h-none overflow-y-auto">
             <div className="space-y-8">
               {/* Специализация */}
               <fieldset>
@@ -213,7 +222,6 @@ export function FilterModal({
                         value={category.key}
                         checked={draftFilters.category === category.key}
                         onChange={handleCategoryChange}
-                        icon={category.emoji}
                       />
                     ))}
                   </div>
