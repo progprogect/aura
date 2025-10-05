@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { motion } from 'framer-motion'
-import { DollarSign, Clock } from 'lucide-react'
+// Убираем импорт иконок - используем внешние SVG
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export interface SpecialistPricingProps {

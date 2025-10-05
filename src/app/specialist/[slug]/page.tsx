@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { User, GraduationCap, Images, HelpCircle, Send } from 'lucide-react'
+// Убираем импорт иконок - теперь используем строковые идентификаторы
 import { prisma } from '@/lib/db'
 import { incrementProfileView } from '@/lib/redis'
 import { categoryConfigService } from '@/lib/category-config'
@@ -121,13 +121,13 @@ export default async function SpecialistPage({ params }: PageProps) {
 
   // Определяем табы в зависимости от наличия контента
   const tabs: Tab[] = [
-    { id: 'about', label: 'О себе', icon: User },
+    { id: 'about', label: 'О себе', icon: 'user' },
     specialist.education.length > 0 || specialist.certificates.length > 0
-      ? { id: 'education', label: 'Образование', icon: GraduationCap }
+      ? { id: 'education', label: 'Образование', icon: 'academic-cap' }
       : null,
-    specialist.gallery.length > 0 ? { id: 'gallery', label: 'Галерея', icon: Images } : null,
-    specialist.faqs.length > 0 ? { id: 'faq', label: 'Вопросы', icon: HelpCircle } : null,
-    { id: 'contact', label: 'Связаться', icon: Send },
+    specialist.gallery.length > 0 ? { id: 'gallery', label: 'Галерея', icon: 'photo' } : null,
+    specialist.faqs.length > 0 ? { id: 'faq', label: 'Вопросы', icon: 'question-mark-circle' } : null,
+    { id: 'contact', label: 'Связаться', icon: 'paper-airplane' },
   ].filter(Boolean) as Tab[]
 
   return (

@@ -2,13 +2,25 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import { LucideIcon } from 'lucide-react'
 
 export interface Tab {
   id: string
   label: string
-  icon?: LucideIcon // Теперь Lucide иконка вместо эмодзи
+  icon?: string // Строковый идентификатор иконки
 }
+
+// Маппинг иконок для удобства
+export const ICON_MAP = {
+  'user': '/icons/user.svg',
+  'academic-cap': '/icons/academic-cap.svg',
+  'photo': '/icons/photo.svg',
+  'question-mark-circle': '/icons/question-mark-circle.svg',
+  'paper-airplane': '/icons/paper-airplane.svg',
+  'currency-dollar': '/icons/currency-dollar.svg',
+  'clock': '/icons/clock.svg',
+} as const
+
+export type IconName = keyof typeof ICON_MAP
 
 export interface SpecialistTabsProps {
   tabs: Tab[]
@@ -60,7 +72,7 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
       <div className="container mx-auto max-w-5xl px-4">
         <div className="scrollbar-hide flex space-x-6 overflow-x-auto md:space-x-8">
           {tabs.map(tab => {
-            const Icon = tab.icon
+            const iconPath = tab.icon ? ICON_MAP[tab.icon as IconName] || tab.icon : null
             return (
               <button
                 key={tab.id}
@@ -73,7 +85,14 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
                     : 'text-gray-500'
                 )}
               >
-                {Icon && <Icon className="h-4 w-4" />}
+                {iconPath && (
+                  <img 
+                    src={iconPath} 
+                    alt="" 
+                    className="h-4 w-4"
+                    style={{ filter: activeTab === tab.id ? 'none' : 'opacity(0.6)' }}
+                  />
+                )}
                 <span>{tab.label}</span>
 
                 {/* Активная линия снизу */}
