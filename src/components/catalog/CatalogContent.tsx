@@ -88,23 +88,23 @@ export function CatalogContent() {
       const params = new URLSearchParams()
       
       // Добавляем параметры фильтрации
-      if (currentFilters.category !== 'all') {
+      if (currentFilters.category && currentFilters.category !== 'all') {
         params.set('category', currentFilters.category)
       }
-      if (currentFilters.experience !== 'any') {
+      if (currentFilters.experience && currentFilters.experience !== 'any') {
         params.set('experience', currentFilters.experience)
       }
-      if (currentFilters.format.length > 0) {
+      if (currentFilters.format && currentFilters.format.length > 0) {
         params.set('format', currentFilters.format.join(','))
       }
       if (currentFilters.verified) {
         params.set('verified', 'true')
       }
-      if (currentFilters.sortBy !== 'relevance') {
+      if (currentFilters.sortBy && currentFilters.sortBy !== 'relevance') {
         params.set('sortBy', currentFilters.sortBy)
       }
-      if (currentFilters.search) {
-        params.set('search', currentFilters.search)
+      if (currentFilters.search && currentFilters.search.trim()) {
+        params.set('search', currentFilters.search.trim())
       }
       
       params.set('page', String(page))
@@ -145,11 +145,13 @@ export function CatalogContent() {
   
   // Обработчик изменения фильтров
   const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
-    const updatedFilters = { ...filters, ...newFilters }
-    setFilters(updatedFilters)
-    updateURL(newFilters)
-    fetchSpecialists(updatedFilters)
-  }, [filters, updateURL, fetchSpecialists])
+    setFilters(prev => {
+      const updatedFilters = { ...prev, ...newFilters }
+      updateURL(newFilters)
+      fetchSpecialists(updatedFilters)
+      return updatedFilters
+    })
+  }, [updateURL, fetchSpecialists])
   
   // Обработчик поиска с debounce
   const handleSearchChange = useCallback((search: string) => {
@@ -160,13 +162,17 @@ export function CatalogContent() {
     }
     
     const timeout = setTimeout(() => {
-      const updatedFilters = { ...filters, search }
-      updateURL({ search })
-      fetchSpecialists(updatedFilters)
+      const trimmedSearch = search.trim()
+      updateURL({ search: trimmedSearch })
+      setFilters(prev => {
+        const updatedFilters = { ...prev, search: trimmedSearch }
+        fetchSpecialists(updatedFilters)
+        return updatedFilters
+      })
     }, 300)
     
     setSearchTimeout(timeout)
-  }, [filters, searchTimeout, updateURL, fetchSpecialists])
+  }, [searchTimeout, updateURL, fetchSpecialists])
   
   // Обработчик сброса фильтров
   const handleResetFilters = useCallback(() => {
@@ -185,12 +191,7 @@ export function CatalogContent() {
     setIsFilterModalOpen(false)
   }, [pathname, router, fetchSpecialists])
   
-  // Загрузка данных при монтировании
-  useEffect(() => {
-    fetchSpecialists(filters)
-  }, [fetchSpecialists, filters]) // Загружаем при монтировании и изменении фильтров
-  
-  // Отдельный эффект для отслеживания изменений фильтров через URL
+  // Загрузка данных при монтировании и изменении URL
   useEffect(() => {
     const urlFilters: FilterState = {
       category: searchParams.get('category') || 'all',
@@ -202,15 +203,24 @@ export function CatalogContent() {
     }
     
     // Обновляем фильтры только если они изменились
-    const filtersChanged = Object.keys(urlFilters).some(key => 
-      urlFilters[key as keyof FilterState] !== filters[key as keyof FilterState]
-    )
+    const filtersChanged = Object.keys(urlFilters).some(key => {
+      const urlValue = urlFilters[key as keyof FilterState]
+      const currentValue = filters[key as keyof FilterState]
+      
+      // Специальная обработка для массивов
+      if (Array.isArray(urlValue) && Array.isArray(currentValue)) {
+        return urlValue.length !== currentValue.length || 
+               urlValue.some((val, index) => val !== currentValue[index])
+      }
+      
+      return urlValue !== currentValue
+    })
     
     if (filtersChanged) {
       setFilters(urlFilters)
       fetchSpecialists(urlFilters)
     }
-  }, [searchParams, fetchSpecialists, filters])
+  }, [searchParams, fetchSpecialists, filters]) // Добавляем filters для корректности
   
   // Очистка timeout при размонтировании
   useEffect(() => {
