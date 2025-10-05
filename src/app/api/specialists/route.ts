@@ -19,8 +19,35 @@ export async function GET(request: NextRequest) {
     })
     
     if (!validationResult.success) {
+      console.error('Validation error in /api/specialists:', {
+        errors: validationResult.error.issues,
+        receivedParams: {
+          category: searchParams.get('category'),
+          experience: searchParams.get('experience'),
+          format: searchParams.get('format'),
+          verified: searchParams.get('verified'),
+          sortBy: searchParams.get('sortBy'),
+          search: searchParams.get('search'),
+          page: searchParams.get('page'),
+          limit: searchParams.get('limit'),
+        }
+      })
+      
       return NextResponse.json(
-        { error: 'Некорректные параметры запроса', details: validationResult.error.issues },
+        { 
+          error: 'Некорректные параметры запроса', 
+          details: validationResult.error.issues,
+          receivedParams: {
+            category: searchParams.get('category'),
+            experience: searchParams.get('experience'),
+            format: searchParams.get('format'),
+            verified: searchParams.get('verified'),
+            sortBy: searchParams.get('sortBy'),
+            search: searchParams.get('search'),
+            page: searchParams.get('page'),
+            limit: searchParams.get('limit'),
+          }
+        },
         { status: 400 }
       )
     }
