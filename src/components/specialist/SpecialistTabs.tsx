@@ -2,11 +2,12 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react'
 
 export interface Tab {
   id: string
   label: string
-  icon?: string
+  icon?: LucideIcon // Теперь Lucide иконка вместо эмодзи
 }
 
 export interface SpecialistTabsProps {
@@ -52,33 +53,36 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
     <div
       ref={tabsRef}
       className={cn(
-        'sticky top-0 z-40 border-b bg-white transition-shadow',
+        'sticky top-0 z-40 border-b bg-white transition-shadow md:top-0',
         isSticky ? 'shadow-sm' : 'border-gray-200'
       )}
     >
       <div className="container mx-auto max-w-5xl px-4">
         <div className="scrollbar-hide flex space-x-6 overflow-x-auto md:space-x-8">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => scrollToSection(tab.id)}
-              className={cn(
-                'relative flex items-center gap-2 whitespace-nowrap py-4 text-sm font-medium transition-colors',
-                'hover:text-gray-900',
-                activeTab === tab.id
-                  ? 'text-gray-900'
-                  : 'text-gray-500'
-              )}
-            >
-              {tab.icon && <span>{tab.icon}</span>}
-              <span>{tab.label}</span>
+          {tabs.map(tab => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => scrollToSection(tab.id)}
+                className={cn(
+                  'relative flex items-center gap-2 whitespace-nowrap py-4 text-sm font-medium transition-colors',
+                  'hover:text-gray-900',
+                  activeTab === tab.id
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                )}
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                <span>{tab.label}</span>
 
-              {/* Активная линия снизу */}
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
-              )}
-            </button>
-          ))}
+                {/* Активная линия снизу */}
+                {activeTab === tab.id && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>
@@ -114,6 +118,3 @@ export function useActiveTab(tabs: Tab[]) {
 
   return activeTab
 }
-
-
-

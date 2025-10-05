@@ -64,7 +64,7 @@ export function SpecialistProfile({ tabs, categoryConfig, data }: SpecialistProf
       <SpecialistTabs tabs={tabs} activeTab={activeTab} />
 
       {/* Основной контент */}
-      <div className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <div className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
         {/* О себе */}
         <SpecialistAbout about={data.about} />
 
