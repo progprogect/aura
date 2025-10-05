@@ -60,7 +60,7 @@ export function SpecialistHero({
       {/* МОБИЛКА: Tinder-style Hero с большим фото */}
       <div className="relative md:hidden">
         {/* Большое фото с градиентом */}
-        <div className="relative h-[50vh] min-h-[400px] overflow-hidden">
+        <div className="relative h-[60vh] min-h-[500px] overflow-hidden">
           {avatar ? (
             <motion.img
               initial={{ scale: 1.1 }}
@@ -68,7 +68,7 @@ export function SpecialistHero({
               transition={{ duration: 0.8 }}
               src={avatar}
               alt={fullName}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary-400 to-primary-600" />
@@ -87,7 +87,7 @@ export function SpecialistHero({
                 transition={{ delay: 0.3 }}
                 className="mb-3"
               >
-                <Badge variant="verified" className="gap-1 bg-white/20 backdrop-blur-sm">
+                <Badge variant="verified" className="gap-1 bg-white/30 backdrop-blur-sm text-blue-700 border-blue-200 hover:bg-white/40">
                   <CheckCircle2 className="h-3 w-3" />
                   Верифицирован
                 </Badge>
@@ -199,15 +199,13 @@ export function SpecialistHero({
         )}
       </div>
 
-      {/* ДЕСКТОП: Улучшенный Hero с градиентом */}
+      {/* ДЕСКТОП: Улучшенный Hero без градиента */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative hidden bg-white md:block"
       >
-        {/* Плавный градиент вместо резкой границы */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-gray-50" />
         
         <div className="container mx-auto max-w-5xl px-4 py-8 lg:py-12">
           <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
