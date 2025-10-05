@@ -3,19 +3,36 @@ import Redis from 'ioredis'
 // Redis client для аналитики просмотров
 // Работает с Railway Redis Plugin или любым стандартным Redis
 const getRedisClient = () => {
-  const redisUrl = process.env.REDIS_URL
+  // В production используем REDIS_PUBLIC_URL для внешнего доступа
+  // В development используем REDIS_URL для локального подключения
+  const redisUrl = process.env.NODE_ENV === 'production' 
+    ? process.env.REDIS_PUBLIC_URL || process.env.REDIS_URL
+    : process.env.REDIS_URL
 
   if (!redisUrl) {
-    console.warn('REDIS_URL not configured, analytics will be disabled')
+    console.warn('Redis URL not configured, analytics will be disabled')
     return null
   }
 
   try {
-    return new Redis(redisUrl, {
+    const client = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
       lazyConnect: true,
+      // Добавляем обработку ошибок подключения
+      connectTimeout: 10000,
     })
+
+    // Обработка ошибок подключения
+    client.on('error', (error) => {
+      console.error('Redis connection error:', error)
+    })
+
+    client.on('connect', () => {
+      console.log('Redis connected successfully')
+    })
+
+    return client
   } catch (error) {
     console.error('Failed to create Redis client:', error)
     return null
