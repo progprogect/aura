@@ -156,37 +156,4 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   }
 }
 
-/**
- * Хук для получения только части фильтров (для оптимизации ре-рендеров)
- * 
- * @example
- * const { category, setCategory } = useCatalogFilter('category')
- */
-export function useCatalogFilter<K extends keyof FilterState>(
-  filterKey: K
-): [FilterState[K], (value: FilterState[K]) => void] {
-  const { filters, setters } = useCatalogFilters()
-  
-  const value = filters[filterKey]
-  const setter = useMemo(() => {
-    switch (filterKey) {
-      case 'category':
-        return setters.setCategory as (value: FilterState[K]) => void
-      case 'experience':
-        return setters.setExperience as (value: FilterState[K]) => void
-      case 'format':
-        return setters.setFormat as (value: FilterState[K]) => void
-      case 'verified':
-        return setters.setVerified as (value: FilterState[K]) => void
-      case 'sortBy':
-        return setters.setSortBy as (value: FilterState[K]) => void
-      case 'search':
-        return setters.setSearch as (value: FilterState[K]) => void
-      default:
-        throw new Error(`Unknown filter key: ${filterKey}`)
-    }
-  }, [filterKey, setters])
-
-  return [value, setter]
-}
-
+// useCatalogFilter removed - was not used and could cause hook issues

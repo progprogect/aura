@@ -7,15 +7,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     
     // Валидация параметров запроса
+    // Преобразуем null в undefined для Zod optional
     const validationResult = GetSpecialistsQuerySchema.safeParse({
-      category: searchParams.get('category'),
-      experience: searchParams.get('experience'),
-      format: searchParams.get('format'),
-      verified: searchParams.get('verified'),
-      sortBy: searchParams.get('sortBy'),
-      search: searchParams.get('search'),
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
+      category: searchParams.get('category') ?? undefined,
+      experience: searchParams.get('experience') ?? undefined,
+      format: searchParams.get('format') ?? undefined,
+      verified: searchParams.get('verified') ?? undefined,
+      sortBy: searchParams.get('sortBy') ?? undefined,
+      search: searchParams.get('search') ?? undefined,
+      page: searchParams.get('page') ?? undefined,
+      limit: searchParams.get('limit') ?? undefined,
     })
     
     if (!validationResult.success) {
