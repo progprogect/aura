@@ -10,6 +10,7 @@ export {
   Filter,           // Фильтры
   ChevronDown,      // Стрелка вниз
   ChevronUp,        // Стрелка вверх
+  ChevronRight,     // Стрелка вправо (breadcrumbs)
   SlidersHorizontal // Настройки фильтров
 } from 'lucide-react'
 
