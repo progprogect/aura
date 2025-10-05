@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { categoryConfigService } from '@/lib/category-config'
 
+// API routes должны быть динамическими
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const categories = await categoryConfigService.getCategories()

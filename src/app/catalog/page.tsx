@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
 import { Metadata } from 'next'
 import { CatalogContent } from '@/components/catalog/CatalogContent'
+import { LoadingSpinner } from '@/components/catalog/LoadingSpinner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export const metadata: Metadata = {
@@ -90,7 +92,9 @@ export default function CatalogPage() {
           </div>
           
           <ErrorBoundary>
-            <CatalogContent />
+            <Suspense fallback={<LoadingSpinner />}>
+              <CatalogContent />
+            </Suspense>
           </ErrorBoundary>
         </div>
       </div>
