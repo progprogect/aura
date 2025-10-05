@@ -13,6 +13,7 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useURLString, useURLBoolean, useURLArray } from './useURLState'
 import { FilterState } from '@/lib/catalog/types'
 import {
@@ -76,6 +77,10 @@ interface UseCatalogFiltersReturn {
  * resetFilters()
  */
 export function useCatalogFilters(): UseCatalogFiltersReturn {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
   // URL состояние для всех фильтров
   const [category, setCategory] = useURLString('category', FILTER_DEFAULTS.CATEGORY)
   const [experience, setExperience] = useURLString('experience', FILTER_DEFAULTS.EXPERIENCE)
@@ -117,39 +122,56 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   // Batch update нескольких фильтров
   const updateFilters = useCallback(
     (updates: Partial<FilterState>) => {
-      console.log('🟢 updateFilters called with:', updates)
+      // ВАЖНО: обновляем URL ОДНИМ вызовом со ВСЕМИ параметрами!
+      const params = new URLSearchParams(searchParams.toString())
       
-      // Применяем все обновления за раз
-      // Каждый setter обновляет URL независимо, но благодаря debounce
-      // они объединятся в один history entry
-      if (updates.category !== undefined) {
-        console.log('  → Setting category:', updates.category)
-        setCategory(updates.category)
-      }
-      if (updates.experience !== undefined) {
-        console.log('  → Setting experience:', updates.experience)
-        setExperience(updates.experience)
-      }
-      if (updates.format !== undefined) {
-        console.log('  → Setting format:', updates.format)
-        setFormat(updates.format)
-      }
-      if (updates.verified !== undefined) {
-        console.log('  → Setting verified:', updates.verified)
-        setVerified(updates.verified)
-      }
-      if (updates.sortBy !== undefined) {
-        console.log('  → Setting sortBy:', updates.sortBy)
-        setSortBy(updates.sortBy)
-      }
-      if (updates.search !== undefined) {
-        console.log('  → Setting search:', updates.search)
-        setSearch(updates.search)
-      }
+      // Применяем ВСЕ обновления к URLSearchParams
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined) return
+        
+        // Default values для сравнения
+        const defaults: Record<string, any> = {
+          category: FILTER_DEFAULTS.CATEGORY,
+          experience: FILTER_DEFAULTS.EXPERIENCE,
+          format: FILTER_DEFAULTS.FORMAT,
+          verified: FILTER_DEFAULTS.VERIFIED,
+          sortBy: FILTER_DEFAULTS.SORT_BY,
+          search: FILTER_DEFAULTS.SEARCH,
+        }
+        
+        const defaultValue = defaults[key]
+        
+        // Сериализация
+        let serialized: string
+        if (Array.isArray(value)) {
+          serialized = value.join(',')
+        } else {
+          serialized = String(value)
+        }
+        
+        let defaultSerialized: string
+        if (Array.isArray(defaultValue)) {
+          defaultSerialized = defaultValue.join(',')
+        } else {
+          defaultSerialized = String(defaultValue)
+        }
+        
+        // Удаляем если default, иначе устанавливаем
+        if (serialized === defaultSerialized) {
+          params.delete(key)
+        } else {
+          params.set(key, serialized)
+        }
+      })
       
-      console.log('✅ All setters called')
+      // Обновляем URL ОДИН РАЗ через Next.js router
+      const queryString = params.toString()
+      const newUrl = queryString ? `${pathname}?${queryString}` : pathname
+      
+      console.log('🔵 updateFilters: pushing URL:', newUrl)
+      router.push(newUrl, { scroll: false })
     },
-    [setCategory, setExperience, setFormat, setVerified, setSortBy, setSearch]
+    [router, pathname, searchParams]
   )
 
   // Сброс фильтров
