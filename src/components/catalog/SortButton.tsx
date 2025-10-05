@@ -13,6 +13,7 @@ import { SORT_OPTIONS } from '@/lib/catalog/constants'
 interface SortButtonProps {
   value: string
   onChange: (value: string) => void
+  compact?: boolean
 }
 
 /**
@@ -25,7 +26,7 @@ interface SortButtonProps {
  * - Accessibility support
  * - Keyboard navigation
  */
-export function SortButton({ value, onChange }: SortButtonProps) {
+export function SortButton({ value, onChange, compact = false }: SortButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -81,12 +82,13 @@ export function SortButton({ value, onChange }: SortButtonProps) {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="
+        className={`
           flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300
           bg-white text-gray-700 hover:bg-gray-50
           transition-all duration-200
           text-sm font-medium
-        "
+          ${compact ? 'flex-1' : ''}
+        `}
         aria-label={`Сортировка: ${currentLabel}`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"

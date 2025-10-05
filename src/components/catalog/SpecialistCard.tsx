@@ -18,6 +18,7 @@ import { useCategoryMap } from '@/hooks/useCategories'
 import { formatPriceRange } from '@/lib/formatters/price'
 import { formatExperience } from '@/lib/formatters/experience'
 import { getCategoryLabel, getCategoryEmoji, getCategoryColor } from '@/lib/formatters/category'
+import { formatWorkFormat, getWorkFormatColor } from '@/lib/formatters/work-format'
 import { Icon } from '@/components/ui/icons/Icon'
 import { CheckCircle2, Clock, MapPin } from '@/components/ui/icons/catalog-icons'
 import { saveCatalogState } from '@/lib/navigation/scroll-restoration'
@@ -86,7 +87,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
       >
         <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
           {/* Фото специалиста */}
-          <div className="relative h-48 bg-gray-100 flex-shrink-0">
+          <div className="relative w-full aspect-square bg-gray-100 flex-shrink-0">
             {specialist.avatar && !imageError ? (
               <Image
                 src={specialist.avatar}
@@ -126,20 +127,32 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
 
           {/* Информация о специалисте */}
           <div className="p-4 flex flex-col flex-grow">
-            {/* Имя и категория */}
-            <div className="mb-2">
-              <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
-                {specialist.fullName}
-              </h3>
+            {/* Имя */}
+            <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors mb-1">
+              {specialist.fullName}
+            </h3>
+
+            {/* Категория компактная */}
+            <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+              <span aria-hidden="true">{categoryEmoji}</span>
+              <span>{categoryLabel}</span>
             </div>
 
-            {/* Категория с эмодзи */}
-            <div className="flex items-center gap-1 mb-2">
-              <span className="text-lg" aria-hidden="true">
-                {categoryEmoji}
-              </span>
-              <span className="text-sm text-gray-600">{categoryLabel}</span>
-            </div>
+            {/* Форматы работы */}
+            {specialist.workFormats.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {specialist.workFormats.map((format, index) => (
+                  <span
+                    key={index}
+                    className={`text-xs px-2 py-0.5 rounded-full border ${getWorkFormatColor(
+                      format
+                    )}`}
+                  >
+                    {formatWorkFormat(format)}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Специализации */}
             {specialist.specializations.length > 0 && (
@@ -164,11 +177,17 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
               </div>
             )}
 
-            {/* Описание */}
+            {/* Описание с gradient fade */}
             {specialist.shortAbout && (
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
-                {specialist.shortAbout}
-              </p>
+              <div className="relative mb-3 flex-grow">
+                <p className="text-sm text-gray-600 line-clamp-4">
+                  {specialist.shortAbout}
+                </p>
+                {/* Gradient fade если текст длинный */}
+                {specialist.about.length > 200 && (
+                  <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                )}
+              </div>
             )}
 
             {/* Дополнительная информация */}
@@ -194,7 +213,7 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
               {/* Цена */}
               {formattedPrice && (
                 <span
-                  className="font-medium text-gray-900"
+                  className="font-semibold text-gray-900 text-sm"
                   aria-label={`Цена: ${formattedPrice}`}
                 >
                   {formattedPrice}

@@ -17,6 +17,7 @@ import { useToast, ToastContainer } from '@/components/ui/toast'
 import { useSpecialists } from '@/hooks/useSpecialists'
 import { useCatalogFilters } from '@/hooks/useCatalogFilters'
 import { useScrollRestoration } from '@/hooks/useScrollRestoration'
+import { formatSpecialistCount } from '@/lib/utils/pluralize'
 
 /**
  * Компонент каталога специалистов
@@ -74,16 +75,42 @@ export function CatalogContent() {
         onChange={setters.setSearch}
       />
 
-      {/* Панель фильтров */}
-      <div className="flex items-center justify-between mb-6">
-        <FilterButton
-          activeFiltersCount={activeFiltersCount}
-          totalCount={pagination?.totalCount || 0}
-          onClick={() => setIsFilterModalOpen(true)}
-        />
+      {/* Панель фильтров - Desktop */}
+      <div className="hidden md:flex md:items-center md:justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <FilterButton
+            activeFiltersCount={activeFiltersCount}
+            onClick={() => setIsFilterModalOpen(true)}
+          />
+          <SortButton value={filters.sortBy} onChange={setters.setSortBy} />
+        </div>
 
-        {/* Сортировка */}
-        <SortButton value={filters.sortBy} onChange={setters.setSortBy} />
+        {/* Счётчик результатов */}
+        <div className="text-sm text-gray-600" role="status" aria-live="polite">
+          Найдено {formatSpecialistCount(pagination?.totalCount || 0)}
+        </div>
+      </div>
+
+      {/* Панель фильтров - Mobile */}
+      <div className="md:hidden mb-6 space-y-3">
+        {/* Счётчик сверху */}
+        <div
+          className="text-sm text-gray-600 font-medium"
+          role="status"
+          aria-live="polite"
+        >
+          Найдено {formatSpecialistCount(pagination?.totalCount || 0)}
+        </div>
+
+        {/* Кнопки */}
+        <div className="flex gap-3">
+          <FilterButton
+            activeFiltersCount={activeFiltersCount}
+            onClick={() => setIsFilterModalOpen(true)}
+            compact
+          />
+          <SortButton value={filters.sortBy} onChange={setters.setSortBy} compact />
+        </div>
       </div>
 
       {/* Сетка специалистов */}
