@@ -12,7 +12,7 @@ import { ChatHistory } from './ChatHistory'
 import { MobileChatNav } from './MobileChatNav'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, RotateCcw, Sparkles, Undo2 } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Sparkles, Undo2, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function ChatContainer() {
