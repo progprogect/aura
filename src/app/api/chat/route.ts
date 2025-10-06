@@ -387,6 +387,11 @@ async function extractSearchParams(
   city?: string
   minExperience?: number
   maxPrice?: number
+  preferences?: {
+    methods?: string[]
+    gender?: string
+    age?: string
+  }
 }> {
   try {
     // Формируем контекст диалога
@@ -408,59 +413,95 @@ async function extractSearchParams(
 
     console.log('[Chat API] 🤖 GPT extraction result:', JSON.stringify(extracted, null, 2))
 
-    // Определяем, нужен ли поиск
-    // СТРОГИЕ ПРАВИЛА: Ищем ТОЛЬКО когда собрана ВСЯ информация
-    // Минимум: категория + формат работы + проблема (все 3!)
+    // ========================================
+    // НОВАЯ ЛОГИКА shouldSearch
+    // ========================================
+    
+    // Базовые параметры (ОБЯЗАТЕЛЬНО для любого поиска)
     const hasCategory = !!extracted.category
     const hasFormat = extracted.workFormats && extracted.workFormats.length > 0
     const hasProblem = extracted.problem && extracted.problem.length > 3
+    const hasBasics = hasCategory && hasFormat && hasProblem
     
-    // Поиск ТОЛЬКО если:
-    // 1. Есть ВСЕ: категория + формат + проблема
-    // 2. ИЛИ это 3+ сообщение (GPT уже задал вопросы) + есть категория + проблема
-    const hasAllInfo = hasCategory && hasFormat && hasProblem
-    const isReadyToSearch = messages.length >= 3 && hasCategory && hasProblem
+    // Дополнительные параметры (для качественного подбора)
+    const hasPrice = !!extracted.maxPrice
+    const hasExperience = !!extracted.minExperience
+    const hasMethods = extracted.preferences?.methods && extracted.preferences.methods.length > 0
+    const hasGender = !!extracted.preferences?.gender
     
-    const hasEnoughInfo = hasAllInfo || isReadyToSearch
+    const additionalParams = [hasPrice, hasExperience, hasMethods, hasGender].filter(Boolean).length
+    
+    // Пользователь ЯВНО попросил начать поиск
+    const searchKeywords = [
+      'найти специалистов',
+      'найди',
+      'начать поиск',
+      'начни поиск',
+      'хватит',
+      'достаточно',
+      'искать',
+      'подбери',
+      '🔍'
+    ]
+    const userRequestedSearch = searchKeywords.some(kw => 
+      lastUserMessageContent?.toLowerCase().includes(kw.toLowerCase())
+    )
+    
+    // GPT собрал достаточно информации (минимум 6 сообщений)
+    const hasEnoughDialog = messages.length >= 6
+    
+    // Follow-up запросы (показать ещё)
+    const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
+    const isFollowUpRequest = messages.length >= 4 && 
+      followUpKeywords.some(kw => lastUserMessageContent?.toLowerCase().includes(kw))
     
     console.log('[Chat API] 🧩 Search criteria:', {
       messageCount: messages.length,
+      hasBasics: hasBasics,
       hasCategory,
       hasFormat,
       hasProblem,
-      hasAllInfo,
-      isReadyToSearch,
-      category: extracted.category,
-      problem: extracted.problem,
-      workFormats: extracted.workFormats
-    })
-    
-    // Или если это явный запрос на дополнительные результаты
-    const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
-    const isFollowUpRequest = messages.length >= 4 && ( // Снижаем порог с 5 до 4
-      followUpKeywords.some(kw => extracted.problem?.toLowerCase().includes(kw)) ||
-      followUpKeywords.some(kw => lastUserMessageContent?.toLowerCase().includes(kw))
-    )
-    
-    console.log('[Chat API] 🔁 Follow-up check:', {
-      messagesCount: messages.length,
+      additionalParams,
+      hasPrice,
+      hasExperience,
+      hasMethods,
+      userRequestedSearch,
+      hasEnoughDialog,
       isFollowUp: isFollowUpRequest,
       isShowPrevious: isShowPreviousRequest,
-      lastMessage: lastUserMessageContent?.substring(0, 50),
+    })
+    
+    // ГЛАВНАЯ ЛОГИКА: Ищем если
+    // 1. Есть базовые параметры И (
+    //    - Пользователь попросил начать ИЛИ
+    //    - GPT задал достаточно вопросов (6+ сообщений)
+    //   )
+    // 2. ИЛИ это follow-up запрос
+    // 3. ИЛИ показываем ранее найденных
+    const shouldSearch = 
+      (hasBasics && (userRequestedSearch || hasEnoughDialog)) ||
+      isFollowUpRequest ||
+      isShowPreviousRequest
+
+    console.log('[Chat API] 🎯 Should search:', shouldSearch, {
+      reason: userRequestedSearch ? 'user_requested' : 
+              hasEnoughDialog ? 'enough_dialog' : 
+              isFollowUpRequest ? 'follow_up' :
+              isShowPreviousRequest ? 'show_previous' : 'waiting_for_confirmation'
     })
 
-    const shouldSearch = hasEnoughInfo || isFollowUpRequest || isShowPreviousRequest
-
-    console.log('[Chat API] 🎯 Should search:', shouldSearch, '(hasEnoughInfo:', hasEnoughInfo, ', isFollowUp:', isFollowUpRequest, ', showPrevious:', isShowPreviousRequest, ')')
-
-    // Формируем текст запроса
-    const query = [
+    // Формируем текст запроса для semantic search
+    const queryParts = [
       extracted.category && getCategoryName(extracted.category),
       extracted.problem,
-      extracted.preferences,
     ]
-      .filter(Boolean)
-      .join(' ')
+    
+    // Добавляем методы/подходы если указаны
+    if (extracted.preferences?.methods) {
+      queryParts.push(extracted.preferences.methods.join(' '))
+    }
+    
+    const query = queryParts.filter(Boolean).join(' ')
 
     return {
       shouldSearch,
@@ -470,6 +511,7 @@ async function extractSearchParams(
       city: extracted.city,
       minExperience: extracted.minExperience,
       maxPrice: extracted.maxPrice,
+      preferences: extracted.preferences,
     }
   } catch (error) {
     console.error('[Chat API] Extraction error:', error)
