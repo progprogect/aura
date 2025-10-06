@@ -41,40 +41,48 @@ export async function generateSpecialistEmbedding(specialistId: string) {
 
 /**
  * Формирует текст для embedding из данных специалиста
+ * ВАЖНО: Порядок и повторение влияют на вес в semantic search!
  */
 function buildSpecialistText(specialist: any): string {
   const parts: string[] = []
 
-  // Основная информация
-  parts.push(`Специалист: ${specialist.firstName} ${specialist.lastName}`)
-  parts.push(`Категория: ${getCategoryName(specialist.category)}`)
+  // 1. КРИТИЧНО: Проблемы с которыми работает (максимальный вес!)
+  if (specialist.customFields) {
+    const cf = specialist.customFields as any
+    if (cf.worksWith && Array.isArray(cf.worksWith) && cf.worksWith.length > 0) {
+      // Дублируем 3 раза для увеличения веса в embedding!
+      parts.push(`Работает с проблемами: ${cf.worksWith.join(', ')}`)
+      parts.push(`Специализация на проблемах: ${cf.worksWith.join(', ')}`)
+      parts.push(`Помогает с: ${cf.worksWith.join(', ')}`)
+    }
+  }
 
-  // Специализации
+  // 2. КРИТИЧНО: Описание специалиста (увеличиваем вес!)
+  if (specialist.about && specialist.about.length > 10) {
+    parts.push(`О специалисте: ${specialist.about}`)
+    // Дублируем описание для увеличения веса
+    parts.push(`Описание работы: ${specialist.about}`)
+  }
+
+  // 3. Специализации (важно)
   if (specialist.specializations && specialist.specializations.length > 0) {
     parts.push(`Специализации: ${specialist.specializations.join(', ')}`)
   }
 
-  // Описание
-  parts.push(`О специалисте: ${specialist.about}`)
-
-  // Слоган/тэглайн
+  // 4. Слоган/подход
   if (specialist.tagline) {
     parts.push(`Подход: ${specialist.tagline}`)
   }
 
-  // Кастомные поля (методы, проблемы, подходы)
+  // 5. Методы работы (важно для matching)
   if (specialist.customFields) {
     const cf = specialist.customFields as any
-
-    if (cf.methods && Array.isArray(cf.methods)) {
+    
+    if (cf.methods && Array.isArray(cf.methods) && cf.methods.length > 0) {
       parts.push(`Методы работы: ${cf.methods.join(', ')}`)
     }
 
-    if (cf.worksWith && Array.isArray(cf.worksWith)) {
-      parts.push(`Работает с проблемами: ${cf.worksWith.join(', ')}`)
-    }
-
-    if (cf.approaches && Array.isArray(cf.approaches)) {
+    if (cf.approaches && Array.isArray(cf.approaches) && cf.approaches.length > 0) {
       parts.push(`Подходы: ${cf.approaches.join(', ')}`)
     }
 
@@ -87,15 +95,19 @@ function buildSpecialistText(specialist: any): string {
     }
   }
 
-  // Опыт
+  // 6. Базовая информация
+  parts.push(`Специалист: ${specialist.firstName} ${specialist.lastName}`)
+  parts.push(`Категория: ${getCategoryName(specialist.category)}`)
+
+  // 7. Опыт
   if (specialist.yearsOfPractice) {
     parts.push(`Опыт работы: ${specialist.yearsOfPractice} лет`)
   }
 
-  // Форматы работы
+  // 8. Форматы работы
   parts.push(`Форматы работы: ${specialist.workFormats.map(formatWorkFormat).join(', ')}`)
 
-  // Локация
+  // 9. Локация
   if (specialist.city) {
     parts.push(`Город: ${specialist.city}`)
   }

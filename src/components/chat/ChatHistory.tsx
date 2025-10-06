@@ -38,9 +38,12 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
     // Ищем все сессии в localStorage
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (key && key.startsWith('aura_chat_session_')) {
+      // Игнорируем ключ с текущей сессией и ищем только сессии с UUID
+      if (key && key.startsWith('aura_chat_session_') && key !== 'aura_chat_session_current') {
         try {
           const data = JSON.parse(localStorage.getItem(key) || '{}')
+          console.log('[Chat History] Found session:', key, 'Messages:', data.messages?.length || 0)
+          
           if (data.messages && data.messages.length > 0 && data.sessionId !== currentSessionId) {
             const firstUserMessage = data.messages.find((m: ChatMessage) => m.role === 'user')
             if (firstUserMessage) {
@@ -57,6 +60,8 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
         }
       }
     }
+    
+    console.log('[Chat History] Total sessions found:', sessions.length)
 
     // Сортируем по дате (новые сверху)
     sessions.sort((a, b) => b.timestamp - a.timestamp)
