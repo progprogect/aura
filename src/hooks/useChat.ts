@@ -82,25 +82,29 @@ export function useChat() {
           buffer += chunk
 
           // Проверяем на специальные маркеры в buffer
-          if (buffer.includes('__SPECIALISTS__')) {
-            const parts = buffer.split('__SPECIALISTS__')
-            assistantContent += parts[0]
-            buffer = ''
-            try {
-              const jsonStr = parts[1]
-              specialists = JSON.parse(jsonStr)
-            } catch (e) {
-              console.error('[Chat] Failed to parse specialists:', e)
+          if (buffer.includes('__SPECIALISTS__') && buffer.includes(']')) {
+            const match = buffer.match(/__SPECIALISTS__([\s\S]*?\])/)
+            if (match) {
+              assistantContent += buffer.split('__SPECIALISTS__')[0]
+              buffer = buffer.substring(buffer.indexOf(match[0]) + match[0].length)
+              try {
+                specialists = JSON.parse(match[1])
+                console.log('[Chat] ✅ Parsed specialists:', specialists.length)
+              } catch (e) {
+                console.error('[Chat] ❌ Failed to parse specialists:', e, match[1])
+              }
             }
-          } else if (buffer.includes('__BUTTONS__')) {
-            const parts = buffer.split('__BUTTONS__')
-            assistantContent += parts[0]
-            buffer = ''
-            try {
-              const jsonStr = parts[1]
-              buttons = JSON.parse(jsonStr)
-            } catch (e) {
-              console.error('[Chat] Failed to parse buttons:', e)
+          } else if (buffer.includes('__BUTTONS__') && buffer.includes(']')) {
+            const match = buffer.match(/__BUTTONS__([\s\S]*?\])/)
+            if (match) {
+              assistantContent += buffer.split('__BUTTONS__')[0]
+              buffer = buffer.substring(buffer.indexOf(match[0]) + match[0].length)
+              try {
+                buttons = JSON.parse(match[1])
+                console.log('[Chat] ✅ Parsed buttons:', buttons.length)
+              } catch (e) {
+                console.error('[Chat] ❌ Failed to parse buttons:', e)
+              }
             }
           } else if (!buffer.includes('__')) {
             // Если нет маркеров, добавляем к контенту
