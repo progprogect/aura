@@ -442,12 +442,37 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
 
           // Извлекаем кнопки из ответа GPT
           const buttonsMatch = fullResponse.match(/__BUTTONS__\[(.*?)\]/)
+          let hasButtons = false
+          
           if (buttonsMatch) {
             try {
               const buttons = JSON.parse(`[${buttonsMatch[1]}]`)
               controller.enqueue(encoder.encode(`\n\n__BUTTONS__${JSON.stringify(buttons)}`))
+              hasButtons = true
             } catch (e) {
               console.error('[Chat API] Failed to parse buttons:', e)
+            }
+          }
+          
+          // FALLBACK: Если GPT предлагает начать поиск, но НЕ добавил кнопки → добавляем автоматически!
+          if (!hasButtons && specialists.length === 0) {
+            const searchSuggestionKeywords = [
+              'начать поиск',
+              'достаточно информации',
+              'хотите уточнить',
+              'начинаем поиск',
+              'готов искать',
+              'готов подобрать'
+            ]
+            
+            const gptSuggestsSearch = searchSuggestionKeywords.some(kw => 
+              fullResponse.toLowerCase().includes(kw)
+            )
+            
+            if (gptSuggestsSearch && messages.length >= 5) {
+              console.log('[Chat API] 🔧 Auto-injecting search buttons (GPT forgot them)')
+              const autoButtons = ["🔍 Найти специалистов", "Уточнить опыт работы", "Уточнить ещё"]
+              controller.enqueue(encoder.encode(`\n\n__BUTTONS__${JSON.stringify(autoButtons)}`))
             }
           }
 
