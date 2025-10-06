@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConditionalNavigation } from "@/components/ConditionalNavigation";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Предотвращает авто-зум на iOS при фокусе инпута
+}
 
 export const metadata: Metadata = {
   title: "Аура — Найдите своего специалиста по здоровью",
