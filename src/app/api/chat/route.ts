@@ -67,56 +67,64 @@ export async function POST(request: NextRequest) {
       await trackChatEvent(ChatEvent.MESSAGE_SENT, sessionId)
     }
 
+    // Проверяем, хочет ли пользователь увидеть ранее показанных
+    const showPreviousKeywords = ['ранее найденных', 'предыдущих', 'прошлых', 'тех же']
+    const isShowPreviousRequest = messages.length >= 4 && 
+      showPreviousKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
+    
     // Извлекаем параметры поиска из диалога
-    const searchParams = await extractSearchParams(messages, lastUserMessage.content)
+    const searchParams = await extractSearchParams(messages, lastUserMessage.content, isShowPreviousRequest)
 
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
     console.log('[Chat API] 💬 Last user message:', lastUserMessage.content)
     console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(searchParams, null, 2))
+    console.log('[Chat API] 🔁 Show previous request:', isShowPreviousRequest)
     console.log('═══════════════════════════════════════════')
 
     // Если нужен поиск специалистов
     let specialists: any[] = []
+    let noNewSpecialists = false
+    
     if (searchParams.shouldSearch) {
-      console.log('[Chat API] 🔎 Starting search with query:', searchParams.query)
-      console.log('[Chat API] 🚫 Excluding already shown IDs:', session.recommendedIds.length, 'specialists')
-      
-      try {
-        specialists = await searchSpecialistsBySemantic({
-          query: searchParams.query,
-          filters: {
-            category: searchParams.category,
-            workFormats: searchParams.workFormats,
-            city: searchParams.city,
-            maxPrice: searchParams.maxPrice,
-            minExperience: searchParams.minExperience,
+      // Если пользователь хочет увидеть ранее показанных - загружаем их из БД
+      if (isShowPreviousRequest && session.recommendedIds.length > 0) {
+        console.log('[Chat API] 🔄 Loading previously shown specialists:', session.recommendedIds.length)
+        
+        specialists = await prisma.specialist.findMany({
+          where: {
+            id: { in: session.recommendedIds },
+            acceptingClients: true,
           },
-          limit: 10,
-          excludeIds: session.recommendedIds,
-        })
-      } catch (embeddingError) {
-        console.warn('[Chat API] Embedding search failed, using keyword fallback:', embeddingError)
-        // Fallback на keyword search
-        specialists = await searchSpecialistsByKeyword({
-          query: searchParams.query,
-          filters: {
-            category: searchParams.category,
-            workFormats: searchParams.workFormats,
-            city: searchParams.city,
-            maxPrice: searchParams.maxPrice,
-            minExperience: searchParams.minExperience,
+          take: 10,
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            slug: true,
+            category: true,
+            specializations: true,
+            tagline: true,
+            about: true,
+            city: true,
+            country: true,
+            workFormats: true,
+            yearsOfPractice: true,
+            priceFrom: true,
+            priceTo: true,
+            currency: true,
+            priceDescription: true,
+            verified: true,
+            customFields: true,
           },
-          limit: 10,
-          excludeIds: session.recommendedIds,
         })
-      }
-
-      console.log('[Chat API] ✅ Found specialists:', specialists.length)
-
-      // Если ничего не нашли, но есть excludeIds - пробуем без исключений
-      if (specialists.length === 0 && session.recommendedIds.length > 0) {
-        console.log('[Chat API] 🔄 No new specialists found. Trying without exclusions...')
+        
+        console.log('[Chat API] ✅ Loaded previous specialists:', specialists.length)
+      } else {
+        // Обычный поиск новых специалистов
+        console.log('[Chat API] 🔎 Starting search with query:', searchParams.query)
+        console.log('[Chat API] 🚫 Excluding already shown IDs:', session.recommendedIds.length, 'specialists')
         
         try {
           specialists = await searchSpecialistsBySemantic({
@@ -129,17 +137,33 @@ export async function POST(request: NextRequest) {
               minExperience: searchParams.minExperience,
             },
             limit: 10,
-            excludeIds: [], // БЕЗ исключений!
+            excludeIds: session.recommendedIds,
           })
-          
-          console.log('[Chat API] 🔄 Found specialists (without exclusions):', specialists.length)
-        } catch (retryError) {
-          console.error('[Chat API] Retry search failed:', retryError)
+        } catch (embeddingError) {
+          console.warn('[Chat API] Embedding search failed, using keyword fallback:', embeddingError)
+          // Fallback на keyword search
+          specialists = await searchSpecialistsByKeyword({
+            query: searchParams.query,
+            filters: {
+              category: searchParams.category,
+              workFormats: searchParams.workFormats,
+              city: searchParams.city,
+              maxPrice: searchParams.maxPrice,
+              minExperience: searchParams.minExperience,
+            },
+            limit: 10,
+            excludeIds: session.recommendedIds,
+          })
         }
+
+        console.log('[Chat API] ✅ Found specialists:', specialists.length)
+        
+        // Если новых не нашли - сохраняем эту информацию для GPT
+        noNewSpecialists = specialists.length === 0 && session.recommendedIds.length > 0
       }
 
-      // Обновляем сессию
-      if (specialists.length > 0) {
+      // Обновляем сессию (только если это НЕ показ ранее найденных)
+      if (specialists.length > 0 && !isShowPreviousRequest) {
         // Добавляем только новых специалистов (которых ещё нет в recommendedIds)
         const newIds = specialists
           .slice(0, 5)
@@ -166,7 +190,10 @@ export async function POST(request: NextRequest) {
             },
           })
         }
-
+      }
+      
+      // Трекаем показ (для всех случаев)
+      if (specialists.length > 0) {
         await trackChatEvent(ChatEvent.RECOMMENDATIONS_SHOWN, sessionId, {
           count: specialists.length,
         })
@@ -175,27 +202,42 @@ export async function POST(request: NextRequest) {
 
     // Формируем контекст для GPT
     const systemMessage = getSystemPrompt()
-    const contextMessage =
-      specialists.length > 0
-        ? `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
+    let contextMessage = ''
+    
+    if (specialists.length > 0) {
+      // Нашли специалистов - показываем
+      contextMessage = `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
 Вот их данные:\n${JSON.stringify(
-            specialists.slice(0, 5).map((s) => ({
-              id: s.id,
-              name: `${s.firstName} ${s.lastName}`,
-              category: s.category,
-              specializations: s.specializations,
-              tagline: s.tagline,
-              experience: s.yearsOfPractice,
-              formats: s.workFormats,
-              city: s.city,
-              price: s.priceFrom ? `от ${Math.floor(s.priceFrom / 100)} ₽` : null,
-            })),
-            null,
-            2
-          )}
+        specialists.slice(0, 5).map((s) => ({
+          id: s.id,
+          name: `${s.firstName} ${s.lastName}`,
+          category: s.category,
+          specializations: s.specializations,
+          tagline: s.tagline,
+          experience: s.yearsOfPractice,
+          formats: s.workFormats,
+          city: s.city,
+          price: s.priceFrom ? `от ${Math.floor(s.priceFrom / 100)} ₽` : null,
+        })),
+        null,
+        2
+      )}
 
 НЕ ПЕРЕЧИСЛЯЙ их текстом - они УЖЕ ПОКАЗАНЫ! Прокомментируй и предложи дальнейшие действия.`
-        : ''
+    } else if (noNewSpecialists) {
+      // Новых не нашли, но уже были показаны ранее
+      contextMessage = `\n\n⚠️ ВАЖНО: Новых специалистов по текущим критериям НЕ НАЙДЕНО.
+Ранее уже было показано ${session.recommendedIds.length} специалистов.
+
+ПРЕДЛОЖИ ПОЛЬЗОВАТЕЛЮ ВАРИАНТЫ:
+1. "Показать ранее найденных специалистов ещё раз?"
+2. "Изменить критерии поиска?" (опыт, цена, город, методы)
+3. "Посмотреть специалистов из других категорий?" (например, если искали психолога - предложи коучинга)
+4. "Перейти в каталог для самостоятельного выбора?" (дай ссылку: /catalog)
+
+Добавь кнопки:
+__BUTTONS__["Показать ранее найденных", "Изменить критерии", "Перейти в каталог"]`
+    }
 
     console.log('[Chat API] 📝 System message length:', systemMessage.length)
     console.log('[Chat API] 📝 Context message:', contextMessage ? `Added (${contextMessage.length} chars)` : 'None')
@@ -309,7 +351,8 @@ export async function POST(request: NextRequest) {
  */
 async function extractSearchParams(
   messages: any[], 
-  lastUserMessageContent: string
+  lastUserMessageContent: string,
+  isShowPreviousRequest: boolean = false
 ): Promise<{
   shouldSearch: boolean
   query: string
@@ -376,12 +419,13 @@ async function extractSearchParams(
     console.log('[Chat API] 🔁 Follow-up check:', {
       messagesCount: messages.length,
       isFollowUp: isFollowUpRequest,
+      isShowPrevious: isShowPreviousRequest,
       lastMessage: lastUserMessageContent?.substring(0, 50),
     })
 
-    const shouldSearch = hasEnoughInfo || isFollowUpRequest
+    const shouldSearch = hasEnoughInfo || isFollowUpRequest || isShowPreviousRequest
 
-    console.log('[Chat API] 🎯 Should search:', shouldSearch, '(hasEnoughInfo:', hasEnoughInfo, ', isFollowUp:', isFollowUpRequest, ')')
+    console.log('[Chat API] 🎯 Should search:', shouldSearch, '(hasEnoughInfo:', hasEnoughInfo, ', isFollowUp:', isFollowUpRequest, ', showPrevious:', isShowPreviousRequest, ')')
 
     // Формируем текст запроса
     const query = [
