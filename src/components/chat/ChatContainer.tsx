@@ -25,22 +25,22 @@ export function ChatContainer() {
   }, [messages, isLoading])
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background">
-      {/* Header - фиксированный */}
-      <div className="flex-shrink-0 bg-background border-b px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
+    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background" style={{ height: '100dvh' }}>
+      {/* Header - фиксированный и компактный на мобильных */}
+      <div className="flex-shrink-0 bg-background border-b px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
             <Link href="/" className="flex items-center">
               <ArrowLeft className="w-4 h-4" />
               <span className="ml-2 md:hidden">Назад</span>
             </Link>
           </Button>
-          <div className="border-l border-border pl-3">
-            <h1 className="font-semibold text-base md:text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              AI-Помощник
+          <div className="border-l border-border pl-2 sm:pl-3 min-w-0">
+            <h1 className="font-semibold text-sm sm:text-base md:text-lg flex items-center gap-1.5 sm:gap-2">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+              <span className="truncate">AI-Помощник</span>
             </h1>
-            <p className="text-xs md:text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground hidden sm:block">
               Помогу найти идеального специалиста
             </p>
           </div>
@@ -153,18 +153,19 @@ export function ChatContainer() {
       </div>
 
       {/* Input - фиксированный */}
-      <div className="flex-shrink-0 bg-background border-t px-4 py-4">
+      <div className="flex-shrink-0 bg-background border-t px-3 sm:px-4 py-3 sm:py-4">
         {/* Кнопка возврата */}
         {messages.length >= 2 && !isLoading && (
-          <div className="mb-3">
+          <div className="mb-2 sm:mb-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={undoLastMessage}
-              className="gap-2 text-muted-foreground hover:text-foreground"
+              className="gap-2 text-muted-foreground hover:text-foreground text-xs sm:text-sm"
             >
-              <Undo2 className="w-4 h-4" />
-              Вернуться к предыдущему шагу
+              <Undo2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Вернуться к предыдущему шагу</span>
+              <span className="sm:hidden">Назад</span>
             </Button>
           </div>
         )}
@@ -178,7 +179,7 @@ export function ChatContainer() {
               : 'Ваше сообщение...'
           }
         />
-        <p className="text-xs text-muted-foreground text-center mt-2">
+        <p className="text-xs text-muted-foreground text-center mt-1.5 sm:mt-2">
           AI может ошибаться. Проверяйте важную информацию.
         </p>
       </div>
