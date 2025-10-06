@@ -63,7 +63,7 @@ export function ChatInput({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <div className="flex-1 relative">
         <textarea
           value={input}
@@ -72,28 +72,29 @@ export function ChatInput({
           placeholder={isListening ? 'Слушаю...' : placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-4 py-3 pr-12 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32"
+          className="w-full px-3 sm:px-4 py-3 pr-11 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32 text-sm sm:text-base leading-normal"
           style={{
             minHeight: '48px',
             maxHeight: '128px',
+            lineHeight: '1.5',
           }}
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement
-            target.style.height = 'auto'
+            target.style.height = '48px'
             target.style.height = `${Math.min(target.scrollHeight, 128)}px`
           }}
         />
         
         {/* Кнопка микрофона внутри поля */}
         {isSupported && (
-          <div className="absolute right-3 bottom-3">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
             <Button
               type="button"
               size="sm"
               variant="ghost"
               onClick={toggleVoiceInput}
               disabled={disabled}
-              className={`h-8 w-8 p-0 ${isListening ? 'text-red-500 hover:text-red-600' : ''}`}
+              className={`h-8 w-8 p-0 rounded-full ${isListening ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {isListening ? (
                 <motion.div
@@ -114,7 +115,7 @@ export function ChatInput({
         type="submit"
         size="icon"
         disabled={!input.trim() || disabled}
-        className="h-12 w-12 rounded-full shrink-0"
+        className="h-12 w-12 rounded-full shrink-0 flex items-center justify-center"
       >
         <Send className="h-5 w-5" />
       </Button>
