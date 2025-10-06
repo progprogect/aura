@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icons/Icon'
 import { MessageCircle, ArrowRight } from '@/components/ui/icons/catalog-icons'
+import { HeroNavigation } from './HeroNavigation'
 
 export function HeroSection() {
   const [demoStep, setDemoStep] = useState(0)
@@ -40,11 +41,14 @@ export function HeroSection() {
   }, [demoStep, demoMessages.length])
 
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Интегрированная навигация */}
+      <HeroNavigation />
+      
       {/* Фоновый градиент */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
       
-      <div className="container mx-auto px-4 relative">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative pt-20">
         <div className="max-w-4xl mx-auto text-center space-y-12">
           {/* Заголовок */}
           <motion.div
@@ -53,13 +57,13 @@ export function HeroSection() {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
               Найди специалиста{' '}
               <span className="bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
                 за 2 минуты
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               AI-помощник поможет найти идеального эксперта для решения ваших задач
             </p>
           </motion.div>
@@ -71,9 +75,9 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <Card className="max-w-2xl mx-auto shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="space-y-4">
+            <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-8 md:p-12">
+                <div className="space-y-6">
                   {/* Заголовок чата */}
                   <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
@@ -93,7 +97,7 @@ export function HeroSection() {
                   </div>
 
                   {/* Сообщения */}
-                  <div className="space-y-4 min-h-[120px]">
+                  <div className="space-y-6 min-h-[160px] md:min-h-[200px]">
                     <AnimatePresence>
                       {demoMessages.slice(0, demoStep).map((message, index) => (
                         <motion.div
@@ -104,13 +108,13 @@ export function HeroSection() {
                           className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                            className={`max-w-[80%] px-6 py-4 rounded-2xl ${
                               message.isUser
                                 ? 'bg-primary text-white'
                                 : 'bg-gray-100 text-foreground'
                             }`}
                           >
-                            <p className="text-sm">{message.text}</p>
+                            <p className="text-sm md:text-base">{message.text}</p>
                           </div>
                         </motion.div>
                       ))}
