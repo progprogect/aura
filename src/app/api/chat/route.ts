@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
     // Извлекаем параметры поиска из диалога
-    const searchParams = await extractSearchParams(messages, lastUserMessage.content, isShowPreviousRequest)
+    const searchParams = await extractSearchParams(messages, lastUserMessage.content, isShowPreviousRequest, isExpandCriteriaRequest)
 
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
@@ -490,7 +490,8 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
 async function extractSearchParams(
   messages: any[], 
   lastUserMessageContent: string,
-  isShowPreviousRequest: boolean = false
+  isShowPreviousRequest: boolean = false,
+  isExpandCriteriaRequest: boolean = false
 ): Promise<{
   shouldSearch: boolean
   query: string
