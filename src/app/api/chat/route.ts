@@ -554,14 +554,12 @@ async function extractSearchParams(
       'достаточно',
       'искать',
       'подбери',
+      'подобрать',
       '🔍'
     ]
     const userRequestedSearch = searchKeywords.some(kw => 
       lastUserMessageContent?.toLowerCase().includes(kw.toLowerCase())
     )
-    
-    // GPT собрал достаточно информации (минимум 6 сообщений)
-    const hasEnoughDialog = messages.length >= 6
     
     // Follow-up запросы (показать ещё)
     const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
@@ -579,31 +577,30 @@ async function extractSearchParams(
       hasExperience,
       hasMethods,
       userRequestedSearch,
-      hasEnoughDialog,
       isFollowUp: isFollowUpRequest,
       isShowPrevious: isShowPreviousRequest,
+      isExpandCriteria: isExpandCriteriaRequest,
     })
     
-    // ГЛАВНАЯ ЛОГИКА: Ищем если
-    // 1. Есть базовые параметры И (
-    //    - Пользователь попросил начать ИЛИ
-    //    - GPT задал достаточно вопросов (6+ сообщений)
-    //   )
-    // 2. ИЛИ это follow-up запрос
+    // ГЛАВНАЯ ЛОГИКА: Ищем ТОЛЬКО если пользователь ЯВНО попросил!
+    // НИКАКОГО АВТОПОИСКА! GPT должен предложить кнопку, а пользователь нажать.
+    //
+    // Ищем если:
+    // 1. Пользователь нажал "🔍 Найти специалистов" ИЛИ написал "найди"
+    // 2. ИЛИ это follow-up запрос ("показать ещё")
     // 3. ИЛИ показываем ранее найденных
     // 4. ИЛИ расширяем критерии (убираем фильтры)
     const shouldSearch = 
-      (hasBasics && (userRequestedSearch || hasEnoughDialog)) ||
+      userRequestedSearch ||
       isFollowUpRequest ||
       isShowPreviousRequest ||
       isExpandCriteriaRequest
 
     console.log('[Chat API] 🎯 Should search:', shouldSearch, {
       reason: userRequestedSearch ? 'user_requested' : 
-              hasEnoughDialog ? 'enough_dialog' : 
               isFollowUpRequest ? 'follow_up' :
               isShowPreviousRequest ? 'show_previous' :
-              isExpandCriteriaRequest ? 'expand_criteria' : 'waiting_for_confirmation'
+              isExpandCriteriaRequest ? 'expand_criteria' : 'waiting_for_user_confirmation'
     })
 
     // Формируем текст запроса для semantic search
