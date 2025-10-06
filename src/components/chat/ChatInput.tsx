@@ -63,8 +63,8 @@ export function ChatInput({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <div className="flex-1 relative">
+    <form onSubmit={handleSubmit} className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex-1 relative min-w-0">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -72,15 +72,15 @@ export function ChatInput({
           placeholder={isListening ? 'Слушаю...' : placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full px-3 sm:px-4 py-3 pr-11 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32 text-sm sm:text-base leading-normal"
+          className="w-full px-2.5 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-11 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32 text-sm sm:text-base leading-normal"
           style={{
-            minHeight: '48px',
+            minHeight: '44px',
             maxHeight: '128px',
             lineHeight: '1.5',
           }}
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement
-            target.style.height = '48px'
+            target.style.height = '44px'
             target.style.height = `${Math.min(target.scrollHeight, 128)}px`
           }}
         />
@@ -115,9 +115,9 @@ export function ChatInput({
         type="submit"
         size="icon"
         disabled={!input.trim() || disabled}
-        className="h-12 w-12 rounded-full shrink-0 flex items-center justify-center"
+        className="h-11 w-11 sm:h-12 sm:w-12 rounded-full shrink-0 flex items-center justify-center"
       >
-        <Send className="h-5 w-5" />
+        <Send className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
     </form>
   )

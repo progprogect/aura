@@ -20,11 +20,12 @@ interface HistorySession {
 interface ChatHistoryProps {
   currentSessionId: string | null
   onLoadSession: (sessionId: string) => void
+  onClose?: () => void
 }
 
-export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProps) {
+export function ChatHistory({ currentSessionId, onLoadSession, onClose }: ChatHistoryProps) {
   const [history, setHistory] = useState<HistorySession[]>([])
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true) // Управляется родителем
 
   const loadHistory = useCallback(() => {
     if (typeof window === 'undefined') return
@@ -71,7 +72,11 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
 
   const handleLoadSession = (sessionId: string) => {
     onLoadSession(sessionId)
-    setIsOpen(false)
+    if (onClose) onClose()
+  }
+  
+  const handleClose = () => {
+    if (onClose) onClose()
   }
 
   const formatTimestamp = (timestamp: number) => {
@@ -85,53 +90,71 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
     return date.toLocaleDateString('ru-RU')
   }
 
-  if (history.length === 0) return null
+  if (history.length === 0) {
+    // Если истории нет - показываем сообщение
+    return (
+      <>
+        {/* Overlay */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleClose}
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
+        />
+        
+        {/* Sidebar */}
+        <motion.div
+          initial={{ x: -300, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -300, opacity: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed left-0 top-0 bottom-0 w-80 bg-card border-r border-border z-[101] overflow-y-auto shadow-2xl"
+        >
+          <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+            <h3 className="font-semibold">История диалогов</h3>
+            <Button variant="ghost" size="sm" onClick={handleClose}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          <div className="p-4 text-center text-muted-foreground text-sm">
+            История диалогов пуста
+          </div>
+        </motion.div>
+      </>
+    )
+  }
 
   return (
     <>
-      {/* Кнопка открытия */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsOpen(!isOpen)}
-        className="gap-2"
-      >
-        <Clock className="w-4 h-4" />
-        <span className="hidden md:inline">История ({history.length})</span>
-      </Button>
+      {/* Overlay */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={handleClose}
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
+      />
 
       {/* Sidebar */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
-            />
-
-            {/* Sidebar */}
-            <motion.div
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 bottom-0 w-80 bg-card border-r border-border z-[101] overflow-y-auto shadow-2xl"
-            >
-              {/* Header */}
-              <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-                <h3 className="font-semibold">История диалогов</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
+      <motion.div
+        initial={{ x: -300, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: -300, opacity: 0 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="fixed left-0 top-0 bottom-0 w-80 bg-card border-r border-border z-[101] overflow-y-auto shadow-2xl"
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+          <h3 className="font-semibold">История диалогов</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
 
               {/* Список сессий */}
               <div className="p-2">
@@ -158,11 +181,8 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
                     </div>
                   </motion.button>
                 ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        </div>
+      </motion.div>
     </>
   )
 }
