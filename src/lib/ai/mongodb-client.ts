@@ -158,24 +158,39 @@ export async function findSimilarEmbeddings(
   limit: number = 20,
   excludeIds: string[] = []
 ): Promise<Array<{ specialistId: string; similarity: number }>> {
-  const collection = await getEmbeddingsCollection()
+  try {
+    const collection = await getEmbeddingsCollection()
 
-  // Получаем все embeddings (для <10k записей это быстро)
-  const filter = excludeIds.length > 0 ? { specialistId: { $nin: excludeIds } } : {}
-  const results = await collection.find(filter).toArray()
-  const allEmbeddings = results as unknown as EmbeddingDocument[]
+    // Получаем все embeddings (для <10k записей это быстро)
+    const filter = excludeIds.length > 0 ? { specialistId: { $nin: excludeIds } } : {}
+    const results = await collection.find(filter).toArray()
+    const allEmbeddings = results as unknown as EmbeddingDocument[]
 
-  // Вычисляем cosine similarity для каждого
-  const similarities = allEmbeddings.map((doc) => ({
-    specialistId: doc.specialistId,
-    similarity: cosineSimilarity(queryEmbedding, doc.embedding),
-  }))
+    console.log(`[MongoDB] 📊 Embeddings in collection: ${allEmbeddings.length}`)
+    console.log(`[MongoDB] 🚫 Excluded IDs: ${excludeIds.length}`)
 
-  // Сортируем по убыванию similarity
-  similarities.sort((a, b) => b.similarity - a.similarity)
+    if (allEmbeddings.length === 0) {
+      console.warn('[MongoDB] ⚠️ No embeddings found in collection! Did you run npm run ai:generate-embeddings?')
+      return []
+    }
 
-  // Возвращаем топ-N
-  return similarities.slice(0, limit)
+    // Вычисляем cosine similarity для каждого
+    const similarities = allEmbeddings.map((doc) => ({
+      specialistId: doc.specialistId,
+      similarity: cosineSimilarity(queryEmbedding, doc.embedding),
+    }))
+
+    // Сортируем по убыванию similarity
+    similarities.sort((a, b) => b.similarity - a.similarity)
+
+    console.log(`[MongoDB] 🎯 Top 3 similarities:`, similarities.slice(0, 3).map(s => ({ id: s.specialistId.substring(0, 8), similarity: s.similarity.toFixed(3) })))
+
+    // Возвращаем топ-N
+    return similarities.slice(0, limit)
+  } catch (error) {
+    console.error('[MongoDB] ❌ Error in findSimilarEmbeddings:', error)
+    throw error
+  }
 }
 
 /**

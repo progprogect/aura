@@ -300,10 +300,20 @@ async function extractSearchParams(messages: any[]): Promise<{
     // Определяем, нужен ли поиск
     // ВАЖНО: Ищем только если есть ДОСТАТОЧНО информации
     // Минимум: категория + (формат ИЛИ проблема)
-    const hasEnoughInfo = !!(
-      extracted.category && 
-      (extracted.workFormats?.length > 0 || extracted.problem)
-    )
+    const hasCategory = !!extracted.category
+    const hasFormat = extracted.workFormats && extracted.workFormats.length > 0
+    const hasProblem = extracted.problem && extracted.problem.length > 3
+    
+    const hasEnoughInfo = hasCategory && (hasFormat || hasProblem)
+    
+    console.log('[Chat API] 🧩 Search criteria:', {
+      hasCategory,
+      hasFormat,
+      hasProblem,
+      category: extracted.category,
+      problem: extracted.problem,
+      workFormats: extracted.workFormats
+    })
     
     // Или если это явный запрос на дополнительные результаты
     const isFollowUpRequest = messages.length >= 3 && (

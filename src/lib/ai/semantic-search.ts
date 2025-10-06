@@ -21,14 +21,17 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   try {
     // 1. Генерируем embedding запроса
     const queryEmbedding = await generateQueryEmbedding(query)
+    console.log('[Semantic Search] 🧮 Query embedding generated:', queryEmbedding.length, 'dimensions')
 
     // 2. Находим похожие embeddings в MongoDB
     const similarEmbeddings = await findSimilarEmbeddings(queryEmbedding, limit * 2, excludeIds)
 
     if (similarEmbeddings.length === 0) {
-      console.log('[Semantic Search] No embeddings found')
-      return []
+      console.warn('[Semantic Search] ⚠️ No embeddings found in MongoDB - falling back to keyword search')
+      return await searchSpecialistsByKeyword(options)
     }
+
+    console.log('[Semantic Search] 📊 Similar embeddings found:', similarEmbeddings.length)
 
   const specialistIds = similarEmbeddings.map((e) => e.specialistId)
 
@@ -100,12 +103,13 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
 
   specialistsWithSimilarity.sort((a, b) => a.distance - b.distance)
 
-  console.log(`[Semantic Search] Found ${specialistsWithSimilarity.length} specialists`)
+  console.log(`[Semantic Search] ✅ Returning ${specialistsWithSimilarity.length} specialists (after filters)`)
 
   return specialistsWithSimilarity as Specialist[]
   } catch (error) {
-    console.error('[Semantic Search] Error:', error)
-    throw error
+    console.error('[Semantic Search] ❌ Error:', error)
+    console.log('[Semantic Search] 🔄 Falling back to keyword search...')
+    return await searchSpecialistsByKeyword(options)
   }
 }
 
