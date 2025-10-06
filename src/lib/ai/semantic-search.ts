@@ -75,7 +75,10 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   }
 
   if (filters.maxPrice) {
-    where.OR = [{ priceFrom: null }, { priceFrom: { lte: filters.maxPrice } }]
+    // ВАЖНО: Цена в БД в КОПЕЙКАХ! Конвертируем рубли → копейки
+    const maxPriceInKopecks = filters.maxPrice * 100
+    where.OR = [{ priceFrom: null }, { priceFrom: { lte: maxPriceInKopecks } }]
+    console.log('[Semantic Search] 💰 Price filter:', filters.maxPrice, '₽ =', maxPriceInKopecks, 'копеек')
   }
 
   if (filters.verified) {
