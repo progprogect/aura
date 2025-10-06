@@ -4,11 +4,8 @@
 
 import { MongoClient, Db, Collection } from 'mongodb'
 
-if (!process.env.MONGODB_URL) {
-  throw new Error('MONGODB_URL is not set in environment variables')
-}
-
-const MONGODB_URL = process.env.MONGODB_URL
+// Используем MONGO_URL (Railway internal) или MONGODB_URL (fallback для других платформ)
+const MONGODB_URL = process.env.MONGO_URL || process.env.MONGODB_URL
 const DB_NAME = 'aura'
 const COLLECTION_NAME = 'specialist_embeddings'
 
@@ -20,6 +17,10 @@ let db: Db | null = null
  */
 async function connect(): Promise<Db> {
   if (db) return db
+
+  if (!MONGODB_URL) {
+    throw new Error('MONGO_URL or MONGODB_URL is not set in environment variables')
+  }
 
   if (!client) {
     client = new MongoClient(MONGODB_URL)
