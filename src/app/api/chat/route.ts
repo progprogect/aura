@@ -146,11 +146,11 @@ export async function POST(request: NextRequest) {
         // Оставляем: категорию, формат, город
         try {
           specialists = await searchSpecialistsBySemantic({
-            query: searchParams.query,
+            query: extractedParams.query,
             filters: {
-              category: searchParams.category,
-              workFormats: searchParams.workFormats,
-              city: searchParams.city,
+              category: extractedParams.category,
+              workFormats: extractedParams.workFormats,
+              city: extractedParams.city,
               // НЕ передаём maxPrice и minExperience
             },
             limit: 10,
@@ -308,8 +308,8 @@ export async function POST(request: NextRequest) {
         contextMessage = `\n\n✅ ВАЖНО: Система РАСШИРИЛА критерии поиска и нашла ${specialists.length} специалистов.
 
 Убранные фильтры для лучшего подбора:
-${searchParams.maxPrice ? `- Бюджет (было: до ${searchParams.maxPrice}₽)` : ''}
-${searchParams.minExperience ? `- Опыт (было: от ${searchParams.minExperience} лет)` : ''}
+${extractedParams.maxPrice ? `- Бюджет (было: до ${extractedParams.maxPrice}₽)` : ''}
+${extractedParams.minExperience ? `- Опыт (было: от ${extractedParams.minExperience} лет)` : ''}
 
 Вот найденные специалисты:
 ${JSON.stringify(
@@ -336,11 +336,11 @@ __BUTTONS__["Подходят", "Вернуть строгие критерии"
         contextMessage = `\n\n⚠️ ВАЖНО: Система нашла ${specialists.length} специалистов, но СОВПАДЕНИЕ НИЗКОЕ (средний ${avgSimilarityScore}%).
 
 Текущие фильтры:
-- Категория: ${searchParams.category || 'не указана'}
-- Формат: ${searchParams.workFormats?.join(', ') || 'не указан'}
-- Бюджет: ${searchParams.maxPrice ? `до ${searchParams.maxPrice}₽` : 'не указан'}
-- Опыт: ${searchParams.minExperience ? `от ${searchParams.minExperience} лет` : 'не указан'}
-- Методы: ${searchParams.preferences?.methods?.join(', ') || 'не указаны'}
+- Категория: ${extractedParams.category || 'не указана'}
+- Формат: ${extractedParams.workFormats?.join(', ') || 'не указан'}
+- Бюджет: ${extractedParams.maxPrice ? `до ${extractedParams.maxPrice}₽` : 'не указан'}
+- Опыт: ${extractedParams.minExperience ? `от ${extractedParams.minExperience} лет` : 'не указан'}
+- Методы: ${extractedParams.preferences?.methods?.join(', ') || 'не указаны'}
 
 Вот найденные специалисты:
 ${JSON.stringify(
@@ -437,20 +437,20 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
               
               // Формируем объяснение почему подобрали
               const matchReasons: string[] = []
-              if (searchParams.category) {
-                matchReasons.push(`Категория: ${getCategoryName(searchParams.category)}`)
+              if (extractedParams.category) {
+                matchReasons.push(`Категория: ${getCategoryName(extractedParams.category)}`)
               }
               if (s.specializations && s.specializations.length > 0) {
                 matchReasons.push(`Специализации: ${s.specializations.slice(0, 3).join(', ')}`)
               }
-              if (searchParams.workFormats && searchParams.workFormats.length > 0) {
-                const formats = searchParams.workFormats.map(f => f === 'online' ? 'Онлайн' : 'Оффлайн').join(', ')
+              if (extractedParams.workFormats && extractedParams.workFormats.length > 0) {
+                const formats = extractedParams.workFormats.map(f => f === 'online' ? 'Онлайн' : 'Оффлайн').join(', ')
                 matchReasons.push(`Формат: ${formats}`)
               }
-              if (s.city && searchParams.city) {
+              if (s.city && extractedParams.city) {
                 matchReasons.push(`Город: ${s.city}`)
               }
-              if (s.yearsOfPractice && searchParams.minExperience) {
+              if (s.yearsOfPractice && extractedParams.minExperience) {
                 matchReasons.push(`Опыт: ${s.yearsOfPractice} лет`)
               }
               
