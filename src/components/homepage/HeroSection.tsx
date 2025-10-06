@@ -183,12 +183,12 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-3 justify-center items-stretch max-w-lg mx-auto"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch max-w-lg mx-auto"
           >
             <Button 
               size="lg" 
               asChild 
-              className="flex-1 h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+              className="flex-1 h-16 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all py-4"
             >
               <Link href="/chat" className="flex items-center justify-center">
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -199,7 +199,7 @@ export function HeroSection() {
               variant="outline" 
               size="lg" 
               asChild 
-              className="flex-1 h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all"
+              className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
             >
               <Link href="/catalog" className="flex items-center justify-center">
                 <Grid3X3 className="w-5 h-5 mr-2" />
