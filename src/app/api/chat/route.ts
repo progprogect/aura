@@ -67,10 +67,14 @@ export async function POST(request: NextRequest) {
       await trackChatEvent(ChatEvent.MESSAGE_SENT, sessionId)
     }
 
-    // Проверяем, хочет ли пользователь увидеть ранее показанных
+    // Проверяем специальные запросы
     const showPreviousKeywords = ['ранее найденных', 'предыдущих', 'прошлых', 'тех же']
     const isShowPreviousRequest = messages.length >= 4 && 
       showPreviousKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
+    
+    const expandCriteriaKeywords = ['расширить критерии', 'расширить', 'убрать фильтр', 'меньше фильтров', 'больше вариантов']
+    const isExpandCriteriaRequest = messages.length >= 4 &&
+      expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
     // Извлекаем параметры поиска из диалога
     const searchParams = await extractSearchParams(messages, lastUserMessage.content, isShowPreviousRequest)
@@ -80,6 +84,7 @@ export async function POST(request: NextRequest) {
     console.log('[Chat API] 💬 Last user message:', lastUserMessage.content)
     console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(searchParams, null, 2))
     console.log('[Chat API] 🔁 Show previous request:', isShowPreviousRequest)
+    console.log('[Chat API] 🔄 Expand criteria request:', isExpandCriteriaRequest)
     console.log('═══════════════════════════════════════════')
 
     // Если нужен поиск специалистов
@@ -87,8 +92,32 @@ export async function POST(request: NextRequest) {
     let noNewSpecialists = false
     
     if (searchParams.shouldSearch) {
+      // Если пользователь хочет расширить критерии - ищем с урезанными фильтрами
+      if (isExpandCriteriaRequest) {
+        console.log('[Chat API] 🔄 Expanding search criteria (removing strict filters)...')
+        
+        // Убираем самые строгие фильтры: опыт и цену
+        // Оставляем: категорию, формат, город
+        try {
+          specialists = await searchSpecialistsBySemantic({
+            query: searchParams.query,
+            filters: {
+              category: searchParams.category,
+              workFormats: searchParams.workFormats,
+              city: searchParams.city,
+              // НЕ передаём maxPrice и minExperience
+            },
+            limit: 10,
+            excludeIds: session.recommendedIds,
+          })
+          
+          console.log('[Chat API] ✅ Found with expanded criteria:', specialists.length)
+        } catch (error) {
+          console.error('[Chat API] Expanded search failed:', error)
+        }
+      }
       // Если пользователь хочет увидеть ранее показанных - загружаем их из БД
-      if (isShowPreviousRequest && session.recommendedIds.length > 0) {
+      else if (isShowPreviousRequest && session.recommendedIds.length > 0) {
         console.log('[Chat API] 🔄 Loading previously shown specialists:', session.recommendedIds.length)
         
         specialists = await prisma.specialist.findMany({
@@ -160,6 +189,29 @@ export async function POST(request: NextRequest) {
         
         // Если новых не нашли - сохраняем эту информацию для GPT
         noNewSpecialists = specialists.length === 0 && session.recommendedIds.length > 0
+        
+        // Вычисляем средний similarity для оценки качества подбора
+        if (specialists.length > 0) {
+          const similarities = specialists
+            .slice(0, 5)
+            .map(s => s.distance !== undefined ? (1 - s.distance) * 100 : 50)
+          
+          const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length
+          
+          console.log('[Chat API] 📊 Similarity stats:', {
+            avg: Math.round(avgSimilarity),
+            min: Math.round(Math.min(...similarities)),
+            max: Math.round(Math.max(...similarities)),
+            count: specialists.length,
+          })
+          
+          // Флаг низкого качества подбора (< 70%)
+          if (avgSimilarity < 70) {
+            specialists._lowQualityMatch = true
+            specialists._avgSimilarity = Math.round(avgSimilarity)
+            console.log('[Chat API] ⚠️ Low quality match detected:', Math.round(avgSimilarity), '% avg similarity')
+          }
+        }
       }
 
       // Обновляем сессию (только если это НЕ показ ранее найденных)
@@ -205,25 +257,87 @@ export async function POST(request: NextRequest) {
     let contextMessage = ''
     
     if (specialists.length > 0) {
-      // Нашли специалистов - показываем
-      contextMessage = `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
+      // Проверяем качество подбора
+      const isLowQuality = specialists._lowQualityMatch
+      const avgSimilarity = specialists._avgSimilarity
+      
+      if (isExpandCriteriaRequest) {
+        // РАСШИРЕННЫЙ ПОИСК - показываем что убрали фильтры
+        contextMessage = `\n\n✅ ВАЖНО: Система РАСШИРИЛА критерии поиска и нашла ${specialists.length} специалистов.
+
+Убранные фильтры для лучшего подбора:
+${searchParams.maxPrice ? `- Бюджет (было: до ${searchParams.maxPrice}₽)` : ''}
+${searchParams.minExperience ? `- Опыт (было: от ${searchParams.minExperience} лет)` : ''}
+
+Вот найденные специалисты:
+${JSON.stringify(
+          specialists.slice(0, 5).map((s) => ({
+            name: `${s.firstName} ${s.lastName}`,
+            specializations: s.specializations,
+            experience: s.yearsOfPractice,
+            price: s.priceFrom ? `от ${Math.floor(s.priceFrom / 100)}₽` : 'по запросу',
+          })),
+          null,
+          2
+        )}
+
+СКАЖИ ПОЛЬЗОВАТЕЛЮ:
+"Расширил критерии - теперь показываю специалистов с разным опытом и ценой.
+ Среди них есть подходящие варианты! Посмотрите на карточки выше."
+
+Добавь кнопки:
+__BUTTONS__["Подходят", "Вернуть строгие критерии", "Показать ещё"]
+
+Карточки УЖЕ ПОКАЗАНЫ (не перечисляй их).`
+      } else if (isLowQuality) {
+        // НИЗКОЕ КАЧЕСТВО ПОДБОРА - предлагаем расширить критерии
+        contextMessage = `\n\n⚠️ ВАЖНО: Система нашла ${specialists.length} специалистов, но СОВПАДЕНИЕ НИЗКОЕ (средний ${avgSimilarity}%).
+
+Текущие фильтры:
+- Категория: ${searchParams.category || 'не указана'}
+- Формат: ${searchParams.workFormats?.join(', ') || 'не указан'}
+- Бюджет: ${searchParams.maxPrice ? `до ${searchParams.maxPrice}₽` : 'не указан'}
+- Опыт: ${searchParams.minExperience ? `от ${searchParams.minExperience} лет` : 'не указан'}
+- Методы: ${searchParams.preferences?.methods?.join(', ') || 'не указаны'}
+
+Вот найденные специалисты:
+${JSON.stringify(
+          specialists.slice(0, 5).map((s) => ({
+            name: `${s.firstName} ${s.lastName}`,
+            specializations: s.specializations,
+          })),
+          null,
+          2
+        )}
+
+ПРЕДЛОЖИ ПОЛЬЗОВАТЕЛЮ:
+"Нашёл ${specialists.length} специалиста, но совпадение с вашим запросом не идеальное (${avgSimilarity}%).
+ Могу расширить критерии поиска - убрать некоторые фильтры (опыт, цену) для лучшего подбора?"
+
+Добавь кнопки:
+__BUTTONS__["Показать найденных", "Расширить критерии", "Изменить запрос"]
+
+Карточки УЖЕ ПОКАЗАНЫ (не перечисляй их текстом).`
+      } else {
+        // НОРМАЛЬНОЕ КАЧЕСТВО - обычный флоу
+        contextMessage = `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
 Вот их данные:\n${JSON.stringify(
-        specialists.slice(0, 5).map((s) => ({
-          id: s.id,
-          name: `${s.firstName} ${s.lastName}`,
-          category: s.category,
-          specializations: s.specializations,
-          tagline: s.tagline,
-          experience: s.yearsOfPractice,
-          formats: s.workFormats,
-          city: s.city,
-          price: s.priceFrom ? `от ${Math.floor(s.priceFrom / 100)} ₽` : null,
-        })),
-        null,
-        2
-      )}
+          specialists.slice(0, 5).map((s) => ({
+            id: s.id,
+            name: `${s.firstName} ${s.lastName}`,
+            category: s.category,
+            specializations: s.specializations,
+            tagline: s.tagline,
+            experience: s.yearsOfPractice,
+            formats: s.workFormats,
+            city: s.city,
+          })),
+          null,
+          2
+        )}
 
 НЕ ПЕРЕЧИСЛЯЙ их текстом - они УЖЕ ПОКАЗАНЫ! Прокомментируй и предложи дальнейшие действия.`
+      }
     } else if (noNewSpecialists) {
       // Новых не нашли, но уже были показаны ранее
       contextMessage = `\n\n⚠️ ВАЖНО: Новых специалистов по текущим критериям НЕ НАЙДЕНО.
@@ -478,16 +592,19 @@ async function extractSearchParams(
     //   )
     // 2. ИЛИ это follow-up запрос
     // 3. ИЛИ показываем ранее найденных
+    // 4. ИЛИ расширяем критерии (убираем фильтры)
     const shouldSearch = 
       (hasBasics && (userRequestedSearch || hasEnoughDialog)) ||
       isFollowUpRequest ||
-      isShowPreviousRequest
+      isShowPreviousRequest ||
+      isExpandCriteriaRequest
 
     console.log('[Chat API] 🎯 Should search:', shouldSearch, {
       reason: userRequestedSearch ? 'user_requested' : 
               hasEnoughDialog ? 'enough_dialog' : 
               isFollowUpRequest ? 'follow_up' :
-              isShowPreviousRequest ? 'show_previous' : 'waiting_for_confirmation'
+              isShowPreviousRequest ? 'show_previous' :
+              isExpandCriteriaRequest ? 'expand_criteria' : 'waiting_for_confirmation'
     })
 
     // Формируем текст запроса для semantic search
