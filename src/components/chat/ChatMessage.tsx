@@ -17,6 +17,16 @@ interface ChatMessageProps {
 export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
   const isUser = message.role === 'user'
 
+  // DEBUG: Логируем specialists для assistant сообщений
+  if (!isUser) {
+    console.log('[ChatMessage] Rendering assistant message:', {
+      id: message.id,
+      hasSpecialists: !!message.specialists,
+      specialistsCount: message.specialists?.length || 0,
+      specialists: message.specialists,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

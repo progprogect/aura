@@ -213,9 +213,11 @@ export async function POST(request: NextRequest) {
               verified: s.verified,
             }))
 
-            controller.enqueue(
-              encoder.encode(`\n\n__SPECIALISTS__${JSON.stringify(specialistsData)}`)
-            )
+            const specialistsPayload = `\n\n__SPECIALISTS__${JSON.stringify(specialistsData)}`
+            console.log('[Chat API] 📤 Sending specialists:', specialistsData.length, 'items')
+            console.log('[Chat API] 📦 Payload preview:', specialistsPayload.substring(0, 200) + '...')
+            
+            controller.enqueue(encoder.encode(specialistsPayload))
           }
 
           // Извлекаем кнопки из ответа GPT

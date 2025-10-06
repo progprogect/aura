@@ -161,6 +161,13 @@ export function useChat() {
           sessionId: sessionId,
         }
 
+        console.log('[Chat] 💾 Final message to save:', {
+          hasSpecialists: !!finalMessage.specialists,
+          specialistsCount: finalMessage.specialists?.length || 0,
+          hasButtons: !!finalMessage.buttons,
+          messageId: finalMessage.id,
+        })
+
         saveMessage(finalMessage)
       } catch (error) {
         // Игнорируем ошибку отмены
