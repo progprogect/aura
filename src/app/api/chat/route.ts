@@ -92,28 +92,48 @@ export async function POST(request: NextRequest) {
                       extractedParams.workFormats.length > 0 &&
                       extractedParams.problem
     
-    const searchKeywords = [
+    // СТРОГИЕ keywords - всегда триггерят поиск (явное подтверждение)
+    const strictKeywords = [
+      '🔍',
       'найти специалистов',
       'начать поиск',
       'начни поиск',
       'начинаем поиск',
-      'хватит',
-      'достаточно',
       'давай искать',
       'давай подберем',
-      '🔍'
-      // УДАЛЕНО: 'найди', 'искать', 'подбери', 'подобрать'
-      // Эти слова используются в просьбах о помощи: "Помоги найти психолога"
-      // А НЕ в подтверждении поиска!
     ]
     
-    const userRequestedSearch = searchKeywords.some(kw => {
-      const match = lastUserMessage.content?.toLowerCase().includes(kw.toLowerCase())
-      if (match) {
-        console.log('[Chat API] 🎯 User requested search! Keyword:', kw, 'Message:', lastUserMessage.content)
-      }
-      return match
-    })
+    // МЯГКИЕ keywords - триггерят ТОЛЬКО если уже есть базовые параметры
+    const looseKeywords = [
+      'найди',
+      'подбери',
+      'подобрать',
+      'искать',
+      'хватит',
+      'достаточно',
+    ]
+    
+    const strictMatch = strictKeywords.some(kw => 
+      lastUserMessage.content?.toLowerCase().includes(kw.toLowerCase())
+    )
+    
+    const looseMatch = looseKeywords.some(kw => 
+      lastUserMessage.content?.toLowerCase().includes(kw.toLowerCase())
+    )
+    
+    // User requested search если:
+    // 1. Строгий keyword (🔍, "найти специалистов")
+    // 2. ИЛИ мягкий keyword + есть базовые параметры
+    const userRequestedSearch = strictMatch || (looseMatch && hasBasics)
+    
+    if (userRequestedSearch) {
+      console.log('[Chat API] 🎯 User requested search!', {
+        strictMatch,
+        looseMatch,
+        hasBasics,
+        message: lastUserMessage.content
+      })
+    }
     
     const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
     const isFollowUpRequest = messages.length >= 4 && 
