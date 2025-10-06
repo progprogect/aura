@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Metadata } from 'next'
 import { CatalogContent } from '@/components/catalog/CatalogContent'
+import { CatalogNavigation } from '@/components/catalog/CatalogNavigation'
 import { LoadingSpinner } from '@/components/catalog/LoadingSpinner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
@@ -81,6 +82,9 @@ export default function CatalogPage() {
       />
       
       <div className="min-h-screen bg-gray-50">
+        {/* Breadcrumbs навигация */}
+        <CatalogNavigation />
+        
         <div className="container mx-auto px-4 py-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
