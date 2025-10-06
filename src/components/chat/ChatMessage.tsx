@@ -54,11 +54,21 @@ export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
         {/* Карточки специалистов */}
         {!isUser && message.specialists && message.specialists.length > 0 && (
           <div className="w-full space-y-3 mt-2">
-            {message.specialists.map((specialist) => (
+            {message.specialists.map((specialist, index) => (
               <SpecialistRecommendation 
                 key={specialist.id} 
                 specialist={specialist}
                 sessionId={message.sessionId}
+                index={index}
+                onFindSimilar={(specialistId) => {
+                  // Отправляем запрос "Найти похожих на X"
+                  if (onQuickReply) {
+                    const specialist = message.specialists?.find(s => s.id === specialistId)
+                    if (specialist) {
+                      onQuickReply(`Найти похожих на ${specialist.firstName} ${specialist.lastName}`)
+                    }
+                  }
+                }}
               />
             ))}
           </div>

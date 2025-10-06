@@ -16,7 +16,10 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
-  specialists?: Specialist[]
+  specialists?: (Specialist & {
+    similarity?: number | null
+    matchReasons?: string[]
+  })[]
   buttons?: string[]
   timestamp: number
   sessionId?: string

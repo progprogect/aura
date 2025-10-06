@@ -275,22 +275,48 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
 
           // В конце отправляем специалистов, если есть
           if (specialists.length > 0) {
-            const specialistsData = specialists.slice(0, 5).map((s) => ({
-              id: s.id,
-              firstName: s.firstName,
-              lastName: s.lastName,
-              avatar: s.avatar,
-              slug: s.slug,
-              category: s.category,
-              specializations: s.specializations,
-              tagline: s.tagline,
-              yearsOfPractice: s.yearsOfPractice,
-              workFormats: s.workFormats,
-              city: s.city,
-              priceFrom: s.priceFrom,
-              priceTo: s.priceTo,
-              verified: s.verified,
-            }))
+            const specialistsData = specialists.slice(0, 5).map((s) => {
+              // Вычисляем similarity (0-100%)
+              const similarity = s.distance !== undefined ? Math.round((1 - s.distance) * 100) : null
+              
+              // Формируем объяснение почему подобрали
+              const matchReasons: string[] = []
+              if (searchParams.category) {
+                matchReasons.push(`Категория: ${getCategoryName(searchParams.category)}`)
+              }
+              if (s.specializations && s.specializations.length > 0) {
+                matchReasons.push(`Специализации: ${s.specializations.slice(0, 3).join(', ')}`)
+              }
+              if (searchParams.workFormats && searchParams.workFormats.length > 0) {
+                const formats = searchParams.workFormats.map(f => f === 'online' ? 'Онлайн' : 'Оффлайн').join(', ')
+                matchReasons.push(`Формат: ${formats}`)
+              }
+              if (s.city && searchParams.city) {
+                matchReasons.push(`Город: ${s.city}`)
+              }
+              if (s.yearsOfPractice && searchParams.minExperience) {
+                matchReasons.push(`Опыт: ${s.yearsOfPractice} лет`)
+              }
+              
+              return {
+                id: s.id,
+                firstName: s.firstName,
+                lastName: s.lastName,
+                avatar: s.avatar,
+                slug: s.slug,
+                category: s.category,
+                specializations: s.specializations,
+                tagline: s.tagline,
+                yearsOfPractice: s.yearsOfPractice,
+                workFormats: s.workFormats,
+                city: s.city,
+                priceFrom: s.priceFrom,
+                priceTo: s.priceTo,
+                verified: s.verified,
+                similarity,
+                matchReasons,
+              }
+            })
 
             const specialistsPayload = `\n\n__SPECIALISTS__${JSON.stringify(specialistsData)}`
             console.log('[Chat API] 📤 Sending specialists:', specialistsData.length, 'items')
