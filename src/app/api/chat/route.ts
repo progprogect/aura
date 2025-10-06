@@ -70,11 +70,17 @@ export async function POST(request: NextRequest) {
     // Извлекаем параметры поиска из диалога
     const searchParams = await extractSearchParams(messages)
 
-    console.log('[Chat API] Extracted params:', searchParams)
+    console.log('═══════════════════════════════════════════')
+    console.log('[Chat API] 📥 Incoming messages:', messages.length)
+    console.log('[Chat API] 💬 Last user message:', lastUserMessage.content)
+    console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(searchParams, null, 2))
+    console.log('═══════════════════════════════════════════')
 
     // Если нужен поиск специалистов
     let specialists: any[] = []
     if (searchParams.shouldSearch) {
+      console.log('[Chat API] 🔎 Starting search with query:', searchParams.query)
+      
       try {
         specialists = await searchSpecialistsBySemantic({
           query: searchParams.query,
@@ -105,8 +111,12 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      console.log('[Chat API] ✅ Found specialists:', specialists.length)
+
       // Обновляем сессию
       if (specialists.length > 0) {
+        console.log('[Chat API] 💾 Updating session with', specialists.slice(0, 5).length, 'specialist IDs')
+        
         await prisma.chatSession.update({
           where: { id: sessionId },
           data: {
@@ -130,7 +140,8 @@ export async function POST(request: NextRequest) {
     const systemMessage = getSystemPrompt()
     const contextMessage =
       specialists.length > 0
-        ? `\n\nНайдено ${specialists.length} специалистов:\n${JSON.stringify(
+        ? `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
+Вот их данные:\n${JSON.stringify(
             specialists.slice(0, 5).map((s) => ({
               id: s.id,
               name: `${s.firstName} ${s.lastName}`,
@@ -144,8 +155,14 @@ export async function POST(request: NextRequest) {
             })),
             null,
             2
-          )}`
+          )}
+
+НЕ ПЕРЕЧИСЛЯЙ их текстом - они УЖЕ ПОКАЗАНЫ! Прокомментируй и предложи дальнейшие действия.`
         : ''
+
+    console.log('[Chat API] 📝 System message length:', systemMessage.length)
+    console.log('[Chat API] 📝 Context message:', contextMessage ? `Added (${contextMessage.length} chars)` : 'None')
+    console.log('[Chat API] 💬 Total messages to GPT:', messages.length + 1)
 
     // Создаём streaming response
     const stream = await openai.chat.completions.create({
@@ -173,6 +190,9 @@ export async function POST(request: NextRequest) {
             // Отправляем chunk клиенту
             controller.enqueue(encoder.encode(content))
           }
+
+          console.log('[Chat API] ✅ GPT response complete:', fullResponse.substring(0, 100) + '...')
+          console.log('[Chat API] 📊 Response length:', fullResponse.length, 'chars')
 
           // В конце отправляем специалистов, если есть
           if (specialists.length > 0) {
@@ -275,14 +295,26 @@ async function extractSearchParams(messages: any[]): Promise<{
 
     const extracted = JSON.parse(response.choices[0].message.content || '{}')
 
-    console.log('[Chat API] Extracted from dialog:', extracted)
+    console.log('[Chat API] 🤖 GPT extraction result:', JSON.stringify(extracted, null, 2))
 
     // Определяем, нужен ли поиск
-    const shouldSearch = !!(
-      extracted.category ||
-      extracted.problem ||
-      extracted.workFormats?.length > 0
+    // ВАЖНО: Ищем только если есть ДОСТАТОЧНО информации
+    // Минимум: категория + (формат ИЛИ проблема)
+    const hasEnoughInfo = !!(
+      extracted.category && 
+      (extracted.workFormats?.length > 0 || extracted.problem)
     )
+    
+    // Или если это явный запрос на дополнительные результаты
+    const isFollowUpRequest = messages.length >= 3 && (
+      extracted.problem?.toLowerCase().includes('ещё') ||
+      extracted.problem?.toLowerCase().includes('другие') ||
+      extracted.problem?.toLowerCase().includes('показать')
+    )
+
+    const shouldSearch = hasEnoughInfo || isFollowUpRequest
+
+    console.log('[Chat API] 🎯 Should search:', shouldSearch, '(hasEnoughInfo:', hasEnoughInfo, ', isFollowUp:', isFollowUpRequest, ')')
 
     // Формируем текст запроса
     const query = [
