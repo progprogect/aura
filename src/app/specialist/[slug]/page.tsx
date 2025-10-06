@@ -120,13 +120,16 @@ export default async function SpecialistPage({ params }: PageProps) {
     specialist.category
   )
 
-  // Определяем табы в зависимости от наличия контента
+  // Определяем табы в зависимости от наличия контента (порядок соответствует структуре профиля)
   const tabs: Tab[] = [
     { id: 'about', label: 'О себе', icon: 'user' },
+    specialist.customFields && categoryConfig ? { id: 'specialization', label: 'Специализация', icon: 'sparkles' } : null,
+    specialist.videoUrl ? { id: 'video', label: 'Видео', icon: 'video-camera' } : null,
+    specialist.gallery.length > 0 ? { id: 'gallery', label: 'Галерея', icon: 'photo' } : null,
     specialist.education.length > 0 || specialist.certificates.length > 0
       ? { id: 'education', label: 'Образование', icon: 'academic-cap' }
       : null,
-    specialist.gallery.length > 0 ? { id: 'gallery', label: 'Галерея', icon: 'photo' } : null,
+    specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
     specialist.faqs.length > 0 ? { id: 'faq', label: 'Вопросы', icon: 'question-mark-circle' } : null,
     { id: 'contact', label: 'Связаться', icon: 'paper-airplane' },
   ].filter(Boolean) as Tab[]

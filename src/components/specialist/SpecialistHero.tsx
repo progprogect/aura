@@ -216,7 +216,7 @@ export function SpecialistHero({
                 size={140}
                 verified={verified}
                 fallback={`${firstName[0]}${lastName[0]}`}
-                className="md:size-48 lg:size-56 xl:size-64 2xl:size-72"
+                className="md:size-[220px] lg:size-[260px] xl:size-[300px] 2xl:size-[320px]"
               />
             </motion.div>
 

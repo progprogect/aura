@@ -12,6 +12,8 @@ export interface Tab {
 // Маппинг иконок для удобства
 export const ICON_MAP = {
   'user': '/icons/user.svg',
+  'sparkles': '/icons/sparkles.svg',
+  'video-camera': '/icons/video-camera.svg',
   'academic-cap': '/icons/academic-cap.svg',
   'photo': '/icons/photo.svg',
   'question-mark-circle': '/icons/question-mark-circle.svg',
