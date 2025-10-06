@@ -40,6 +40,16 @@ export function HeroNavigation() {
               Главная
             </Link>
             <Link
+              href="/chat"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/chat') 
+                  ? 'text-primary' 
+                  : 'text-gray-700 hover:text-primary'
+              }`}
+            >
+              AI-Помощник
+            </Link>
+            <Link
               href="/catalog"
               className={`text-sm font-medium transition-colors ${
                 isActive('/catalog') 

@@ -85,18 +85,6 @@ export function SpecialistRecommendation({
       }}
       className="border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 bg-card"
     >
-      {/* Similarity badge - если есть */}
-      {specialist.similarity !== null && specialist.similarity !== undefined && (
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-2 border-b border-border/50">
-          <div className="flex items-center gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="font-medium text-primary">
-              {specialist.similarity}% совпадение с вашим запросом
-            </span>
-          </div>
-        </div>
-      )}
-
       <div className="p-4">
         <div className="flex gap-4">
           {/* Аватар */}

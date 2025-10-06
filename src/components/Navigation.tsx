@@ -35,6 +35,16 @@ export function Navigation() {
               Главная
             </Link>
             <Link
+              href="/chat"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/chat') 
+                  ? 'text-blue-600' 
+                  : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              AI-Помощник
+            </Link>
+            <Link
               href="/catalog"
               className={`text-sm font-medium transition-colors ${
                 isActive('/catalog') 
