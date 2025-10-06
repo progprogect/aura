@@ -14,31 +14,37 @@ import { ArrowRight } from 'lucide-react'
 const categories = [
   { 
     name: 'Психология', 
+    description: 'Ментальное здоровье',
     key: 'psychology',
     href: '/catalog?category=psychology'
   },
   { 
     name: 'Фитнес', 
+    description: 'Физическая активность',
     key: 'fitness',
     href: '/catalog?category=fitness'
   },
   { 
     name: 'Питание', 
+    description: 'Здоровое питание',
     key: 'nutrition',
     href: '/catalog?category=nutrition'
   },
   { 
     name: 'Массаж', 
+    description: 'Релаксация и восстановление',
     key: 'massage',
     href: '/catalog?category=massage'
   },
   { 
     name: 'Коучинг', 
+    description: 'Личностное развитие',
     key: 'coaching',
     href: '/catalog?category=coaching'
   },
   { 
     name: 'Медицина', 
+    description: 'Медицинские консультации',
     key: 'medicine',
     href: '/catalog?category=medicine'
   }
@@ -58,10 +64,10 @@ export function CategoriesSection() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Популярные специализации
+              Все сферы вашего здоровья
             </h2>
             <p className="text-lg text-muted-foreground">
-              Выберите категорию или найдите через AI-помощника
+              Найдите специалиста для любой области саморазвития
             </p>
           </motion.div>
 
@@ -91,10 +97,15 @@ export function CategoriesSection() {
                     />
                   </div>
                   
-                  {/* Название */}
-                  <h3 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
-                    {category.name}
-                  </h3>
+                  {/* Название и описание */}
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
+                      {category.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {category.description}
+                    </p>
+                  </div>
                 </Link>
               </motion.div>
             ))}

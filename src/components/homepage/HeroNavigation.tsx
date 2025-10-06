@@ -27,27 +27,33 @@ export function HeroNavigation() {
             <span className="text-lg font-bold text-gray-900">Aura</span>
           </Link>
           
-          {/* Навигационные ссылки - уменьшенные */}
+          {/* Навигационные ссылки */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
-              className={`text-xs font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors ${
                 isActive('/') 
-                  ? 'text-blue-600' 
-                  : 'text-gray-700 hover:text-blue-600'
+                  ? 'text-primary' 
+                  : 'text-gray-700 hover:text-primary'
               }`}
             >
               Главная
             </Link>
             <Link
               href="/catalog"
-              className={`text-xs font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors ${
                 isActive('/catalog') 
-                  ? 'text-blue-600' 
-                  : 'text-gray-700 hover:text-blue-600'
+                  ? 'text-primary' 
+                  : 'text-gray-700 hover:text-primary'
               }`}
             >
-              Каталог специалистов
+              Специалисты
+            </Link>
+            <Link
+              href="/about"
+              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+            >
+              О нас
             </Link>
           </div>
           

@@ -58,13 +58,13 @@ export function HeroSection() {
             className="space-y-6"
           >
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-              Найди специалиста{' '}
+              Ваш путь к{' '}
               <span className="bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                за 2 минуты
+                здоровому образу жизни
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              AI-помощник поможет найти идеального эксперта для решения ваших задач
+              Найдите проверенных специалистов для поддержания здоровья и саморазвития
             </p>
           </motion.div>
 
@@ -193,7 +193,7 @@ export function HeroSection() {
               className="w-full sm:w-auto px-12 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Icon icon={MessageCircle} size={20} />
-              Найти специалиста
+              Начать путь к здоровью
             </Button>
             
             {/* Вторичная ссылка */}
@@ -201,7 +201,7 @@ export function HeroSection() {
               href="/catalog"
               className="group flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
             >
-              Посмотреть каталог
+              Смотреть специалистов
               <Icon 
                 icon={ArrowRight} 
                 size={16} 
@@ -217,7 +217,7 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-sm text-muted-foreground"
           >
-            <p>Обычно это занимает 2-3 минуты • Без регистрации</p>
+            <p>Персональный подбор • Без регистрации • Прямая связь со специалистом</p>
           </motion.div>
         </div>
       </div>

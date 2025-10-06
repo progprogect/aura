@@ -3,16 +3,15 @@ import { HeroSection } from '@/components/homepage/HeroSection'
 import { HowItWorksSection } from '@/components/homepage/HowItWorksSection'
 import { CategoriesSection } from '@/components/homepage/CategoriesSection'
 import { AdvantagesSection } from '@/components/homepage/AdvantagesSection'
-import { CTASection } from '@/components/homepage/CTASection'
 import { HomepageErrorBoundary } from '@/components/homepage/HomepageErrorBoundary'
 
 export const metadata: Metadata = {
-  title: 'Аура — Найдите своего специалиста по здоровью за 2 минуты',
-  description: 'AI-помощник поможет найти идеального эксперта для решения ваших задач. Проверенные специалисты: нутрициологи, тренеры, психологи и другие профессионалы.',
-  keywords: ['специалист по здоровью', 'нутрициолог', 'тренер', 'психолог', 'консультант', 'AI помощник'],
+  title: 'Аура — Ваш путь к здоровому образу жизни',
+  description: 'Платформа для поиска проверенных специалистов в сфере здоровья и саморазвития. Психологи, нутрициологи, тренеры и другие эксперты помогут вам достичь целей.',
+  keywords: ['здоровый образ жизни', 'специалисты по здоровью', 'саморазвитие', 'нутрициолог', 'тренер', 'психолог', 'консультант'],
   openGraph: {
-    title: 'Аура — Найдите своего специалиста по здоровью за 2 минуты',
-    description: 'AI-помощник поможет найти идеального эксперта для решения ваших задач',
+    title: 'Аура — Ваш путь к здоровому образу жизни',
+    description: 'Платформа для поиска проверенных специалистов в сфере здоровья и саморазвития',
     type: 'website',
     locale: 'ru_RU',
   },
@@ -50,7 +49,6 @@ export default function Home() {
           <HowItWorksSection />
           <CategoriesSection />
           <AdvantagesSection />
-          <CTASection />
         </HomepageErrorBoundary>
       </main>
     </>

@@ -12,18 +12,18 @@ import { MessageCircle, Eye, Briefcase } from '@/components/ui/icons/catalog-ico
 const steps = [
   {
     icon: MessageCircle,
-    title: 'Опишите проблему',
-    description: 'Расскажите AI-помощнику о том, что вас беспокоит'
+    title: 'Опишите свои цели',
+    description: 'Расскажите, что хотите улучшить в своем здоровье'
   },
   {
     icon: Eye,
-    title: 'Выберите подходящего',
-    description: 'Получите список проверенных специалистов'
+    title: 'Получите персональные рекомендации',
+    description: 'AI подберет специалистов под ваши задачи'
   },
   {
     icon: Briefcase,
-    title: 'Получите консультацию',
-    description: 'Свяжитесь напрямую и начните работу'
+    title: 'Начните путь к здоровью',
+    description: 'Работайте с экспертом и достигайте целей'
   }
 ]
 
@@ -41,10 +41,10 @@ export function HowItWorksSection() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Как это работает
+              Ваш путь к результату
             </h2>
             <p className="text-lg text-muted-foreground">
-              Простой процесс поиска специалиста
+              Пошаговый процесс работы с нашими специалистами
             </p>
           </motion.div>
 
@@ -106,9 +106,9 @@ export function HowItWorksSection() {
             className="text-center mt-16"
           >
             <p className="text-lg text-muted-foreground">
-              <span className="font-semibold text-foreground">Обычно это занимает 2-3 минуты</span>
+              <span className="font-semibold text-foreground">Персональный подход</span>
               <br />
-              От вопроса до первого контакта со специалистом
+              Каждый специалист подбирается под ваши индивидуальные потребности
             </p>
           </motion.div>
         </div>
