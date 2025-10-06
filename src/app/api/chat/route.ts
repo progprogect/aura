@@ -309,9 +309,9 @@ async function extractSearchParams(
     
     // Поиск ТОЛЬКО если:
     // 1. Есть ВСЕ: категория + формат + проблема
-    // 2. ИЛИ это 4+ сообщение (GPT уже задал вопросы) + есть категория + проблема
+    // 2. ИЛИ это 3+ сообщение (GPT уже задал вопросы) + есть категория + проблема
     const hasAllInfo = hasCategory && hasFormat && hasProblem
-    const isReadyToSearch = messages.length >= 4 && hasCategory && hasProblem
+    const isReadyToSearch = messages.length >= 3 && hasCategory && hasProblem
     
     const hasEnoughInfo = hasAllInfo || isReadyToSearch
     

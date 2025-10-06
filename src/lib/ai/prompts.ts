@@ -132,8 +132,15 @@ export function getExtractionPrompt(): string {
 ПРАВИЛА:
 - category должна быть одной из: psychology, fitness, nutrition, massage, coaching, medicine
 - problem — суть запроса простыми словами
-- workFormats — если указано "онлайн" → ["online"], "оффлайн" → ["offline"], "неважно" → []
+- workFormats:
+  * "онлайн" → ["online"]
+  * "оффлайн" → ["offline"]  
+  * "неважно", "любой", "без разницы", "всё равно" → ["online", "offline"]
+  * Если не указано → []
 - city — только если формат offline и город указан явно
-- Если что-то не указано → null или []`
+- Если что-то не указано → null или []
+
+ВАЖНО: "Неважно" для формата = ["online", "offline"] (все форматы подходят)`
+
 }
 
