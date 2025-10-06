@@ -183,16 +183,25 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto"
+            className="flex flex-col sm:flex-row gap-3 justify-center items-stretch max-w-lg mx-auto"
           >
-            <Button size="lg" asChild className="w-full sm:w-auto min-w-[200px]">
-              <Link href="/chat">
+            <Button 
+              size="lg" 
+              asChild 
+              className="flex-1 h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+            >
+              <Link href="/chat" className="flex items-center justify-center">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Попробовать AI-помощника
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild className="w-full sm:w-auto min-w-[200px]">
-              <Link href="/catalog">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              asChild 
+              className="flex-1 h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all"
+            >
+              <Link href="/catalog" className="flex items-center justify-center">
                 <Grid3X3 className="w-5 h-5 mr-2" />
                 Смотреть каталог
               </Link>
