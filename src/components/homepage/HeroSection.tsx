@@ -49,7 +49,7 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
       
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative pt-20">
-        <div className="max-w-4xl mx-auto text-center space-y-12">
+        <div className="max-w-5xl mx-auto text-center space-y-16">
           {/* Заголовок */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -75,12 +75,12 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-sm">
               <CardContent className="p-8 md:p-12">
                 <div className="space-y-6">
                   {/* Заголовок чата */}
                   <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center animate-pulse">
                       <Image 
                         src="/icons/chat-bubble.svg" 
                         alt="Чат-помощник" 
@@ -185,18 +185,29 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
-            <Button size="lg" className="text-lg px-8 py-6 h-auto">
+            {/* Главная CTA */}
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto px-12 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
               <Icon icon={MessageCircle} size={20} />
-              Попробовать AI
+              Найти специалиста
             </Button>
-            <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6 h-auto">
-              <Link href="/catalog">
-                Смотреть каталог
-                <Icon icon={ArrowRight} size={20} />
-              </Link>
-            </Button>
+            
+            {/* Вторичная ссылка */}
+            <Link 
+              href="/catalog"
+              className="group flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+            >
+              Посмотреть каталог
+              <Icon 
+                icon={ArrowRight} 
+                size={16} 
+                className="group-hover:translate-x-1 transition-transform duration-300" 
+              />
+            </Link>
           </motion.div>
 
           {/* Дополнительная информация */}

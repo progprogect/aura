@@ -48,6 +48,26 @@ export function HowItWorksSection() {
             </p>
           </motion.div>
 
+          {/* Прогресс-индикатор */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex items-center justify-center mb-12"
+          >
+            <div className="flex items-center space-x-4">
+              {steps.map((_, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="w-3 h-3 bg-primary rounded-full shadow-sm" />
+                  {index < steps.length - 1 && (
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-primary to-primary-600 mx-2" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
           {/* Шаги */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {steps.map((step, index) => (
@@ -57,33 +77,21 @@ export function HowItWorksSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="text-center relative"
+                className="text-center group"
               >
-                {/* Стрелка между шагами (только на десктопе) */}
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-full w-12 h-0.5 bg-primary/30 transform translate-x-6">
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-0 h-0 border-l-4 border-l-primary/30 border-t-2 border-t-transparent border-b-2 border-b-transparent" />
-                  </div>
-                )}
-
-                {/* Иконка */}
-                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                {/* Иконка с hover-эффектом */}
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                   <Icon icon={step.icon} size={32} className="text-white" />
                 </div>
 
                 {/* Контент */}
-                <div className="space-y-3">
-                  <h3 className="text-xl font-semibold text-foreground">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed text-base">
                     {step.description}
                   </p>
-                </div>
-
-                {/* Номер шага */}
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                  {index + 1}
                 </div>
               </motion.div>
             ))}
