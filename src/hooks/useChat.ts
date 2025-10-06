@@ -82,26 +82,74 @@ export function useChat() {
           buffer += chunk
 
           // Проверяем на специальные маркеры в buffer
-          if (buffer.includes('__SPECIALISTS__') && buffer.includes(']')) {
-            const match = buffer.match(/__SPECIALISTS__([\s\S]*?\])/)
-            if (match) {
-              assistantContent += buffer.split('__SPECIALISTS__')[0]
-              buffer = buffer.substring(buffer.indexOf(match[0]) + match[0].length)
-              try {
-                specialists = JSON.parse(match[1])
-                console.log('[Chat] ✅ Parsed specialists:', specialists.length)
-              } catch (e) {
-                console.error('[Chat] ❌ Failed to parse specialists:', e, match[1])
+          if (buffer.includes('__SPECIALISTS__')) {
+            const startIdx = buffer.indexOf('__SPECIALISTS__')
+            const jsonStart = startIdx + '__SPECIALISTS__'.length
+            
+            // Ищем полный JSON массив (считаем вложенность скобок)
+            let bracketCount = 0
+            let jsonEnd = -1
+            let inString = false
+            let escapeNext = false
+            
+            for (let i = jsonStart; i < buffer.length; i++) {
+              const char = buffer[i]
+              
+              if (escapeNext) {
+                escapeNext = false
+                continue
+              }
+              
+              if (char === '\\') {
+                escapeNext = true
+                continue
+              }
+              
+              if (char === '"') {
+                inString = !inString
+                continue
+              }
+              
+              if (!inString) {
+                if (char === '[') bracketCount++
+                if (char === ']') {
+                  bracketCount--
+                  if (bracketCount === 0) {
+                    jsonEnd = i + 1
+                    break
+                  }
+                }
               }
             }
-          } else if (buffer.includes('__BUTTONS__') && buffer.includes(']')) {
-            const match = buffer.match(/__BUTTONS__([\s\S]*?\])/)
-            if (match) {
-              assistantContent += buffer.split('__BUTTONS__')[0]
-              buffer = buffer.substring(buffer.indexOf(match[0]) + match[0].length)
+            
+            if (jsonEnd > jsonStart) {
+              assistantContent += buffer.substring(0, startIdx)
+              const jsonStr = buffer.substring(jsonStart, jsonEnd)
+              buffer = buffer.substring(jsonEnd)
+              
               try {
-                buttons = JSON.parse(match[1])
-                console.log('[Chat] ✅ Parsed buttons:', buttons.length)
+                specialists = JSON.parse(jsonStr)
+                console.log('[Chat] ✅ Parsed specialists:', specialists.length, 'items')
+              } catch (e) {
+                console.error('[Chat] ❌ Failed to parse specialists:', e)
+                console.error('[Chat] ❌ JSON string:', jsonStr.substring(0, 200) + '...')
+              }
+            }
+          } else if (buffer.includes('__BUTTONS__')) {
+            const startIdx = buffer.indexOf('__BUTTONS__')
+            const jsonStart = startIdx + '__BUTTONS__'.length
+            
+            // Для buttons проще - ищем первую закрывающую ] (buttons - простой массив строк)
+            const jsonEnd = buffer.indexOf(']', jsonStart)
+            
+            if (jsonEnd > jsonStart) {
+              assistantContent += buffer.substring(0, startIdx)
+              const jsonStr = buffer.substring(jsonStart, jsonEnd + 1)
+              buffer = buffer.substring(jsonEnd + 1)
+              
+              try {
+                buttons = JSON.parse(jsonStr)
+                console.log('[Chat] ✅ Parsed buttons:', buttons.length, 'items')
               } catch (e) {
                 console.error('[Chat] ❌ Failed to parse buttons:', e)
               }
