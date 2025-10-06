@@ -298,28 +298,39 @@ async function extractSearchParams(messages: any[]): Promise<{
     console.log('[Chat API] 🤖 GPT extraction result:', JSON.stringify(extracted, null, 2))
 
     // Определяем, нужен ли поиск
-    // ВАЖНО: Ищем только если есть ДОСТАТОЧНО информации
-    // Минимум: категория + (формат ИЛИ проблема)
+    // СТРОГИЕ ПРАВИЛА: Ищем ТОЛЬКО когда собрана ВСЯ информация
+    // Минимум: категория + формат работы + проблема (все 3!)
     const hasCategory = !!extracted.category
     const hasFormat = extracted.workFormats && extracted.workFormats.length > 0
     const hasProblem = extracted.problem && extracted.problem.length > 3
     
-    const hasEnoughInfo = hasCategory && (hasFormat || hasProblem)
+    // Поиск ТОЛЬКО если:
+    // 1. Есть ВСЕ: категория + формат + проблема
+    // 2. ИЛИ это 4+ сообщение (GPT уже задал вопросы) + есть категория + проблема
+    const hasAllInfo = hasCategory && hasFormat && hasProblem
+    const isReadyToSearch = messages.length >= 4 && hasCategory && hasProblem
+    
+    const hasEnoughInfo = hasAllInfo || isReadyToSearch
     
     console.log('[Chat API] 🧩 Search criteria:', {
+      messageCount: messages.length,
       hasCategory,
       hasFormat,
       hasProblem,
+      hasAllInfo,
+      isReadyToSearch,
       category: extracted.category,
       problem: extracted.problem,
       workFormats: extracted.workFormats
     })
     
     // Или если это явный запрос на дополнительные результаты
-    const isFollowUpRequest = messages.length >= 3 && (
+    const isFollowUpRequest = messages.length >= 5 && (
       extracted.problem?.toLowerCase().includes('ещё') ||
       extracted.problem?.toLowerCase().includes('другие') ||
-      extracted.problem?.toLowerCase().includes('показать')
+      extracted.problem?.toLowerCase().includes('показать') ||
+      lastUserMessage.content?.toLowerCase().includes('ещё') ||
+      lastUserMessage.content?.toLowerCase().includes('другие')
     )
 
     const shouldSearch = hasEnoughInfo || isFollowUpRequest

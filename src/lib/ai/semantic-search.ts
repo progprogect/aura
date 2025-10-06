@@ -35,22 +35,29 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
 
   const specialistIds = similarEmbeddings.map((e) => e.specialistId)
 
+  console.log('[Semantic Search] 🔑 Specialist IDs from MongoDB:', specialistIds.slice(0, 5).map(id => id.substring(0, 10)))
+
   // 3. Строим фильтры для Prisma
   const where: SpecialistWhereInput = {
     id: { in: specialistIds },
     acceptingClients: true,
   }
 
+  console.log('[Semantic Search] 🔍 Prisma where (before optional filters):', { ids: specialistIds.length, acceptingClients: true })
+
   if (filters.category) {
     where.category = filters.category
+    console.log('[Semantic Search] 📂 Adding category filter:', filters.category)
   }
 
   if (filters.workFormats && filters.workFormats.length > 0) {
     where.workFormats = { hasSome: filters.workFormats as any }
+    console.log('[Semantic Search] 💻 Adding workFormats filter:', filters.workFormats)
   }
 
   if (filters.city) {
     where.city = filters.city
+    console.log('[Semantic Search] 📍 Adding city filter:', filters.city)
   }
 
   if (filters.minExperience) {
@@ -66,6 +73,9 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   }
 
   // 4. Получаем специалистов из PostgreSQL
+  console.log('[Semantic Search] 🗄️ Querying PostgreSQL...')
+  console.log('[Semantic Search] 📋 Where clause:', JSON.stringify(where, null, 2))
+  
   const specialists = await prisma.specialist.findMany({
     where,
     take: limit,
@@ -91,6 +101,21 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
       customFields: true,
     },
   })
+
+  console.log('[Semantic Search] 📊 PostgreSQL returned:', specialists.length, 'specialists')
+  
+  if (specialists.length === 0) {
+    console.warn('[Semantic Search] ⚠️ PostgreSQL returned 0 - checking why...')
+    // Проверяем без фильтров для debug
+    const allFromIds = await prisma.specialist.findMany({
+      where: { id: { in: specialistIds } },
+      select: { id: true, category: true, acceptingClients: true }
+    })
+    console.log('[Semantic Search] 🔍 Same IDs without filters:', allFromIds.length, 'found')
+    if (allFromIds.length > 0) {
+      console.log('[Semantic Search] 🔍 First specialist:', allFromIds[0])
+    }
+  }
 
   // 5. Сортируем по similarity из MongoDB
   const specialistsWithSimilarity = specialists.map((specialist) => {
