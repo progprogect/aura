@@ -110,7 +110,7 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
             />
 
             {/* Sidebar */}
@@ -119,7 +119,7 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 bottom-0 w-80 bg-card border-r border-border z-50 overflow-y-auto"
+              className="fixed left-0 top-0 bottom-0 w-80 bg-card border-r border-border z-[101] overflow-y-auto shadow-2xl"
             >
               {/* Header */}
               <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
