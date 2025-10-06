@@ -25,9 +25,9 @@ export function ChatContainer() {
   }, [messages, isLoading])
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background" style={{ height: '100dvh' }}>
+    <div className="flex flex-col h-screen w-full max-w-4xl mx-auto bg-background overflow-x-hidden" style={{ height: '100dvh' }}>
       {/* Header - фиксированный и компактный на мобильных */}
-      <div className="flex-shrink-0 bg-background border-b px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-background border-b px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between min-w-0">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
             <Link href="/" className="flex items-center">
@@ -70,7 +70,7 @@ export function ChatContainer() {
       {/* Messages - скроллируемая область */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-4 min-h-0"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 py-4 sm:py-6 space-y-4 min-h-0"
       >
         {/* Приветствие если нет сообщений */}
         {messages.length === 0 && (

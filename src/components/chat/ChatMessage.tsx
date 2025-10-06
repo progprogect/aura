@@ -32,9 +32,9 @@ export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} w-full`}
     >
-      <div className={`max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-3`}>
+      <div className={`max-w-[90%] sm:max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-3 min-w-0`}>
         {/* Сообщение */}
         <div
           className={`px-4 py-3 rounded-2xl ${
@@ -53,7 +53,7 @@ export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
 
         {/* Карточки специалистов */}
         {!isUser && message.specialists && message.specialists.length > 0 && (
-          <div className="w-full space-y-3 mt-2">
+          <div className="w-full space-y-2 sm:space-y-3 mt-2">
             {message.specialists.map((specialist, index) => (
               <SpecialistRecommendation 
                 key={specialist.id} 
