@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/homepage/HeroSection'
 import { HowItWorksSection } from '@/components/homepage/HowItWorksSection'
 import { CategoriesSection } from '@/components/homepage/CategoriesSection'
 import { AdvantagesSection } from '@/components/homepage/AdvantagesSection'
+import { FeaturedSpecialists } from '@/components/homepage/FeaturedSpecialists'
 import { HomepageErrorBoundary } from '@/components/homepage/HomepageErrorBoundary'
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function Home() {
           <HowItWorksSection />
           <CategoriesSection />
           <AdvantagesSection />
+          <FeaturedSpecialists />
         </HomepageErrorBoundary>
       </main>
     </>

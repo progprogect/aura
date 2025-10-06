@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HeroNavigation } from './HeroNavigation'
-import { FeaturedSpecialists } from './FeaturedSpecialists'
 
 export function HeroSection() {
   const [demoStep, setDemoStep] = useState(0)
@@ -187,9 +186,6 @@ export function HeroSection() {
           </motion.div>
         </div>
       </div>
-
-      {/* Секция популярных специалистов */}
-      <FeaturedSpecialists />
     </section>
   )
 }
