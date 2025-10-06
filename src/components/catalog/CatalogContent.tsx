@@ -75,14 +75,14 @@ export function CatalogContent() {
       />
 
       {/* Панель фильтров */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-6">
         <FilterButton
           activeFiltersCount={activeFiltersCount}
           onClick={() => setIsFilterModalOpen(true)}
         />
 
         {/* Счётчик результатов */}
-        <div className="text-sm text-gray-600" role="status" aria-live="polite">
+        <div className="text-sm sm:text-base text-gray-600 text-center sm:text-right" role="status" aria-live="polite">
           Найдено {formatSpecialistCount(pagination?.totalCount || 0)}
         </div>
       </div>
