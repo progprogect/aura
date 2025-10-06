@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
     let specialists: any[] = []
     if (searchParams.shouldSearch) {
       console.log('[Chat API] 🔎 Starting search with query:', searchParams.query)
+      console.log('[Chat API] 🚫 Excluding already shown IDs:', session.recommendedIds.length, 'specialists')
       
       try {
         specialists = await searchSpecialistsBySemantic({
@@ -113,22 +114,58 @@ export async function POST(request: NextRequest) {
 
       console.log('[Chat API] ✅ Found specialists:', specialists.length)
 
+      // Если ничего не нашли, но есть excludeIds - пробуем без исключений
+      if (specialists.length === 0 && session.recommendedIds.length > 0) {
+        console.log('[Chat API] 🔄 No new specialists found. Trying without exclusions...')
+        
+        try {
+          specialists = await searchSpecialistsBySemantic({
+            query: searchParams.query,
+            filters: {
+              category: searchParams.category,
+              workFormats: searchParams.workFormats,
+              city: searchParams.city,
+              maxPrice: searchParams.maxPrice,
+              minExperience: searchParams.minExperience,
+            },
+            limit: 10,
+            excludeIds: [], // БЕЗ исключений!
+          })
+          
+          console.log('[Chat API] 🔄 Found specialists (without exclusions):', specialists.length)
+        } catch (retryError) {
+          console.error('[Chat API] Retry search failed:', retryError)
+        }
+      }
+
       // Обновляем сессию
       if (specialists.length > 0) {
-        console.log('[Chat API] 💾 Updating session with', specialists.slice(0, 5).length, 'specialist IDs')
+        // Добавляем только новых специалистов (которых ещё нет в recommendedIds)
+        const newIds = specialists
+          .slice(0, 5)
+          .map((s) => s.id)
+          .filter((id) => !session.recommendedIds.includes(id))
         
-        await prisma.chatSession.update({
-          where: { id: sessionId },
-          data: {
-            recommendedIds: {
-              push: specialists.slice(0, 5).map((s) => s.id),
-            },
-            specialistsShown: {
-              increment: specialists.slice(0, 5).length,
-            },
-            extractedFilters: searchParams as any,
-          },
+        console.log('[Chat API] 💾 Updating session:', {
+          totalShown: specialists.slice(0, 5).length,
+          newIds: newIds.length,
+          alreadyShown: specialists.slice(0, 5).length - newIds.length,
         })
+        
+        if (newIds.length > 0) {
+          await prisma.chatSession.update({
+            where: { id: sessionId },
+            data: {
+              recommendedIds: {
+                push: newIds,
+              },
+              specialistsShown: {
+                increment: newIds.length,
+              },
+              extractedFilters: searchParams as any,
+            },
+          })
+        }
 
         await trackChatEvent(ChatEvent.RECOMMENDATIONS_SHOWN, sessionId, {
           count: specialists.length,
@@ -330,13 +367,17 @@ async function extractSearchParams(
     })
     
     // Или если это явный запрос на дополнительные результаты
-    const isFollowUpRequest = messages.length >= 5 && (
-      extracted.problem?.toLowerCase().includes('ещё') ||
-      extracted.problem?.toLowerCase().includes('другие') ||
-      extracted.problem?.toLowerCase().includes('показать') ||
-      lastUserMessageContent?.toLowerCase().includes('ещё') ||
-      lastUserMessageContent?.toLowerCase().includes('другие')
+    const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
+    const isFollowUpRequest = messages.length >= 4 && ( // Снижаем порог с 5 до 4
+      followUpKeywords.some(kw => extracted.problem?.toLowerCase().includes(kw)) ||
+      followUpKeywords.some(kw => lastUserMessageContent?.toLowerCase().includes(kw))
     )
+    
+    console.log('[Chat API] 🔁 Follow-up check:', {
+      messagesCount: messages.length,
+      isFollowUp: isFollowUpRequest,
+      lastMessage: lastUserMessageContent?.substring(0, 50),
+    })
 
     const shouldSearch = hasEnoughInfo || isFollowUpRequest
 
