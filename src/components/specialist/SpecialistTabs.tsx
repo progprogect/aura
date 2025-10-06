@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 export interface Tab {
@@ -88,9 +89,11 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
                 )}
               >
                 {iconPath && (
-                  <img 
+                  <Image 
                     src={iconPath} 
                     alt="" 
+                    width={16}
+                    height={16}
                     className="h-4 w-4"
                     style={{ filter: activeTab === tab.id ? 'none' : 'opacity(0.6)' }}
                   />

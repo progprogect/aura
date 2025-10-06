@@ -24,14 +24,6 @@ export function ChatContainer() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isLoading])
 
-  // Автофокус на input при загрузке
-  useEffect(() => {
-    if (messages.length === 0) {
-      // Отправляем приветственное сообщение от ассистента
-      // (имитируем через setTimeout чтобы было после инициализации)
-    }
-  }, [])
-
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background">
       {/* Header - фиксированный */}

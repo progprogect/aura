@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Clock, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -26,11 +26,7 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
   const [history, setHistory] = useState<HistorySession[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
-  useEffect(() => {
-    loadHistory()
-  }, [currentSessionId])
-
-  const loadHistory = () => {
+  const loadHistory = useCallback(() => {
     if (typeof window === 'undefined') return
 
     const sessions: HistorySession[] = []
@@ -67,7 +63,11 @@ export function ChatHistory({ currentSessionId, onLoadSession }: ChatHistoryProp
     sessions.sort((a, b) => b.timestamp - a.timestamp)
     
     setHistory(sessions.slice(0, 5)) // Показываем только 5 последних
-  }
+  }, [currentSessionId])
+
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
 
   const handleLoadSession = (sessionId: string) => {
     onLoadSession(sessionId)
