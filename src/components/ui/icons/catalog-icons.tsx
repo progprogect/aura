@@ -25,6 +25,8 @@ export {
   Briefcase,        // Профессия
   Award,            // Достижения
   GraduationCap,    // Образование
+  MessageCircle,    // Сообщения / Чат
+  Eye,              // Просмотр
 } from 'lucide-react'
 
 // Иконки навигации и действий
