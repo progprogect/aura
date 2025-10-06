@@ -193,39 +193,27 @@ export function SpecialistRecommendation({
               </div>
             )}
 
-            {/* Цена и кнопки */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div>
-                {specialist.priceFrom ? (
-                  <span className="text-base font-semibold text-foreground">
-                    от {Math.floor(specialist.priceFrom / 100)} ₽
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Цена по запросу</span>
-                )}
-              </div>
-              
-              <div className="flex gap-2">
-                {onFindSimilar && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={handleFindSimilar}
-                    className="gap-1.5"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Найти похожих</span>
-                  </Button>
-                )}
-                <Button size="sm" asChild>
-                  <Link 
-                    href={`/specialist/${specialist.slug}`}
-                    onClick={handleProfileClick}
-                  >
-                    Смотреть профиль
-                  </Link>
+            {/* Кнопки действий */}
+            <div className="flex gap-2 flex-wrap justify-end">
+              {onFindSimilar && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleFindSimilar}
+                  className="gap-1.5"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Найти похожих</span>
                 </Button>
-              </div>
+              )}
+              <Button size="sm" asChild>
+                <Link 
+                  href={`/specialist/${specialist.slug}`}
+                  onClick={handleProfileClick}
+                >
+                  Смотреть профиль
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

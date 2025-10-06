@@ -37,13 +37,6 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
   const categoryLabel = getCategoryLabel(specialist.category, categoryMap)
   const categoryColor = getCategoryColor(specialist.category)
 
-  // Форматирование цены
-  const formattedPrice = formatPriceRange(
-    specialist.priceFrom,
-    specialist.priceTo,
-    specialist.currency
-  )
-
   // Форматирование опыта
   const formattedExperience = formatExperience(specialist.yearsOfPractice)
 
@@ -191,32 +184,20 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
             )}
 
             {/* Дополнительная информация */}
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
-              <div className="flex items-center gap-3">
-                {/* Опыт */}
-                {formattedExperience && (
-                  <span className="flex items-center gap-1" aria-label={`Опыт работы: ${formattedExperience}`}>
-                    <Icon icon={Clock} size={12} aria-hidden />
-                    <span>{formattedExperience}</span>
-                  </span>
-                )}
+            <div className="flex items-center gap-3 text-xs text-gray-500 mt-auto">
+              {/* Опыт */}
+              {formattedExperience && (
+                <span className="flex items-center gap-1" aria-label={`Опыт работы: ${formattedExperience}`}>
+                  <Icon icon={Clock} size={12} aria-hidden />
+                  <span>{formattedExperience}</span>
+                </span>
+              )}
 
-                {/* Город */}
-                {specialist.city && (
-                  <span className="flex items-center gap-1" aria-label={`Город: ${specialist.city}`}>
-                    <Icon icon={MapPin} size={12} aria-hidden />
-                    <span>{specialist.city}</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Цена */}
-              {formattedPrice && (
-                <span
-                  className="font-semibold text-gray-900 text-sm"
-                  aria-label={`Цена: ${formattedPrice}`}
-                >
-                  {formattedPrice}
+              {/* Город */}
+              {specialist.city && (
+                <span className="flex items-center gap-1" aria-label={`Город: ${specialist.city}`}>
+                  <Icon icon={MapPin} size={12} aria-hidden />
+                  <span>{specialist.city}</span>
                 </span>
               )}
             </div>
