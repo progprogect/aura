@@ -4,15 +4,17 @@
 
 import { redis } from '@/lib/redis'
 import { prisma } from '@/lib/db'
+import { APP_CONFIG } from '@/config/app'
 
 // Ключи Redis для счётчиков
+const REDIS_KEY_PREFIX = APP_CONFIG.analytics.redisKeyPrefix
 const REDIS_KEYS = {
-  SESSIONS_TODAY: 'chat:analytics:sessions:today',
-  MESSAGES_TODAY: 'chat:analytics:messages:today',
-  COMPLETED_TODAY: 'chat:analytics:completed:today',
-  ABANDONED_TODAY: 'chat:analytics:abandoned:today',
-  PROFILE_CLICKS_TODAY: 'chat:analytics:profile_clicks:today',
-  CATALOG_CLICKS_TODAY: 'chat:analytics:catalog_clicks:today',
+  SESSIONS_TODAY: `${REDIS_KEY_PREFIX}:sessions:today`,
+  MESSAGES_TODAY: `${REDIS_KEY_PREFIX}:messages:today`,
+  COMPLETED_TODAY: `${REDIS_KEY_PREFIX}:completed:today`,
+  ABANDONED_TODAY: `${REDIS_KEY_PREFIX}:abandoned:today`,
+  PROFILE_CLICKS_TODAY: `${REDIS_KEY_PREFIX}:profile_clicks:today`,
+  CATALOG_CLICKS_TODAY: `${REDIS_KEY_PREFIX}:catalog_clicks:today`,
 }
 
 /**

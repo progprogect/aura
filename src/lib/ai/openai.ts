@@ -3,6 +3,7 @@
  */
 
 import OpenAI from 'openai'
+import { APP_CONFIG } from '@/config/app'
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set in environment variables')
@@ -12,16 +13,16 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Модели
+// Модели (из централизованной конфигурации)
 export const MODELS = {
-  CHAT: 'gpt-4o-mini', // Быстрая и дешёвая модель для чата
-  EMBEDDING: 'text-embedding-3-small', // 1536 dimensions
+  CHAT: APP_CONFIG.ai.models.chat,
+  EMBEDDING: APP_CONFIG.ai.models.embedding,
 } as const
 
-// Параметры для чата
+// Параметры для чата (из централизованной конфигурации)
 export const CHAT_CONFIG = {
-  temperature: 0.7, // Баланс между креативностью и последовательностью
-  maxTokens: 500, // Ограничение ответа (короткие сообщения)
-  topP: 0.9,
+  temperature: APP_CONFIG.ai.chat.temperature,
+  maxTokens: APP_CONFIG.ai.chat.maxTokens,
+  topP: APP_CONFIG.ai.chat.topP,
 } as const
 

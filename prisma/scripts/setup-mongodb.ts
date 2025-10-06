@@ -3,7 +3,7 @@
  * Запуск: tsx prisma/setup-mongodb.ts
  */
 
-import { createIndexes } from '../src/lib/ai/mongodb-client'
+import { createIndexes } from '../../src/lib/ai/mongodb-client'
 
 async function main() {
   console.log('🗄️  Setting up MongoDB...\n')

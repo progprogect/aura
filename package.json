@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-categories": "tsx prisma/seed-categories.ts",
-    "ai:generate-embeddings": "tsx prisma/generate-embeddings.ts"
+    "ai:generate-embeddings": "tsx prisma/scripts/generate-embeddings.ts",
+    "ai:setup-mongodb": "tsx prisma/scripts/setup-mongodb.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

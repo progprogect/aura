@@ -3,7 +3,7 @@
  * Запуск: tsx prisma/generate-embeddings.ts
  */
 
-import { generateAllEmbeddings } from '../src/lib/ai/embeddings'
+import { generateAllEmbeddings } from '../../src/lib/ai/embeddings'
 
 async function main() {
   console.log('🚀 Starting embeddings generation...\n')

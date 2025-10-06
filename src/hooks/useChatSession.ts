@@ -6,15 +6,17 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { APP_CONFIG } from '@/config/app'
+import type { Specialist } from '@/lib/ai/types'
 
 const SESSION_KEY = 'aura_chat_session'
-const SESSION_TTL = 7 * 24 * 60 * 60 * 1000 // 7 дней
+const SESSION_TTL = APP_CONFIG.cache.session
 
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
-  specialists?: any[]
+  specialists?: Specialist[]
   buttons?: string[]
   timestamp: number
   sessionId?: string

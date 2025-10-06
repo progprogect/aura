@@ -4,7 +4,7 @@
 
 import { Metadata } from 'next'
 import { ChatContainer } from '@/components/chat/ChatContainer'
-import { ChatErrorBoundary } from '@/components/chat/ChatErrorBoundary'
+import { ErrorBoundary, ChatErrorFallback } from '@/components/ui/error-boundary'
 
 export const metadata: Metadata = {
   title: 'AI-Помощник — Аура',
@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
 export default function ChatPage() {
   return (
-    <ChatErrorBoundary>
+    <ErrorBoundary fallback={ChatErrorFallback}>
       <ChatContainer />
-    </ChatErrorBoundary>
+    </ErrorBoundary>
   )
 }
 

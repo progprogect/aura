@@ -5,7 +5,7 @@
 import { prisma } from '@/lib/db'
 import { generateQueryEmbedding } from './embeddings'
 import { findSimilarEmbeddings } from './mongodb-client'
-import type { SearchOptions, SearchFilters, Specialist } from './types'
+import type { SearchOptions, SearchFilters, Specialist, SpecialistWhereInput } from './types'
 
 export type { SearchOptions, SearchFilters }
 
@@ -30,10 +30,10 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
       return []
     }
 
-    const specialistIds = similarEmbeddings.map((e) => e.specialistId)
+  const specialistIds = similarEmbeddings.map((e) => e.specialistId)
 
-    // 3. Строим фильтры для Prisma
-    const where: any = {
+  // 3. Строим фильтры для Prisma
+  const where: SpecialistWhereInput = {
     id: { in: specialistIds },
     acceptingClients: true,
   }
@@ -43,7 +43,7 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   }
 
   if (filters.workFormats && filters.workFormats.length > 0) {
-    where.workFormats = { hasSome: filters.workFormats }
+    where.workFormats = { hasSome: filters.workFormats as any }
   }
 
   if (filters.city) {
@@ -117,21 +117,21 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
 
   console.log('[Keyword Search] Query:', query)
 
-  const where: any = {
+  const where: SpecialistWhereInput = {
     acceptingClients: true,
     id: excludeIds.length > 0 ? { notIn: excludeIds } : undefined,
     category: filters.category,
-    workFormats: filters.workFormats ? { hasSome: filters.workFormats } : undefined,
+    workFormats: filters.workFormats ? { hasSome: filters.workFormats as any } : undefined,
     city: filters.city,
     yearsOfPractice: filters.minExperience ? { gte: filters.minExperience } : undefined,
     priceFrom: filters.maxPrice ? { lte: filters.maxPrice } : undefined,
     verified: filters.verified,
   }
 
-  // Поиск по тексту
+  // Поиск по тексту (расширяем тип для поиска)
   if (query) {
     const searchTerm = query.toLowerCase()
-    where.OR = [
+    ;(where as any).OR = [
       { firstName: { contains: searchTerm, mode: 'insensitive' } },
       { lastName: { contains: searchTerm, mode: 'insensitive' } },
       { tagline: { contains: searchTerm, mode: 'insensitive' } },

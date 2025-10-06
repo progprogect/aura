@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useChatSession, ChatMessage } from './useChatSession'
+import type { Specialist } from '@/lib/ai/types'
 
 export function useChat() {
   const { sessionId, messages: sessionMessages, saveMessage, clearSession } = useChatSession()
@@ -68,7 +69,7 @@ export function useChat() {
         const decoder = new TextDecoder()
 
         let assistantContent = ''
-        let specialists: any[] = []
+        let specialists: Specialist[] = []
         let buttons: string[] = []
         let tempAssistantId = crypto.randomUUID()
         let buffer = '' // Buffer для accumulation markers

@@ -4,7 +4,7 @@ import { HowItWorksSection } from '@/components/homepage/HowItWorksSection'
 import { CategoriesSection } from '@/components/homepage/CategoriesSection'
 import { AdvantagesSection } from '@/components/homepage/AdvantagesSection'
 import { FeaturedSpecialists } from '@/components/homepage/FeaturedSpecialists'
-import { HomepageErrorBoundary } from '@/components/homepage/HomepageErrorBoundary'
+import { ErrorBoundary, HomepageErrorFallback } from '@/components/ui/error-boundary'
 
 export const metadata: Metadata = {
   title: 'Аура — Ваш путь к здоровому образу жизни',
@@ -45,13 +45,13 @@ export default function Home() {
       />
 
       <main className="min-h-screen bg-background">
-        <HomepageErrorBoundary>
+        <ErrorBoundary fallback={HomepageErrorFallback}>
           <HeroSection />
           <HowItWorksSection />
           <CategoriesSection />
           <AdvantagesSection />
           <FeaturedSpecialists />
-        </HomepageErrorBoundary>
+        </ErrorBoundary>
       </main>
     </>
   );
