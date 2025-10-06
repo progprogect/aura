@@ -31,7 +31,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         aria-label="Breadcrumb"
         className="hidden md:block py-3 border-b border-gray-100"
       >
-        <div className="container mx-auto max-w-5xl px-4">
+        <div className="container mx-auto px-4">
           <ol className="flex items-center text-sm space-x-2" role="list">
             {items.map((item, index) => (
               <li key={index} className="flex items-center" role="listitem">
