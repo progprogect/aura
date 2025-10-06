@@ -76,15 +76,59 @@ export async function POST(request: NextRequest) {
     const isExpandCriteriaRequest = messages.length >= 4 &&
       expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
-    // Извлекаем параметры поиска из диалога
-    const searchParams = await extractSearchParams(messages, lastUserMessage.content, isShowPreviousRequest, isExpandCriteriaRequest)
+    // Извлекаем параметры поиска из диалога (БЕЗ shouldSearch!)
+    const extractedParams = await extractSearchParams(messages, lastUserMessage.content)
 
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
     console.log('[Chat API] 💬 Last user message:', lastUserMessage.content)
-    console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(searchParams, null, 2))
+    console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(extractedParams, null, 2))
     console.log('[Chat API] 🔁 Show previous request:', isShowPreviousRequest)
     console.log('[Chat API] 🔄 Expand criteria request:', isExpandCriteriaRequest)
+    
+    // Определяем shouldSearch ЗДЕСЬ (с доступом ко ВСЕМ переменным!)
+    const hasBasics = extractedParams.category && 
+                      extractedParams.workFormats && 
+                      extractedParams.workFormats.length > 0 &&
+                      extractedParams.problem
+    
+    const searchKeywords = [
+      'найти специалистов',
+      'найди',
+      'начать поиск',
+      'начни поиск',
+      'хватит',
+      'достаточно',
+      'искать',
+      'подбери',
+      'подобрать',
+      '🔍'
+    ]
+    
+    const userRequestedSearch = searchKeywords.some(kw => {
+      const match = lastUserMessage.content?.toLowerCase().includes(kw.toLowerCase())
+      if (match) {
+        console.log('[Chat API] 🎯 User requested search! Keyword:', kw, 'Message:', lastUserMessage.content)
+      }
+      return match
+    })
+    
+    const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
+    const isFollowUpRequest = messages.length >= 4 && 
+      followUpKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
+    
+    const shouldSearch = 
+      userRequestedSearch ||
+      isFollowUpRequest ||
+      isShowPreviousRequest ||
+      isExpandCriteriaRequest
+    
+    console.log('[Chat API] 🎯 Should search:', shouldSearch, {
+      userRequested: userRequestedSearch,
+      followUp: isFollowUpRequest,
+      showPrevious: isShowPreviousRequest,
+      expandCriteria: isExpandCriteriaRequest,
+    })
     console.log('═══════════════════════════════════════════')
 
     // Если нужен поиск специалистов
@@ -93,7 +137,7 @@ export async function POST(request: NextRequest) {
     let isLowQualityMatch = false
     let avgSimilarityScore = 0
     
-    if (searchParams.shouldSearch) {
+    if (shouldSearch) {
       // Если пользователь хочет расширить критерии - ищем с урезанными фильтрами
       if (isExpandCriteriaRequest) {
         console.log('[Chat API] 🔄 Expanding search criteria (removing strict filters)...')
@@ -154,18 +198,18 @@ export async function POST(request: NextRequest) {
         console.log('[Chat API] ✅ Loaded previous specialists:', specialists.length)
       } else {
         // Обычный поиск новых специалистов
-        console.log('[Chat API] 🔎 Starting search with query:', searchParams.query)
+        console.log('[Chat API] 🔎 Starting search with query:', extractedParams.query)
         console.log('[Chat API] 🚫 Excluding already shown IDs:', session.recommendedIds.length, 'specialists')
         
         try {
           specialists = await searchSpecialistsBySemantic({
-            query: searchParams.query,
+            query: extractedParams.query,
             filters: {
-              category: searchParams.category,
-              workFormats: searchParams.workFormats,
-              city: searchParams.city,
-              maxPrice: searchParams.maxPrice,
-              minExperience: searchParams.minExperience,
+              category: extractedParams.category,
+              workFormats: extractedParams.workFormats,
+              city: extractedParams.city,
+              maxPrice: extractedParams.maxPrice,
+              minExperience: extractedParams.minExperience,
             },
             limit: 10,
             excludeIds: session.recommendedIds,
@@ -174,13 +218,13 @@ export async function POST(request: NextRequest) {
           console.warn('[Chat API] Embedding search failed, using keyword fallback:', embeddingError)
           // Fallback на keyword search
           specialists = await searchSpecialistsByKeyword({
-            query: searchParams.query,
+            query: extractedParams.query,
             filters: {
-              category: searchParams.category,
-              workFormats: searchParams.workFormats,
-              city: searchParams.city,
-              maxPrice: searchParams.maxPrice,
-              minExperience: searchParams.minExperience,
+              category: extractedParams.category,
+              workFormats: extractedParams.workFormats,
+              city: extractedParams.city,
+              maxPrice: extractedParams.maxPrice,
+              minExperience: extractedParams.minExperience,
             },
             limit: 10,
             excludeIds: session.recommendedIds,
@@ -517,12 +561,10 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
  */
 async function extractSearchParams(
   messages: any[], 
-  lastUserMessageContent: string,
-  isShowPreviousRequest: boolean = false,
-  isExpandCriteriaRequest: boolean = false
+  lastUserMessageContent: string
 ): Promise<{
-  shouldSearch: boolean
   query: string
+  problem?: string
   category?: string
   workFormats?: string[]
   city?: string
@@ -554,83 +596,6 @@ async function extractSearchParams(
 
     console.log('[Chat API] 🤖 GPT extraction result:', JSON.stringify(extracted, null, 2))
 
-    // ========================================
-    // НОВАЯ ЛОГИКА shouldSearch
-    // ========================================
-    
-    // Базовые параметры (ОБЯЗАТЕЛЬНО для любого поиска)
-    const hasCategory = !!extracted.category
-    const hasFormat = extracted.workFormats && extracted.workFormats.length > 0
-    const hasProblem = extracted.problem && extracted.problem.length > 3
-    const hasBasics = hasCategory && hasFormat && hasProblem
-    
-    // Дополнительные параметры (для качественного подбора)
-    const hasPrice = !!extracted.maxPrice
-    const hasExperience = !!extracted.minExperience
-    const hasMethods = extracted.preferences?.methods && extracted.preferences.methods.length > 0
-    const hasGender = !!extracted.preferences?.gender
-    
-    const additionalParams = [hasPrice, hasExperience, hasMethods, hasGender].filter(Boolean).length
-    
-    // Пользователь ЯВНО попросил начать поиск
-    const searchKeywords = [
-      'найти специалистов',
-      'найди',
-      'начать поиск',
-      'начни поиск',
-      'хватит',
-      'достаточно',
-      'искать',
-      'подбери',
-      'подобрать',
-      '🔍'
-    ]
-    const userRequestedSearch = searchKeywords.some(kw => 
-      lastUserMessageContent?.toLowerCase().includes(kw.toLowerCase())
-    )
-    
-    // Follow-up запросы (показать ещё)
-    const followUpKeywords = ['ещё', 'другие', 'других', 'показать', 'больше', 'дополнительные', 'еще']
-    const isFollowUpRequest = messages.length >= 4 && 
-      followUpKeywords.some(kw => lastUserMessageContent?.toLowerCase().includes(kw))
-    
-    console.log('[Chat API] 🧩 Search criteria:', {
-      messageCount: messages.length,
-      hasBasics: hasBasics,
-      hasCategory,
-      hasFormat,
-      hasProblem,
-      additionalParams,
-      hasPrice,
-      hasExperience,
-      hasMethods,
-      userRequestedSearch,
-      isFollowUp: isFollowUpRequest,
-      isShowPrevious: isShowPreviousRequest,
-      isExpandCriteria: isExpandCriteriaRequest,
-    })
-    
-    // ГЛАВНАЯ ЛОГИКА: Ищем ТОЛЬКО если пользователь ЯВНО попросил!
-    // НИКАКОГО АВТОПОИСКА! GPT должен предложить кнопку, а пользователь нажать.
-    //
-    // Ищем если:
-    // 1. Пользователь нажал "🔍 Найти специалистов" ИЛИ написал "найди"
-    // 2. ИЛИ это follow-up запрос ("показать ещё")
-    // 3. ИЛИ показываем ранее найденных
-    // 4. ИЛИ расширяем критерии (убираем фильтры)
-    const shouldSearch = 
-      userRequestedSearch ||
-      isFollowUpRequest ||
-      isShowPreviousRequest ||
-      isExpandCriteriaRequest
-
-    console.log('[Chat API] 🎯 Should search:', shouldSearch, {
-      reason: userRequestedSearch ? 'user_requested' : 
-              isFollowUpRequest ? 'follow_up' :
-              isShowPreviousRequest ? 'show_previous' :
-              isExpandCriteriaRequest ? 'expand_criteria' : 'waiting_for_user_confirmation'
-    })
-
     // Формируем текст запроса для semantic search
     const queryParts = [
       extracted.category && getCategoryName(extracted.category),
@@ -645,8 +610,8 @@ async function extractSearchParams(
     const query = queryParts.filter(Boolean).join(' ')
 
     return {
-      shouldSearch,
       query,
+      problem: extracted.problem,
       category: extracted.category,
       workFormats: extracted.workFormats?.filter(Boolean),
       city: extracted.city,
@@ -657,7 +622,6 @@ async function extractSearchParams(
   } catch (error) {
     console.error('[Chat API] Extraction error:', error)
     return {
-      shouldSearch: false,
       query: '',
     }
   }
