@@ -103,7 +103,7 @@ export function AdvantagesSection() {
             <Card className="max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-primary/5 to-primary-600/5">
               <CardContent className="p-8">
                 <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 flex-shrink-0 bg-primary/20 rounded-xl flex items-center justify-center">
                     <Icon icon={Shield} size={24} className="text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">
