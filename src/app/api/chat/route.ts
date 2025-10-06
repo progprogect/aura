@@ -281,10 +281,10 @@ export async function POST(request: NextRequest) {
               recommendedIds: {
                 push: newIds,
               },
-              specialistsShown: {
-                increment: newIds.length,
-              },
-              extractedFilters: searchParams as any,
+            specialistsShown: {
+              increment: newIds.length,
+            },
+            extractedFilters: extractedParams as any,
             },
           })
         }
