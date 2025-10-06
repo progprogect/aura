@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Award, Video, MapPinOff } from 'lucide-react'
 import { categoryConfigService, type CategoryConfig } from '@/lib/category-config'
-import { trackChatEvent, ChatEvent } from '@/lib/analytics/chat-analytics'
 
 interface SpecialistRecommendationProps {
   specialist: {
@@ -44,8 +43,17 @@ export function SpecialistRecommendation({ specialist, sessionId }: SpecialistRe
 
   const handleProfileClick = () => {
     if (sessionId) {
-      trackChatEvent(ChatEvent.PROFILE_CLICKED, sessionId, {
-        specialistId: specialist.id,
+      // Трекаем клик через API (fire-and-forget)
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'profile_clicked',
+          sessionId,
+          metadata: { specialistId: specialist.id },
+        }),
+      }).catch((error) => {
+        console.error('[Analytics] Failed to track profile click:', error)
       })
     }
   }
