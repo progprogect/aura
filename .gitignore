@@ -45,4 +45,7 @@ next-env.d.ts
 *.swp
 *.swo
 
+# Local test scripts (не коммитим, только для локальной разработки)
+/scripts/
+
 
