@@ -1,14 +1,12 @@
 /**
- * Поле ввода сообщения в чате с голосовым вводом
+ * Поле ввода сообщения в чате
  */
 
 'use client'
 
-import { useState, FormEvent, KeyboardEvent, useEffect } from 'react'
+import { useState, FormEvent, KeyboardEvent } from 'react'
 import { Button } from '@/components/ui/button'
-import { Send, Mic, MicOff } from 'lucide-react'
-import { useVoiceInput } from '@/hooks/useVoiceInput'
-import { motion } from 'framer-motion'
+import { Send } from 'lucide-react'
 
 interface ChatInputProps {
   onSend: (message: string) => void
@@ -22,28 +20,12 @@ export function ChatInput({
   placeholder = 'Напишите сообщение...',
 }: ChatInputProps) {
   const [input, setInput] = useState('')
-  const { 
-    isListening, 
-    transcript, 
-    isSupported, 
-    startListening, 
-    stopListening,
-    resetTranscript 
-  } = useVoiceInput()
-
-  // Обновляем input когда получаем транскрипт
-  useEffect(() => {
-    if (transcript) {
-      setInput(transcript)
-    }
-  }, [transcript])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (input.trim() && !disabled) {
       onSend(input.trim())
       setInput('')
-      resetTranscript()
     }
   }
 
@@ -54,63 +36,28 @@ export function ChatInput({
     }
   }
 
-  const toggleVoiceInput = () => {
-    if (isListening) {
-      stopListening()
-    } else {
-      startListening()
-    }
-  }
-
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-1.5 sm:gap-2">
-      <div className="flex-1 relative min-w-0">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={isListening ? 'Слушаю...' : placeholder}
-          disabled={disabled}
-          rows={1}
-          className="w-full px-2.5 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-11 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32 leading-normal"
-          style={{
-            minHeight: '44px',
-            maxHeight: '128px',
-            lineHeight: '1.5',
-            fontSize: '16px', // КРИТИЧНО: минимум 16px чтобы iOS НЕ зуммил!
-          }}
-          onInput={(e) => {
-            const target = e.target as HTMLTextAreaElement
-            target.style.height = '44px'
-            target.style.height = `${Math.min(target.scrollHeight, 128)}px`
-          }}
-        />
-        
-        {/* Кнопка микрофона внутри поля */}
-        {isSupported && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={toggleVoiceInput}
-              disabled={disabled}
-              className={`h-8 w-8 p-0 rounded-full ${isListening ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              {isListening ? (
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  <MicOff className="h-4 w-4" />
-                </motion.div>
-              ) : (
-                <Mic className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        )}
-      </div>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        disabled={disabled}
+        rows={1}
+        className="flex-1 min-w-0 px-2.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed max-h-32 leading-normal"
+        style={{
+          minHeight: '44px',
+          maxHeight: '128px',
+          lineHeight: '1.5',
+          fontSize: '16px', // КРИТИЧНО: минимум 16px чтобы iOS НЕ зуммил!
+        }}
+        onInput={(e) => {
+          const target = e.target as HTMLTextAreaElement
+          target.style.height = '44px'
+          target.style.height = `${Math.min(target.scrollHeight, 128)}px`
+        }}
+      />
       
       <Button
         type="submit"
