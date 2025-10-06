@@ -6,10 +6,8 @@
 
 import { useRef, useEffect } from 'react'
 import { useChat } from '@/hooks/useChat'
-import { useChatProgress } from '@/hooks/useChatProgress'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
-import { ChatProgressIndicator } from './ChatProgressIndicator'
 import { ChatHistory } from './ChatHistory'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -18,7 +16,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export function ChatContainer() {
   const { messages, sendMessage, isLoading, reset, undoLastMessage, loadSession, sessionId } = useChat()
-  const { currentStep } = useChatProgress(messages)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -77,9 +74,6 @@ export function ChatContainer() {
           )}
         </div>
       </div>
-
-      {/* Progress Indicator */}
-      {messages.length > 0 && <ChatProgressIndicator currentStep={currentStep} />}
 
       {/* Messages */}
       <div
