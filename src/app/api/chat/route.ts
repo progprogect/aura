@@ -432,9 +432,12 @@ __BUTTONS__["Показать ранее найденных", "Изменить 
 
             const specialistsPayload = `\n\n__SPECIALISTS__${JSON.stringify(specialistsData)}`
             console.log('[Chat API] 📤 Sending specialists:', specialistsData.length, 'items')
-            console.log('[Chat API] 📦 Payload preview:', specialistsPayload.substring(0, 200) + '...')
+            console.log('[Chat API] 📦 Payload length:', specialistsPayload.length, 'chars')
+            console.log('[Chat API] 📦 First specialist:', specialistsData[0]?.firstName, specialistsData[0]?.lastName)
+            console.log('[Chat API] 📦 Payload preview:', specialistsPayload.substring(0, 300))
             
             controller.enqueue(encoder.encode(specialistsPayload))
+            console.log('[Chat API] ✅ Specialists payload enqueued')
           }
 
           // Извлекаем кнопки из ответа GPT

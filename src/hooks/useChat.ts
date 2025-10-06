@@ -130,9 +130,10 @@ export function useChat() {
               try {
                 specialists = JSON.parse(jsonStr)
                 console.log('[Chat] ✅ Parsed specialists:', specialists.length, 'items')
+                console.log('[Chat] 📦 First specialist:', specialists[0])
               } catch (e) {
                 console.error('[Chat] ❌ Failed to parse specialists:', e)
-                console.error('[Chat] ❌ JSON string:', jsonStr.substring(0, 200) + '...')
+                console.error('[Chat] ❌ JSON string:', jsonStr.substring(0, 500))
               }
             }
           } else if (buffer.includes('__BUTTONS__')) {
@@ -214,9 +215,12 @@ export function useChat() {
           specialistsCount: finalMessage.specialists?.length || 0,
           hasButtons: !!finalMessage.buttons,
           messageId: finalMessage.id,
+          specialists: finalMessage.specialists,
         })
 
         saveMessage(finalMessage)
+        
+        console.log('[Chat] 💾 Message saved. Current messages count:', messages.length + 1)
       } catch (error) {
         // Игнорируем ошибку отмены
         if (error instanceof Error && error.name === 'AbortError') {
