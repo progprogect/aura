@@ -1,6 +1,6 @@
 /**
  * Упрощенный хук для загрузки специалистов на главной странице
- * Показывает 6 верифицированных популярных специалистов
+ * Показывает 8 верифицированных популярных специалистов
  */
 
 'use client'
@@ -38,9 +38,9 @@ export function useHomepageSpecialists(): UseHomepageSpecialistsReturn {
         setLoading(true)
         setError(null)
 
-        // Запрашиваем 6 верифицированных популярных специалистов
+        // Запрашиваем 8 верифицированных популярных специалистов
         const params = new URLSearchParams({
-          limit: '6',
+          limit: '8',
           verified: 'true',
           sortBy: 'rating', // По популярности (profileViews)
         })

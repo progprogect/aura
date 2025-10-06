@@ -56,15 +56,15 @@ export function FeaturedSpecialists() {
         {loading ? (
           <>
             {/* Десктоп/планшет */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
             </div>
 
             {/* Мобильный */}
             <div className="md:hidden flex gap-4 overflow-x-auto pb-4 mb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="min-w-[280px] snap-start">
                   <SkeletonCard />
                 </div>
@@ -74,7 +74,7 @@ export function FeaturedSpecialists() {
         ) : (
           <>
             {/* Десктоп и планшет: Grid */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {specialists.map((specialist) => (
                 <SpecialistCard key={specialist.id} specialist={specialist} />
               ))}
