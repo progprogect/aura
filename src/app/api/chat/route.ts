@@ -87,10 +87,28 @@ export async function POST(request: NextRequest) {
     console.log('[Chat API] 🔄 Expand criteria request:', isExpandCriteriaRequest)
     
     // Определяем shouldSearch ЗДЕСЬ (с доступом ко ВСЕМ переменным!)
-    const hasBasics = extractedParams.category && 
-                      extractedParams.workFormats && 
-                      extractedParams.workFormats.length > 0 &&
-                      extractedParams.problem
+    
+    // КРИТИЧЕСКИЕ ШАГИ ДИАЛОГА (MUST HAVE для поиска):
+    const hasCategory = !!extractedParams.category
+    const hasFormat = extractedParams.workFormats && extractedParams.workFormats.length > 0
+    const hasProblem = extractedParams.problem && extractedParams.problem.length > 3
+    const hasBudget = !!extractedParams.maxPrice
+    
+    // Базовые параметры (минимум для поиска)
+    const hasBasics = hasCategory && hasFormat && hasProblem
+    
+    // Все критические шаги завершены (включая бюджет)
+    const allCriticalStepsComplete = hasBasics && hasBudget
+    
+    console.log('[Chat API] 📊 Dialog progress:', {
+      hasCategory,
+      hasFormat,
+      hasProblem,
+      hasBudget,
+      hasBasics,
+      allCriticalStepsComplete,
+      messageCount: messages.length
+    })
     
     // СТРОГИЕ keywords - всегда триггерят поиск (явное подтверждение)
     const strictKeywords = [
@@ -121,17 +139,32 @@ export async function POST(request: NextRequest) {
       lastUserMessage.content?.toLowerCase().includes(kw.toLowerCase())
     )
     
+    // НОВАЯ ЛОГИКА НА ОСНОВЕ ШАГОВ:
     // User requested search если:
-    // 1. Строгий keyword (🔍, "найти специалистов")
-    // 2. ИЛИ мягкий keyword + есть базовые параметры
-    const userRequestedSearch = strictMatch || (looseMatch && hasBasics)
+    // 1. СТРОГИЙ keyword (🔍, "найти специалистов") - всегда работает
+    // 2. ИЛИ МЯГКИЙ keyword + ВСЕ КРИТИЧЕСКИЕ ШАГИ ПРОЙДЕНЫ
+    const userRequestedSearch = strictMatch || (looseMatch && allCriticalStepsComplete)
     
     if (userRequestedSearch) {
       console.log('[Chat API] 🎯 User requested search!', {
         strictMatch,
         looseMatch,
-        hasBasics,
+        allCriticalStepsComplete,
         message: lastUserMessage.content
+      })
+    } else if (looseMatch && !allCriticalStepsComplete) {
+      console.log('[Chat API] ⏸️  Loose keyword found but critical steps incomplete:', {
+        looseMatch,
+        hasCategory,
+        hasFormat,
+        hasProblem,
+        hasBudget,
+        missingSteps: [
+          !hasCategory && 'category',
+          !hasFormat && 'format',
+          !hasProblem && 'problem',
+          !hasBudget && 'budget'
+        ].filter(Boolean)
       })
     }
     
