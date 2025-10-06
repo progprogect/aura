@@ -56,9 +56,13 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   //   console.log('[Semantic Search] 📂 Adding category filter:', filters.category)
   // }
 
-  if (filters.workFormats && filters.workFormats.length > 0) {
+  // workFormats: фильтруем ТОЛЬКО если выбран конкретный формат
+  // Если ['online', 'offline'] (оба) = "Неважно" → НЕ фильтруем
+  if (filters.workFormats && filters.workFormats.length === 1) {
     where.workFormats = { hasSome: filters.workFormats as any }
     console.log('[Semantic Search] 💻 Adding workFormats filter:', filters.workFormats)
+  } else if (filters.workFormats && filters.workFormats.length > 1) {
+    console.log('[Semantic Search] 💻 Skipping workFormats filter (user selected "any")')
   }
 
   if (filters.city) {
