@@ -6,15 +6,19 @@
 
 import { useRef, useEffect } from 'react'
 import { useChat } from '@/hooks/useChat'
+import { useChatProgress } from '@/hooks/useChatProgress'
 import { ChatMessage } from './ChatMessage'
 import { ChatInput } from './ChatInput'
+import { ChatProgressIndicator } from './ChatProgressIndicator'
+import { ChatHistory } from './ChatHistory'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, RotateCcw, Sparkles } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Sparkles, Undo2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function ChatContainer() {
-  const { messages, sendMessage, isLoading, reset, sessionId } = useChat()
+  const { messages, sendMessage, isLoading, reset, undoLastMessage, loadSession, sessionId } = useChat()
+  const { currentStep } = useChatProgress(messages)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -52,21 +56,30 @@ export function ChatContainer() {
             </p>
           </div>
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (confirm('Начать новый поиск? Текущая переписка будет очищена.')) {
-                reset()
-              }
-            }}
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            <span className="hidden md:inline">Начать заново</span>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <ChatHistory 
+            currentSessionId={sessionId} 
+            onLoadSession={loadSession}
+          />
+          {messages.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (confirm('Начать новый поиск? Текущая переписка будет очищена.')) {
+                  reset()
+                }
+              }}
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              <span className="hidden md:inline">Начать заново</span>
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Progress Indicator */}
+      {messages.length > 0 && <ChatProgressIndicator currentStep={currentStep} />}
 
       {/* Messages */}
       <div
@@ -155,6 +168,21 @@ export function ChatContainer() {
 
       {/* Input */}
       <div className="sticky bottom-0 bg-background border-t px-4 py-4">
+        {/* Кнопка возврата */}
+        {messages.length >= 2 && !isLoading && (
+          <div className="mb-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={undoLastMessage}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <Undo2 className="w-4 h-4" />
+              Вернуться к предыдущему шагу
+            </Button>
+          </div>
+        )}
+        
         <ChatInput
           onSend={sendMessage}
           disabled={isLoading}

@@ -9,7 +9,7 @@ import { useChatSession, ChatMessage } from './useChatSession'
 import type { Specialist } from '@/lib/ai/types'
 
 export function useChat() {
-  const { sessionId, messages: sessionMessages, saveMessage, clearSession } = useChatSession()
+  const { sessionId, messages: sessionMessages, saveMessage, clearSession, loadSession } = useChatSession()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -248,11 +248,31 @@ export function useChat() {
     clearSession()
   }, [clearSession])
 
+  // Отмена последнего сообщения (возврат назад)
+  const undoLastMessage = useCallback(() => {
+    if (messages.length < 2) return // Нельзя отменить если меньше 2 сообщений
+    
+    // Убираем последнее сообщение ассистента и последнее пользовательское
+    const newMessages = messages.slice(0, -2)
+    setMessages(newMessages)
+    
+    // Обновляем localStorage
+    const stored = localStorage.getItem('aura_chat_session')
+    if (stored) {
+      const session = JSON.parse(stored)
+      session.messages = newMessages
+      session.updatedAt = Date.now()
+      localStorage.setItem('aura_chat_session', JSON.stringify(session))
+    }
+  }, [messages])
+
   return {
     messages,
     sendMessage,
     isLoading,
     reset,
+    undoLastMessage,
+    loadSession,
     sessionId,
   }
 }
