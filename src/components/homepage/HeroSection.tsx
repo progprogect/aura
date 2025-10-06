@@ -174,38 +174,36 @@ export function HeroSection() {
                     </motion.div>
                   )}
                 </div>
-
-                {/* Кнопки действий */}
-                {demoStep >= 2 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.8 }}
-                    className="flex flex-col sm:flex-row gap-3 pt-2"
-                  >
-                    <Button size="lg" asChild className="flex-1 sm:flex-none">
-                      <Link href="/chat">
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Попробовать AI-помощника
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="lg" asChild className="flex-1 sm:flex-none">
-                      <Link href="/catalog">
-                        <Grid3X3 className="w-4 h-4 mr-2" />
-                        Смотреть каталог
-                      </Link>
-                    </Button>
-                  </motion.div>
-                )}
               </div>
             </div>
+          </motion.div>
+
+          {/* Кнопки действий - отдельно от чата */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto"
+          >
+            <Button size="lg" asChild className="w-full sm:w-auto min-w-[200px]">
+              <Link href="/chat">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Попробовать AI-помощника
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild className="w-full sm:w-auto min-w-[200px]">
+              <Link href="/catalog">
+                <Grid3X3 className="w-5 h-5 mr-2" />
+                Смотреть каталог
+              </Link>
+            </Button>
           </motion.div>
 
           {/* Дополнительная информация */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
             className="text-sm text-muted-foreground"
           >
             <p>Персональный подбор • Без регистрации • Прямая связь со специалистом</p>
