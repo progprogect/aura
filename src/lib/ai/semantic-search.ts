@@ -23,8 +23,13 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
     const queryEmbedding = await generateQueryEmbedding(query)
     console.log('[Semantic Search] 🧮 Query embedding generated:', queryEmbedding.length, 'dimensions')
 
-    // 2. Находим похожие embeddings в MongoDB
-    const similarEmbeddings = await findSimilarEmbeddings(queryEmbedding, limit * 2, excludeIds)
+    // 2. Находим похожие embeddings в MongoDB (с фильтром по категории!)
+    const similarEmbeddings = await findSimilarEmbeddings(
+      queryEmbedding, 
+      limit * 2, 
+      excludeIds,
+      filters.category // ← ФИЛЬТР ПО КАТЕГОРИИ В MONGODB!
+    )
 
     if (similarEmbeddings.length === 0) {
       console.warn('[Semantic Search] ⚠️ No embeddings found in MongoDB - falling back to keyword search')
@@ -45,10 +50,11 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
 
   console.log('[Semantic Search] 🔍 Prisma where (before optional filters):', { ids: specialistIds.length, acceptingClients: true })
 
-  if (filters.category) {
-    where.category = filters.category
-    console.log('[Semantic Search] 📂 Adding category filter:', filters.category)
-  }
+  // Категория УЖЕ отфильтрована в MongoDB! Не дублируем фильтр
+  // if (filters.category) {
+  //   where.category = filters.category
+  //   console.log('[Semantic Search] 📂 Adding category filter:', filters.category)
+  // }
 
   if (filters.workFormats && filters.workFormats.length > 0) {
     where.workFormats = { hasSome: filters.workFormats as any }

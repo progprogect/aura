@@ -45,6 +45,7 @@ export async function getEmbeddingsCollection(): Promise<Collection> {
  */
 export interface EmbeddingDocument {
   specialistId: string
+  category: string // Добавляем категорию для фильтрации ДО семантического поиска
   embedding: number[]
   sourceText: string
   modelVersion: string
@@ -57,6 +58,7 @@ export interface EmbeddingDocument {
  */
 export async function saveEmbedding(
   specialistId: string,
+  category: string,
   embedding: number[],
   sourceText: string,
   modelVersion: string
@@ -68,6 +70,7 @@ export async function saveEmbedding(
     {
       $set: {
         specialistId,
+        category,
         embedding,
         sourceText,
         modelVersion,
@@ -120,7 +123,8 @@ export async function countEmbeddings(): Promise<number> {
 export async function createIndexes(): Promise<void> {
   const collection = await getEmbeddingsCollection()
   await collection.createIndex({ specialistId: 1 }, { unique: true })
-  console.log('[MongoDB] Indexes created')
+  await collection.createIndex({ category: 1 }) // Индекс по категории для фильтрации
+  console.log('[MongoDB] Indexes created (specialistId, category)')
 }
 
 /**
@@ -156,13 +160,22 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 export async function findSimilarEmbeddings(
   queryEmbedding: number[],
   limit: number = 20,
-  excludeIds: string[] = []
+  excludeIds: string[] = [],
+  category?: string // ФИЛЬТР ПО КАТЕГОРИИ!
 ): Promise<Array<{ specialistId: string; similarity: number }>> {
   try {
     const collection = await getEmbeddingsCollection()
 
-    // Получаем все embeddings (для <10k записей это быстро)
-    const filter = excludeIds.length > 0 ? { specialistId: { $nin: excludeIds } } : {}
+    // Фильтр: исключаем ID + фильтруем по категории ДО вычисления сходства
+    const filter: any = {}
+    if (excludeIds.length > 0) {
+      filter.specialistId = { $nin: excludeIds }
+    }
+    if (category) {
+      filter.category = category
+      console.log(`[MongoDB] 🎯 Filtering by category: ${category}`)
+    }
+
     const results = await collection.find(filter).toArray()
     const allEmbeddings = results as unknown as EmbeddingDocument[]
 

@@ -31,8 +31,8 @@ export async function generateSpecialistEmbedding(specialistId: string) {
 
   const embedding = response.data[0].embedding
 
-  // Сохраняем в MongoDB
-  await saveEmbedding(specialistId, embedding, sourceText, MODELS.EMBEDDING)
+  // Сохраняем в MongoDB (с категорией для фильтрации!)
+  await saveEmbedding(specialistId, specialist.category, embedding, sourceText, MODELS.EMBEDDING)
 
   console.log(`[Embeddings] ✓ Saved for ${specialist.firstName} ${specialist.lastName}`)
 
