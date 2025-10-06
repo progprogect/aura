@@ -51,7 +51,7 @@ export const APP_CONFIG = {
     },
     chat: {
       temperature: 0.7,
-      maxTokens: 500,
+      maxTokens: 800, // Увеличено для follow-up вопросов
       topP: 0.9,
     },
     embeddings: {
