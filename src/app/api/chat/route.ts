@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Извлекаем параметры поиска из диалога
-    const searchParams = await extractSearchParams(messages)
+    const searchParams = await extractSearchParams(messages, lastUserMessage.content)
 
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
@@ -268,7 +268,10 @@ export async function POST(request: NextRequest) {
 /**
  * Извлекает параметры поиска из диалога
  */
-async function extractSearchParams(messages: any[]): Promise<{
+async function extractSearchParams(
+  messages: any[], 
+  lastUserMessageContent: string
+): Promise<{
   shouldSearch: boolean
   query: string
   category?: string
@@ -329,8 +332,8 @@ async function extractSearchParams(messages: any[]): Promise<{
       extracted.problem?.toLowerCase().includes('ещё') ||
       extracted.problem?.toLowerCase().includes('другие') ||
       extracted.problem?.toLowerCase().includes('показать') ||
-      lastUserMessage.content?.toLowerCase().includes('ещё') ||
-      lastUserMessage.content?.toLowerCase().includes('другие')
+      lastUserMessageContent?.toLowerCase().includes('ещё') ||
+      lastUserMessageContent?.toLowerCase().includes('другие')
     )
 
     const shouldSearch = hasEnoughInfo || isFollowUpRequest
