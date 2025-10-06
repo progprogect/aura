@@ -34,13 +34,13 @@ export function ChatContainer() {
 
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b px-4 py-3 flex items-center justify-between">
+      {/* Header - фиксированный */}
+      <div className="flex-shrink-0 bg-background border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Назад
+            <Link href="/" className="flex items-center">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="ml-2 md:hidden">Назад</span>
             </Link>
           </Button>
           <div className="border-l border-border pl-3">
@@ -75,10 +75,10 @@ export function ChatContainer() {
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages - скроллируемая область */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
+        className="flex-1 overflow-y-auto px-4 py-6 space-y-4 min-h-0"
       >
         {/* Приветствие если нет сообщений */}
         {messages.length === 0 && (
@@ -160,8 +160,8 @@ export function ChatContainer() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="sticky bottom-0 bg-background border-t px-4 py-4">
+      {/* Input - фиксированный */}
+      <div className="flex-shrink-0 bg-background border-t px-4 py-4">
         {/* Кнопка возврата */}
         {messages.length >= 2 && !isLoading && (
           <div className="mb-3">
