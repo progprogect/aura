@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
     // Если нужен поиск специалистов
     let specialists: any[] = []
     let noNewSpecialists = false
+    let isLowQualityMatch = false
+    let avgSimilarityScore = 0
     
     if (searchParams.shouldSearch) {
       // Если пользователь хочет расширить критерии - ищем с урезанными фильтрами
@@ -197,9 +199,10 @@ export async function POST(request: NextRequest) {
             .map(s => s.distance !== undefined ? (1 - s.distance) * 100 : 50)
           
           const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length
+          avgSimilarityScore = Math.round(avgSimilarity)
           
           console.log('[Chat API] 📊 Similarity stats:', {
-            avg: Math.round(avgSimilarity),
+            avg: avgSimilarityScore,
             min: Math.round(Math.min(...similarities)),
             max: Math.round(Math.max(...similarities)),
             count: specialists.length,
@@ -207,9 +210,8 @@ export async function POST(request: NextRequest) {
           
           // Флаг низкого качества подбора (< 70%)
           if (avgSimilarity < 70) {
-            specialists._lowQualityMatch = true
-            specialists._avgSimilarity = Math.round(avgSimilarity)
-            console.log('[Chat API] ⚠️ Low quality match detected:', Math.round(avgSimilarity), '% avg similarity')
+            isLowQualityMatch = true
+            console.log('[Chat API] ⚠️ Low quality match detected:', avgSimilarityScore, '% avg similarity')
           }
         }
       }
@@ -257,10 +259,6 @@ export async function POST(request: NextRequest) {
     let contextMessage = ''
     
     if (specialists.length > 0) {
-      // Проверяем качество подбора
-      const isLowQuality = specialists._lowQualityMatch
-      const avgSimilarity = specialists._avgSimilarity
-      
       if (isExpandCriteriaRequest) {
         // РАСШИРЕННЫЙ ПОИСК - показываем что убрали фильтры
         contextMessage = `\n\n✅ ВАЖНО: Система РАСШИРИЛА критерии поиска и нашла ${specialists.length} специалистов.
@@ -289,9 +287,9 @@ ${JSON.stringify(
 __BUTTONS__["Подходят", "Вернуть строгие критерии", "Показать ещё"]
 
 Карточки УЖЕ ПОКАЗАНЫ (не перечисляй их).`
-      } else if (isLowQuality) {
+      } else if (isLowQualityMatch) {
         // НИЗКОЕ КАЧЕСТВО ПОДБОРА - предлагаем расширить критерии
-        contextMessage = `\n\n⚠️ ВАЖНО: Система нашла ${specialists.length} специалистов, но СОВПАДЕНИЕ НИЗКОЕ (средний ${avgSimilarity}%).
+        contextMessage = `\n\n⚠️ ВАЖНО: Система нашла ${specialists.length} специалистов, но СОВПАДЕНИЕ НИЗКОЕ (средний ${avgSimilarityScore}%).
 
 Текущие фильтры:
 - Категория: ${searchParams.category || 'не указана'}
@@ -311,7 +309,7 @@ ${JSON.stringify(
         )}
 
 ПРЕДЛОЖИ ПОЛЬЗОВАТЕЛЮ:
-"Нашёл ${specialists.length} специалиста, но совпадение с вашим запросом не идеальное (${avgSimilarity}%).
+"Нашёл ${specialists.length} специалиста, но совпадение с вашим запросом не идеальное (${avgSimilarityScore}%).
  Могу расширить критерии поиска - убрать некоторые фильтры (опыт, цену) для лучшего подбора?"
 
 Добавь кнопки:
