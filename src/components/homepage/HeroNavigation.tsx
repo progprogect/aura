@@ -49,12 +49,6 @@ export function HeroNavigation() {
             >
               Специалисты
             </Link>
-            <Link
-              href="/about"
-              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
-            >
-              О нас
-            </Link>
           </div>
           
           {/* Мобильное меню */}

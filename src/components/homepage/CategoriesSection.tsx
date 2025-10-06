@@ -17,7 +17,6 @@ const categories = [
     description: 'Ментальное здоровье и терапия',
     key: 'psychology',
     href: '/catalog?category=psychology',
-    gradient: 'from-purple-500 to-pink-500',
     count: '45+'
   },
   { 
@@ -25,7 +24,6 @@ const categories = [
     description: 'Физическая активность и тренировки',
     key: 'fitness',
     href: '/catalog?category=fitness',
-    gradient: 'from-orange-500 to-red-500',
     count: '32+'
   },
   { 
@@ -33,7 +31,6 @@ const categories = [
     description: 'Здоровое питание и нутрициология',
     key: 'nutrition',
     href: '/catalog?category=nutrition',
-    gradient: 'from-green-500 to-emerald-500',
     count: '28+'
   },
   { 
@@ -41,7 +38,6 @@ const categories = [
     description: 'Релаксация и восстановление',
     key: 'massage',
     href: '/catalog?category=massage',
-    gradient: 'from-blue-500 to-cyan-500',
     count: '18+'
   },
   { 
@@ -49,7 +45,6 @@ const categories = [
     description: 'Личностное развитие и карьера',
     key: 'coaching',
     href: '/catalog?category=coaching',
-    gradient: 'from-yellow-500 to-orange-500',
     count: '22+'
   },
   { 
@@ -57,7 +52,6 @@ const categories = [
     description: 'Медицинские консультации',
     key: 'medicine',
     href: '/catalog?category=medicine',
-    gradient: 'from-red-500 to-pink-500',
     count: '15+'
   }
 ]
@@ -101,12 +95,12 @@ export function CategoriesSection() {
                   aria-label={`Перейти к категории ${category.name}`}
                 >
                   <div className="h-full bg-white rounded-2xl border border-gray-200 hover:border-primary/30 hover:shadow-2xl transition-all duration-300 p-8">
-                    {/* Иконка с градиентом */}
-                    <div className={`w-16 h-16 bg-gradient-to-br ${category.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow`}>
+                    {/* Иконка с единым стилем */}
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                       <CategoryIcon 
                         category={category.key} 
                         size={32} 
-                        className="text-white" 
+                        className="text-primary" 
                       />
                     </div>
                     
