@@ -1,0 +1,130 @@
+{
+  "timestamp": "2025-10-06T12:07:16.937Z",
+  "results": {
+    "generated": 20,
+    "failed": 0,
+    "updated": 20
+  },
+  "generatedImages": [
+    {
+      "specialist": "Максим Козлов",
+      "category": "massage",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-sDhuEd8LQ1voOoSUGVAmA4UD.png?st=2025-10-06T11%3A02%3A27Z&se=2025-10-06T13%3A02%3A27Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=0e2a3d55-e963-40c9-9c89-2a1aa28cb3ac&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T10%3A06%3A09Z&ske=2025-10-07T10%3A06%3A09Z&sks=b&skv=2024-08-04&sig=Sb%2BjNYf238BC6Zx0Un3QmO4jqdBog9IdKDCWcjwXBVQ%3D",
+      "prompt": "Professional massage therapist portrait, calm expression, spa setting background, white uniform, peaceful demeanor, realistic photography"
+    },
+    {
+      "specialist": "Ольга Новикова",
+      "category": "coaching",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-VnqgcXP4Ozjp3gEmwfqdyoTO.png?st=2025-10-06T11%3A02%3A39Z&se=2025-10-06T13%3A02%3A39Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=0e2a3d55-e963-40c9-9c89-2a1aa28cb3ac&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T22%3A33%3A24Z&ske=2025-10-06T22%3A33%3A24Z&sks=b&skv=2024-08-04&sig=wtr%2BDAumU5bFcCd7tJCl%2BW9Lm2b4uK1SuclxlgKyi3M%3D",
+      "prompt": "Executive coach headshot, professional appearance, corporate setting, motivational expression, confident pose, high quality portrait"
+    },
+    {
+      "specialist": "Александр Морозов",
+      "category": "medicine",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-GwPCL8k0SdQzkoUdLIoY1Fv6.png?st=2025-10-06T11%3A02%3A54Z&se=2025-10-06T13%3A02%3A54Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=0e2a3d55-e963-40c9-9c89-2a1aa28cb3ac&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T02%3A21%3A15Z&ske=2025-10-07T02%3A21%3A15Z&sks=b&skv=2024-08-04&sig=BaIO1K%2BzSsxxm%2Bl85%2BuXaIkBgxLWnwz4kv0nZlszPjg%3D",
+      "prompt": "Medical specialist portrait, clinical environment, white coat, caring expression, professional lighting, realistic photography style"
+    },
+    {
+      "specialist": "Елена Смирнова",
+      "category": "nutrition",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-y7BvvAFnv9fdG6WMsoKK33OQ.png?st=2025-10-06T11%3A03%3A09Z&se=2025-10-06T13%3A03%3A09Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=6e4237ed-4a31-4e1d-a677-4df21834ece0&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T16%3A09%3A33Z&ske=2025-10-06T16%3A09%3A33Z&sks=b&skv=2024-08-04&sig=eFG5Dh09dVmdZBcnEwMcX2bDUK0TtF3fv3GiwwL74/s%3D",
+      "prompt": "Health and wellness expert photo, clean modern setting, professional appearance, reassuring expression, studio quality portrait"
+    },
+    {
+      "specialist": "Мария Соколова",
+      "category": "nutrition",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-Nn2Eoyg3V5Dil3SjFk6XjGS9.png?st=2025-10-06T11%3A03%3A23Z&se=2025-10-06T13%3A03%3A23Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=6e4237ed-4a31-4e1d-a677-4df21834ece0&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T01%3A38%3A49Z&ske=2025-10-07T01%3A38%3A49Z&sks=b&skv=2024-08-04&sig=KQV%2B82m/soVYPibCmZakUthgErf1kK/Kyiu5m19TGn4%3D",
+      "prompt": "Professional nutritionist portrait, healthy appearance, modern kitchen background, white coat, warm smile, trustworthy expression, realistic"
+    },
+    {
+      "specialist": "Андрей Лебедев",
+      "category": "massage",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-7eFORiDCdSOA93R7BeMkRuww.png?st=2025-10-06T11%3A03%3A37Z&se=2025-10-06T13%3A03%3A37Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=6e4237ed-4a31-4e1d-a677-4df21834ece0&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T12%3A03%3A37Z&ske=2025-10-07T12%3A03%3A37Z&sks=b&skv=2024-08-04&sig=TPZ5QixLBfS3SgOrPgnjFQpR93otnmVwhCJgNyoNT78%3D",
+      "prompt": "Licensed massage therapist headshot, serene appearance, wellness center background, professional attire, soothing expression, high quality"
+    },
+    {
+      "specialist": "Екатерина Козлова",
+      "category": "coaching",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-bcIywzaSddxpPYG36kMuTyKI.png?st=2025-10-06T11%3A03%3A50Z&se=2025-10-06T13%3A03%3A50Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=0e2a3d55-e963-40c9-9c89-2a1aa28cb3ac&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T09%3A28%3A23Z&ske=2025-10-07T09%3A28%3A23Z&sks=b&skv=2024-08-04&sig=IVdFn7n3UrSA2QzwokdLgoExU7gMG4U0uxiGP7TAwP8%3D",
+      "prompt": "Business coach portrait, modern workspace background, professional dress, encouraging smile, dynamic lighting, realistic style"
+    },
+    {
+      "specialist": "Сергей Волков",
+      "category": "fitness",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-rcDc5K1YdqQh5AC4M6yZIZpY.png?st=2025-10-06T11%3A04%3A05Z&se=2025-10-06T13%3A04%3A05Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=32836cae-d25f-4fe9-827b-1c8c59c442cc&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T11%3A52%3A46Z&ske=2025-10-07T11%3A52%3A46Z&sks=b&skv=2024-08-04&sig=OWdH5HQgPIxRLO4JcbYjpXCXqTW9mkc4o5ey//qzPW8%3D",
+      "prompt": "Fitness instructor professional photo, athletic wear, gym equipment background, energetic expression, studio quality lighting"
+    },
+    {
+      "specialist": "Игорь Петров",
+      "category": "fitness",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-0sIt8CarCCX1E0uK8sz3VCfB.png?st=2025-10-06T11%3A04%3A21Z&se=2025-10-06T13%3A04%3A21Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=b2c0e1c0-cf97-4e19-8986-8073905d5723&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T04%3A45%3A17Z&ske=2025-10-07T04%3A45%3A17Z&sks=b&skv=2024-08-04&sig=DJrNw1UdBoKi2T%2BSOEeAMRc0MgJ8JnbTvZEayxyKv4M%3D",
+      "prompt": "Professional fitness trainer portrait, athletic build, gym background, sportswear, confident smile, high energy expression, realistic photography"
+    },
+    {
+      "specialist": "Светлана Волкова",
+      "category": "nutrition",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-OM7ka0O8uDU3R9c5Z1hG3Fxb.png?st=2025-10-06T11%3A04%3A35Z&se=2025-10-06T13%3A04%3A35Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=b2c0e1c0-cf97-4e19-8986-8073905d5723&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T18%3A23%3A46Z&ske=2025-10-06T18%3A23%3A46Z&sks=b&skv=2024-08-04&sig=pZwsWS%2BHdEX%2Bc3kkYs/ijXr4ykWDslQt9SWDk/yzj%2BY%3D",
+      "prompt": "Registered dietitian headshot, professional attire, medical office setting, caring expression, confident pose, high quality photography"
+    },
+    {
+      "specialist": "Михаил Соколов",
+      "category": "massage",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-tpPLvaFjnjwlsgHsas0anRrO.png?st=2025-10-06T11%3A04%3A51Z&se=2025-10-06T13%3A04%3A51Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=38e27a3b-6174-4d3e-90ac-d7d9ad49543f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T11%3A01%3A10Z&ske=2025-10-07T11%3A01%3A10Z&sks=b&skv=2024-08-04&sig=rHPug6wz3dF/5RG04vZZiLFXjeQ0elAkZard6KorYHM%3D",
+      "prompt": "Bodywork specialist portrait, tranquil setting, medical uniform, gentle smile, relaxing atmosphere, realistic photography style"
+    },
+    {
+      "specialist": "Наталья Морозова",
+      "category": "psychology",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-108WjUJ1I46qoaxYCEQiMH5R.png?st=2025-10-06T11%3A05%3A05Z&se=2025-10-06T13%3A05%3A05Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=0e2a3d55-e963-40c9-9c89-2a1aa28cb3ac&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T03%3A15%3A28Z&ske=2025-10-07T03%3A15%3A28Z&sks=b&skv=2024-08-04&sig=vphYV3pweQX2axZwMdj2OtOGuTyrEA7S3%2B9ZQn3cf10%3D",
+      "prompt": "Mental health professional portrait, caring expression, modern therapy room background, professional dress, warm lighting, realistic style"
+    },
+    {
+      "specialist": "Ирина Попова",
+      "category": "psychology",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-3smqpFXyWAKMHoLMyLpwL5Bu.png?st=2025-10-06T11%3A05%3A17Z&se=2025-10-06T13%3A05%3A17Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=b2c0e1c0-cf97-4e19-8986-8073905d5723&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T22%3A51%3A47Z&ske=2025-10-06T22%3A51%3A47Z&sks=b&skv=2024-08-04&sig=YVLMuauMQsvViX3rG0DywtNlLRAtI6Db2NR%2B13W1n1c%3D",
+      "prompt": "Professional psychologist portrait, warm smile, glasses, modern office background, business casual attire, professional headshot style, high quality, realistic"
+    },
+    {
+      "specialist": "Николай Васильев",
+      "category": "fitness",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-Yfo437x1Zq8KmcoFwommXI4y.png?st=2025-10-06T11%3A05%3A32Z&se=2025-10-06T13%3A05%3A32Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=c6569cb0-0faa-463d-9694-97df3dc1dfb1&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T11%3A38%3A50Z&ske=2025-10-07T11%3A38%3A50Z&sks=b&skv=2024-08-04&sig=1Z%2BtFmpjfgyzt3dRmaiU72GHgatYOM8RqKesTLmkYJw%3D",
+      "prompt": "Personal trainer headshot, healthy appearance, fitness studio background, workout attire, motivational expression, professional lighting"
+    },
+    {
+      "specialist": "Анна Иванова",
+      "category": "psychology",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-5E3xSKvrbO5jO9WWATWbvKpt.png?st=2025-10-06T11%3A05%3A51Z&se=2025-10-06T13%3A05%3A51Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=6e4237ed-4a31-4e1d-a677-4df21834ece0&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T12%3A05%3A51Z&ske=2025-10-07T12%3A05%3A51Z&sks=b&skv=2024-08-04&sig=wcDKqWUlapkzxyPErYIzfyGbY30av4Jm572HhbyL8%2BU%3D",
+      "prompt": "Clinical psychologist headshot, professional appearance, white coat, medical office setting, trustworthy expression, high quality portrait"
+    },
+    {
+      "specialist": "Алексей Кузнецов",
+      "category": "medicine",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-7Vtzu2BCMfdDTF9OZ9i2xHrV.png?st=2025-10-06T11%3A06%3A07Z&se=2025-10-06T13%3A06%3A07Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=38e27a3b-6174-4d3e-90ac-d7d9ad49543f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T10%3A57%3A12Z&ske=2025-10-07T10%3A57%3A12Z&sks=b&skv=2024-08-04&sig=tyvBJ9xCm7x61pYFUAyJeqftC3EmAiSnJ9oOQZ/NmiA%3D",
+      "prompt": "Healthcare professional photo, medical facility background, professional attire, reassuring smile, clinical setting, realistic portrait"
+    },
+    {
+      "specialist": "Дмитрий Петров",
+      "category": "fitness",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-8t0SZqVyDyd0t722hglOpbzR.png?st=2025-10-06T11%3A06%3A24Z&se=2025-10-06T13%3A06%3A24Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=32836cae-d25f-4fe9-827b-1c8c59c442cc&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T09%3A55%3A03Z&ske=2025-10-07T09%3A55%3A03Z&sks=b&skv=2024-08-04&sig=O%2Bk4HH9YM8HSgpo5V/OKecnqdhgQZP4lvXD2ccpQXns%3D",
+      "prompt": "Professional fitness trainer portrait, athletic build, gym background, sportswear, confident smile, high energy expression, realistic photography"
+    },
+    {
+      "specialist": "Татьяна Петрова",
+      "category": "psychology",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-iFg3wtGmLGE7oMN6AiKT83mz.png?st=2025-10-06T11%3A06%3A37Z&se=2025-10-06T13%3A06%3A37Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=38e27a3b-6174-4d3e-90ac-d7d9ad49543f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T17%3A51%3A29Z&ske=2025-10-06T17%3A51%3A29Z&sks=b&skv=2024-08-04&sig=glV5i/QPOyhyTwlpbepzlXIhlGZYJkSw8%2B4IwLBLS7U%3D",
+      "prompt": "Friendly therapist portrait, approachable expression, neutral background, professional attire, confident pose, studio lighting, realistic photography style"
+    },
+    {
+      "specialist": "Владимир Новиков",
+      "category": "medicine",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-pybJZzPM5QIW6zKKCi4JfcfM.png?st=2025-10-06T11%3A06%3A52Z&se=2025-10-06T13%3A06%3A52Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=32836cae-d25f-4fe9-827b-1c8c59c442cc&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T09%3A50%3A52Z&ske=2025-10-07T09%3A50%3A52Z&sks=b&skv=2024-08-04&sig=AgECBtvPhRiiTuHWW%2BP4hTCpS08HzXMKmmcr099uido%3D",
+      "prompt": "Medical specialist portrait, clinical environment, white coat, caring expression, professional lighting, realistic photography style"
+    },
+    {
+      "specialist": "Юлия Лебедева",
+      "category": "coaching",
+      "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-w14rCMuEcSf2oCBPVRcVacfw/user-8FVhEDM4MQ4grKXMdiV1OHx3/img-MHECt7iHZEqYneY56XPRV7Zn.png?st=2025-10-06T11%3A07%3A09Z&se=2025-10-06T13%3A07%3A09Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=b2c0e1c0-cf97-4e19-8986-8073905d5723&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-06T08%3A40%3A37Z&ske=2025-10-07T08%3A40%3A37Z&sks=b&skv=2024-08-04&sig=bqbkjPz5hnuPg58LcLJr2f6oLLRoX0k5Dws0p5Q088g%3D",
+      "prompt": "Personal development coach photo, contemporary office setting, approachable expression, professional attire, inspiring atmosphere"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "instructions": {
+    "size": "400x400px",
+    "format": "JPG or PNG",
+    "style": "Realistic photography",
+    "quality": "High resolution",
+    "composition": "Square frame, face centered"
+  },
+  "recommendedServices": [
+    "DALL-E 3 (ChatGPT Plus)",
+    "Midjourney",
+    "Stable Diffusion",
+    "Leonardo AI",
+    "Bing Image Creator"
+  ],
+  "prompts": {
+    "psychology": [
+      "Professional psychologist portrait, warm smile, glasses, modern office background, business casual attire, professional headshot style, high quality, realistic",
+      "Friendly therapist portrait, approachable expression, neutral background, professional attire, confident pose, studio lighting, realistic photography style",
+      "Clinical psychologist headshot, professional appearance, white coat, medical office setting, trustworthy expression, high quality portrait",
+      "Mental health professional portrait, caring expression, modern therapy room background, professional dress, warm lighting, realistic style"
+    ],
+    "fitness": [
+      "Professional fitness trainer portrait, athletic build, gym background, sportswear, confident smile, high energy expression, realistic photography",
+      "Personal trainer headshot, healthy appearance, fitness studio background, workout attire, motivational expression, professional lighting",
+      "Sports coach portrait, athletic clothing, sports facility background, encouraging smile, dynamic pose, realistic photography style",
+      "Fitness instructor professional photo, athletic wear, gym equipment background, energetic expression, studio quality lighting"
+    ],
+    "nutrition": [
+      "Professional nutritionist portrait, healthy appearance, modern kitchen background, white coat, warm smile, trustworthy expression, realistic",
+      "Registered dietitian headshot, professional attire, medical office setting, caring expression, confident pose, high quality photography",
+      "Nutrition specialist portrait, fresh vegetables background, professional dress, approachable smile, natural lighting, realistic style",
+      "Health and wellness expert photo, clean modern setting, professional appearance, reassuring expression, studio quality portrait"
+    ],
+    "massage": [
+      "Professional massage therapist portrait, calm expression, spa setting background, white uniform, peaceful demeanor, realistic photography",
+      "Licensed massage therapist headshot, serene appearance, wellness center background, professional attire, soothing expression, high quality",
+      "Bodywork specialist portrait, tranquil setting, medical uniform, gentle smile, relaxing atmosphere, realistic photography style",
+      "Therapeutic massage professional photo, spa environment, calm expression, professional appearance, soft lighting, realistic portrait"
+    ],
+    "coaching": [
+      "Professional life coach portrait, confident expression, modern office background, business attire, inspiring smile, realistic photography",
+      "Executive coach headshot, professional appearance, corporate setting, motivational expression, confident pose, high quality portrait",
+      "Business coach portrait, modern workspace background, professional dress, encouraging smile, dynamic lighting, realistic style",
+      "Personal development coach photo, contemporary office setting, approachable expression, professional attire, inspiring atmosphere"
+    ],
+    "medicine": [
+      "Professional doctor portrait, white coat, medical office background, confident expression, stethoscope, realistic photography",
+      "Physician headshot, medical uniform, hospital setting, trustworthy appearance, professional smile, high quality portrait",
+      "Medical specialist portrait, clinical environment, white coat, caring expression, professional lighting, realistic photography style",
+      "Healthcare professional photo, medical facility background, professional attire, reassuring smile, clinical setting, realistic portrait"
+    ]
+  }
+}
