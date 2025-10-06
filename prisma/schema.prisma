@@ -244,3 +244,80 @@ model CategoryField {
   @@index([categoryId])
   @@index([isActive])
 }
+
+// ========================================
+// AI-ЧАТ: EMBEDDINGS хранятся в MongoDB
+// ========================================
+// См. src/lib/ai/mongodb-client.ts
+
+// ========================================
+// AI-Чат: СЕССИИ И ИСТОРИЯ
+// ========================================
+
+model ChatSession {
+  id               String     @id @default(cuid())
+  
+  // Опционально: связь с пользователем (для будущей авторизации)
+  userId           String?
+  
+  // История сообщений
+  messages         Json       @db.JsonB
+  // Формат: [{id, role: 'user'|'assistant', content, specialists?: [], timestamp}]
+  
+  // Контекст диалога (извлечённые параметры)
+  extractedFilters Json?      @db.JsonB
+  // Формат: {category, workFormats, city, minExperience, maxPrice, problem, preferences}
+  
+  // IDs показанных специалистов (для избежания дубликатов)
+  recommendedIds   String[]
+  
+  // Метаданные
+  status           String     @default("active") // "active" | "completed" | "abandoned"
+  source           String     @default("chat_page") // "chat_page" | "homepage" | "catalog"
+  
+  // Аналитика
+  messageCount     Int        @default(0)
+  specialistsShown Int        @default(0)
+  clickedProfiles  String[]   @default([])
+  
+  // TTL: удаляем через 7 дней неактивности
+  expiresAt        DateTime
+  
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+}
+
+// ========================================
+// АНАЛИТИКА ЧАТА (Redis + aggregation)
+// ========================================
+
+model ChatAnalytics {
+  id               String     @id @default(cuid())
+  
+  // Временной интервал (день/час)
+  date             DateTime   @db.Date
+  hour             Int?       // Час дня (0-23), null = агрегация за день
+  
+  // Метрики
+  sessionsStarted  Int        @default(0)
+  messagesTotal    Int        @default(0)
+  completedChats   Int        @default(0)  // Дошли до рекомендаций
+  abandonedChats   Int        @default(0)
+  
+  profileClicks    Int        @default(0)  // Переходы к профилю
+  catalogClicks    Int        @default(0)  // "Открыть в каталоге"
+  
+  avgMessagesPerSession Float  @default(0)
+  avgSpecialistsShown   Float  @default(0)
+  
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  
+  @@unique([date, hour])
+  @@index([date])
+}

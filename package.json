@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
-    "db:seed-categories": "tsx prisma/seed-categories.ts"
+    "db:seed-categories": "tsx prisma/seed-categories.ts",
+    "ai:generate-embeddings": "tsx prisma/generate-embeddings.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -18,6 +19,7 @@
     "framer-motion": "^11.5.4",
     "ioredis": "^5.8.0",
     "lucide-react": "^0.441.0",
+    "mongodb": "^6.20.0",
     "next": "14.2.13",
     "openai": "^6.1.0",
     "react": "^18.3.1",

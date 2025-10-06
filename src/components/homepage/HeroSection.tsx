@@ -7,8 +7,11 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HeroNavigation } from './HeroNavigation'
+import { Button } from '@/components/ui/button'
+import { Sparkles, Grid3X3 } from 'lucide-react'
 
 export function HeroSection() {
   const [demoStep, setDemoStep] = useState(0)
@@ -171,6 +174,29 @@ export function HeroSection() {
                     </motion.div>
                   )}
                 </div>
+
+                {/* Кнопки действий */}
+                {demoStep >= 2 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.8 }}
+                    className="flex flex-col sm:flex-row gap-3 pt-2"
+                  >
+                    <Button size="lg" asChild className="flex-1 sm:flex-none">
+                      <Link href="/chat">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Попробовать AI-помощника
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="lg" asChild className="flex-1 sm:flex-none">
+                      <Link href="/catalog">
+                        <Grid3X3 className="w-4 h-4 mr-2" />
+                        Смотреть каталог
+                      </Link>
+                    </Button>
+                  </motion.div>
+                )}
               </div>
             </div>
           </motion.div>
