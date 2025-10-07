@@ -156,7 +156,7 @@ export function useChat() {
         setState(prev => ({ ...prev, isLoading: false }))
       }
     },
-    [sessionId, saveMessage, state.mode.type, collectedData, detectedCategory, messages, handleError, canRecover, recoverFromError, validateInput, validateMessage]
+    [sessionId, saveMessage, state.mode.type, collectedData, detectedCategory, handleError, canRecover, recoverFromError, validateInput, validateMessage]
   )
 
   // Обрабатываем debounced сообщение
@@ -191,7 +191,7 @@ export function useChat() {
       // Для обычных сообщений используем debouncing
       setPendingMessage(content)
     },
-    [sessionId, state.phase]
+    [sessionId, state.phase, processMessage]
   )
 
   // Обработка умного режима - используем реальный API
@@ -294,23 +294,10 @@ export function useChat() {
           buffer = buffer.substring(textParts[0].length)
         }
 
-        // Создаем сообщение только один раз
-        if (assistantContent && !messageCreated) {
-          const assistantMessage: ChatMessage = {
-            id: tempAssistantId,
-            role: 'assistant',
-            content: assistantContent,
-            specialists: specialists.length > 0 ? specialists : undefined,
-            buttons: buttons.length > 0 ? buttons : undefined,
-            timestamp: Date.now(),
-          }
-          
-          saveMessage(assistantMessage)
-          messageCreated = true
-        }
+        // Накапливаем содержимое для финального сообщения
       }
 
-      // Финальное обновление сообщения с полным содержимым
+      // Сохраняем финальное сообщение
       if (assistantContent) {
         const finalMessage: ChatMessage = {
           id: tempAssistantId,
@@ -321,17 +308,7 @@ export function useChat() {
           timestamp: Date.now(),
         }
         
-        // Обновляем последнее сообщение
-        const sessionKey = `aura_chat_session_${sessionId}`
-        const stored = localStorage.getItem(sessionKey)
-        if (stored) {
-          const session = JSON.parse(stored)
-          const messageIndex = session.messages.findIndex((m: ChatMessage) => m.id === tempAssistantId)
-          if (messageIndex >= 0) {
-            session.messages[messageIndex] = finalMessage
-            localStorage.setItem(sessionKey, JSON.stringify(session))
-          }
-        }
+        saveMessage(finalMessage)
       }
 
     } catch (error) {
