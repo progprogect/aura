@@ -142,6 +142,9 @@ export async function POST(request: NextRequest) {
       'искать',
       'хватит',
       'достаточно',
+      'похожих', // для кнопки "Найти похожих"
+      'похожие',
+      'аналоги',
     ]
     
     const strictMatch = strictKeywords.some(kw => 
@@ -186,9 +189,13 @@ export async function POST(request: NextRequest) {
       followUpKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
     // НОВАЯ ЛОГИКА: Объединяем контекстный анализ с пользовательскими запросами
+    // Добавляем fallback для явных запросов поиска
+    const hasBasicInfo = extractedParams.category && extractedParams.problem
     const shouldSearch = 
       (readyForSearch && dialogAnalysis.nextAction === 'start_search') ||
       userRequestedSearch ||
+      (strictMatch && hasBasicInfo) || // Строгие keywords + базовые данные
+      (looseMatch && readyForSearch) || // Мягкие keywords + готовность
       isFollowUpRequest ||
       isShowPreviousRequest ||
       isExpandCriteriaRequest
@@ -217,6 +224,17 @@ export async function POST(request: NextRequest) {
     let noNewSpecialists = false
     let isLowQualityMatch = false
     let avgSimilarityScore = 0
+    
+    // Определяем, нужно ли исключать специалистов (для "Найти похожих")
+    let excludeSpecialistIds: string[] = []
+    const isSimilarSearch = lastUserMessage.content?.toLowerCase().includes('похожих') || 
+                           lastUserMessage.content?.toLowerCase().includes('похожие')
+    
+    if (isSimilarSearch && session.recommendedIds.length > 0) {
+      // Исключаем последнего показанного специалиста
+      excludeSpecialistIds = [session.recommendedIds[session.recommendedIds.length - 1]]
+      console.log('[Chat API] 🔄 Similar search - excluding:', excludeSpecialistIds[0])
+    }
     
     if (shouldSearch) {
       console.log('[Chat API] 🔍 Starting search with params:', {
@@ -289,8 +307,12 @@ export async function POST(request: NextRequest) {
         console.log('[Chat API] ✅ Loaded previous specialists:', specialists.length)
       } else {
         // Обычный поиск новых специалистов
+        // Объединяем исключения: уже показанных + текущего специалиста для "похожих"
+        const allExcludeIds = [...session.recommendedIds, ...excludeSpecialistIds]
+        
         console.log('[Chat API] 🔎 Starting search with query:', extractedParams.query)
         console.log('[Chat API] 🚫 Excluding already shown IDs:', session.recommendedIds.length, 'specialists')
+        console.log('[Chat API] 🔄 Excluding for similar search:', excludeSpecialistIds.length, 'specialists')
         
         try {
           specialists = await searchSpecialistsBySemantic({
@@ -303,7 +325,7 @@ export async function POST(request: NextRequest) {
               minExperience: extractedParams.minExperience,
             },
             limit: 10,
-            excludeIds: session.recommendedIds,
+            excludeIds: allExcludeIds,
           })
         } catch (embeddingError) {
           console.warn('[Chat API] Embedding search failed, using keyword fallback:', embeddingError)
@@ -318,7 +340,7 @@ export async function POST(request: NextRequest) {
               minExperience: extractedParams.minExperience,
             },
             limit: 10,
-            excludeIds: session.recommendedIds,
+            excludeIds: allExcludeIds,
           })
         }
 

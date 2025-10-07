@@ -252,5 +252,8 @@ export function isReadyForSearch(extractedParams: any): boolean {
   const hasCategory = extractedParams.category
   const hasWorkFormat = extractedParams.workFormats && extractedParams.workFormats.length > 0
 
-  return hasPersonalData && hasProblem && hasCategory && hasWorkFormat
+  // Более гибкая логика: достаточно базовых данных + категории
+  // ИЛИ если пользователь явно запросил поиск
+  return (hasPersonalData && hasProblem && hasCategory) || 
+         (hasCategory && hasProblem) // Минимальные требования
 }
