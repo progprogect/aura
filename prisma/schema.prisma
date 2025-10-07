@@ -66,6 +66,10 @@ model Specialist {
   faqs            FAQ[]
   consultationRequests ConsultationRequest[]
   
+  // Авторизация
+  authSessions    AuthSession[]
+  socialAccounts  SocialAccount[]
+  
   // Медиа
   videoUrl        String?                   // YouTube/Vimeo URL для видео-презентации
   
@@ -249,6 +253,83 @@ model CategoryField {
 // AI-ЧАТ: EMBEDDINGS хранятся в MongoDB
 // ========================================
 // См. src/lib/ai/mongodb-client.ts
+
+// ========================================
+// СИСТЕМА АВТОРИЗАЦИИ СПЕЦИАЛИСТОВ
+// ========================================
+
+model AuthSession {
+  id            String   @id @default(cuid())
+  specialistId  String
+  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  
+  // Данные сессии
+  sessionToken  String   @unique
+  deviceFingerprint String?
+  userAgent     String?
+  ipAddress     String?
+  
+  // Статус и время
+  isActive      Boolean  @default(true)
+  expiresAt     DateTime
+  lastUsedAt    DateTime @default(now())
+  
+  // Метаданные
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([specialistId])
+  @@index([sessionToken])
+  @@index([expiresAt])
+}
+
+model SMSVerification {
+  id            String   @id @default(cuid())
+  
+  // Данные верификации
+  phone         String
+  code          String
+  purpose       String   // "registration" | "login" | "recovery"
+  
+  // Статус и время
+  isUsed        Boolean  @default(false)
+  attempts      Int      @default(0)
+  expiresAt     DateTime
+  
+  // Метаданные
+  createdAt     DateTime @default(now())
+  usedAt        DateTime?
+  
+  @@index([phone])
+  @@index([code])
+  @@index([expiresAt])
+}
+
+model SocialAccount {
+  id            String   @id @default(cuid())
+  specialistId  String
+  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  
+  // Данные социального аккаунта
+  provider      String   // "google" | "vk" | "yandex" | "whatsapp" | "telegram"
+  providerId    String   // ID в системе провайдера
+  email         String?
+  name          String?
+  picture       String?
+  rawData       Json?    // Полные данные от провайдера
+  
+  // Статус
+  isPrimary     Boolean  @default(false)
+  isVerified    Boolean  @default(false)
+  
+  // Метаданные
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([provider, providerId])
+  @@index([specialistId])
+  @@index([provider])
+}
 
 // ========================================
 // AI-Чат: СЕССИИ И ИСТОРИЯ
