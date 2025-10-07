@@ -13,7 +13,7 @@
     "ai:setup-mongodb": "tsx prisma/scripts/setup-mongodb.ts",
     "test:chat": "tsx scripts/test-chat.ts",
     "test:ai-chat": "tsx scripts/test-ai-chat-api.ts",
-    "analyze:ai": "tsx scripts/analyze-ai-responses.ts",
+    "test:duplication": "tsx scripts/test-duplication-fix.ts",
     "chat": "tsx scripts/interactive-chat.ts"
   },
   "dependencies": {

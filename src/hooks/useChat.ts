@@ -194,44 +194,144 @@ export function useChat() {
     [sessionId, state.phase]
   )
 
-  // Обработка умного режима
+  // Обработка умного режима - используем реальный API
   const handleSmartMode = useCallback(async (userMessage: ChatMessage) => {
     try {
-      // 1. Генерируем вопросы
-      setState(prev => ({ ...prev, isGeneratingQuestions: true }))
-      
-      const context = getQuestionContext()
-      const questionResult = await callAIAPI('generateQuestions', context)
-      
-      setState(prev => ({ ...prev, isGeneratingQuestions: false }))
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          sessionId,
+        }),
+        signal: abortControllerRef.current?.signal,
+      })
 
-      // 2. Обновляем категорию
-      if (questionResult.searchParams?.category) {
-        updateDetectedCategory(questionResult.searchParams.category)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
       }
 
-      // 3. Сохраняем вопросы
-      saveQuestionsAsked(questionResult.questions)
+      // Читаем streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
 
-      // 4. Определяем следующий шаг
-      if (questionResult.shouldSearch) {
-        await performSearch(questionResult.searchParams!)
-      } else if (questionResult.questions.length > 0) {
-        updatePhase('collecting')
-        
-        const assistantMessage: ChatMessage = {
-          id: crypto.randomUUID(),
+      let assistantContent = ''
+      let specialists: Specialist[] = []
+      let buttons: string[] = []
+      let tempAssistantId = crypto.randomUUID()
+      let buffer = ''
+      let messageCreated = false
+
+      while (true) {
+        const { done, value } = (await reader?.read()) || {}
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        buffer += chunk
+
+        // Парсим специальные маркеры
+        if (buffer.includes('__SPECIALISTS__')) {
+          const startIdx = buffer.indexOf('__SPECIALISTS__')
+          const jsonStart = startIdx + '__SPECIALISTS__'.length
+          
+          let bracketCount = 0
+          let jsonEnd = -1
+          
+          for (let i = jsonStart; i < buffer.length; i++) {
+            if (buffer[i] === '[') bracketCount++
+            if (buffer[i] === ']') bracketCount--
+            if (bracketCount === 0) {
+              jsonEnd = i
+              break
+            }
+          }
+          
+          if (jsonEnd > jsonStart) {
+            try {
+              const specialistsJson = buffer.substring(jsonStart, jsonEnd + 1)
+              specialists = JSON.parse(specialistsJson)
+              buffer = buffer.substring(jsonEnd + 1)
+            } catch (e) {
+              console.error('[Chat] Failed to parse specialists:', e)
+            }
+          }
+        }
+
+        if (buffer.includes('__BUTTONS__')) {
+          const startIdx = buffer.indexOf('__BUTTONS__')
+          const jsonStart = startIdx + '__BUTTONS__'.length
+          
+          let bracketCount = 0
+          let jsonEnd = -1
+          
+          for (let i = jsonStart; i < buffer.length; i++) {
+            if (buffer[i] === '[') bracketCount++
+            if (buffer[i] === ']') bracketCount--
+            if (bracketCount === 0) {
+              jsonEnd = i
+              break
+            }
+          }
+          
+          if (jsonEnd > jsonStart) {
+            try {
+              const buttonsJson = buffer.substring(jsonStart, jsonEnd + 1)
+              buttons = JSON.parse(buttonsJson)
+              buffer = buffer.substring(jsonEnd + 1)
+            } catch (e) {
+              console.error('[Chat] Failed to parse buttons:', e)
+            }
+          }
+        }
+
+        // Добавляем текст к содержимому
+        const textParts = buffer.split(/__(?:SPECIALISTS|BUTTONS)__/)
+        if (textParts[0]) {
+          assistantContent += textParts[0]
+          buffer = buffer.substring(textParts[0].length)
+        }
+
+        // Создаем сообщение только один раз
+        if (assistantContent && !messageCreated) {
+          const assistantMessage: ChatMessage = {
+            id: tempAssistantId,
+            role: 'assistant',
+            content: assistantContent,
+            specialists: specialists.length > 0 ? specialists : undefined,
+            buttons: buttons.length > 0 ? buttons : undefined,
+            timestamp: Date.now(),
+          }
+          
+          saveMessage(assistantMessage)
+          messageCreated = true
+        }
+      }
+
+      // Финальное обновление сообщения с полным содержимым
+      if (assistantContent) {
+        const finalMessage: ChatMessage = {
+          id: tempAssistantId,
           role: 'assistant',
-          content: `Отлично! Помогу найти подходящего специалиста. Давайте уточним несколько деталей для более точного подбора.`,
-          questions: questionResult.questions,
-          dataCollectionPhase: 'collecting',
+          content: assistantContent,
+          specialists: specialists.length > 0 ? specialists : undefined,
+          buttons: buttons.length > 0 ? buttons : undefined,
           timestamp: Date.now(),
         }
         
-        saveMessage(assistantMessage)
-      } else {
-        // Fallback к классическому режиму
-        await handleClassicMode(userMessage)
+        // Обновляем последнее сообщение
+        const sessionKey = `aura_chat_session_${sessionId}`
+        const stored = localStorage.getItem(sessionKey)
+        if (stored) {
+          const session = JSON.parse(stored)
+          const messageIndex = session.messages.findIndex((m: ChatMessage) => m.id === tempAssistantId)
+          if (messageIndex >= 0) {
+            session.messages[messageIndex] = finalMessage
+            localStorage.setItem(sessionKey, JSON.stringify(session))
+          }
+        }
       }
 
     } catch (error) {
@@ -246,7 +346,7 @@ export function useChat() {
         throw chatError
       }
     }
-  }, [getQuestionContext, updateDetectedCategory, saveQuestionsAsked, updatePhase, saveMessage, handleError, canRecover, recoverFromError])
+  }, [messages, sessionId, saveMessage, handleError, canRecover, recoverFromError])
 
   // Обработка классического режима
   const handleClassicMode = useCallback(async (userMessage: ChatMessage) => {
