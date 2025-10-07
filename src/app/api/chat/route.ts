@@ -679,11 +679,31 @@ ${contextualHints.map(hint => `- ${hint}`).join('\n')}
               }
             })
 
-            const specialistsPayload = `\n\n__SPECIALISTS__${JSON.stringify(specialistsData)}`
-            console.log('[Chat API] 📤 Sending specialists:', specialistsData.length, 'items')
-            console.log('[Chat API] 📦 Payload length:', specialistsPayload.length, 'chars')
-            console.log('[Chat API] 📦 First specialist:', specialistsData[0]?.firstName, specialistsData[0]?.lastName)
-            console.log('[Chat API] 📦 Payload preview:', specialistsPayload.substring(0, 300))
+            // Очищаем данные от проблемных символов
+            const cleanSpecialistsData = specialistsData.map(s => ({
+              ...s,
+              tagline: s.tagline?.replace(/[^\w\s\-.,!?()]/g, '') || '',
+              specializations: s.specializations?.map((spec: string) => 
+                spec.replace(/[^\w\s\-.,!?()]/g, '')
+              ) || []
+            }))
+            
+            const specialistsJson = JSON.stringify(cleanSpecialistsData)
+            console.log('[Chat API] 📤 Sending specialists:', cleanSpecialistsData.length, 'items')
+            console.log('[Chat API] 📦 JSON length:', specialistsJson.length, 'chars')
+            console.log('[Chat API] 📦 First specialist:', cleanSpecialistsData[0]?.firstName, cleanSpecialistsData[0]?.lastName)
+            console.log('[Chat API] 📦 JSON preview:', specialistsJson.substring(0, 300))
+            
+            // Валидируем JSON
+            try {
+              JSON.parse(specialistsJson)
+              console.log('[Chat API] ✅ JSON is valid')
+            } catch (e) {
+              console.error('[Chat API] ❌ JSON validation failed:', e)
+              return
+            }
+            
+            const specialistsPayload = `\n\n__SPECIALISTS__${specialistsJson}`
             
             controller.enqueue(encoder.encode(specialistsPayload))
             console.log('[Chat API] ✅ Specialists payload enqueued')
