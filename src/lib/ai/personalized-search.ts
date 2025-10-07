@@ -61,7 +61,7 @@ export function rankSpecialistsByPersonalization(
     const matchReasons = generateMatchReasons(specialist, personalProfile, extractedParams)
     
     // Вычисляем similarity если есть distance
-    const similarity = specialist.distance !== undefined ? Math.round((1 - specialist.distance) * 100) : null
+    const similarity = specialist.distance !== undefined ? Math.round((1 - specialist.distance) * 100) : undefined
     
     return {
       id: specialist.id,
@@ -120,7 +120,7 @@ function generateMatchReasons(
   
   // Совпадение по формату работы
   if (extractedParams.workFormats && extractedParams.workFormats.length > 0) {
-    const formats = extractedParams.workFormats.map(f => f === 'online' ? 'Онлайн' : 'Оффлайн').join(', ')
+    const formats = extractedParams.workFormats.map((f: string) => f === 'online' ? 'Онлайн' : 'Оффлайн').join(', ')
     reasons.push(`Формат: ${formats}`)
   }
   

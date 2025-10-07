@@ -10,6 +10,7 @@ import { searchSpecialistsBySemantic, searchSpecialistsByKeyword } from '@/lib/a
 import { generatePersonalQuestions } from '@/lib/ai/personal-questions-generator'
 import { analyzePersonalContext } from '@/lib/ai/contextual-analyzer'
 import { rankSpecialistsByPersonalization, generatePersonalizedSearchExplanation, analyzePersonalizationQuality } from '@/lib/ai/personalized-search'
+import { CategoryKey } from '@/config/app'
 import { prisma } from '@/lib/db'
 import { trackChatEvent, ChatEvent } from '@/lib/analytics/chat-analytics'
 
@@ -66,6 +67,9 @@ export async function POST(request: NextRequest) {
     // Последнее сообщение пользователя
     const lastUserMessage = messages[messages.length - 1]
 
+    // Извлекаем параметры поиска из диалога (включая личный профиль)
+    const extractedParams = await extractSearchParams(messages, lastUserMessage.content)
+
     if (lastUserMessage.role === 'user') {
       await trackChatEvent(ChatEvent.MESSAGE_SENT, sessionId)
       
@@ -86,9 +90,6 @@ export async function POST(request: NextRequest) {
     const expandCriteriaKeywords = ['расширить критерии', 'расширить', 'убрать фильтр', 'меньше фильтров', 'больше вариантов']
     const isExpandCriteriaRequest = messages.length >= 4 &&
       expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
-    
-    // Извлекаем параметры поиска из диалога (включая личный профиль)
-    const extractedParams = await extractSearchParams(messages, lastUserMessage.content)
 
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
@@ -311,7 +312,7 @@ export async function POST(request: NextRequest) {
           const rankedSpecialists = rankSpecialistsByPersonalization(
             specialists,
             extractedParams.personalProfile,
-            extractedParams.category,
+            extractedParams.category as CategoryKey,
             extractedParams
           )
           
@@ -462,8 +463,8 @@ ${JSON.stringify(
 Карточки УЖЕ ПОКАЗАНЫ (не перечисляй их текстом).`
       } else {
         // НОРМАЛЬНОЕ КАЧЕСТВО - персонализированный флоу
-        const personalizedExplanation = specialists.length > 0 && extractedParams.personalProfile 
-          ? generatePersonalizedSearchExplanation(specialists, extractedParams.personalProfile, extractedParams.category)
+        const personalizedExplanation = specialists.length > 0 && extractedParams.personalProfile && extractedParams.category
+          ? generatePersonalizedSearchExplanation(specialists, extractedParams.personalProfile, extractedParams.category as CategoryKey)
           : 'Система нашла специалистов.'
         
         contextMessage = `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
