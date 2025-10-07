@@ -9,7 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Award, Video, MapPinOff, Sparkles, Search } from 'lucide-react'
+import { MapPin, Award, Sparkles, Search } from 'lucide-react'
 import { categoryConfigService, type CategoryConfig } from '@/lib/category-config'
 import { motion } from 'framer-motion'
 
@@ -177,21 +177,10 @@ export function SpecialistRecommendation({
                   {specialist.yearsOfPractice} {getPluralYears(specialist.yearsOfPractice)} опыта
                 </span>
               )}
-              {specialist.workFormats.includes('online') && (
-                <span className="flex items-center gap-1">
-                  <Video className="w-3.5 h-3.5" />
-                  Онлайн
-                </span>
-              )}
-              {specialist.city ? (
+              {specialist.city && (
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" />
                   {specialist.city}
-                </span>
-              ) : specialist.workFormats.includes('offline') && (
-                <span className="flex items-center gap-1">
-                  <MapPinOff className="w-3.5 h-3.5" />
-                  Оффлайн
                 </span>
               )}
             </div>
