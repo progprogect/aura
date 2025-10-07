@@ -558,8 +558,8 @@ ${extractedParams.preferences?.methods ? `- Методы: ${extractedParams.pref
             console.log('[Chat API] ✅ Specialists payload enqueued')
           }
 
-          // Извлекаем кнопки из ответа GPT
-          const buttonsMatch = fullResponse.match(/Добавь кнопки:\s*\[(.*?)\]/)
+          // Извлекаем кнопки из ответа GPT (поддерживаем оба формата)
+          const buttonsMatch = fullResponse.match(/(?:Добавь кнопки:\s*|_BUTTONS___)\[(.*?)\]/)
           let hasButtons = false
           
           if (buttonsMatch) {
@@ -567,9 +567,16 @@ ${extractedParams.preferences?.methods ? `- Методы: ${extractedParams.pref
               const buttons = JSON.parse(`[${buttonsMatch[1]}]`)
               controller.enqueue(encoder.encode(`\n\n__BUTTONS__${JSON.stringify(buttons)}`))
               hasButtons = true
+              console.log('[Chat API] ✅ Buttons extracted and sent:', buttons)
             } catch (e) {
               console.error('[Chat API] Failed to parse buttons:', e)
             }
+          }
+          
+          // Дополнительная проверка: если GPT написал _BUTTONS___ в тексте, убираем это из контента
+          if (fullResponse.includes('_BUTTONS___')) {
+            console.log('[Chat API] 🔧 Removing _BUTTONS___ from content')
+            fullResponse = fullResponse.replace(/_BUTTONS___\[.*?\]/g, '')
           }
           
           // FALLBACK: Если GPT предлагает начать поиск, но НЕ добавил кнопки → добавляем автоматически!
