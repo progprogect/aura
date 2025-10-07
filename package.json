@@ -12,7 +12,8 @@
     "ai:generate-embeddings": "tsx prisma/scripts/generate-embeddings.ts",
     "ai:setup-mongodb": "tsx prisma/scripts/setup-mongodb.ts",
     "test:chat": "tsx scripts/test-chat.ts",
-    "test:smart-chat": "tsx scripts/test-smart-chat.ts",
+    "test:ai-chat": "tsx scripts/test-ai-chat-api.ts",
+    "analyze:ai": "tsx scripts/analyze-ai-responses.ts",
     "chat": "tsx scripts/interactive-chat.ts"
   },
   "dependencies": {
