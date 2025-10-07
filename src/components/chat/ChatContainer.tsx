@@ -12,11 +12,11 @@ import { ChatHistory } from './ChatHistory'
 import { MobileChatNav } from './MobileChatNav'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, RotateCcw, Sparkles, Undo2, Clock } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Sparkles, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function ChatContainer() {
-  const { messages, sendMessage, isLoading, reset, undoLastMessage, loadSession, sessionId } = useChat()
+  const { messages, sendMessage, isLoading, reset, loadSession, sessionId } = useChat()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -188,20 +188,6 @@ export function ChatContainer() {
         />
         
         <div className="border-t px-2.5 sm:px-4 py-2.5 sm:py-4">
-          {/* Кнопка возврата - только desktop */}
-          {messages.length >= 2 && !isLoading && (
-            <div className="mb-3 hidden md:block">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={undoLastMessage}
-                className="gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <Undo2 className="w-4 h-4" />
-                Вернуться к предыдущему шагу
-              </Button>
-            </div>
-          )}
           
           <ChatInput
             onSend={sendMessage}

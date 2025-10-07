@@ -80,7 +80,7 @@ export function useChat() {
   const handleClassicModeRef = useRef<typeof handleClassicMode>()
   const handleQuestionAnswerRef = useRef<typeof handleQuestionAnswer>()
   const performSearchRef = useRef<typeof performSearch>()
-  const undoLastMessageRef = useRef<typeof undoLastMessage>()
+  // undoLastMessageRef удалён
   const [pendingMessage, setPendingMessage] = useState<string>('')
   const debouncedMessage = useDebounce(pendingMessage, 500) // 500ms debounce
 
@@ -723,23 +723,7 @@ export function useChat() {
     clearSession()
   }, [clearSession])
 
-  // Отмена последнего сообщения
-  const undoLastMessage = useCallback(() => {
-    if (messages.length < 2) return
-    
-    const newMessages = messages.slice(0, -2)
-    setState(prev => ({ ...prev, phase: 'initial' }))
-    
-    // Обновляем localStorage
-    const stored = localStorage.getItem(`aura_chat_session_${sessionId}`)
-    if (stored) {
-      const session = JSON.parse(stored)
-      session.messages = newMessages
-      session.updatedAt = Date.now()
-      localStorage.setItem(`aura_chat_session_${sessionId}`, JSON.stringify(session))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId])
+  // Функция undoLastMessage удалена - больше не используется
 
   // Обновляем ref'ы для стабильных ссылок
   processMessageRef.current = processMessage
@@ -747,7 +731,7 @@ export function useChat() {
   handleClassicModeRef.current = handleClassicMode
   handleQuestionAnswerRef.current = handleQuestionAnswer
   performSearchRef.current = performSearch
-  undoLastMessageRef.current = undoLastMessage
+  // undoLastMessageRef.current удалён
 
   // Обертка для handleQuestionAnswer с правильной сигнатурой
   const handleQuestionAnswerWrapper = useCallback(async (questionId: string, answer: string | string[]) => {
@@ -768,7 +752,7 @@ export function useChat() {
     skipDataCollection,
     toggleMode,
     reset,
-    undoLastMessage,
+    // undoLastMessage удалён
     loadSession,
   }
 }
