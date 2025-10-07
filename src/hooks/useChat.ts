@@ -14,6 +14,210 @@ import type { StructuredQuestion, QuestionGenerationResult } from '@/lib/ai/ques
 import type { Specialist } from '@/lib/ai/types'
 import type { ChatError } from '@/lib/error-handler'
 
+// Типизация для унифицированного парсинга
+interface StreamingParseResult {
+  content: string
+  specialists: any[]
+  buttons: string[]
+  remainingBuffer: string
+}
+
+/**
+ * Валидация данных специалиста
+ */
+function validateSpecialistData(specialist: any): boolean {
+  const requiredFields = ['id', 'firstName', 'lastName', 'category']
+  return requiredFields.every(field => 
+    specialist[field] && typeof specialist[field] === 'string'
+  )
+}
+
+/**
+ * Валидация данных кнопки
+ */
+function validateButtonData(button: any): boolean {
+  return typeof button === 'string' && button.length > 0
+}
+
+/**
+ * Парсинг маркера __SPECIALISTS__
+ */
+function parseSpecialistsMarker(buffer: string, specialists: any[]): string {
+  if (!buffer.includes('__SPECIALISTS__')) return buffer
+
+  const startIdx = buffer.indexOf('__SPECIALISTS__')
+  const jsonStart = startIdx + '__SPECIALISTS__'.length
+  
+  let bracketCount = 0
+  let jsonEnd = -1
+  let inString = false
+  let escapeNext = false
+  
+  for (let i = jsonStart; i < buffer.length; i++) {
+    const char = buffer[i]
+    
+    if (escapeNext) {
+      escapeNext = false
+      continue
+    }
+    
+    if (char === '\\') {
+      escapeNext = true
+      continue
+    }
+    
+    if (char === '"') {
+      inString = !inString
+      continue
+    }
+    
+    if (!inString) {
+      if (char === '[') bracketCount++
+      if (char === ']') {
+        bracketCount--
+        if (bracketCount === 0) {
+          jsonEnd = i + 1
+          break
+        }
+      }
+    }
+  }
+  
+  if (jsonEnd > jsonStart) {
+    try {
+      const specialistsJson = buffer.substring(jsonStart, jsonEnd)
+      const parsedSpecialists = JSON.parse(specialistsJson)
+      
+      // Валидируем и добавляем только корректные данные
+      const validSpecialists = parsedSpecialists.filter(validateSpecialistData)
+      specialists.push(...validSpecialists)
+      
+      if (validSpecialists.length !== parsedSpecialists.length) {
+        console.warn('[Chat] Some specialists were filtered out due to validation errors')
+      }
+    } catch (e) {
+      console.error('[Chat] Failed to parse specialists:', e)
+    }
+    return buffer.substring(jsonEnd)
+  }
+  
+  return buffer
+}
+
+/**
+ * Парсинг маркера __BUTTONS__
+ */
+function parseButtonsMarker(buffer: string, buttons: string[]): string {
+  if (!buffer.includes('__BUTTONS__')) return buffer
+
+  const startIdx = buffer.indexOf('__BUTTONS__')
+  const jsonStart = startIdx + '__BUTTONS__'.length
+  
+  let bracketCount = 0
+  let jsonEnd = -1
+  let inString = false
+  let escapeNext = false
+  
+  for (let i = jsonStart; i < buffer.length; i++) {
+    const char = buffer[i]
+    
+    if (escapeNext) {
+      escapeNext = false
+      continue
+    }
+    
+    if (char === '\\') {
+      escapeNext = true
+      continue
+    }
+    
+    if (char === '"') {
+      inString = !inString
+      continue
+    }
+    
+    if (!inString) {
+      if (char === '[') bracketCount++
+      if (char === ']') {
+        bracketCount--
+        if (bracketCount === 0) {
+          jsonEnd = i + 1
+          break
+        }
+      }
+    }
+  }
+  
+  if (jsonEnd > jsonStart) {
+    try {
+      const buttonsJson = buffer.substring(jsonStart, jsonEnd)
+      const parsedButtons = JSON.parse(buttonsJson)
+      
+      // Валидируем и добавляем только корректные данные
+      const validButtons = parsedButtons.filter(validateButtonData)
+      buttons.push(...validButtons)
+      
+      if (validButtons.length !== parsedButtons.length) {
+        console.warn('[Chat] Some buttons were filtered out due to validation errors')
+      }
+    } catch (e) {
+      console.error('[Chat] Failed to parse buttons:', e)
+    }
+    return buffer.substring(jsonEnd)
+  }
+  
+  return buffer
+}
+
+/**
+ * Унифицированная функция парсинга streaming ответа
+ */
+function parseStreamingResponse(
+  buffer: string,
+  currentContent: string,
+  currentSpecialists: any[],
+  currentButtons: string[]
+): StreamingParseResult {
+  let content = currentContent
+  let specialists = [...currentSpecialists]
+  let buttons = [...currentButtons]
+  let remainingBuffer = buffer
+
+  // 1. Сначала накапливаем ВСЁ текстовое содержимое
+  const textParts = remainingBuffer.split(/__(?:SPECIALISTS|BUTTONS)__/)
+  if (textParts[0]) {
+    content += textParts[0]
+      .replace(/__BUTTONS__\[.*?\]/g, '')
+      .replace(/__SPECIALISTS__\[.*?\]/g, '')
+    remainingBuffer = remainingBuffer.substring(textParts[0].length)
+  }
+
+  // 2. Затем парсим маркеры (в правильном порядке)
+  remainingBuffer = parseSpecialistsMarker(remainingBuffer, specialists)
+  remainingBuffer = parseButtonsMarker(remainingBuffer, buttons)
+
+  return {
+    content,
+    specialists,
+    buttons,
+    remainingBuffer
+  }
+}
+
+/**
+ * Создание fallback сообщения при ошибках
+ */
+function createFallbackMessage(content: string, specialists: any[], buttons: string[]): ChatMessage {
+  return {
+    id: crypto.randomUUID(),
+    role: 'assistant',
+    content: content || 'Произошла ошибка при обработке ответа',
+    specialists: specialists.length > 0 ? specialists : undefined,
+    buttons: buttons.length > 0 ? buttons : undefined,
+    timestamp: Date.now(),
+  }
+}
+
 // API функции для вызова серверных модулей
 async function callAIAPI(action: string, data: any) {
   const response = await fetch('/api/ai', {
@@ -238,146 +442,41 @@ export function useChat() {
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
 
+      if (!reader) {
+        throw new Error('No response body reader available')
+      }
+
       let assistantContent = ''
-      let specialists: Specialist[] = []
+      let specialists: any[] = []
       let buttons: string[] = []
       let tempAssistantId = crypto.randomUUID()
       let buffer = ''
-      let messageCreated = false
 
       while (true) {
-        const { done, value } = (await reader?.read()) || {}
+        const { done, value } = await reader.read()
         if (done) break
 
         const chunk = decoder.decode(value, { stream: true })
         buffer += chunk
 
-        // Парсим специальные маркеры
-        if (buffer.includes('__SPECIALISTS__')) {
-          const startIdx = buffer.indexOf('__SPECIALISTS__')
-          const jsonStart = startIdx + '__SPECIALISTS__'.length
-          
-          let bracketCount = 0
-          let jsonEnd = -1
-          let inString = false
-          let escapeNext = false
-          
-          for (let i = jsonStart; i < buffer.length; i++) {
-            const char = buffer[i]
-            
-            if (escapeNext) {
-              escapeNext = false
-              continue
-            }
-            
-            if (char === '\\') {
-              escapeNext = true
-              continue
-            }
-            
-            if (char === '"') {
-              inString = !inString
-              continue
-            }
-            
-            if (!inString) {
-              if (char === '[') bracketCount++
-              if (char === ']') {
-                bracketCount--
-                if (bracketCount === 0) {
-                  jsonEnd = i + 1
-                  break
-                }
-              }
-            }
-          }
-          
-          if (jsonEnd > jsonStart) {
-            try {
-              const specialistsJson = buffer.substring(jsonStart, jsonEnd)
-              specialists = JSON.parse(specialistsJson)
-              buffer = buffer.substring(jsonEnd)
-            } catch (e) {
-              console.error('[Chat] Failed to parse specialists:', e)
-            }
-          }
-        }
-
-        if (buffer.includes('__BUTTONS__')) {
-          const startIdx = buffer.indexOf('__BUTTONS__')
-          const jsonStart = startIdx + '__BUTTONS__'.length
-          
-          let bracketCount = 0
-          let jsonEnd = -1
-          let inString = false
-          let escapeNext = false
-          
-          for (let i = jsonStart; i < buffer.length; i++) {
-            const char = buffer[i]
-            
-            if (escapeNext) {
-              escapeNext = false
-              continue
-            }
-            
-            if (char === '\\') {
-              escapeNext = true
-              continue
-            }
-            
-            if (char === '"') {
-              inString = !inString
-              continue
-            }
-            
-            if (!inString) {
-              if (char === '[') bracketCount++
-              if (char === ']') {
-                bracketCount--
-                if (bracketCount === 0) {
-                  jsonEnd = i + 1
-                  break
-                }
-              }
-            }
-          }
-          
-          if (jsonEnd > jsonStart) {
-            try {
-              const buttonsJson = buffer.substring(jsonStart, jsonEnd)
-              buttons = JSON.parse(buttonsJson)
-              buffer = buffer.substring(jsonEnd)
-            } catch (e) {
-              console.error('[Chat] Failed to parse buttons:', e)
-            }
-          }
-        }
-
-        // Добавляем текст к содержимому (очищаем от маркеров)
-        const textParts = buffer.split(/__(?:SPECIALISTS|BUTTONS)__/)
-        if (textParts[0]) {
-          assistantContent += textParts[0]
-            .replace(/__BUTTONS__\[.*?\]/g, '')
-            .replace(/__SPECIALISTS__\[.*?\]/g, '')
-          buffer = buffer.substring(textParts[0].length)
-        }
-
-        // Накапливаем содержимое для финального сообщения
+        // Унифицированный парсинг
+        const parseResult = parseStreamingResponse(buffer, assistantContent, specialists, buttons)
+        assistantContent = parseResult.content
+        specialists = parseResult.specialists
+        buttons = parseResult.buttons
+        buffer = parseResult.remainingBuffer
       }
 
-      // Сохраняем финальное сообщение
-      if (assistantContent) {
-        const finalMessage: ChatMessage = {
-          id: tempAssistantId,
-          role: 'assistant',
-          content: assistantContent
-            .replace(/__BUTTONS__\[.*?\]/g, '')
-            .replace(/__SPECIALISTS__\[.*?\]/g, '')
-            .trim(),
-          specialists: specialists.length > 0 ? specialists : undefined,
-          buttons: buttons.length > 0 ? buttons : undefined,
-          timestamp: Date.now(),
-        }
+      // Создаём финальное сообщение
+      if (assistantContent.trim()) {
+        const finalMessage = createFallbackMessage(assistantContent.trim(), specialists, buttons)
+        finalMessage.id = tempAssistantId // Используем правильный ID
+        
+        saveMessage(finalMessage)
+      } else if (specialists.length > 0 || buttons.length > 0) {
+        // Если есть только специалисты или кнопки без текста
+        const finalMessage = createFallbackMessage('', specialists, buttons)
+        finalMessage.id = tempAssistantId
         
         saveMessage(finalMessage)
       }
@@ -421,119 +520,46 @@ export function useChat() {
         const reader = response.body?.getReader()
         const decoder = new TextDecoder()
 
+        if (!reader) {
+          throw new Error('No response body reader available')
+        }
+
         let assistantContent = ''
-        let specialists: Specialist[] = []
+        let specialists: any[] = []
         let buttons: string[] = []
         let tempAssistantId = crypto.randomUUID()
-      let buffer = ''
+        let buffer = ''
 
         while (true) {
-          const { done, value } = (await reader?.read()) || {}
+          const { done, value } = await reader.read()
           if (done) break
 
           const chunk = decoder.decode(value, { stream: true })
           buffer += chunk
 
-        // Парсим специальные маркеры
-          if (buffer.includes('__SPECIALISTS__')) {
-            const startIdx = buffer.indexOf('__SPECIALISTS__')
-            const jsonStart = startIdx + '__SPECIALISTS__'.length
-            
-            let bracketCount = 0
-            let jsonEnd = -1
-            let inString = false
-            let escapeNext = false
-            
-            for (let i = jsonStart; i < buffer.length; i++) {
-              const char = buffer[i]
-              
-              if (escapeNext) {
-                escapeNext = false
-                continue
-              }
-              
-              if (char === '\\') {
-                escapeNext = true
-                continue
-              }
-              
-              if (char === '"') {
-                inString = !inString
-                continue
-              }
-              
-              if (!inString) {
-                if (char === '[') bracketCount++
-                if (char === ']') {
-                  bracketCount--
-                  if (bracketCount === 0) {
-                    jsonEnd = i + 1
-                    break
-                  }
-                }
-              }
-            }
-            
-            if (jsonEnd > jsonStart) {
-              assistantContent += buffer.substring(0, startIdx)
-              const jsonStr = buffer.substring(jsonStart, jsonEnd)
-              buffer = buffer.substring(jsonEnd)
-              
-              try {
-                specialists = JSON.parse(jsonStr)
-              } catch (e) {
-              console.error('[Chat] Failed to parse specialists:', e)
-              }
-            }
-          } else if (buffer.includes('__BUTTONS__')) {
-            const startIdx = buffer.indexOf('__BUTTONS__')
-            const jsonStart = startIdx + '__BUTTONS__'.length
-            const jsonEnd = buffer.indexOf(']', jsonStart)
-            
-            if (jsonEnd > jsonStart) {
-              assistantContent += buffer.substring(0, startIdx)
-              const jsonStr = buffer.substring(jsonStart, jsonEnd + 1)
-              buffer = buffer.substring(jsonEnd + 1)
-              
-              try {
-                buttons = JSON.parse(jsonStr)
-              } catch (e) {
-              console.error('[Chat] Failed to parse buttons:', e)
-              }
-            }
-          } else if (!buffer.includes('__')) {
-            assistantContent += buffer
-            buffer = ''
-          }
-
-        // Обновляем сообщение в реальном времени
-          const cleanContent = assistantContent
-            .replace(/__BUTTONS__\[.*?\]/g, '')
-            .replace(/__SEARCH__\{.*?\}/g, '')
-            .trim()
-
-        // Обновляем состояние для streaming
-        setState(prev => ({
-                ...prev,
-          isLoading: true, // Продолжаем показывать индикатор загрузки
-        }))
+          // Унифицированный парсинг (та же логика, что и в handleSmartMode)
+          const parseResult = parseStreamingResponse(buffer, assistantContent, specialists, buttons)
+          assistantContent = parseResult.content
+          specialists = parseResult.specialists
+          buttons = parseResult.buttons
+          buffer = parseResult.remainingBuffer
         }
 
-        // Сохраняем финальное сообщение
-        const finalMessage: ChatMessage = {
-          id: tempAssistantId,
-          role: 'assistant',
-          content: assistantContent
-            .replace(/__BUTTONS__\[.*?\]/g, '')
-            .replace(/__SEARCH__\{.*?\}/g, '')
-            .trim(),
-          specialists: specialists.length > 0 ? specialists : undefined,
-          buttons: buttons.length > 0 ? buttons : undefined,
-          timestamp: Date.now(),
-          sessionId: sessionId,
+        // Создаём финальное сообщение
+        if (assistantContent.trim()) {
+          const finalMessage = createFallbackMessage(assistantContent.trim(), specialists, buttons)
+          finalMessage.id = tempAssistantId // Используем правильный ID
+          finalMessage.sessionId = sessionId // Добавляем sessionId для classic mode
+          
+          saveMessage(finalMessage)
+        } else if (specialists.length > 0 || buttons.length > 0) {
+          // Если есть только специалисты или кнопки без текста
+          const finalMessage = createFallbackMessage('', specialists, buttons)
+          finalMessage.id = tempAssistantId
+          finalMessage.sessionId = sessionId
+          
+          saveMessage(finalMessage)
         }
-
-        saveMessage(finalMessage)
         
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
