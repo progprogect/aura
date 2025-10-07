@@ -93,10 +93,16 @@ export function useChat() {
     }))
   }, [currentPhase, questionsAsked])
 
-  // Обработка сообщения
+  // Обработка сообщения - стабильная функция без зависимостей от изменяемых данных
   const processMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || !sessionId) return
+
+      // Получаем актуальные данные на момент вызова
+      const currentMessages = messages
+      const currentCollectedData = collectedData
+      const currentDetectedCategory = detectedCategory
+      const currentMode = state.mode.type
 
       // Валидируем пользовательский ввод
       const inputValidation = validateInput(content)
@@ -141,10 +147,10 @@ export function useChat() {
       setState(prev => ({ ...prev, isLoading: true, error: undefined }))
 
       try {
-        if (state.mode.type === 'smart') {
-          await handleSmartMode(userMessage)
+        if (currentMode === 'smart') {
+          await handleSmartModeRef.current?.(userMessage, currentMessages, currentCollectedData, currentDetectedCategory)
         } else {
-          await handleClassicMode(userMessage)
+          await handleClassicModeRef.current?.(userMessage, currentMessages)
         }
       } catch (error) {
         const chatError = handleError(error, 'sendMessage')
@@ -162,7 +168,7 @@ export function useChat() {
         setState(prev => ({ ...prev, isLoading: false }))
       }
     },
-    [sessionId, saveMessage, state.mode.type, collectedData, detectedCategory, handleError, canRecover, recoverFromError, validateInput, validateMessage]
+    [sessionId, saveMessage, handleError, canRecover, recoverFromError, validateInput, validateMessage]
   )
 
   // Обрабатываем debounced сообщение
@@ -200,18 +206,25 @@ export function useChat() {
     [sessionId, state.phase]
   )
 
-  // Обработка умного режима - используем реальный API
-  const handleSmartMode = useCallback(async (userMessage: ChatMessage) => {
+  // Обработка умного режима - стабильная функция с параметрами
+  const handleSmartMode = useCallback(async (
+    userMessage: ChatMessage, 
+    currentMessages: ChatMessage[], 
+    currentCollectedData: Record<string, any>, 
+    currentDetectedCategory?: string
+  ) => {
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
+          messages: [...currentMessages, userMessage].map((m) => ({
             role: m.role,
             content: m.content,
           })),
           sessionId,
+          collectedData: currentCollectedData,
+          detectedCategory: currentDetectedCategory,
         }),
         signal: abortControllerRef.current?.signal,
       })
@@ -331,159 +344,166 @@ export function useChat() {
     }
   }, [sessionId, saveMessage, handleError, canRecover, recoverFromError])
 
-  // Обработка классического режима
-  const handleClassicMode = useCallback(async (userMessage: ChatMessage) => {
+  // Обработка классического режима - стабильная функция с параметрами
+  const handleClassicMode = useCallback(async (userMessage: ChatMessage, currentMessages: ChatMessage[]) => {
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          sessionId,
-        }),
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [...currentMessages, userMessage].map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            sessionId,
+          }),
         signal: abortControllerRef.current?.signal,
-      })
+        })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
 
-      // Читаем streaming response
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
+        // Читаем streaming response
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
 
-      let assistantContent = ''
-      let specialists: Specialist[] = []
-      let buttons: string[] = []
-      let tempAssistantId = crypto.randomUUID()
+        let assistantContent = ''
+        let specialists: Specialist[] = []
+        let buttons: string[] = []
+        let tempAssistantId = crypto.randomUUID()
       let buffer = ''
 
-      while (true) {
-        const { done, value } = (await reader?.read()) || {}
-        if (done) break
+        while (true) {
+          const { done, value } = (await reader?.read()) || {}
+          if (done) break
 
-        const chunk = decoder.decode(value, { stream: true })
-        buffer += chunk
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
 
         // Парсим специальные маркеры
-        if (buffer.includes('__SPECIALISTS__')) {
-          const startIdx = buffer.indexOf('__SPECIALISTS__')
-          const jsonStart = startIdx + '__SPECIALISTS__'.length
-          
-          let bracketCount = 0
-          let jsonEnd = -1
-          let inString = false
-          let escapeNext = false
-          
-          for (let i = jsonStart; i < buffer.length; i++) {
-            const char = buffer[i]
+          if (buffer.includes('__SPECIALISTS__')) {
+            const startIdx = buffer.indexOf('__SPECIALISTS__')
+            const jsonStart = startIdx + '__SPECIALISTS__'.length
             
-            if (escapeNext) {
-              escapeNext = false
-              continue
-            }
+            let bracketCount = 0
+            let jsonEnd = -1
+            let inString = false
+            let escapeNext = false
             
-            if (char === '\\') {
-              escapeNext = true
-              continue
-            }
-            
-            if (char === '"') {
-              inString = !inString
-              continue
-            }
-            
-            if (!inString) {
-              if (char === '[') bracketCount++
-              if (char === ']') {
-                bracketCount--
-                if (bracketCount === 0) {
-                  jsonEnd = i + 1
-                  break
+            for (let i = jsonStart; i < buffer.length; i++) {
+              const char = buffer[i]
+              
+              if (escapeNext) {
+                escapeNext = false
+                continue
+              }
+              
+              if (char === '\\') {
+                escapeNext = true
+                continue
+              }
+              
+              if (char === '"') {
+                inString = !inString
+                continue
+              }
+              
+              if (!inString) {
+                if (char === '[') bracketCount++
+                if (char === ']') {
+                  bracketCount--
+                  if (bracketCount === 0) {
+                    jsonEnd = i + 1
+                    break
+                  }
                 }
               }
             }
-          }
-          
-          if (jsonEnd > jsonStart) {
-            assistantContent += buffer.substring(0, startIdx)
-            const jsonStr = buffer.substring(jsonStart, jsonEnd)
-            buffer = buffer.substring(jsonEnd)
             
-            try {
-              specialists = JSON.parse(jsonStr)
-            } catch (e) {
+            if (jsonEnd > jsonStart) {
+              assistantContent += buffer.substring(0, startIdx)
+              const jsonStr = buffer.substring(jsonStart, jsonEnd)
+              buffer = buffer.substring(jsonEnd)
+              
+              try {
+                specialists = JSON.parse(jsonStr)
+              } catch (e) {
               console.error('[Chat] Failed to parse specialists:', e)
+              }
             }
-          }
-        } else if (buffer.includes('__BUTTONS__')) {
-          const startIdx = buffer.indexOf('__BUTTONS__')
-          const jsonStart = startIdx + '__BUTTONS__'.length
-          const jsonEnd = buffer.indexOf(']', jsonStart)
-          
-          if (jsonEnd > jsonStart) {
-            assistantContent += buffer.substring(0, startIdx)
-            const jsonStr = buffer.substring(jsonStart, jsonEnd + 1)
-            buffer = buffer.substring(jsonEnd + 1)
+          } else if (buffer.includes('__BUTTONS__')) {
+            const startIdx = buffer.indexOf('__BUTTONS__')
+            const jsonStart = startIdx + '__BUTTONS__'.length
+            const jsonEnd = buffer.indexOf(']', jsonStart)
             
-            try {
-              buttons = JSON.parse(jsonStr)
-            } catch (e) {
+            if (jsonEnd > jsonStart) {
+              assistantContent += buffer.substring(0, startIdx)
+              const jsonStr = buffer.substring(jsonStart, jsonEnd + 1)
+              buffer = buffer.substring(jsonEnd + 1)
+              
+              try {
+                buttons = JSON.parse(jsonStr)
+              } catch (e) {
               console.error('[Chat] Failed to parse buttons:', e)
+              }
             }
+          } else if (!buffer.includes('__')) {
+            assistantContent += buffer
+            buffer = ''
           }
-        } else if (!buffer.includes('__')) {
-          assistantContent += buffer
-          buffer = ''
-        }
 
         // Обновляем сообщение в реальном времени
-        const cleanContent = assistantContent
-          .replace(/__BUTTONS__\[.*?\]/g, '')
-          .replace(/__SEARCH__\{.*?\}/g, '')
-          .trim()
+          const cleanContent = assistantContent
+            .replace(/__BUTTONS__\[.*?\]/g, '')
+            .replace(/__SEARCH__\{.*?\}/g, '')
+            .trim()
 
         // Обновляем состояние для streaming
         setState(prev => ({
-          ...prev,
+                ...prev,
           isLoading: true, // Продолжаем показывать индикатор загрузки
         }))
-      }
+        }
 
-      // Сохраняем финальное сообщение
-      const finalMessage: ChatMessage = {
-        id: tempAssistantId,
-        role: 'assistant',
-        content: assistantContent
-          .replace(/__BUTTONS__\[.*?\]/g, '')
-          .replace(/__SEARCH__\{.*?\}/g, '')
-          .trim(),
-        specialists: specialists.length > 0 ? specialists : undefined,
-        buttons: buttons.length > 0 ? buttons : undefined,
-        timestamp: Date.now(),
-        sessionId: sessionId,
-      }
+        // Сохраняем финальное сообщение
+        const finalMessage: ChatMessage = {
+          id: tempAssistantId,
+          role: 'assistant',
+          content: assistantContent
+            .replace(/__BUTTONS__\[.*?\]/g, '')
+            .replace(/__SEARCH__\{.*?\}/g, '')
+            .trim(),
+          specialists: specialists.length > 0 ? specialists : undefined,
+          buttons: buttons.length > 0 ? buttons : undefined,
+          timestamp: Date.now(),
+          sessionId: sessionId,
+        }
 
-      saveMessage(finalMessage)
+        saveMessage(finalMessage)
+        
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return
+        }
 
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return
-      }
-      
       const chatError = handleError(error, 'classicMode')
       throw chatError
     }
   }, [sessionId, saveMessage, handleError])
 
-  // Обработка ответов на вопросы
-  const handleQuestionAnswer = useCallback(async (questionId: string, answer: string | string[]) => {
+  // Обработка ответов на вопросы - стабильная функция с параметрами
+  const handleQuestionAnswer = useCallback(async (
+    questionId: string, 
+    answer: string | string[],
+    currentQuestionsAsked: StructuredQuestion[],
+    currentCollectedData: Record<string, any>,
+    currentDetectedCategory?: string,
+    currentMessages: ChatMessage[] = []
+  ) => {
     try {
       // Находим вопрос
-      const question = questionsAsked.find(q => q.id === questionId)
+      const question = currentQuestionsAsked.find(q => q.id === questionId)
       if (!question) {
         setState(prev => ({ 
           ...prev, 
@@ -519,23 +539,23 @@ export function useChat() {
 
       // Анализируем достаточность данных
       const context = {
-        category: detectedCategory as any,
-        collectedData: { ...collectedData, ...newData },
-        questionsAsked: questionsAsked,
-        conversationHistory: messages.map(m => m.content),
-        userQuery: messages[messages.length - 1]?.content || ''
+        category: currentDetectedCategory as any,
+        collectedData: { ...currentCollectedData, ...newData },
+        questionsAsked: currentQuestionsAsked,
+        conversationHistory: currentMessages.map(m => m.content),
+        userQuery: currentMessages[currentMessages.length - 1]?.content || ''
       }
 
       const sufficiency = await callAIAPI('analyzeDataSufficiency', context)
 
       if (sufficiency.isSufficient || !sufficiency.shouldAskMore) {
         // Переходим к поиску
-        await performSearch({
-          category: detectedCategory as any,
+        await performSearchRef.current?.({
+          category: currentDetectedCategory as any,
           problem: context.userQuery,
           workFormats: newData.work_format ? [newData.work_format] : [],
-          preferences: newData
-        })
+          preferences: { ...currentCollectedData, ...newData }
+        }, { ...currentCollectedData, ...newData }, currentDetectedCategory, currentMessages)
       } else {
         // Продолжаем сбор данных
         const assistantMessage: ChatMessage = {
@@ -555,19 +575,24 @@ export function useChat() {
         error: chatError.message 
       }))
     }
-  }, [collectedData, detectedCategory, questionsAsked, saveCollectedData, saveMessage, validateAnswer, handleError])
+  }, [saveCollectedData, saveMessage, validateAnswer, handleError])
 
-  // Выполнение поиска специалистов
-  const performSearch = useCallback(async (searchParams: any) => {
+  // Выполнение поиска специалистов - стабильная функция с параметрами
+  const performSearch = useCallback(async (
+    searchParams: any,
+    currentCollectedData: Record<string, any>,
+    currentDetectedCategory?: string,
+    currentMessages: ChatMessage[] = []
+  ) => {
     try {
       setState(prev => ({ ...prev, isSearching: true }))
       updatePhase('searching')
 
       const searchOptions = {
-        query: searchParams.problem || messages[messages.length - 1]?.content || '',
-        collectedData,
-        detectedCategory,
-        conversationHistory: messages.map(m => m.content),
+        query: searchParams.problem || currentMessages[currentMessages.length - 1]?.content || '',
+        collectedData: currentCollectedData,
+        detectedCategory: currentDetectedCategory,
+        conversationHistory: currentMessages.map(m => m.content),
         limit: 6,
         excludeIds: []
       }
@@ -609,23 +634,27 @@ export function useChat() {
     } finally {
       setState(prev => ({ ...prev, isSearching: false }))
     }
-  }, [collectedData, detectedCategory, updatePhase, saveMessage, handleError, validateSearchOptions])
+  }, [updatePhase, saveMessage, handleError, validateSearchOptions])
 
-  // Пропуск сбора данных
-  const skipDataCollection = useCallback(async () => {
+  // Пропуск сбора данных - стабильная функция с параметрами
+  const skipDataCollection = useCallback(async (
+    currentDetectedCategory?: string,
+    currentCollectedData: Record<string, any> = {},
+    currentMessages: ChatMessage[] = []
+  ) => {
     try {
       const context = getQuestionContext()
-      await performSearch({
-        category: detectedCategory,
+      await performSearchRef.current?.({
+        category: currentDetectedCategory,
         problem: context.userQuery,
         workFormats: [],
-        preferences: collectedData
-      })
+        preferences: currentCollectedData
+      }, currentCollectedData, currentDetectedCategory, currentMessages)
     } catch (error) {
       const chatError = handleError(error, 'skipDataCollection')
       console.error('[Chat] Error skipping data collection:', chatError)
     }
-  }, [getQuestionContext, detectedCategory, collectedData, performSearch, handleError])
+  }, [getQuestionContext, handleError])
 
   // Сброс чата
   const reset = useCallback(() => {
@@ -666,6 +695,11 @@ export function useChat() {
   performSearchRef.current = performSearch
   undoLastMessageRef.current = undoLastMessage
 
+  // Обертка для handleQuestionAnswer с правильной сигнатурой
+  const handleQuestionAnswerWrapper = useCallback(async (questionId: string, answer: string | string[]) => {
+    return handleQuestionAnswerRef.current?.(questionId, answer, questionsAsked, collectedData, detectedCategory, messages)
+  }, [])
+
   return {
     // Состояние
     messages,
@@ -675,7 +709,7 @@ export function useChat() {
     
     // Методы
     sendMessage,
-    handleQuestionAnswer,
+    handleQuestionAnswer: handleQuestionAnswerWrapper,
     skipDataCollection,
     toggleMode,
     reset,
