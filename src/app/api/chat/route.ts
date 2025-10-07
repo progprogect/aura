@@ -198,6 +198,17 @@ export async function POST(request: NextRequest) {
       followUp: isFollowUpRequest,
       showPrevious: isShowPreviousRequest,
       expandCriteria: isExpandCriteriaRequest,
+      readyForSearch,
+      dialogAnalysisNextAction: dialogAnalysis.nextAction,
+      extractedParams: {
+        hasPersonalData: !!extractedParams.personalProfile?.gender && !!extractedParams.personalProfile?.age,
+        hasProblem: extractedParams.problem && extractedParams.problem.length > 3,
+        hasCategory: !!extractedParams.category,
+        hasWorkFormat: extractedParams.workFormats && extractedParams.workFormats.length > 0,
+        category: extractedParams.category,
+        workFormats: extractedParams.workFormats,
+        problem: extractedParams.problem
+      }
     })
     console.log('═══════════════════════════════════════════')
 
@@ -208,6 +219,16 @@ export async function POST(request: NextRequest) {
     let avgSimilarityScore = 0
     
     if (shouldSearch) {
+      console.log('[Chat API] 🔍 Starting search with params:', {
+        query: extractedParams.query,
+        category: extractedParams.category,
+        workFormats: extractedParams.workFormats,
+        city: extractedParams.city,
+        isExpandCriteriaRequest,
+        isShowPreviousRequest,
+        isFollowUpRequest
+      })
+      
       // Если пользователь хочет расширить критерии - ищем с урезанными фильтрами
       if (isExpandCriteriaRequest) {
         console.log('[Chat API] 🔄 Expanding search criteria (removing strict filters)...')
@@ -302,6 +323,12 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('[Chat API] ✅ Found specialists:', specialists.length)
+        console.log('[Chat API] 📋 Specialists data:', specialists.map(s => ({
+          id: s.id,
+          name: s.firstName + ' ' + s.lastName,
+          category: s.category,
+          city: s.city
+        })))
         
         // Если новых не нашли - сохраняем эту информацию для GPT
         noNewSpecialists = specialists.length === 0 && session.recommendedIds.length > 0
@@ -401,6 +428,17 @@ export async function POST(request: NextRequest) {
           count: specialists.length,
         })
       }
+    } else {
+      console.log('[Chat API] ❌ Search NOT performed - shouldSearch is false')
+      console.log('[Chat API] 🔍 Debug info:', {
+        shouldSearch,
+        readyForSearch,
+        dialogAnalysisNextAction: dialogAnalysis.nextAction,
+        userRequestedSearch,
+        isFollowUpRequest,
+        isShowPreviousRequest,
+        isExpandCriteriaRequest
+      })
     }
 
     // Формируем контекст для GPT

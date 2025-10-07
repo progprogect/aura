@@ -46,7 +46,7 @@ export const APP_CONFIG = {
    */
   ai: {
     models: {
-      chat: 'gpt-4o', // Более умная модель для лучшего диалога
+      chat: 'gpt-4o-mini', // Быстрая и эффективная модель для диалога
       embedding: 'text-embedding-3-small',
     },
     chat: {
