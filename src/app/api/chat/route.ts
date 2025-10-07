@@ -10,6 +10,7 @@ import { searchSpecialistsBySemantic, searchSpecialistsByKeyword } from '@/lib/a
 import { generatePersonalQuestions } from '@/lib/ai/personal-questions-generator'
 import { analyzePersonalContext } from '@/lib/ai/contextual-analyzer'
 import { rankSpecialistsByPersonalization, generatePersonalizedSearchExplanation, analyzePersonalizationQuality } from '@/lib/ai/personalized-search'
+import { analyzeDialogContext, analyzeUserType, analyzeComplexity, generateContextualHints, isReadyForSearch } from '@/lib/ai/contextual-dialog-analyzer'
 import { CategoryKey } from '@/config/app'
 import { prisma } from '@/lib/db'
 import { trackChatEvent, ChatEvent } from '@/lib/analytics/chat-analytics'
@@ -91,35 +92,34 @@ export async function POST(request: NextRequest) {
     const isExpandCriteriaRequest = messages.length >= 4 &&
       expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
 
+    // НОВАЯ ЛОГИКА: Контекстный анализ диалога
+    const dialogAnalysis = analyzeDialogContext(messages, extractedParams)
+    const userType = analyzeUserType(messages, extractedParams)
+    const complexity = analyzeComplexity(messages, extractedParams)
+    const contextualHints = generateContextualHints(extractedParams, userType, complexity)
+    const readyForSearch = isReadyForSearch(extractedParams)
+
     console.log('═══════════════════════════════════════════')
     console.log('[Chat API] 📥 Incoming messages:', messages.length)
     console.log('[Chat API] 💬 Last user message:', lastUserMessage.content)
     console.log('[Chat API] 🔍 Extracted params:', JSON.stringify(extractedParams, null, 2))
+    console.log('[Chat API] 🧠 Dialog analysis:', JSON.stringify(dialogAnalysis, null, 2))
+    console.log('[Chat API] 👤 User type:', userType)
+    console.log('[Chat API] 📊 Complexity:', complexity)
+    console.log('[Chat API] 💡 Contextual hints:', contextualHints)
+    console.log('[Chat API] ✅ Ready for search:', readyForSearch)
     console.log('[Chat API] 🔁 Show previous request:', isShowPreviousRequest)
     console.log('[Chat API] 🔄 Expand criteria request:', isExpandCriteriaRequest)
     
     // Определяем shouldSearch ЗДЕСЬ (с доступом ко ВСЕМ переменным!)
     
-    // НОВАЯ ЛОГИКА: КРИТИЧЕСКИЕ ШАГИ (MUST HAVE для поиска):
-    const hasCategory = !!extractedParams.category
-    const hasFormat = extractedParams.workFormats && extractedParams.workFormats.length > 0
-    const hasProblem = extractedParams.problem && extractedParams.problem.length > 3
-    const hasPersonalProfile = !!extractedParams.personalProfile?.gender && !!extractedParams.personalProfile?.age
-    const hasBudget = !!extractedParams.maxPrice // НЕ ОБЯЗАТЕЛЬНО!
-    
-    // Базовые параметры (минимум для поиска): личные данные + проблема + формат
-    const hasBasics = hasPersonalProfile && hasCategory && hasFormat && hasProblem
-    
-    // Все критические шаги завершены (бюджет опционален)
-    const allCriticalStepsComplete = hasBasics
+    // НОВАЯ ЛОГИКА: Используем контекстный анализ для определения готовности к поиску
+    // const shouldSearch = readyForSearch && dialogAnalysis.nextAction === 'start_search'
     
     console.log('[Chat API] 📊 Dialog progress:', {
-      hasCategory,
-      hasFormat,
-      hasProblem,
-      hasBudget,
-      hasBasics,
-      allCriticalStepsComplete,
+      readyForSearch,
+      dialogStage: dialogAnalysis.currentStage,
+      nextAction: dialogAnalysis.nextAction,
       messageCount: messages.length
     })
     
@@ -156,27 +156,27 @@ export async function POST(request: NextRequest) {
     // User requested search если:
     // 1. СТРОГИЙ keyword (🔍, "найти специалистов") - всегда работает
     // 2. ИЛИ МЯГКИЙ keyword + ВСЕ КРИТИЧЕСКИЕ ШАГИ ПРОЙДЕНЫ
-    const userRequestedSearch = strictMatch || (looseMatch && allCriticalStepsComplete)
+    const userRequestedSearch = strictMatch || (looseMatch && readyForSearch)
     
     if (userRequestedSearch) {
       console.log('[Chat API] 🎯 User requested search!', {
         strictMatch,
         looseMatch,
-        allCriticalStepsComplete,
+        readyForSearch,
         message: lastUserMessage.content
       })
-    } else if (looseMatch && !allCriticalStepsComplete) {
+    } else if (looseMatch && !readyForSearch) {
       console.log('[Chat API] ⏸️  Loose keyword found but critical steps incomplete:', {
         looseMatch,
-        hasCategory,
-        hasFormat,
-        hasProblem,
-        hasBudget,
+        hasCategory: !!extractedParams.category,
+        hasFormat: extractedParams.workFormats && extractedParams.workFormats.length > 0,
+        hasProblem: extractedParams.problem && extractedParams.problem.length > 3,
+        hasBudget: !!extractedParams.maxPrice,
         missingSteps: [
-          !hasCategory && 'category',
-          !hasFormat && 'format',
-          !hasProblem && 'problem',
-          !hasBudget && 'budget'
+          !extractedParams.category && 'category',
+          !(extractedParams.workFormats && extractedParams.workFormats.length > 0) && 'format',
+          !(extractedParams.problem && extractedParams.problem.length > 3) && 'problem',
+          !extractedParams.maxPrice && 'budget'
         ].filter(Boolean)
       })
     }
@@ -185,7 +185,9 @@ export async function POST(request: NextRequest) {
     const isFollowUpRequest = messages.length >= 4 && 
       followUpKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
+    // НОВАЯ ЛОГИКА: Объединяем контекстный анализ с пользовательскими запросами
     const shouldSearch = 
+      (readyForSearch && dialogAnalysis.nextAction === 'start_search') ||
       userRequestedSearch ||
       isFollowUpRequest ||
       isShowPreviousRequest ||
@@ -524,6 +526,40 @@ ${extractedParams.preferences?.methods ? `- Методы: ${extractedParams.pref
 Добавь кнопки: ["Расширить критерии", "Изменить параметры", "Смотреть каталог"]
 
 ВАЖНО: НЕ говори что нашёл специалистов! Их НЕТ!`
+    } else {
+      // НОВАЯ ЛОГИКА: Контекстный анализ для диалога
+      contextMessage = `\n\n🧠 КОНТЕКСТ ДИАЛОГА:
+Полная история переписки: ${JSON.stringify(messages, null, 2)}
+
+АНАЛИЗ ТЕКУЩЕГО СОСТОЯНИЯ:
+- Личные данные: ${extractedParams.personalProfile ? 'собраны' : 'не собраны'}
+- Проблема: ${extractedParams.problem || 'не определена'}
+- Категория: ${extractedParams.category || 'не определена'}
+- Формат работы: ${extractedParams.workFormats?.join(', ') || 'не определён'}
+- Город: ${extractedParams.city || 'не указан'}
+
+ТЕКУЩИЙ ЭТАП: ${dialogAnalysis.currentStage}
+ЛОГИКА: ${dialogAnalysis.logicReasoning}
+СЛЕДУЮЩЕЕ ДЕЙСТВИЕ: ${dialogAnalysis.nextAction}
+
+ПРЕДЛОЖЕННЫЕ ВОПРОСЫ:
+${dialogAnalysis.suggestedQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+КОНТЕКСТНЫЕ ПОДСКАЗКИ:
+${contextualHints.map(hint => `- ${hint}`).join('\n')}
+
+ЛОГИКА ДЛЯ GPT:
+1. Если личные данные не собраны → собирай их
+2. Если проблема не ясна → уточни детали
+3. Если оффлайн и нет города → спроси город
+4. Если онлайн и нет часового пояса → спроси часовой пояс
+5. Если новичок → спроси цели и предпочтения
+6. Если опытный → спроси специфические методы
+7. Если достаточно данных → переходи к поиску
+
+НЕ СПРАШИВАЙ ЦЕНУ (только если пользователь сам упомянет)
+
+ИСПОЛЬЗУЙ КОНТЕКСТНЫЕ ПОДСКАЗКИ для персонализации ответов!`
     }
 
     console.log('[Chat API] 📝 System message length:', systemMessage.length)

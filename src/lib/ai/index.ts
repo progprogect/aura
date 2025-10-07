@@ -108,6 +108,19 @@ export type {
   PersonalizedSearchParams,
 } from './personalized-search'
 
+// Contextual Dialog Analyzer
+export {
+  analyzeDialogContext,
+  analyzeUserType,
+  analyzeComplexity,
+  generateContextualHints,
+  isReadyForSearch,
+} from './contextual-dialog-analyzer'
+export type {
+  DialogStage,
+  DialogContext,
+} from './contextual-dialog-analyzer'
+
 // MongoDB (внутренний, но экспортируем для scripts)
 export {
   saveEmbedding,
