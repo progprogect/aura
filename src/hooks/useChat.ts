@@ -259,21 +259,44 @@ export function useChat() {
           
           let bracketCount = 0
           let jsonEnd = -1
+          let inString = false
+          let escapeNext = false
           
           for (let i = jsonStart; i < buffer.length; i++) {
-            if (buffer[i] === '[') bracketCount++
-            if (buffer[i] === ']') bracketCount--
-            if (bracketCount === 0) {
-              jsonEnd = i
-              break
+            const char = buffer[i]
+            
+            if (escapeNext) {
+              escapeNext = false
+              continue
+            }
+            
+            if (char === '\\') {
+              escapeNext = true
+              continue
+            }
+            
+            if (char === '"') {
+              inString = !inString
+              continue
+            }
+            
+            if (!inString) {
+              if (char === '[') bracketCount++
+              if (char === ']') {
+                bracketCount--
+                if (bracketCount === 0) {
+                  jsonEnd = i + 1
+                  break
+                }
+              }
             }
           }
           
           if (jsonEnd > jsonStart) {
             try {
-              const specialistsJson = buffer.substring(jsonStart, jsonEnd + 1)
+              const specialistsJson = buffer.substring(jsonStart, jsonEnd)
               specialists = JSON.parse(specialistsJson)
-              buffer = buffer.substring(jsonEnd + 1)
+              buffer = buffer.substring(jsonEnd)
             } catch (e) {
               console.error('[Chat] Failed to parse specialists:', e)
             }
@@ -286,31 +309,56 @@ export function useChat() {
           
           let bracketCount = 0
           let jsonEnd = -1
+          let inString = false
+          let escapeNext = false
           
           for (let i = jsonStart; i < buffer.length; i++) {
-            if (buffer[i] === '[') bracketCount++
-            if (buffer[i] === ']') bracketCount--
-            if (bracketCount === 0) {
-              jsonEnd = i
-              break
+            const char = buffer[i]
+            
+            if (escapeNext) {
+              escapeNext = false
+              continue
+            }
+            
+            if (char === '\\') {
+              escapeNext = true
+              continue
+            }
+            
+            if (char === '"') {
+              inString = !inString
+              continue
+            }
+            
+            if (!inString) {
+              if (char === '[') bracketCount++
+              if (char === ']') {
+                bracketCount--
+                if (bracketCount === 0) {
+                  jsonEnd = i + 1
+                  break
+                }
+              }
             }
           }
           
           if (jsonEnd > jsonStart) {
             try {
-              const buttonsJson = buffer.substring(jsonStart, jsonEnd + 1)
+              const buttonsJson = buffer.substring(jsonStart, jsonEnd)
               buttons = JSON.parse(buttonsJson)
-              buffer = buffer.substring(jsonEnd + 1)
+              buffer = buffer.substring(jsonEnd)
             } catch (e) {
               console.error('[Chat] Failed to parse buttons:', e)
             }
           }
         }
 
-        // Добавляем текст к содержимому
+        // Добавляем текст к содержимому (очищаем от маркеров)
         const textParts = buffer.split(/__(?:SPECIALISTS|BUTTONS)__/)
         if (textParts[0]) {
           assistantContent += textParts[0]
+            .replace(/__BUTTONS__\[.*?\]/g, '')
+            .replace(/__SPECIALISTS__\[.*?\]/g, '')
           buffer = buffer.substring(textParts[0].length)
         }
 
@@ -322,7 +370,10 @@ export function useChat() {
         const finalMessage: ChatMessage = {
           id: tempAssistantId,
           role: 'assistant',
-          content: assistantContent,
+          content: assistantContent
+            .replace(/__BUTTONS__\[.*?\]/g, '')
+            .replace(/__SPECIALISTS__\[.*?\]/g, '')
+            .trim(),
           specialists: specialists.length > 0 ? specialists : undefined,
           buttons: buttons.length > 0 ? buttons : undefined,
           timestamp: Date.now(),
