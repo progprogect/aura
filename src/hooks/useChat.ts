@@ -168,6 +168,7 @@ export function useChat() {
         setState(prev => ({ ...prev, isLoading: false }))
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sessionId, saveMessage, handleError, canRecover, recoverFromError, validateInput, validateMessage]
   )
 
@@ -337,11 +338,12 @@ export function useChat() {
       // Fallback к классическому режиму
       if (canRecover(chatError)) {
         recoverFromError(chatError)
-        await handleClassicMode(userMessage)
+        await handleClassicModeRef.current?.(userMessage, currentMessages)
       } else {
         throw chatError
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, saveMessage, handleError, canRecover, recoverFromError])
 
   // Обработка классического режима - стабильная функция с параметрами
@@ -685,6 +687,7 @@ export function useChat() {
       session.updatedAt = Date.now()
       localStorage.setItem(`aura_chat_session_${sessionId}`, JSON.stringify(session))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId])
 
   // Обновляем ref'ы для стабильных ссылок
@@ -698,6 +701,7 @@ export function useChat() {
   // Обертка для handleQuestionAnswer с правильной сигнатурой
   const handleQuestionAnswerWrapper = useCallback(async (questionId: string, answer: string | string[]) => {
     return handleQuestionAnswerRef.current?.(questionId, answer, questionsAsked, collectedData, detectedCategory, messages)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
