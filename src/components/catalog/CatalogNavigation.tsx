@@ -21,3 +21,4 @@ export function CatalogNavigation() {
   return <Breadcrumbs items={breadcrumbs} />
 }
 
+

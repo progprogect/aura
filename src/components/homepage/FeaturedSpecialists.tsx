@@ -63,12 +63,14 @@ export function FeaturedSpecialists() {
             </div>
 
             {/* Мобильный */}
-            <div className="md:hidden flex gap-4 overflow-x-auto pb-4 mb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="min-w-[280px] snap-start">
-                  <SkeletonCard />
-                </div>
-              ))}
+            <div className="md:hidden">
+              <div className="flex gap-4 overflow-x-auto pb-4 mb-8 snap-x snap-mandatory scrollbar-hide px-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="min-w-[280px] snap-start flex-shrink-0">
+                    <SkeletonCard />
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         ) : (
@@ -81,12 +83,14 @@ export function FeaturedSpecialists() {
             </div>
 
             {/* Мобильный: Горизонтальный скролл */}
-            <div className="md:hidden flex gap-4 overflow-x-auto pb-4 mb-12 snap-x snap-mandatory scrollbar-hide -mx-6 px-6">
-              {specialists.map((specialist) => (
-                <div key={specialist.id} className="min-w-[280px] snap-start">
-                  <SpecialistCard specialist={specialist} />
-                </div>
-              ))}
+            <div className="md:hidden">
+              <div className="flex gap-4 overflow-x-auto pb-4 mb-12 snap-x snap-mandatory scrollbar-hide px-6">
+                {specialists.map((specialist) => (
+                  <div key={specialist.id} className="min-w-[280px] snap-start flex-shrink-0">
+                    <SpecialistCard specialist={specialist} />
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}

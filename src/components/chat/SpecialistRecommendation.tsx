@@ -13,6 +13,18 @@ import { MapPin, Award, Video, MapPinOff, Sparkles, Search } from 'lucide-react'
 import { categoryConfigService, type CategoryConfig } from '@/lib/category-config'
 import { motion } from 'framer-motion'
 
+// Маппинг английских ключей категорий на русские названия
+const CATEGORY_NAMES: Record<string, string> = {
+  psychology: 'Психология и терапия',
+  fitness: 'Фитнес и спорт',
+  nutrition: 'Питание и диетология',
+  massage: 'Массаж и телесные практики',
+  wellness: 'Wellness и холистические практики',
+  coaching: 'Коучинг и наставничество',
+  medicine: 'Медицинские специалисты',
+  other: 'Другие специалисты',
+}
+
 interface SpecialistRecommendationProps {
   specialist: {
     id: string
@@ -47,7 +59,15 @@ export function SpecialistRecommendation({
 
   useEffect(() => {
     categoryConfigService.getCategoryConfig(specialist.category).then(setCategoryConfig).catch(() => {
-      setCategoryConfig({ key: specialist.category, name: specialist.category, emoji: '✨', priceLabel: 'за услугу', fields: {} })
+      // Используем русское название из маппинга вместо английского ключа
+      const russianName = CATEGORY_NAMES[specialist.category] || specialist.category
+      setCategoryConfig({ 
+        key: specialist.category, 
+        name: russianName, 
+        emoji: '✨', 
+        priceLabel: 'за услугу', 
+        fields: {} 
+      })
     })
   }, [specialist.category])
 
@@ -118,7 +138,7 @@ export function SpecialistRecommendation({
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {categoryConfig?.name || specialist.category}
+                  {categoryConfig?.name || CATEGORY_NAMES[specialist.category] || specialist.category}
                 </p>
               </div>
             </div>
