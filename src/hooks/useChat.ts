@@ -183,7 +183,11 @@ function parseStreamingResponse(
   let buttons = [...currentButtons]
   let remainingBuffer = buffer
 
-  // 1. Сначала накапливаем ВСЁ текстовое содержимое
+  // 1. Сначала парсим маркеры (чтобы не потерять их)
+  remainingBuffer = parseSpecialistsMarker(remainingBuffer, specialists)
+  remainingBuffer = parseButtonsMarker(remainingBuffer, buttons)
+
+  // 2. Затем накапливаем текстовое содержимое (очищаем от маркеров)
   const textParts = remainingBuffer.split(/__(?:SPECIALISTS|BUTTONS)__/)
   if (textParts[0]) {
     content += textParts[0]
@@ -191,10 +195,6 @@ function parseStreamingResponse(
       .replace(/__SPECIALISTS__\[.*?\]/g, '')
     remainingBuffer = remainingBuffer.substring(textParts[0].length)
   }
-
-  // 2. Затем парсим маркеры (в правильном порядке)
-  remainingBuffer = parseSpecialistsMarker(remainingBuffer, specialists)
-  remainingBuffer = parseButtonsMarker(remainingBuffer, buttons)
 
   return {
     content,
