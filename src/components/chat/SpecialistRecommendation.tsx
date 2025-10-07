@@ -163,7 +163,7 @@ export function SpecialistRecommendation({
             )}
 
             {/* Слоган */}
-            {specialist.tagline && (
+            {specialist.tagline && specialist.tagline.trim() && (
               <p className="text-sm text-foreground/80 mb-3 line-clamp-2">
                 {specialist.tagline}
               </p>

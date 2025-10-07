@@ -688,10 +688,10 @@ ${contextualHints.map(hint => `- ${hint}`).join('\n')}
             // Очищаем данные от проблемных символов
             const cleanSpecialistsData = specialistsData.map(s => ({
               ...s,
-              tagline: s.tagline?.replace(/[^\w\s\-.,!?()]/g, '') || '',
+              tagline: s.tagline?.replace(/[^\w\s\-.,!?()]/g, '').trim() || null,
               specializations: s.specializations?.map((spec: string) => 
-                spec.replace(/[^\w\s\-.,!?()]/g, '')
-              ) || []
+                spec.replace(/[^\w\s\-.,!?()]/g, '').trim()
+              ).filter((spec: string) => spec.length > 0) || []
             }))
             
             const specialistsJson = JSON.stringify(cleanSpecialistsData)
