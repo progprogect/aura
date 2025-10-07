@@ -14,6 +14,7 @@
     "test:chat": "tsx scripts/test-chat.ts",
     "test:ai-chat": "tsx scripts/test-ai-chat-api.ts",
     "test:duplication": "tsx scripts/test-duplication-fix.ts",
+    "test:personalized-chat": "tsx scripts/test-personalized-chat.ts",
     "chat": "tsx scripts/interactive-chat.ts"
   },
   "dependencies": {

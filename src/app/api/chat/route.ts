@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { openai, MODELS, CHAT_CONFIG } from '@/lib/ai/openai'
 import { getSystemPrompt, getExtractionPrompt } from '@/lib/ai/prompts'
 import { searchSpecialistsBySemantic, searchSpecialistsByKeyword } from '@/lib/ai/semantic-search'
+import { generatePersonalQuestions } from '@/lib/ai/personal-questions-generator'
+import { analyzePersonalContext } from '@/lib/ai/contextual-analyzer'
+import { rankSpecialistsByPersonalization, generatePersonalizedSearchExplanation, analyzePersonalizationQuality } from '@/lib/ai/personalized-search'
 import { prisma } from '@/lib/db'
 import { trackChatEvent, ChatEvent } from '@/lib/analytics/chat-analytics'
 
@@ -65,6 +68,14 @@ export async function POST(request: NextRequest) {
 
     if (lastUserMessage.role === 'user') {
       await trackChatEvent(ChatEvent.MESSAGE_SENT, sessionId)
+      
+      // Трекинг ответов на личные вопросы
+      if (extractedParams.personalProfile && Object.keys(extractedParams.personalProfile).length > 0) {
+        await trackChatEvent(ChatEvent.PERSONAL_QUESTIONS_ANSWERED, sessionId, {
+          personalProfile: extractedParams.personalProfile,
+          messageCount: messages.length
+        })
+      }
     }
 
     // Проверяем специальные запросы
@@ -76,7 +87,7 @@ export async function POST(request: NextRequest) {
     const isExpandCriteriaRequest = messages.length >= 4 &&
       expandCriteriaKeywords.some(kw => lastUserMessage.content?.toLowerCase().includes(kw))
     
-    // Извлекаем параметры поиска из диалога (БЕЗ shouldSearch!)
+    // Извлекаем параметры поиска из диалога (включая личный профиль)
     const extractedParams = await extractSearchParams(messages, lastUserMessage.content)
 
     console.log('═══════════════════════════════════════════')
@@ -88,17 +99,18 @@ export async function POST(request: NextRequest) {
     
     // Определяем shouldSearch ЗДЕСЬ (с доступом ко ВСЕМ переменным!)
     
-    // КРИТИЧЕСКИЕ ШАГИ ДИАЛОГА (MUST HAVE для поиска):
+    // НОВАЯ ЛОГИКА: КРИТИЧЕСКИЕ ШАГИ (MUST HAVE для поиска):
     const hasCategory = !!extractedParams.category
     const hasFormat = extractedParams.workFormats && extractedParams.workFormats.length > 0
     const hasProblem = extractedParams.problem && extractedParams.problem.length > 3
-    const hasBudget = !!extractedParams.maxPrice
+    const hasPersonalProfile = !!extractedParams.personalProfile?.gender && !!extractedParams.personalProfile?.age
+    const hasBudget = !!extractedParams.maxPrice // НЕ ОБЯЗАТЕЛЬНО!
     
-    // Базовые параметры (минимум для поиска)
-    const hasBasics = hasCategory && hasFormat && hasProblem
+    // Базовые параметры (минимум для поиска): личные данные + проблема + формат
+    const hasBasics = hasPersonalProfile && hasCategory && hasFormat && hasProblem
     
-    // Все критические шаги завершены (включая бюджет)
-    const allCriticalStepsComplete = hasBasics && hasBudget
+    // Все критические шаги завершены (бюджет опционален)
+    const allCriticalStepsComplete = hasBasics
     
     console.log('[Chat API] 📊 Dialog progress:', {
       hasCategory,
@@ -291,26 +303,61 @@ export async function POST(request: NextRequest) {
         // Если новых не нашли - сохраняем эту информацию для GPT
         noNewSpecialists = specialists.length === 0 && session.recommendedIds.length > 0
         
-        // Вычисляем средний similarity для оценки качества подбора
-        if (specialists.length > 0) {
-          const similarities = specialists
+        // НОВАЯ ЛОГИКА: Персонализированное ранжирование
+        if (specialists.length > 0 && extractedParams.personalProfile && extractedParams.category) {
+          console.log('[Chat API] 🎯 Applying personalization ranking...')
+          
+          // Ранжируем с учётом личного профиля
+          const rankedSpecialists = rankSpecialistsByPersonalization(
+            specialists,
+            extractedParams.personalProfile,
+            extractedParams.category,
+            extractedParams
+          )
+          
+          specialists = rankedSpecialists
+          
+          // Трекинг применения персонализации
+          await trackChatEvent(ChatEvent.PERSONALIZATION_APPLIED, sessionId, {
+            personalProfile: extractedParams.personalProfile,
+            category: extractedParams.category,
+            specialistsCount: specialists.length
+          })
+          
+          // Вычисляем средний персональный score для оценки качества подбора
+          const personalizationScores = specialists
             .slice(0, 5)
-            .map(s => s.distance !== undefined ? (1 - s.distance) * 100 : 50)
+            .map(s => s.personalizationScore)
           
-          const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length
-          avgSimilarityScore = Math.round(avgSimilarity)
+          const avgPersonalization = personalizationScores.reduce((a, b) => a + b, 0) / personalizationScores.length
+          avgSimilarityScore = Math.round(avgPersonalization)
           
-          console.log('[Chat API] 📊 Similarity stats:', {
+          console.log('[Chat API] 📊 Personalization stats:', {
             avg: avgSimilarityScore,
-            min: Math.round(Math.min(...similarities)),
-            max: Math.round(Math.max(...similarities)),
+            min: Math.round(Math.min(...personalizationScores)),
+            max: Math.round(Math.max(...personalizationScores)),
             count: specialists.length,
           })
           
           // Флаг низкого качества подбора (< 70%)
-          if (avgSimilarity < 70) {
+          if (avgPersonalization < 70) {
             isLowQualityMatch = true
-            console.log('[Chat API] ⚠️ Low quality match detected:', avgSimilarityScore, '% avg similarity')
+            console.log('[Chat API] ⚠️ Low personalization quality detected:', avgSimilarityScore, '% avg personalization')
+          }
+        } else {
+          // Fallback: старый способ оценки (если нет личного профиля)
+          if (specialists.length > 0) {
+            const similarities = specialists
+              .slice(0, 5)
+              .map(s => s.distance !== undefined ? (1 - s.distance) * 100 : 50)
+            
+            const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length
+            avgSimilarityScore = Math.round(avgSimilarity)
+            
+            if (avgSimilarity < 70) {
+              isLowQualityMatch = true
+              console.log('[Chat API] ⚠️ Low similarity quality detected:', avgSimilarityScore, '% avg similarity')
+            }
           }
         }
       }
@@ -414,8 +461,14 @@ ${JSON.stringify(
 
 Карточки УЖЕ ПОКАЗАНЫ (не перечисляй их текстом).`
       } else {
-        // НОРМАЛЬНОЕ КАЧЕСТВО - обычный флоу
+        // НОРМАЛЬНОЕ КАЧЕСТВО - персонализированный флоу
+        const personalizedExplanation = specialists.length > 0 && extractedParams.personalProfile 
+          ? generatePersonalizedSearchExplanation(specialists, extractedParams.personalProfile, extractedParams.category)
+          : 'Система нашла специалистов.'
+        
         contextMessage = `\n\n🎯 ВАЖНО: Система нашла и ПОКАЗАЛА пользователю ${specialists.length} специалистов в виде карточек.
+${personalizedExplanation}
+
 Вот их данные:\n${JSON.stringify(
           specialists.slice(0, 5).map((s) => ({
             id: s.id,
@@ -426,12 +479,15 @@ ${JSON.stringify(
             experience: s.yearsOfPractice,
             formats: s.workFormats,
             city: s.city,
+            personalizationScore: s.personalizationScore,
+            matchReasons: s.matchReasons,
+            personalizedExplanation: s.personalizedExplanation
           })),
           null,
           2
         )}
 
-НЕ ПЕРЕЧИСЛЯЙ их текстом - они УЖЕ ПОКАЗАНЫ! Прокомментируй и предложи дальнейшие действия.`
+НЕ ПЕРЕЧИСЛЯЙ их текстом - они УЖЕ ПОКАЗАНЫ! Прокомментируй персонализацию и предложи дальнейшие действия.`
       }
     } else if (noNewSpecialists) {
       // Новых не нашли, но уже были показаны ранее
@@ -651,10 +707,18 @@ async function extractSearchParams(
   city?: string
   minExperience?: number
   maxPrice?: number
+  personalProfile?: {
+    gender?: 'male' | 'female'
+    age?: 'young' | 'middle' | 'mature'
+    experience?: 'none' | 'little' | 'regular'
+    physical_condition?: 'beginner' | 'intermediate' | 'advanced'
+    lifestyle?: 'active' | 'moderate' | 'sedentary'
+    communication_style?: 'formal' | 'casual' | 'supportive'
+  }
   preferences?: {
     methods?: string[]
-    gender?: string
-    age?: string
+    specialistGender?: string
+    specialistAge?: string
   }
 }> {
   try {
@@ -698,6 +762,7 @@ async function extractSearchParams(
       city: extracted.city,
       minExperience: extracted.minExperience,
       maxPrice: extracted.maxPrice,
+      personalProfile: extracted.personalProfile,
       preferences: extracted.preferences,
     }
   } catch (error) {

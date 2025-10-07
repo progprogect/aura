@@ -74,6 +74,40 @@ export type {
   AnalysisContext,
 } from './context-analyzer'
 
+// Personal Questions Generator
+export {
+  generatePersonalQuestions,
+  validatePersonalData,
+} from './personal-questions-generator'
+export type {
+  PersonalQuestion,
+  PersonalDataContext,
+  PersonalProfile,
+} from './personal-questions-generator'
+
+// Contextual Analyzer
+export {
+  analyzePersonalContext,
+  calculatePersonalizationScore,
+  generatePersonalizedExplanation,
+} from './contextual-analyzer'
+export type {
+  ContextualHint,
+  ContextualInsights,
+  PersonalizationScore,
+} from './contextual-analyzer'
+
+// Personalized Search
+export {
+  rankSpecialistsByPersonalization,
+  generatePersonalizedSearchExplanation,
+  analyzePersonalizationQuality,
+} from './personalized-search'
+export type {
+  RankedSpecialist,
+  PersonalizedSearchParams,
+} from './personalized-search'
+
 // MongoDB (внутренний, но экспортируем для scripts)
 export {
   saveEmbedding,

@@ -28,6 +28,8 @@ export enum ChatEvent {
   CATALOG_CLICKED = 'catalog_clicked',
   CHAT_COMPLETED = 'chat_completed',
   CHAT_ABANDONED = 'chat_abandoned',
+  PERSONAL_QUESTIONS_ANSWERED = 'personal_questions_answered',
+  PERSONALIZATION_APPLIED = 'personalization_applied',
 }
 
 /**
@@ -88,6 +90,16 @@ export async function trackChatEvent(
       case ChatEvent.CATALOG_CLICKED:
         await redis.incr(`${REDIS_KEYS.CATALOG_CLICKS_TODAY}:${today}`)
         await redis.expire(`${REDIS_KEYS.CATALOG_CLICKS_TODAY}:${today}`, 60 * 60 * 48)
+        break
+
+      case ChatEvent.PERSONAL_QUESTIONS_ANSWERED:
+        // Трекинг ответов на личные вопросы для анализа качества персонализации
+        console.log(`[Analytics] Personal questions answered for session ${sessionId}:`, metadata)
+        break
+
+      case ChatEvent.PERSONALIZATION_APPLIED:
+        // Трекинг применения персонализации для анализа эффективности
+        console.log(`[Analytics] Personalization applied for session ${sessionId}:`, metadata)
         break
     }
 
