@@ -75,6 +75,7 @@ export function useChat() {
   })
 
   const abortControllerRef = useRef<AbortController | null>(null)
+  const processMessageRef = useRef<typeof processMessage>()
   const [pendingMessage, setPendingMessage] = useState<string>('')
   const debouncedMessage = useDebounce(pendingMessage, 500) // 500ms debounce
 
@@ -159,13 +160,16 @@ export function useChat() {
     [sessionId, saveMessage, state.mode.type, collectedData, detectedCategory, handleError, canRecover, recoverFromError, validateInput, validateMessage]
   )
 
+  // Обновляем ref для стабильной ссылки
+  processMessageRef.current = processMessage
+
   // Обрабатываем debounced сообщение
   useEffect(() => {
     if (debouncedMessage && debouncedMessage.trim()) {
-      processMessage(debouncedMessage)
+      processMessageRef.current?.(debouncedMessage)
       setPendingMessage('')
     }
-  }, [debouncedMessage, processMessage])
+  }, [debouncedMessage])
 
   // Переключение режима чата
   const toggleMode = useCallback((mode: 'smart' | 'classic') => {
@@ -184,14 +188,14 @@ export function useChat() {
 
       // Для быстрых ответов (кнопки) отправляем сразу
       if (state.phase === 'collecting' || state.phase === 'searching') {
-        await processMessage(content)
+        await processMessageRef.current?.(content)
         return
       }
 
       // Для обычных сообщений используем debouncing
       setPendingMessage(content)
     },
-    [sessionId, state.phase, processMessage]
+    [sessionId, state.phase]
   )
 
   // Обработка умного режима - используем реальный API
