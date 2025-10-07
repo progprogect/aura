@@ -76,6 +76,11 @@ export function useChat() {
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const processMessageRef = useRef<typeof processMessage>()
+  const handleSmartModeRef = useRef<typeof handleSmartMode>()
+  const handleClassicModeRef = useRef<typeof handleClassicMode>()
+  const handleQuestionAnswerRef = useRef<typeof handleQuestionAnswer>()
+  const performSearchRef = useRef<typeof performSearch>()
+  const undoLastMessageRef = useRef<typeof undoLastMessage>()
   const [pendingMessage, setPendingMessage] = useState<string>('')
   const debouncedMessage = useDebounce(pendingMessage, 500) // 500ms debounce
 
@@ -159,9 +164,6 @@ export function useChat() {
     },
     [sessionId, saveMessage, state.mode.type, collectedData, detectedCategory, handleError, canRecover, recoverFromError, validateInput, validateMessage]
   )
-
-  // Обновляем ref для стабильной ссылки
-  processMessageRef.current = processMessage
 
   // Обрабатываем debounced сообщение
   useEffect(() => {
@@ -327,7 +329,7 @@ export function useChat() {
         throw chatError
       }
     }
-  }, [messages, sessionId, saveMessage, handleError, canRecover, recoverFromError])
+  }, [sessionId, saveMessage, handleError, canRecover, recoverFromError])
 
   // Обработка классического режима
   const handleClassicMode = useCallback(async (userMessage: ChatMessage) => {
@@ -475,7 +477,7 @@ export function useChat() {
       const chatError = handleError(error, 'classicMode')
       throw chatError
     }
-  }, [messages, sessionId, saveMessage, handleError])
+  }, [sessionId, saveMessage, handleError])
 
   // Обработка ответов на вопросы
   const handleQuestionAnswer = useCallback(async (questionId: string, answer: string | string[]) => {
@@ -553,7 +555,7 @@ export function useChat() {
         error: chatError.message 
       }))
     }
-  }, [collectedData, detectedCategory, questionsAsked, messages, saveCollectedData, saveMessage, validateAnswer, handleError])
+  }, [collectedData, detectedCategory, questionsAsked, saveCollectedData, saveMessage, validateAnswer, handleError])
 
   // Выполнение поиска специалистов
   const performSearch = useCallback(async (searchParams: any) => {
@@ -607,7 +609,7 @@ export function useChat() {
     } finally {
       setState(prev => ({ ...prev, isSearching: false }))
     }
-  }, [collectedData, detectedCategory, messages, updatePhase, saveMessage, handleError, validateSearchOptions])
+  }, [collectedData, detectedCategory, updatePhase, saveMessage, handleError, validateSearchOptions])
 
   // Пропуск сбора данных
   const skipDataCollection = useCallback(async () => {
@@ -654,7 +656,15 @@ export function useChat() {
       session.updatedAt = Date.now()
       localStorage.setItem(`aura_chat_session_${sessionId}`, JSON.stringify(session))
     }
-  }, [messages, sessionId])
+  }, [sessionId])
+
+  // Обновляем ref'ы для стабильных ссылок
+  processMessageRef.current = processMessage
+  handleSmartModeRef.current = handleSmartMode
+  handleClassicModeRef.current = handleClassicMode
+  handleQuestionAnswerRef.current = handleQuestionAnswer
+  performSearchRef.current = performSearch
+  undoLastMessageRef.current = undoLastMessage
 
   return {
     // Состояние
