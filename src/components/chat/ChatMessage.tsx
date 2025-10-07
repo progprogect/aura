@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { ChatMessage as ChatMessageType } from '@/hooks/useChatSession'
 import { SpecialistRecommendation } from './SpecialistRecommendation'
 import { QuickReplyButtons } from './QuickReplyButtons'
+import { MarkdownRenderer } from './MarkdownRenderer'
 
 interface ChatMessageProps {
   message: ChatMessageType
@@ -43,7 +44,14 @@ export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
               : 'bg-muted text-foreground'
           }`}
         >
-          <p className="text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
+          {isUser ? (
+            <p className="text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <MarkdownRenderer 
+              content={message.content} 
+              className="text-sm md:text-base" 
+            />
+          )}
         </div>
 
         {/* Кнопки быстрого ответа */}
