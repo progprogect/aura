@@ -40,6 +40,15 @@ async function getRequests() {
     where: {
       specialistId: authSession.specialistId
     },
+    include: {
+      leadMagnet: {
+        select: {
+          id: true,
+          title: true,
+          emoji: true
+        }
+      }
+    },
     orderBy: {
       createdAt: 'desc'
     }

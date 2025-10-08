@@ -20,6 +20,15 @@ export async function GET(request: NextRequest) {
       where: {
         specialistId: session.specialistId
       },
+      include: {
+        leadMagnet: {
+          select: {
+            id: true,
+            title: true,
+            emoji: true
+          }
+        }
+      },
       orderBy: {
         createdAt: 'desc' // Новые сверху
       }

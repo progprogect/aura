@@ -17,6 +17,11 @@ interface ConsultationRequest {
   message: string | null
   status: string
   createdAt: Date
+  leadMagnetId?: string | null
+  leadMagnet?: {
+    title: string
+    emoji: string
+  } | null
 }
 
 interface RequestsListProps {
@@ -138,13 +143,27 @@ export function RequestsList({ requests: initialRequests }: RequestsListProps) {
                   <User className={`w-6 h-6 ${isNew ? 'text-blue-600' : 'text-gray-600'}`} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">
-                    {request.name}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {request.name}
+                    </h3>
+                    {/* Пометка лид-магнита */}
+                    {request.leadMagnetId && request.leadMagnet && (
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
+                        {request.leadMagnet.emoji} Лид-магнит
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                     <Clock className="w-4 h-4" />
                     {formatRelativeTime(request.createdAt)}
                   </div>
+                  {/* Название лид-магнита */}
+                  {request.leadMagnetId && request.leadMagnet && (
+                    <p className="text-xs text-purple-600 mt-1">
+                      → {request.leadMagnet.title}
+                    </p>
+                  )}
                 </div>
               </div>
               {getStatusBadge(request.status)}

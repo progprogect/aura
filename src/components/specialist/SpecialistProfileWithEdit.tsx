@@ -23,6 +23,8 @@ import { SpecialistFAQ } from './SpecialistFAQ'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import { GalleryEditor } from './edit/GalleryEditor'
 import { FAQEditor } from './edit/FAQEditor'
+import { LeadMagnetsEditor } from './edit/LeadMagnetsEditor'
+import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 
@@ -88,6 +90,15 @@ interface SpecialistProfileWithEditProps {
       id: string
       question: string
       answer: string
+    }>
+    leadMagnets: Array<{
+      id: string
+      type: 'file' | 'link' | 'service'
+      title: string
+      description: string
+      fileUrl?: string | null
+      linkUrl?: string | null
+      emoji: string
     }>
   }
 }
@@ -423,6 +434,33 @@ export function SpecialistProfileWithEdit({
             )}
           </div>
 
+          {/* Лид-магниты */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                <span className="text-pink-600 text-sm">🎁</span>
+              </span>
+              <span className="text-base sm:text-xl">Лид-магниты</span>
+            </h2>
+            {isEditMode ? (
+              <LeadMagnetsEditor
+                leadMagnets={data.leadMagnets}
+                onRefresh={() => window.location.reload()}
+              />
+            ) : (
+              data.leadMagnets.length > 0 ? (
+                <SpecialistLeadMagnets
+                  leadMagnets={data.leadMagnets}
+                  specialistId={data.id}
+                  specialistName={data.fullName}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Лид-магниты не добавлены</p>
+                </div>
+              )
+            )}
+          </div>
 
         </div>
       ) : (

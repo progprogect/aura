@@ -64,6 +64,7 @@ model Specialist {
   certificates    Certificate[]
   gallery         GalleryItem[]
   faqs            FAQ[]
+  leadMagnets     LeadMagnet[]
   consultationRequests ConsultationRequest[]
   
   // Авторизация
@@ -177,13 +178,49 @@ model FAQ {
 }
 
 // ========================================
+// ЛИД-МАГНИТЫ
+// ========================================
+
+model LeadMagnet {
+  id            String     @id @default(cuid())
+  specialistId  String
+  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  
+  type          String                    // "file" | "link" | "service"
+  title         String                    // Название лид-магнита
+  description   String                    // Краткое описание
+  
+  fileUrl       String?                   // Для типа "file" - URL файла в Cloudinary
+  linkUrl       String?                   // Для типа "link" - внешняя ссылка
+  
+  emoji         String     @default("🎁")
+  order         Int        @default(0)
+  isActive      Boolean    @default(true)
+  
+  // Аналитика
+  viewCount     Int        @default(0)
+  downloadCount Int        @default(0)
+  
+  consultationRequests ConsultationRequest[]
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  @@index([specialistId, isActive])
+}
+
+// ========================================
 // ЗАПРОСЫ НА КОНСУЛЬТАЦИЮ
 // ========================================
 
 model ConsultationRequest {
-  id            String     @id @default(cuid())
+  id            String      @id @default(cuid())
   specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  specialist    Specialist  @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  
+  // Лид-магнит (если заявка через лид-магнит)
+  leadMagnetId  String?
+  leadMagnet    LeadMagnet? @relation(fields: [leadMagnetId], references: [id], onDelete: SetNull)
   
   // Данные клиента
   name          String
@@ -199,6 +236,7 @@ model ConsultationRequest {
   
   @@index([specialistId])
   @@index([status])
+  @@index([leadMagnetId])
 }
 
 // ========================================

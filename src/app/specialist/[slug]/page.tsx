@@ -33,6 +33,10 @@ async function getSpecialist(slug: string) {
       faqs: {
         orderBy: { order: 'asc' },
       },
+      leadMagnets: {
+        where: { isActive: true },
+        orderBy: { order: 'asc' },
+      },
     },
   })
 
@@ -214,6 +218,15 @@ export default async function SpecialistPage({ params }: PageProps) {
             id: faq.id,
             question: faq.question,
             answer: faq.answer,
+          })),
+          leadMagnets: specialist.leadMagnets.map(lm => ({
+            id: lm.id,
+            type: lm.type as 'file' | 'link' | 'service',
+            title: lm.title,
+            description: lm.description,
+            fileUrl: lm.fileUrl,
+            linkUrl: lm.linkUrl,
+            emoji: lm.emoji,
           })),
         }}
       />

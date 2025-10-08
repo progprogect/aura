@@ -63,6 +63,9 @@ async function getDashboardData() {
       certificates: true,
       gallery: true,
       faqs: true,
+      leadMagnets: {
+        where: { isActive: true }
+      },
     }
   })
 
@@ -87,6 +90,7 @@ async function getDashboardData() {
     gallery: specialist.gallery.length > 0 ? 10 : 0,
     faqs: specialist.faqs.length > 0 ? 5 : 0,
     video: specialist.videoUrl ? 10 : 0,
+    leadMagnets: specialist.leadMagnets.length > 0 ? 10 : 0,
   }
 
   const baseCompletion = 20
@@ -169,6 +173,16 @@ async function getDashboardData() {
       id: 'video',
       title: 'Добавьте видео-презентацию',
       description: 'Видео помогает клиентам познакомиться с вами',
+      bonus: 10,
+      completed: false
+    })
+  }
+
+  if (specialist.leadMagnets.length === 0) {
+    tasks.push({
+      id: 'leadMagnets',
+      title: 'Создайте лид-магниты',
+      description: 'Привлекайте клиентов бесплатными материалами',
       bonus: 10,
       completed: false
     })
