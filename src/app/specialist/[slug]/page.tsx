@@ -151,30 +151,6 @@ export default async function SpecialistPage({ params }: PageProps) {
         />
       )}
 
-      {/* Hero - только для клиентов (не для владельца) */}
-      {!isOwner && (
-        <SpecialistHero
-          firstName={specialist.firstName}
-          lastName={specialist.lastName}
-          avatar={specialist.avatar}
-          category={specialist.category}
-          categoryEmoji={categoryConfig?.emoji}
-          specializations={specialist.specializations}
-          tagline={specialist.tagline}
-          city={specialist.city}
-          country={specialist.country}
-          workFormats={specialist.workFormats}
-          yearsOfPractice={specialist.yearsOfPractice}
-          verified={specialist.verified}
-          profileViews={specialist.profileViews}
-          email={specialist.email}
-          telegram={specialist.telegram}
-          whatsapp={specialist.whatsapp}
-          instagram={specialist.instagram}
-          website={specialist.website}
-        />
-      )}
-
       {/* Профиль с табами и контентом */}
       <SpecialistProfileWithEdit
         isOwner={isOwner}
@@ -184,8 +160,15 @@ export default async function SpecialistPage({ params }: PageProps) {
           firstName: specialist.firstName,
           lastName: specialist.lastName,
           avatar: specialist.avatar,
+          category: specialist.category,
+          categoryEmoji: categoryConfig?.emoji,
           tagline: specialist.tagline,
           city: specialist.city,
+          country: specialist.country,
+          workFormats: specialist.workFormats,
+          yearsOfPractice: specialist.yearsOfPractice,
+          verified: specialist.verified,
+          profileViews: specialist.profileViews,
           specializations: specialist.specializations,
         }}
         contactsData={{

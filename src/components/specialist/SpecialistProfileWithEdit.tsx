@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
+import { SpecialistHero } from './SpecialistHero'
 import { SpecialistHeroEdit } from './SpecialistHeroEdit'
 import { ContactsEditor } from './edit/ContactsEditor'
 import { EditModeToggle } from './edit/EditModeToggle'
@@ -33,8 +34,15 @@ interface SpecialistProfileWithEditProps {
     firstName: string
     lastName: string
     avatar: string | null
+    category: string
+    categoryEmoji?: string
     tagline: string | null
     city: string | null
+    country?: string
+    workFormats: string[]
+    yearsOfPractice?: number | null
+    verified: boolean
+    profileViews: number
     specializations: string[]
   }
   contactsData: {
@@ -181,6 +189,30 @@ export function SpecialistProfileWithEdit({
         )}
       </AnimatePresence>
 
+
+      {/* Hero - показываем для владельца только в режиме просмотра */}
+      {isOwner && !isEditMode && (
+        <SpecialistHero
+          firstName={heroData.firstName}
+          lastName={heroData.lastName}
+          avatar={heroData.avatar}
+          category={heroData.category}
+          categoryEmoji={heroData.categoryEmoji}
+          specializations={heroData.specializations}
+          tagline={heroData.tagline}
+          city={heroData.city}
+          country={heroData.country}
+          workFormats={heroData.workFormats}
+          yearsOfPractice={heroData.yearsOfPractice}
+          verified={heroData.verified}
+          profileViews={heroData.profileViews}
+          email={contactsData.email}
+          telegram={contactsData.telegram}
+          whatsapp={contactsData.whatsapp}
+          instagram={contactsData.instagram}
+          website={contactsData.website}
+        />
+      )}
 
       {/* Профиль - разные режимы для клиентов и специалиста */}
       {isOwner ? (
