@@ -42,24 +42,28 @@ export function InternationalPhoneInput({
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Обновляем отображаемое значение при изменении value
+  // Инициализация displayValue из value (только при внешнем изменении)
   useEffect(() => {
-    if (value && value !== normalizePhoneNumber(displayValue)) {
-      const country = detectCountryCode(value)
+    if (value) {
+      const digits = value.replace(/\D/g, '')
+      const country = detectCountryCode(digits)
       if (country) {
         setSelectedCountry(country)
-        setDisplayValue(formatPhoneNumber(value, country))
+        setDisplayValue(formatPhoneNumber(digits, country))
       } else {
-        setDisplayValue(value)
+        setDisplayValue(formatPhoneNumber(digits, selectedCountry))
       }
+    } else {
+      setDisplayValue('')
     }
-  }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value])
 
   // Обновляем отображаемое значение при изменении страны
   useEffect(() => {
     if (value) {
-      const normalized = normalizePhoneNumber(value)
-      const formatted = formatPhoneNumber(normalized, selectedCountry)
+      const digits = value.replace(/\D/g, '')
+      const formatted = formatPhoneNumber(digits, selectedCountry)
+      const normalized = normalizePhoneNumber(digits)
       setDisplayValue(formatted)
       onChange(normalized)
     }
@@ -68,14 +72,19 @@ export function InternationalPhoneInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value
     
+    // Извлекаем только цифры
+    const digits = input.replace(/\D/g, '')
+    
     // Определяем страну по введённым цифрам
-    const detectedCountry = detectCountryCode(input)
+    const detectedCountry = detectCountryCode(digits)
     if (detectedCountry && detectedCountry.code !== selectedCountry.code) {
       setSelectedCountry(detectedCountry)
     }
     
-    const formatted = formatPhoneNumber(input, detectedCountry || selectedCountry)
-    const normalized = normalizePhoneNumber(formatted)
+    // Форматируем для отображения
+    const formatted = formatPhoneNumber(digits, detectedCountry || selectedCountry)
+    // Нормализуем для передачи наверх
+    const normalized = digits ? normalizePhoneNumber(digits) : ''
     
     setDisplayValue(formatted)
     onChange(normalized)

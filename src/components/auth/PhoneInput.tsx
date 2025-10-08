@@ -36,15 +36,11 @@ export function PhoneInput({
   const [displayValue, setDisplayValue] = useState('')
   const [currentCountry, setCurrentCountry] = useState<any>(null)
 
-  // Форматирование номера телефона
-  const formatPhone = (input: string) => {
+  // Форматирование номера телефона из чистых цифр
+  const formatPhone = (digits: string) => {
+    if (!digits) return ''
+
     if (international) {
-      // Используем новую логику для международных номеров
-      const digits = input.replace(/\D/g, '')
-      
-      // Если ввод пустой, возвращаем пустую строку
-      if (!digits) return ''
-      
       // Определяем страну по коду
       const country = detectCountryCode(digits)
       if (country) {
@@ -52,17 +48,14 @@ export function PhoneInput({
         return formatPhoneNumber(digits, country)
       }
       
-      // Если страна не определена, но есть цифры - показываем как есть
-      return input
+      // Если страна не определена, но есть цифры - добавляем + в начало
+      return '+' + digits
     }
     
     // Старая логика для российских номеров (обратная совместимость)
-    const digits = input.replace(/\D/g, '')
-    
-    if (!digits) return ''
+    let cleanDigits = digits
     
     // Если начинается с 8, заменяем на 7
-    let cleanDigits = digits
     if (digits.startsWith('8')) {
       cleanDigits = '7' + digits.slice(1)
     }
@@ -84,35 +77,45 @@ export function PhoneInput({
     return `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4, 7)}-${cleanDigits.slice(7, 9)}-${cleanDigits.slice(9)}`
   }
 
-  // Преобразование отформатированного номера в чистый формат
-  const normalizePhone = (formatted: string) => {
-    if (international) {
-      return normalizePhoneNumber(formatted)
-    }
-    
-    // Старая логика
-    const digits = formatted.replace(/\D/g, '')
-    if (digits.startsWith('8')) {
-      return '+7' + digits.slice(1)
-    }
-    if (digits.startsWith('7')) {
-      return '+' + digits
-    }
-    return digits
-  }
-
-  // Обновляем отображаемое значение при изменении value
+  // Инициализация displayValue из value (только при монтировании или внешнем изменении)
   useEffect(() => {
-    if (value && value !== normalizePhone(displayValue)) {
-      setDisplayValue(formatPhone(value))
+    if (value) {
+      const digits = value.replace(/\D/g, '')
+      const formatted = formatPhone(digits)
+      setDisplayValue(formatted)
+    } else {
+      setDisplayValue('')
+      setCurrentCountry(null)
     }
-  }, [value, international]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value
-    const formatted = formatPhone(input)
-    const normalized = normalizePhone(formatted)
     
+    // Извлекаем только цифры из введенного значения
+    const digits = input.replace(/\D/g, '')
+    
+    // Форматируем для отображения
+    const formatted = formatPhone(digits)
+    
+    // Нормализуем для передачи наверх
+    let normalized = ''
+    if (digits) {
+      if (international) {
+        normalized = normalizePhoneNumber(digits)
+      } else {
+        // Старая логика
+        if (digits.startsWith('8')) {
+          normalized = '+7' + digits.slice(1)
+        } else if (digits.startsWith('7')) {
+          normalized = '+' + digits
+        } else {
+          normalized = '+7' + digits
+        }
+      }
+    }
+    
+    // Обновляем состояние
     setDisplayValue(formatted)
     onChange(normalized)
   }
