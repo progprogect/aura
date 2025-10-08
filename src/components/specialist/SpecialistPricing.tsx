@@ -4,6 +4,7 @@ import * as React from 'react'
 import { motion } from 'framer-motion'
 // Убираем импорт иконок - используем внешние SVG
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { InlineInput } from './edit/InlineInput'
 
 export interface SpecialistPricingProps {
   category: string
@@ -12,6 +13,8 @@ export interface SpecialistPricingProps {
   currency: string
   priceDescription?: string | null
   priceLabel?: string // Передаем из server component
+  isEditMode?: boolean
+  onSave?: (field: string, value: string | number) => Promise<any>
 }
 
 export function SpecialistPricing({
@@ -21,12 +24,14 @@ export function SpecialistPricing({
   currency,
   priceDescription,
   priceLabel = 'за услугу',
+  isEditMode = false,
+  onSave,
 }: SpecialistPricingProps) {
-  if (!priceFrom && !priceTo) {
+  if (!priceFrom && !priceTo && !isEditMode) {
     return null
   }
 
-  // Форматируем цену из копеек в рубли
+  // Форматируем цену из копеек в рубли для отображения
   const formatPrice = (price: number) => {
     const rubles = price / 100
     return new Intl.NumberFormat('ru-RU', {
@@ -35,6 +40,10 @@ export function SpecialistPricing({
       maximumFractionDigits: 0,
     }).format(rubles)
   }
+
+  // Конвертируем копейки в рубли для редактирования
+  const priceFromRubles = priceFrom ? priceFrom / 100 : null
+  const priceToRubles = priceTo ? priceTo / 100 : null
 
   return (
     <motion.div
@@ -50,22 +59,68 @@ export function SpecialistPricing({
             💰 Стоимость
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900">
-              {priceFrom && priceTo && priceFrom !== priceTo
-                ? `${formatPrice(priceFrom)} - ${formatPrice(priceTo)}`
-                : formatPrice(priceFrom || priceTo || 0)}
-            </span>
-            <span className="text-lg text-gray-600">₽</span>
-          </div>
+        <CardContent className="space-y-4">
+          {isEditMode && onSave ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InlineInput
+                  value={priceFromRubles}
+                  field="priceFrom"
+                  onSave={async (field, value) => {
+                    // Конвертируем рубли обратно в копейки
+                    const priceInKopecks = typeof value === 'number' ? value * 100 : 0
+                    return onSave(field, priceInKopecks)
+                  }}
+                  isEditMode={isEditMode}
+                  placeholder="3000"
+                  type="number"
+                  label="Цена от (₽)"
+                />
+                
+                <InlineInput
+                  value={priceToRubles}
+                  field="priceTo"
+                  onSave={async (field, value) => {
+                    // Конвертируем рубли обратно в копейки
+                    const priceInKopecks = typeof value === 'number' ? value * 100 : 0
+                    return onSave(field, priceInKopecks)
+                  }}
+                  isEditMode={isEditMode}
+                  placeholder="5000"
+                  type="number"
+                  label="Цена до (₽)"
+                />
+              </div>
 
-          {priceDescription && (
-            <p className="mt-2 text-sm text-gray-600">{priceDescription}</p>
-          )}
+              <InlineInput
+                value={priceDescription || ''}
+                field="priceDescription"
+                onSave={onSave}
+                isEditMode={isEditMode}
+                placeholder="за сессию 60 минут"
+                label="Описание цены"
+                maxLength={100}
+              />
+            </>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-gray-900">
+                  {priceFrom && priceTo && priceFrom !== priceTo
+                    ? `${formatPrice(priceFrom)} - ${formatPrice(priceTo)}`
+                    : formatPrice(priceFrom || priceTo || 0)}
+                </span>
+                <span className="text-lg text-gray-600">₽</span>
+              </div>
 
-          {!priceDescription && (
-            <p className="mt-2 text-sm text-gray-600">{priceLabel}</p>
+              {priceDescription && (
+                <p className="mt-2 text-sm text-gray-600">{priceDescription}</p>
+              )}
+
+              {!priceDescription && (
+                <p className="mt-2 text-sm text-gray-600">{priceLabel}</p>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

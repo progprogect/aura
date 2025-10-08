@@ -171,6 +171,13 @@ export default async function SpecialistPage({ params }: PageProps) {
         isOwner={isOwner}
         tabs={tabs}
         categoryConfig={categoryConfig}
+        heroData={{
+          firstName: specialist.firstName,
+          lastName: specialist.lastName,
+          tagline: specialist.tagline,
+          city: specialist.city,
+          specializations: specialist.specializations,
+        }}
         data={{
           id: specialist.id,
           fullName,

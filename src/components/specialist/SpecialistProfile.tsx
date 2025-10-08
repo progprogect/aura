@@ -98,7 +98,7 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
         )}
 
         {/* Стоимость */}
-        {(data.priceFrom || data.priceTo) && (
+        {(data.priceFrom || data.priceTo || isEditMode) && (
           <SpecialistPricing
             category={data.category}
             priceFrom={data.priceFrom}
@@ -106,6 +106,8 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
             currency={data.currency}
             priceDescription={data.priceDescription}
             priceLabel={categoryConfig?.priceLabel}
+            isEditMode={isEditMode}
+            onSave={onSaveField}
           />
         )}
 

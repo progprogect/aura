@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
+import { SpecialistHeroEdit } from './SpecialistHeroEdit'
 import { EditModeToggle } from './edit/EditModeToggle'
 import { EditToolbar } from './edit/EditToolbar'
 import type { Tab } from './SpecialistTabs'
@@ -17,6 +18,13 @@ interface SpecialistProfileWithEditProps {
   isOwner: boolean
   tabs: Tab[]
   categoryConfig: CategoryConfig | null
+  heroData: {
+    firstName: string
+    lastName: string
+    tagline: string | null
+    city: string | null
+    specializations: string[]
+  }
   data: {
     id: string
     fullName: string
@@ -60,7 +68,8 @@ interface SpecialistProfileWithEditProps {
 export function SpecialistProfileWithEdit({ 
   isOwner, 
   tabs, 
-  categoryConfig, 
+  categoryConfig,
+  heroData,
   data 
 }: SpecialistProfileWithEditProps) {
   const [isEditMode, setIsEditMode] = useState(false)
@@ -75,13 +84,35 @@ export function SpecialistProfileWithEdit({
     window.location.reload()
   }, [])
 
-  // Функция для сохранения изменений
+  // Функция для сохранения одного поля
   const handleSaveField = useCallback(async (field: string, value: string | number) => {
     try {
       const response = await fetch('/api/specialist/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ field, value })
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Ошибка сохранения')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Ошибка сохранения:', error)
+      throw error
+    }
+  }, [])
+
+  // Функция для сохранения массивов
+  const handleSaveArray = useCallback(async (field: string, values: string[]) => {
+    try {
+      const response = await fetch('/api/specialist/profile/arrays', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ field, value: values })
       })
 
       const result = await response.json()
@@ -107,6 +138,19 @@ export function SpecialistProfileWithEdit({
           />
         )}
       </AnimatePresence>
+
+      {/* Hero Edit секция (в режиме редактирования) */}
+      {isEditMode && isOwner && (
+        <SpecialistHeroEdit
+          firstName={heroData.firstName}
+          lastName={heroData.lastName}
+          tagline={heroData.tagline}
+          city={heroData.city}
+          specializations={heroData.specializations}
+          onSaveField={handleSaveField}
+          onSaveArray={handleSaveArray}
+        />
+      )}
 
       {/* Профиль */}
       <SpecialistProfile
