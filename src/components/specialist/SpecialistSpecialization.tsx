@@ -70,12 +70,29 @@ export function SpecialistSpecialization({
         <CardContent className="space-y-6">
           {isEditMode && onSaveCustomField ? (
             // Режим редактирования - используем CustomFieldsEditor
-            <CustomFieldsEditor
-              customFields={customFields || {}}
-              categoryFields={config.fields}
-              isEditMode={isEditMode}
-              onSave={onSaveCustomField}
-            />
+            <>
+              {/* Пояснительный блок */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-blue-600 text-xl mt-0.5">💡</div>
+                  <div className="flex-1 text-sm text-blue-900">
+                    <p className="font-semibold mb-2">О полях специализации:</p>
+                    <ul className="space-y-1 text-blue-800">
+                      <li>• <strong>Ключевые специализации</strong> - краткие теги для Hero и поиска (3-5 тегов)</li>
+                      <li>• <strong>Детальная информация</strong> - специфичные поля вашей категории для глубокой фильтрации</li>
+                      <li>• Все эти данные помогают клиентам найти именно вас через поиск и фильтры</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <CustomFieldsEditor
+                customFields={customFields || {}}
+                categoryFields={config.fields}
+                isEditMode={isEditMode}
+                onSave={onSaveCustomField}
+              />
+            </>
           ) : (
             // Режим просмотра - показываем только заполненные поля
             <>

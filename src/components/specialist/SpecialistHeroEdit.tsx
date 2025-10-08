@@ -37,6 +37,21 @@ export function SpecialistHeroEdit({
 }: SpecialistHeroEditProps) {
   return (
     <div className="space-y-6">
+      {/* Пояснительный блок */}
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <div className="text-purple-600 text-xl mt-0.5">ℹ️</div>
+          <div className="flex-1 text-sm text-purple-900">
+            <p className="font-semibold mb-2">Основная информация профиля:</p>
+            <ul className="space-y-1 text-purple-800">
+              <li>• <strong>Фото и имя</strong> - первое впечатление о вас</li>
+              <li>• <strong>Категория</strong> - основное направление работы (психология, фитнес, питание и т.д.)</li>
+              <li>• <strong>Ключевые специализации</strong> - 3-5 главных навыков для поиска</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       {/* Аватар */}
       <div>
         <label className="text-sm font-medium text-gray-700 mb-3 block">Фото профиля</label>

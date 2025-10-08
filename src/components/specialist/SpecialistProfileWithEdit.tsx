@@ -252,12 +252,19 @@ export function SpecialistProfileWithEdit({
                   <span className="text-base sm:text-xl">Контакты для связи</span>
                 </h2>
                 
-                {/* Подсказка */}
-                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-xs text-blue-900">
-                    💡 <strong>Эти контакты будут видны клиентам</strong> в вашем профиле. 
-                    Укажите удобные способы связи.
-                  </p>
+                {/* Пояснительный блок */}
+                <div className="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-orange-600 text-xl mt-0.5">ℹ️</div>
+                    <div className="flex-1 text-sm text-orange-900">
+                      <p className="font-semibold mb-2">Контакты для клиентов:</p>
+                      <ul className="space-y-1 text-orange-800">
+                        <li>• Эти контакты будут отображаться в кнопке "Показать контакты"</li>
+                        <li>• Клиенты смогут скопировать их или перейти по ссылке</li>
+                        <li>• Укажите те контакты, по которым готовы общаться с клиентами</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
                 
                 <ContactsEditor
