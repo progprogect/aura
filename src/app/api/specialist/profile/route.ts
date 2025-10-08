@@ -27,7 +27,12 @@ const UpdateProfileSchema = z.object({
     'priceDescription',
     'yearsOfPractice',
     'videoUrl',
-    'acceptingClients'
+    'acceptingClients',
+    // Новые поля для контактов с клиентами
+    'contactEmail',
+    'contactPhone',
+    'contactTelegram',
+    'contactWhatsapp'
   ]),
   value: z.union([z.string(), z.number(), z.boolean(), z.null()]),
 })

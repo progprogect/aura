@@ -12,6 +12,14 @@ import { SpecialistHeroEdit } from './SpecialistHeroEdit'
 import { ContactsEditor } from './edit/ContactsEditor'
 import { EditModeToggle } from './edit/EditModeToggle'
 import { EditToolbar } from './edit/EditToolbar'
+import { SpecialistAbout } from './SpecialistAbout'
+import { SpecialistSpecialization } from './SpecialistSpecialization'
+import { SpecialistVideo } from './SpecialistVideo'
+import { SpecialistGallery } from './SpecialistGallery'
+import { SpecialistEducation } from './SpecialistEducation'
+import { SpecialistPricing } from './SpecialistPricing'
+import { SpecialistFAQ } from './SpecialistFAQ'
+import { SpecialistContactForClients } from './SpecialistContactForClients'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 
@@ -171,44 +179,210 @@ export function SpecialistProfileWithEdit({
         )}
       </AnimatePresence>
 
-      {/* Hero Edit секция (в режиме редактирования) */}
-      {isEditMode && isOwner && (
-        <div className="space-y-6 pb-6">
-          <SpecialistHeroEdit
-            firstName={heroData.firstName}
-            lastName={heroData.lastName}
-            avatar={heroData.avatar}
-            tagline={heroData.tagline}
-            city={heroData.city}
-            specializations={heroData.specializations}
-            onSaveField={handleSaveField}
-            onSaveArray={handleSaveArray}
-            onRefresh={handleExitEditMode}
-          />
+
+      {/* Профиль - разные режимы для клиентов и специалиста */}
+      {isOwner ? (
+        // Режим редактирования для специалиста - без табов, все поля видны
+        <div className="container mx-auto max-w-5xl space-y-8 px-4 py-8">
           
-          {/* Контакты в режиме редактирования */}
-          <div className="container mx-auto max-w-4xl px-4">
-            <ContactsEditor
-              email={contactsData.email}
-              telegram={contactsData.telegram}
-              whatsapp={contactsData.whatsapp}
-              instagram={contactsData.instagram}
-              website={contactsData.website}
+          {/* Hero Edit секция (в режиме редактирования) */}
+          {isEditMode && (
+            <div className="space-y-6">
+              <SpecialistHeroEdit
+                firstName={heroData.firstName}
+                lastName={heroData.lastName}
+                avatar={heroData.avatar}
+                tagline={heroData.tagline}
+                city={heroData.city}
+                specializations={heroData.specializations}
+                onSaveField={handleSaveField}
+                onSaveArray={handleSaveArray}
+                onRefresh={handleExitEditMode}
+              />
+              
+              {/* Контакты в режиме редактирования */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-600 text-sm">📧</span>
+                  </span>
+                  Личные контакты
+                </h2>
+                <ContactsEditor
+                  email={contactsData.email}
+                  telegram={contactsData.telegram}
+                  whatsapp={contactsData.whatsapp}
+                  instagram={contactsData.instagram}
+                  website={contactsData.website}
+                  onSave={handleSaveField}
+                />
+              </div>
+            </div>
+          )}
+          
+          {/* О себе */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-blue-600 text-sm">👤</span>
+              </span>
+              О себе
+            </h2>
+            <SpecialistAbout 
+              about={data.about} 
+              isEditMode={isEditMode}
               onSave={handleSaveField}
             />
           </div>
-        </div>
-      )}
 
-      {/* Профиль */}
-      <SpecialistProfile
-        tabs={tabs}
-        categoryConfig={categoryConfig}
-        data={data}
-        isEditMode={isEditMode && isOwner}
-        onSaveField={handleSaveField}
-        onSaveCustomField={handleSaveCustomField}
-      />
+          {/* Специализация */}
+          {categoryConfig && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <span className="text-purple-600 text-sm">✨</span>
+                </span>
+                Специализация
+              </h2>
+              <SpecialistSpecialization
+                category={data.category}
+                customFields={data.customFields}
+                categoryConfig={categoryConfig}
+                isEditMode={isEditMode}
+                onSaveCustomField={handleSaveCustomField}
+              />
+            </div>
+          )}
+
+          {/* Видео-презентация */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <span className="text-red-600 text-sm">🎥</span>
+              </span>
+              Видео-презентация
+            </h2>
+            {data.videoUrl ? (
+              <SpecialistVideo videoUrl={data.videoUrl} />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                {isEditMode ? (
+                  <div className="space-y-2">
+                    <p>Добавьте видео-презентацию</p>
+                    <p className="text-sm">Это поможет клиентам лучше узнать вас</p>
+                  </div>
+                ) : (
+                  <p>Видео-презентация не добавлена</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Галерея */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-green-600 text-sm">📸</span>
+              </span>
+              Галерея
+            </h2>
+            {data.gallery.length > 0 ? (
+              <SpecialistGallery items={data.gallery} />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                {isEditMode ? (
+                  <div className="space-y-2">
+                    <p>Добавьте фото и видео в галерею</p>
+                    <p className="text-sm">Покажите примеры вашей работы</p>
+                  </div>
+                ) : (
+                  <p>Галерея пуста</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Образование и сертификаты */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <span className="text-yellow-600 text-sm">🎓</span>
+              </span>
+              Образование и сертификаты
+            </h2>
+            <SpecialistEducation
+              education={data.education}
+              certificates={data.certificates}
+              isEditMode={isEditMode}
+              onRefresh={() => window.location.reload()}
+            />
+          </div>
+
+          {/* Стоимость */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <span className="text-emerald-600 text-sm">💰</span>
+              </span>
+              Стоимость услуг
+            </h2>
+            <SpecialistPricing
+              priceFrom={data.priceFrom}
+              priceTo={data.priceTo}
+              currency={data.currency}
+              priceDescription={data.priceDescription}
+              isEditMode={isEditMode}
+              onSave={handleSaveField}
+            />
+          </div>
+
+          {/* FAQ */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <span className="text-indigo-600 text-sm">❓</span>
+              </span>
+              Часто задаваемые вопросы
+            </h2>
+            <SpecialistFAQ
+              faqs={data.faqs}
+              isEditMode={isEditMode}
+              onRefresh={() => window.location.reload()}
+            />
+          </div>
+
+          {/* Контакты для связи - только в режиме редактирования */}
+          {isEditMode && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <span className="text-orange-600 text-sm">📞</span>
+                </span>
+                Контакты для связи с клиентами
+              </h2>
+              <SpecialistContactForClients
+                email={contactsData.email}
+                phone={contactsData.phone}
+                telegram={contactsData.telegram}
+                whatsapp={contactsData.whatsapp}
+                isEditMode={isEditMode}
+                onSave={handleSaveField}
+              />
+            </div>
+          )}
+
+        </div>
+      ) : (
+        // Режим просмотра для клиентов - с табами (идеальный профиль)
+        <SpecialistProfile
+          tabs={tabs}
+          categoryConfig={categoryConfig}
+          data={data}
+          isEditMode={false}
+          onSaveField={handleSaveField}
+          onSaveCustomField={handleSaveCustomField}
+        />
+      )}
 
       {/* Floating кнопка "Редактировать" */}
       {isOwner && (
