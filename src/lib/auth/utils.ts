@@ -9,24 +9,15 @@ import { AUTH_ERRORS } from './types'
 // ВАЛИДАЦИЯ ДАННЫХ
 // ========================================
 
+import { validatePhoneNumber } from '@/lib/phone/country-codes'
+
 export function validatePhone(phone: string): { isValid: boolean; error?: string } {
   if (!phone) {
     return { isValid: false, error: 'Номер телефона обязателен' }
   }
   
-  // Поддержка международных номеров
-  const internationalPattern = /^\+\d{1,4}\d{6,14}$/
-  if (internationalPattern.test(phone)) {
-    return { isValid: true }
-  }
-  
-  // Обратная совместимость с российскими номерами
-  const phonePattern = /^\+7\d{10}$/
-  if (phonePattern.test(phone)) {
-    return { isValid: true }
-  }
-  
-  return { isValid: false, error: 'Неверный формат номера телефона' }
+  // Используем единую систему валидации
+  return validatePhoneNumber(phone)
 }
 
 export function validateSMSCode(code: string): { isValid: boolean; error?: string } {

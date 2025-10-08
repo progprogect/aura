@@ -12,9 +12,9 @@ import {
   detectCountryCode, 
   formatPhoneNumber, 
   normalizePhoneNumber,
-  getPlaceholder,
-  validatePhoneNumber 
+  getPlaceholder
 } from '@/lib/phone/country-codes'
+import { usePhoneValidation, createPhoneValidationHandlers } from '@/hooks/usePhoneValidation'
 
 interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value: string
@@ -35,6 +35,7 @@ export function PhoneInput({
 }: PhoneInputProps) {
   const [displayValue, setDisplayValue] = useState('')
   const [currentCountry, setCurrentCountry] = useState<any>(null)
+  const [hasBlurred, setHasBlurred] = useState(false)
   const isInternalChange = useRef(false)
 
   // Форматирование номера телефона из чистых цифр
@@ -150,7 +151,16 @@ export function PhoneInput({
     e.target.select()
   }
 
-  const validation = validatePhoneNumber(value)
+  // Умная валидация с отложенным показом ошибок
+  const validation = usePhoneValidation(value, {
+    immediate: false, // Не показываем ошибки сразу
+    minLengthForValidation: 4, // Минимум 4 цифры
+    debounceMs: 500 // Задержка 500мс
+  })
+
+  // Обработчики для отслеживания blur/focus
+  const { onBlur, onFocus: onFocusHandler } = createPhoneValidationHandlers(setHasBlurred)
+
   const dynamicPlaceholder = international && currentCountry ? 
     getPlaceholder(currentCountry) : placeholder
 
@@ -161,12 +171,16 @@ export function PhoneInput({
         value={displayValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
+        onFocus={(e) => {
+          handleFocus(e)
+          onFocusHandler()
+        }}
+        onBlur={onBlur}
         placeholder={dynamicPlaceholder}
         disabled={disabled}
         className={cn(
           "text-base h-12",
-          !validation.isValid && "border-red-500 focus:ring-red-500",
+          validation.shouldShowError && "border-red-500 focus:ring-red-500",
           className
         )}
         autoComplete="tel"
@@ -175,7 +189,7 @@ export function PhoneInput({
       />
       
       {/* Сообщение об ошибке */}
-      {!validation.isValid && value && (
+      {validation.shouldShowError && (
         <p className="text-sm text-red-500">{validation.error}</p>
       )}
       

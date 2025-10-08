@@ -4,6 +4,7 @@
 
 import { z } from 'zod'
 import { AUTH_ERRORS } from './types'
+import { validatePhoneNumber } from '@/lib/phone/country-codes'
 
 // ========================================
 // СХЕМЫ ВАЛИДАЦИИ
@@ -11,7 +12,12 @@ import { AUTH_ERRORS } from './types'
 
 export const PhoneSchema = z.string()
   .min(1, 'Номер телефона обязателен')
-  .regex(/^\+7\d{10}$/, 'Номер телефона должен начинаться с +7 и содержать 10 цифр')
+  .refine((phone) => {
+    const { isValid } = validatePhoneNumber(phone)
+    return isValid
+  }, {
+    message: 'Неверный формат номера телефона'
+  })
 
 export const SMSCodeSchema = z.string()
   .min(1, 'Код обязателен')

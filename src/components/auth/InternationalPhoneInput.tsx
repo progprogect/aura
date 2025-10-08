@@ -15,9 +15,9 @@ import {
   detectCountryCode, 
   formatPhoneNumber, 
   normalizePhoneNumber,
-  getPlaceholder,
-  validatePhoneNumber 
+  getPlaceholder
 } from '@/lib/phone/country-codes'
+import { usePhoneValidation, createPhoneValidationHandlers } from '@/hooks/usePhoneValidation'
 import { ChevronDown, Search } from 'lucide-react'
 
 interface InternationalPhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
@@ -40,6 +40,7 @@ export function InternationalPhoneInput({
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[defaultCountry])
   const [isCountrySelectorOpen, setIsCountrySelectorOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [hasBlurred, setHasBlurred] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const isInternalChange = useRef(false)
   const isCountryChange = useRef(false)
@@ -146,7 +147,15 @@ export function InternationalPhoneInput({
     country.flag.includes(searchQuery)
   )
 
-  const validation = validatePhoneNumber(value)
+  // Умная валидация с отложенным показом ошибок
+  const validation = usePhoneValidation(value, {
+    immediate: false,
+    minLengthForValidation: 4,
+    debounceMs: 500
+  })
+
+  // Обработчики для отслеживания blur/focus
+  const { onBlur, onFocus: onFocusHandler } = createPhoneValidationHandlers(setHasBlurred)
 
   return (
     <div className="relative">
@@ -209,12 +218,16 @@ export function InternationalPhoneInput({
           value={displayValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          onFocus={handleFocus}
+          onFocus={(e) => {
+            handleFocus(e)
+            onFocusHandler()
+          }}
+          onBlur={onBlur}
           placeholder={getPlaceholder(selectedCountry)}
           disabled={disabled}
           className={cn(
             "h-12 rounded-l-none border-l-0 flex-1",
-            !validation.isValid && "border-red-500 focus:ring-red-500",
+            validation.shouldShowError && "border-red-500 focus:ring-red-500",
             className
           )}
           autoComplete="tel"
@@ -224,7 +237,7 @@ export function InternationalPhoneInput({
       </div>
 
       {/* Сообщение об ошибке */}
-      {!validation.isValid && (
+      {validation.shouldShowError && (
         <p className="mt-1 text-sm text-red-500">{validation.error}</p>
       )}
 
