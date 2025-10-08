@@ -69,6 +69,16 @@ export function HeroNavigation() {
             >
               Специалисты
             </Link>
+            <Link
+              href="/auth/register"
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isActive('/auth/register') || isActive('/auth/login')
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              Стать специалистом
+            </Link>
           </div>
           
           {/* Мобильное меню */}
@@ -127,6 +137,17 @@ export function HeroNavigation() {
                 onClick={closeMobileMenu}
               >
                 Специалисты
+              </Link>
+              <Link
+                href="/auth/register"
+                className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/auth/register') || isActive('/auth/login')
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Стать специалистом
               </Link>
             </div>
           </div>

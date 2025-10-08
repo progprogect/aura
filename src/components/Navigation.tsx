@@ -64,6 +64,16 @@ export function Navigation() {
             >
               Каталог специалистов
             </Link>
+            <Link
+              href="/auth/register"
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isActive('/auth/register') || isActive('/auth/login')
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              Стать специалистом
+            </Link>
           </div>
           
           {/* Мобильное меню */}
@@ -122,6 +132,17 @@ export function Navigation() {
                 onClick={closeMobileMenu}
               >
                 Каталог специалистов
+              </Link>
+              <Link
+                href="/auth/register"
+                className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/auth/register') || isActive('/auth/login')
+                    ? 'bg-blue-700 text-white' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Стать специалистом
               </Link>
             </div>
           </div>
