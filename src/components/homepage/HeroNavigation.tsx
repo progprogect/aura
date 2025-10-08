@@ -82,10 +82,10 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/register"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                className={`text-sm font-medium transition-colors ${
                   isActive('/auth/register')
-                    ? 'bg-primary/90 text-primary-foreground' 
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    ? 'text-primary font-semibold' 
+                    : 'text-gray-700 hover:text-primary'
                 }`}
               >
                 Стать специалистом
@@ -163,10 +163,10 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/register"
-                className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive('/auth/register')
-                    ? 'bg-primary/90 text-primary-foreground' 
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    ? 'text-primary bg-primary/10 font-semibold' 
+                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                 }`}
                 onClick={closeMobileMenu}
               >

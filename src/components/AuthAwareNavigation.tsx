@@ -106,10 +106,10 @@ export function AuthAwareNavigation() {
                     </Link>
                     <Link
                       href="/auth/register"
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      className={`text-sm font-medium transition-colors ${
                         isActive('/auth/register')
-                          ? 'bg-blue-700 text-white' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                          ? 'text-blue-600 font-semibold' 
+                          : 'text-gray-700 hover:text-blue-600'
                       }`}
                     >
                       Стать специалистом
@@ -216,10 +216,10 @@ export function AuthAwareNavigation() {
                       </Link>
                       <Link
                         href="/auth/register"
-                        className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                           isActive('/auth/register')
-                            ? 'bg-blue-700 text-white' 
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            ? 'text-blue-600 bg-blue-50 font-semibold' 
+                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                         }`}
                         onClick={closeMobileMenu}
                       >

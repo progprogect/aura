@@ -188,13 +188,6 @@ export function AuthRegisterForm() {
             </div>
 
             <AuthProviderButtons />
-
-            <p className="text-center text-sm text-muted-foreground">
-              Уже зарегистрированы?{' '}
-              <a href="/auth/login" className="text-primary hover:underline">
-                Войти
-              </a>
-            </p>
           </motion.div>
         )}
 
