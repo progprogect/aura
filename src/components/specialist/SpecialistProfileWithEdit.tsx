@@ -19,7 +19,6 @@ import { SpecialistGallery } from './SpecialistGallery'
 import { SpecialistEducation } from './SpecialistEducation'
 import { SpecialistPricing } from './SpecialistPricing'
 import { SpecialistFAQ } from './SpecialistFAQ'
-import { SpecialistContactForClients } from './SpecialistContactForClients'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
@@ -210,14 +209,23 @@ export function SpecialistProfileWithEdit({
                 />
               </div>
               
-              {/* Личные контакты в режиме редактирования */}
+              {/* Контакты для связи */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-600 text-sm">📧</span>
+                  <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <span className="text-orange-600 text-sm">📞</span>
                   </span>
-                  <span className="text-base sm:text-xl">Личные контакты</span>
+                  <span className="text-base sm:text-xl">Контакты для связи</span>
                 </h2>
+                
+                {/* Подсказка */}
+                <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-xs text-blue-900">
+                    💡 <strong>Эти контакты будут видны клиентам</strong> в вашем профиле. 
+                    Укажите удобные способы связи.
+                  </p>
+                </div>
+                
                 <ContactsEditor
                   email={contactsData.email}
                   telegram={contactsData.telegram}
@@ -371,24 +379,6 @@ export function SpecialistProfileWithEdit({
             )}
           </div>
 
-          {/* Контакты для связи - только в режиме редактирования */}
-          {isEditMode && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <span className="text-orange-600 text-sm">📞</span>
-                </span>
-                <span className="text-base sm:text-xl">Контакты для связи с клиентами</span>
-              </h2>
-              <SpecialistContactForClients
-                email={contactsData.email}
-                telegram={contactsData.telegram}
-                whatsapp={contactsData.whatsapp}
-                isEditMode={isEditMode}
-                onSave={handleSaveField}
-              />
-            </div>
-          )}
 
         </div>
       ) : (
