@@ -270,7 +270,7 @@ export function SpecialistProfileWithEdit({
                     <div className="flex-1 text-sm text-orange-900">
                       <p className="font-semibold mb-2">Контакты для клиентов:</p>
                       <ul className="space-y-1 text-orange-800">
-                        <li>• Эти контакты будут отображаться в кнопке "Показать контакты"</li>
+                        <li>• Эти контакты будут отображаться в кнопке &quot;Показать контакты&quot;</li>
                         <li>• Клиенты смогут скопировать их или перейти по ссылке</li>
                         <li>• Укажите те контакты, по которым готовы общаться с клиентами</li>
                       </ul>
