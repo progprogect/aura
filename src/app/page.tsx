@@ -47,10 +47,10 @@ export default function Home() {
       <main className="min-h-screen bg-background">
         <ErrorBoundary fallback={HomepageErrorFallback}>
           <HeroSection />
+          <FeaturedSpecialists />
           <HowItWorksSection />
           <CategoriesSection />
           <AdvantagesSection />
-          <FeaturedSpecialists />
         </ErrorBoundary>
       </main>
     </>
