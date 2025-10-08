@@ -25,8 +25,8 @@ export class SpecialistService {
     const slug = await this.generateUniqueSlug(baseSlug)
     
     // Извлекаем данные из социального профиля если есть
-    const firstName = socialData?.firstName || socialData?.name?.split(' ')[0] || 'Новый'
-    const lastName = socialData?.lastName || socialData?.name?.split(' ')[1] || 'Специалист'
+    const firstName = socialData?.firstName || socialData?.name?.split(' ')[0] || null
+    const lastName = socialData?.lastName || socialData?.name?.split(' ')[1] || null
     const email = socialData?.email
     const avatar = socialData?.picture
     
@@ -40,7 +40,7 @@ export class SpecialistService {
         slug,
         category: 'other',
         specializations: ['Специалист'],
-        about: 'Профиль будет заполнен позже',
+        about: '', // Должно быть заполнено в onboarding
         workFormats: ['online'],
         verified: false,
         acceptingClients: false

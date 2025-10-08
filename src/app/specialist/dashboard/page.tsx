@@ -178,6 +178,7 @@ async function getDashboardData() {
       specializations: specialist.specializations,
       verified: specialist.verified,
       acceptingClients: specialist.acceptingClients,
+      about: specialist.about,
     },
     stats: {
       profileViews: specialist.profileViews,
@@ -200,7 +201,8 @@ export default async function DashboardPage() {
   const { specialist, stats, tasks } = data
 
   // Если профиль не заполнен → на онбординг
-  if (!specialist.firstName || !specialist.lastName) {
+  // Проверяем основные поля (firstName, lastName, about)
+  if (!specialist.firstName || !specialist.lastName || !specialist.about || specialist.about.trim() === '') {
     redirect('/specialist/onboarding')
   }
 

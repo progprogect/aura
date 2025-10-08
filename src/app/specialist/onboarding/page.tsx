@@ -45,7 +45,8 @@ export default async function OnboardingPage() {
   }
 
   // Если профиль уже заполнен → на dashboard
-  if (specialist.firstName && specialist.lastName && specialist.about) {
+  // Проверяем только основные поля (firstName, lastName, about)
+  if (specialist.firstName && specialist.lastName && specialist.about && specialist.about.trim() !== '') {
     redirect('/specialist/dashboard')
   }
 
