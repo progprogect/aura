@@ -143,11 +143,13 @@ export default async function SpecialistPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation (breadcrumbs + FAB) */}
-      <SpecialistNavigation
-        specialistName={fullName}
-        category={specialist.category}
-      />
+      {/* Navigation (breadcrumbs + FAB) - только для чужих профилей */}
+      {!isOwner && (
+        <SpecialistNavigation
+          specialistName={fullName}
+          category={specialist.category}
+        />
+      )}
 
       {/* Hero */}
       <SpecialistHero
