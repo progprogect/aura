@@ -17,9 +17,16 @@ export async function POST(request: NextRequest) {
       response.cookies.set('session_token', result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 30, // 30 дней
         path: '/',
       })
+      
+      // Отладочные логи
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[API/register] Cookie установлен: session_token=${result.sessionToken.substring(0, 10)}...`)
+      }
+      
       return response
     }
 

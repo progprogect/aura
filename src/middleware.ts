@@ -9,10 +9,15 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   // Проверяем токен сессии из cookies
-  const sessionToken = request.cookies.get('sessionToken')?.value
+  const sessionToken = request.cookies.get('session_token')?.value
+  
+  // Отладочные логи (только в development)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[Middleware] ${pathname} - sessionToken: ${sessionToken ? 'exists' : 'missing'}`)
+  }
   
   // Защищённые маршруты (требуют авторизации)
-  const protectedRoutes = ['/specialist/dashboard', '/specialist/profile']
+  const protectedRoutes = ['/specialist/dashboard', '/specialist/profile', '/specialist/onboarding']
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   
   // Маршруты авторизации (если уже авторизован, редиректим)

@@ -38,8 +38,9 @@ async function getSpecialist() {
 export default async function OnboardingPage() {
   const specialist = await getSpecialist()
 
-  // Если не авторизован → на страницу входа
+  // Middleware уже проверил авторизацию, поэтому specialist всегда существует здесь
   if (!specialist) {
+    // Это не должно происходить благодаря middleware, но на всякий случай
     redirect('/auth/login')
   }
 
