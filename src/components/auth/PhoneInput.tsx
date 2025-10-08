@@ -40,15 +40,26 @@ export function PhoneInput({
   const formatPhone = (input: string) => {
     if (international) {
       // Используем новую логику для международных номеров
-      const country = detectCountryCode(input)
+      const digits = input.replace(/\D/g, '')
+      
+      // Если ввод пустой, возвращаем пустую строку
+      if (!digits) return ''
+      
+      // Определяем страну по коду
+      const country = detectCountryCode(digits)
       if (country) {
         setCurrentCountry(country)
-        return formatPhoneNumber(input, country)
+        return formatPhoneNumber(digits, country)
       }
+      
+      // Если страна не определена, но есть цифры - показываем как есть
+      return input
     }
     
     // Старая логика для российских номеров (обратная совместимость)
     const digits = input.replace(/\D/g, '')
+    
+    if (!digits) return ''
     
     // Если начинается с 8, заменяем на 7
     let cleanDigits = digits

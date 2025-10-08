@@ -197,8 +197,8 @@ export function detectCountryCode(input: string): CountryCode | null {
     }
   }
   
-  // Если ничего не найдено, возвращаем Россию по умолчанию
-  return COUNTRY_CODES['7']
+  // Если ничего не найдено, возвращаем null
+  return null
 }
 
 /**
