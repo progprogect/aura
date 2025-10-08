@@ -8,10 +8,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { LogOut, User } from 'lucide-react'
 
 export function HeroNavigation() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { user, isAuthenticated, logout, loading } = useAuth()
   
   const isActive = (path: string) => {
     return pathname === path
@@ -69,28 +72,59 @@ export function HeroNavigation() {
             >
               Специалисты
             </Link>
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/auth/login"
-                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
-                  isActive('/auth/login')
-                    ? 'border-blue-600 bg-blue-100 text-blue-700' 
-                    : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
-                }`}
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth/register"
-                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
-                  isActive('/auth/register')
-                    ? 'border-blue-700 bg-blue-700 text-white' 
-                    : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
-                }`}
-              >
-                Стать специалистом
-              </Link>
-            </div>
+            {!loading && (
+              <div className="flex items-center space-x-3">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/specialist/dashboard"
+                      className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={`${user.firstName} ${user.lastName}`}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                      <span>{user?.firstName} {user?.lastName}</span>
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Выйти</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                        isActive('/auth/login')
+                          ? 'border-blue-600 bg-blue-100 text-blue-700' 
+                          : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
+                      }`}
+                    >
+                      Войти
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                        isActive('/auth/register')
+                          ? 'border-blue-700 bg-blue-700 text-white' 
+                          : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
+                      }`}
+                    >
+                      Стать специалистом
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Мобильное меню */}
@@ -150,28 +184,65 @@ export function HeroNavigation() {
               >
                 Специалисты
               </Link>
-              <Link
-                href="/auth/login"
-                className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
-                  isActive('/auth/login') 
-                    ? 'border-blue-600 bg-blue-100 text-blue-700' 
-                    : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth/register"
-                className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
-                  isActive('/auth/register')
-                    ? 'border-blue-700 bg-blue-700 text-white' 
-                    : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Стать специалистом
-              </Link>
+              {!loading && (
+                <>
+                  {isAuthenticated ? (
+                    <>
+                      <Link
+                        href="/specialist/dashboard"
+                        className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        {user?.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={`${user.firstName} ${user.lastName}`}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
+                        <span>{user?.firstName} {user?.lastName}</span>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout()
+                          closeMobileMenu()
+                        }}
+                        className="flex items-center space-x-2 w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Выйти</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/login"
+                        className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
+                          isActive('/auth/login') 
+                            ? 'border-blue-600 bg-blue-100 text-blue-700' 
+                            : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
+                        }`}
+                        onClick={closeMobileMenu}
+                      >
+                        Войти
+                      </Link>
+                      <Link
+                        href="/auth/register"
+                        className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
+                          isActive('/auth/register')
+                            ? 'border-blue-700 bg-blue-700 text-white' 
+                            : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
+                        }`}
+                        onClick={closeMobileMenu}
+                      >
+                        Стать специалистом
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}
