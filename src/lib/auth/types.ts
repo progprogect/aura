@@ -96,11 +96,12 @@ export const AUTH_PROVIDERS: Record<AuthProvider, AuthProviderConfig> = {
 
 export interface UserProfile {
   id: string
-  firstName: string
-  lastName: string
+  firstName: string | null
+  lastName: string | null
   phone?: string
   email?: string
   avatar?: string
+  slug: string
   verified: boolean
   subscriptionTier: 'FREE' | 'PREMIUM'
   createdAt: Date

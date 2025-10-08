@@ -33,8 +33,8 @@ interface SpecialistProfileWithEditProps {
   tabs: Tab[]
   categoryConfig: CategoryConfig | null
   heroData: {
-    firstName: string
-    lastName: string
+    firstName: string | null
+    lastName: string | null
     avatar: string | null
     category: string
     categoryEmoji?: string

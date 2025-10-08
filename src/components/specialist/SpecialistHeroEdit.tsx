@@ -11,8 +11,8 @@ import { AvatarUploader } from './edit/AvatarUploader'
 import { CategorySelector } from './edit/CategorySelector'
 
 interface SpecialistHeroEditProps {
-  firstName: string
-  lastName: string
+  firstName: string | null
+  lastName: string | null
   avatar: string | null
   category: string
   tagline: string | null
@@ -64,7 +64,7 @@ export function SpecialistHeroEdit({
       {/* Имя и Фамилия */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InlineInput
-          value={firstName}
+          value={firstName || ''}
           field="firstName"
           onSave={onSaveField}
           isEditMode={true}
@@ -73,7 +73,7 @@ export function SpecialistHeroEdit({
         />
         
         <InlineInput
-          value={lastName}
+          value={lastName || ''}
           field="lastName"
           onSave={onSaveField}
           isEditMode={true}

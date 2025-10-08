@@ -12,8 +12,8 @@ import { WORK_FORMAT_LABELS } from '@/lib/constants'
 import { ContactsModal } from './ContactsModal'
 
 export interface SpecialistHeroProps {
-  firstName: string
-  lastName: string
+  firstName: string | null
+  lastName: string | null
   avatar?: string | null
   category: string
   categoryEmoji?: string
@@ -53,7 +53,7 @@ export function SpecialistHero({
   instagram,
   website,
 }: SpecialistHeroProps) {
-  const fullName = `${firstName} ${lastName}`
+  const fullName = `${firstName || ''} ${lastName || ''}`.trim() || 'Специалист'
   const [isContactsModalOpen, setIsContactsModalOpen] = React.useState(false)
 
   // Скролл к форме связи
@@ -227,7 +227,7 @@ export function SpecialistHero({
                 alt={fullName}
                 size={140}
                 verified={verified}
-                fallback={`${firstName[0]}${lastName[0]}`}
+                fallback={`${firstName?.[0] || '?'}${lastName?.[0] || '?'}`}
                 className="md:size-[220px] lg:size-[260px] xl:size-[300px] 2xl:size-[320px]"
               />
             </motion.div>

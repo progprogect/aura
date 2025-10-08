@@ -16,9 +16,9 @@ datasource db {
 model Specialist {
   id              String   @id @default(cuid())
   
-  // Основная информация (обязательные поля)
-  firstName       String
-  lastName        String
+  // Основная информация
+  firstName       String?                   // Заполняется при онбординге
+  lastName        String?                   // Заполняется при онбординге
   avatar          String?
   slug            String   @unique
   

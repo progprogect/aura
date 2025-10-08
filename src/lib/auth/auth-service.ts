@@ -80,6 +80,7 @@ export async function registerSpecialist(request: unknown): Promise<AuthResponse
     }
     
   } catch (error) {
+    console.error('[auth-service] Ошибка регистрации:', error)
     debugLog('Ошибка регистрации', error)
     return {
       success: false,
@@ -341,6 +342,7 @@ function mapSpecialistToProfile(specialist: any): UserProfile {
     phone: specialist.phone,
     email: specialist.email,
     avatar: specialist.avatar,
+    slug: specialist.slug,
     verified: specialist.verified,
     subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
     createdAt: specialist.createdAt,
