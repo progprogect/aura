@@ -26,21 +26,6 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { field, value } = UpdateArraySchema.parse(body)
 
-    // Валидация
-    if (field === 'specializations' && value.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Должна быть хотя бы одна специализация' },
-        { status: 400 }
-      )
-    }
-
-    if (field === 'workFormats' && value.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Должен быть хотя бы один формат работы' },
-        { status: 400 }
-      )
-    }
-
     // Обновляем профиль
     const specialist = await prisma.specialist.update({
       where: { id: session.specialistId },
