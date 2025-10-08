@@ -116,10 +116,10 @@ export function AuthRegisterForm() {
         login(data.sessionToken, data.specialist)
         setStep('success')
         
-        // Перенаправляем на заполнение профиля через 2 секунды
+        // Перенаправляем на онбординг через 1.5 секунды
         setTimeout(() => {
-          router.push('/specialist/profile/edit')
-        }, 2000)
+          router.push('/specialist/onboarding')
+        }, 1500)
       } else {
         setError(data.error || 'Неверный код')
       }

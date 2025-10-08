@@ -1,0 +1,165 @@
+/**
+ * Шаг 1 онбординга: Имя, Фамилия и Категория
+ */
+
+'use client'
+
+import { motion } from 'framer-motion'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+
+interface OnboardingStep1Props {
+  data: {
+    firstName: string
+    lastName: string
+    category: string
+  }
+  onChange: (field: string, value: string) => void
+  errors?: Record<string, string>
+}
+
+// Категории с иконками
+const CATEGORIES = [
+  { id: 'psychology', name: 'Психология', emoji: '🧠', description: 'Психологи, психотерапевты' },
+  { id: 'fitness', name: 'Фитнес', emoji: '💪', description: 'Тренеры, инструкторы' },
+  { id: 'nutrition', name: 'Нутрициология', emoji: '🥗', description: 'Нутрициологи, диетологи' },
+  { id: 'massage', name: 'Массаж', emoji: '💆', description: 'Массажисты, остеопаты' },
+  { id: 'wellness', name: 'Wellness', emoji: '🌿', description: 'Wellness-коучи' },
+  { id: 'coaching', name: 'Коучинг', emoji: '🎯', description: 'Лайф-коучи, бизнес-коучи' },
+  { id: 'medicine', name: 'Медицина', emoji: '⚕️', description: 'Врачи, специалисты' },
+  { id: 'other', name: 'Другое', emoji: '✨', description: 'Другие направления' },
+]
+
+export function OnboardingStep1({ data, onChange, errors }: OnboardingStep1Props) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      {/* Заголовок */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          Кто вы?
+        </h2>
+        <p className="text-sm md:text-base text-gray-600">
+          Расскажите немного о себе
+        </p>
+      </div>
+
+      {/* Имя и Фамилия */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Имя */}
+        <div className="space-y-2">
+          <Label htmlFor="firstName">
+            Имя <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="firstName"
+            type="text"
+            placeholder="Александр"
+            value={data.firstName}
+            onChange={(e) => onChange('firstName', e.target.value)}
+            className={`h-12 text-base ${errors?.firstName ? 'border-red-500' : ''}`}
+            autoFocus
+          />
+          {errors?.firstName && (
+            <p className="text-sm text-red-500">{errors.firstName}</p>
+          )}
+        </div>
+
+        {/* Фамилия */}
+        <div className="space-y-2">
+          <Label htmlFor="lastName">
+            Фамилия <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="lastName"
+            type="text"
+            placeholder="Морозов"
+            value={data.lastName}
+            onChange={(e) => onChange('lastName', e.target.value)}
+            className={`h-12 text-base ${errors?.lastName ? 'border-red-500' : ''}`}
+          />
+          {errors?.lastName && (
+            <p className="text-sm text-red-500">{errors.lastName}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Категория */}
+      <div className="space-y-3">
+        <Label>
+          Выберите категорию <span className="text-red-500">*</span>
+        </Label>
+        
+        {/* Десктоп: Grid */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {CATEGORIES.map((category) => (
+            <Card
+              key={category.id}
+              onClick={() => onChange('category', category.id)}
+              className={`
+                cursor-pointer transition-all duration-200 hover:shadow-md
+                ${data.category === category.id 
+                  ? 'ring-2 ring-blue-600 bg-blue-50 border-blue-600' 
+                  : 'hover:border-gray-400'
+                }
+              `}
+            >
+              <div className="p-4 text-center">
+                <div className="text-3xl mb-2">{category.emoji}</div>
+                <div className="font-medium text-sm text-gray-900 mb-1">
+                  {category.name}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {category.description}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Мобильный: Вертикальный список */}
+        <div className="md:hidden space-y-2">
+          {CATEGORIES.map((category) => (
+            <Card
+              key={category.id}
+              onClick={() => onChange('category', category.id)}
+              className={`
+                cursor-pointer transition-all duration-200
+                ${data.category === category.id 
+                  ? 'ring-2 ring-blue-600 bg-blue-50 border-blue-600' 
+                  : 'active:bg-gray-50'
+                }
+              `}
+            >
+              <div className="p-4 flex items-center gap-4">
+                <div className="text-3xl">{category.emoji}</div>
+                <div className="flex-1">
+                  <div className="font-medium text-sm text-gray-900">
+                    {category.name}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {category.description}
+                  </div>
+                </div>
+                {data.category === category.id && (
+                  <div className="text-blue-600">✓</div>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {errors?.category && (
+          <p className="text-sm text-red-500">{errors.category}</p>
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
