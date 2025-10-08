@@ -6,10 +6,24 @@
 
 import { Button } from '@/components/ui/button'
 
-export function AuthProviderButtons() {
+interface AuthProviderButtonsProps {
+  onProviderClick?: (provider: string) => void | Promise<void>
+  mode?: 'login' | 'register'
+  disabled?: boolean
+}
+
+export function AuthProviderButtons({ 
+  onProviderClick, 
+  mode = 'login',
+  disabled = false 
+}: AuthProviderButtonsProps) {
   const handleSocialLogin = (provider: string) => {
-    // TODO: Реализовать социальную авторизацию
-    console.log(`Вход через ${provider}`)
+    if (onProviderClick) {
+      onProviderClick(provider)
+    } else {
+      // TODO: Реализовать социальную авторизацию
+      console.log(`Вход через ${provider}`)
+    }
   }
 
   return (
@@ -30,6 +44,7 @@ export function AuthProviderButtons() {
         className="w-full" 
         onClick={() => handleSocialLogin('google')}
         type="button"
+        disabled={disabled}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
           <path
@@ -57,6 +72,7 @@ export function AuthProviderButtons() {
         className="w-full" 
         onClick={() => handleSocialLogin('vk')}
         type="button"
+        disabled={disabled}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14c5.6 0 6.93-1.33 6.93-6.93V8.93C22 3.33 20.67 2 15.07 2zm3.18 14.49h-1.46c-.61 0-.8-.49-1.89-1.59-.95-.93-1.37-1.06-1.61-1.06-.33 0-.42.09-.42.53v1.45c0 .39-.13.63-1.14.63-1.68 0-3.55-.99-4.86-2.84-1.97-2.76-2.51-4.85-2.51-5.27 0-.24.09-.47.53-.47h1.46c.39 0 .54.18.69.6.75 2.15 2.01 4.03 2.52 4.03.2 0 .28-.09.28-.58v-2.25c-.06-.97-.57-1.05-.57-1.39 0-.2.16-.39.42-.39h2.29c.33 0 .44.18.44.56v3.03c0 .33.14.44.24.44.2 0 .36-.11.73-.48 1.14-1.28 1.95-3.26 1.95-3.26.11-.23.28-.47.72-.47h1.46c.44 0 .54.23.44.56-.16.82-1.95 3.59-1.95 3.59-.16.26-.22.38 0 .68.16.21.7.69 1.06 1.11.65.75 1.14 1.38 1.28 1.81.13.43-.07.65-.51.65z"/>
@@ -69,6 +85,7 @@ export function AuthProviderButtons() {
         className="w-full" 
         onClick={() => handleSocialLogin('yandex')}
         type="button"
+        disabled={disabled}
       >
         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.93 14.5h-2.13V9.26H9.78V7.5h4.15v9z"/>

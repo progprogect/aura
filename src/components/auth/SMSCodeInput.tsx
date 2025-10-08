@@ -10,14 +10,20 @@ import { cn } from '@/lib/utils'
 interface SMSCodeInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value?: string
   onChange?: (value: string) => void
+  onComplete?: () => void
   length?: number
 }
 
 export const SMSCodeInput = React.forwardRef<HTMLInputElement, SMSCodeInputProps>(
-  ({ className, value = '', onChange, length = 4, ...props }, ref) => {
+  ({ className, value = '', onChange, onComplete, length = 4, ...props }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value.replace(/\D/g, '').slice(0, length)
       onChange?.(newValue)
+      
+      // Вызываем onComplete если код полностью введен
+      if (newValue.length === length && onComplete) {
+        onComplete()
+      }
     }
 
     return (
