@@ -46,11 +46,6 @@ export function InlineTagsEditor({
   }
 
   const handleRemove = async (tag: string) => {
-    if (localValues.length === 1) {
-      // Минимум 1 тег должен остаться
-      return
-    }
-
     const newValues = localValues.filter(t => t !== tag)
     setLocalValues(newValues)
     await saveChanges(newValues)
@@ -125,16 +120,14 @@ export function InlineTagsEditor({
             className="px-3 py-1.5 text-sm flex items-center gap-2"
           >
             {tag}
-            {localValues.length > 1 && (
-              <button
-                type="button"
-                onClick={() => handleRemove(tag)}
-                className="hover:text-red-500 transition-colors"
-                aria-label={`Удалить ${tag}`}
-              >
-                <X size={14} />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleRemove(tag)}
+              className="hover:text-red-500 transition-colors"
+              aria-label={`Удалить ${tag}`}
+            >
+              <X size={14} />
+            </button>
           </Badge>
         ))}
       </div>
@@ -166,9 +159,28 @@ export function InlineTagsEditor({
         </div>
       )}
 
-      <p className="text-xs text-gray-500">
-        {localValues.length}/{maxTags} тегов
-      </p>
+      <div className="space-y-2">
+        <p className="text-xs text-gray-500">
+          {localValues.length}/{maxTags} тегов
+        </p>
+        
+        {/* Подсказка о поиске */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+          <div className="text-blue-600 mt-0.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-blue-900 font-medium">
+              💡 Эти теги влияют на поиск
+            </p>
+            <p className="text-xs text-blue-700 mt-1">
+              Клиенты смогут найти вас по этим специализациям в каталоге и поиске. Указывайте конкретные методы и подходы.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
