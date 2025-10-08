@@ -14,8 +14,9 @@ import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useEffect } from 'react'
 
 type LoginStep = 'phone' | 'code' | 'success'
 
@@ -28,7 +29,20 @@ export function AuthLoginForm() {
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login } = useAuth()
+
+  // Проверяем наличие ошибки в URL (от OAuth)
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error) {
+      setError(decodeURIComponent(error))
+      // Очищаем URL от параметра ошибки
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('error')
+      window.history.replaceState({}, '', newUrl.toString())
+    }
+  }, [searchParams])
 
   // Таймер обратного отсчёта
   useState(() => {

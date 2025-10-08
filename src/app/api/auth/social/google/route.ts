@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { AUTH_CONFIG } from '@/lib/auth/config'
+import { SocialAuthService } from '@/lib/auth/business-logic'
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,25 +46,32 @@ export async function GET(request: NextRequest) {
 
     const userData = await userResponse.json()
 
-    // TODO: Создаём или находим специалиста через auth-service
-    // const result = await registerSpecialist({
-    //   provider: 'google',
-    //   socialData: {
-    //     provider: 'google',
-    //     providerId: userData.id,
-    //     email: userData.email,
-    //     name: userData.name,
-    //     picture: userData.picture,
-    //     rawData: userData
-    //   }
-    // })
-
-    // Временно возвращаем данные пользователя
-    return NextResponse.json({
-      success: true,
-      userData,
-      message: 'Google OAuth пока в разработке. Используйте вход по телефону.'
+    // Обрабатываем OAuth callback через SocialAuthService
+    const result = await SocialAuthService.handleOAuthCallback('google', {
+      id: userData.id,
+      firstName: userData.given_name,
+      lastName: userData.family_name,
+      email: userData.email,
+      picture: userData.picture,
+      name: userData.name
     })
+
+    if (result.success) {
+      // Устанавливаем токен сессии в куки и перенаправляем
+      const response = NextResponse.redirect(new URL('/specialist/dashboard', request.url))
+      response.cookies.set('session_token', result.sessionToken!, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 30, // 30 дней
+        path: '/',
+      })
+      return response
+    } else {
+      // Ошибка авторизации - перенаправляем на страницу входа с ошибкой
+      const errorUrl = new URL('/auth/login', request.url)
+      errorUrl.searchParams.set('error', result.error || 'Ошибка авторизации')
+      return NextResponse.redirect(errorUrl)
+    }
 
   } catch (error) {
     console.error('[API/auth/social/google] Ошибка:', error)

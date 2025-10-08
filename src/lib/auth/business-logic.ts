@@ -3,8 +3,8 @@
  */
 
 import { prisma } from '@/lib/db'
-import { normalizePhone } from './utils'
-import type { AuthProvider } from './types'
+import { normalizePhone, debugLog } from './utils'
+import type { AuthProvider, AuthResponse } from './types'
 
 // ========================================
 // РАБОТА СО СПЕЦИАЛИСТАМИ
@@ -96,6 +96,24 @@ export class SpecialistService {
       
       slug = `${baseSlug}-${counter}`
       counter++
+    }
+  }
+  
+  /**
+   * Преобразование специалиста в профиль пользователя
+   */
+  static mapSpecialistToProfile(specialist: any): any {
+    return {
+      id: specialist.id,
+      firstName: specialist.firstName,
+      lastName: specialist.lastName,
+      phone: specialist.phone,
+      email: specialist.email,
+      avatar: specialist.avatar,
+      verified: specialist.verified,
+      subscriptionTier: specialist.subscriptionTier,
+      createdAt: specialist.createdAt,
+      updatedAt: specialist.updatedAt
     }
   }
 }
@@ -348,5 +366,99 @@ export class SMSVerificationService {
     })
     
     return { success: true, verificationId: verification.id }
+  }
+}
+
+// ========================================
+// СОЦИАЛЬНАЯ АВТОРИЗАЦИЯ
+// ========================================
+
+export class SocialAuthService {
+  /**
+   * Обработка OAuth callback'а
+   */
+  static async handleOAuthCallback(provider: string, userData: any): Promise<AuthResponse> {
+    try {
+      debugLog(`Обработка OAuth callback для ${provider}`, userData)
+
+      // Ищем существующий социальный аккаунт
+      const existingAccount = await SocialAccountService.findByProvider(provider as AuthProvider, userData.id.toString())
+
+      if (existingAccount) {
+        // Аккаунт уже существует - входим
+        const specialist = existingAccount.specialist
+        if (!specialist) {
+          return { success: false, error: 'Связанный специалист не найден' }
+        }
+
+        const session = await SessionService.createSession(specialist.id)
+
+        debugLog(`Вход через ${provider}`, { specialistId: specialist.id })
+
+        return {
+          success: true,
+          sessionToken: session.sessionToken,
+          specialist: SpecialistService.mapSpecialistToProfile(specialist),
+          isNewUser: false
+        }
+      }
+
+      // Новый пользователь - создаём специалиста
+      const specialist = await SpecialistService.createSpecialist(
+        '', // phone будет пустой для социальных аккаунтов
+        {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          name: userData.name || `${userData.firstName} ${userData.lastName}`,
+          email: userData.email,
+          picture: userData.picture
+        }
+      )
+
+      // Создаём социальный аккаунт
+      await SocialAccountService.createAccount(specialist.id, {
+        provider: provider as AuthProvider,
+        socialId: userData.id.toString(),
+        email: userData.email,
+        name: userData.name || `${userData.firstName} ${userData.lastName}`,
+        picture: userData.picture,
+        rawData: userData
+      })
+
+      // Создаём сессию
+      const session = await SessionService.createSession(specialist.id)
+
+      debugLog(`Регистрация через ${provider}`, { specialistId: specialist.id })
+
+      return {
+        success: true,
+        sessionToken: session.sessionToken,
+        specialist: SpecialistService.mapSpecialistToProfile(specialist),
+        isNewUser: true,
+        requiresProfileCompletion: true
+      }
+
+    } catch (error) {
+      debugLog(`Ошибка обработки OAuth callback для ${provider}`, error)
+      return { success: false, error: 'Ошибка авторизации через социальную сеть' }
+    }
+  }
+
+  /**
+   * Получение URL для OAuth провайдера
+   */
+  static getOAuthUrl(provider: string, state: string): string {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    
+    switch (provider) {
+      case 'google':
+        return `${baseUrl}/api/auth/social/google?state=${state}`
+      case 'vk':
+        return `${baseUrl}/api/auth/social/vk?state=${state}`
+      case 'yandex':
+        return `${baseUrl}/api/auth/social/yandex?state=${state}`
+      default:
+        throw new Error(`Неподдерживаемый провайдер: ${provider}`)
+    }
   }
 }

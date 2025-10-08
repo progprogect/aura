@@ -25,11 +25,9 @@ export function AuthProviderButtons({
       if (provider === 'google') {
         window.location.href = `/api/auth/social/google?state=${mode}`
       } else if (provider === 'vk') {
-        // TODO: Реализовать VK OAuth
-        alert('Авторизация через ВКонтакте скоро будет доступна')
+        window.location.href = `/api/auth/social/vk?state=${mode}`
       } else if (provider === 'yandex') {
-        // TODO: Реализовать Yandex OAuth
-        alert('Авторизация через Яндекс скоро будет доступна')
+        window.location.href = `/api/auth/social/yandex?state=${mode}`
       } else {
         alert(`Авторизация через ${provider} в разработке. Используйте вход по номеру телефона.`)
       }
