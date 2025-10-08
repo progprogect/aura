@@ -16,7 +16,7 @@ import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 
 type LoginStep = 'phone' | 'code' | 'success'
 

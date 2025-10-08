@@ -3,7 +3,7 @@
  */
 
 import { Metadata } from 'next'
-import { AuthLoginForm } from '@/components/auth/AuthLoginForm'
+import { AuthLoginFormWrapper } from '@/components/auth/AuthLoginFormWrapper'
 import { AuthNavigation } from '@/components/auth/AuthNavigation'
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export default function LoginPage() {
       <div className="flex items-center justify-center min-h-screen px-4 py-8">
         <div className="w-full max-w-md">
           {/* Форма входа */}
-          <AuthLoginForm />
+          <AuthLoginFormWrapper />
         </div>
       </div>
     </div>
