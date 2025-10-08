@@ -72,20 +72,20 @@ export function HeroNavigation() {
             <div className="flex items-center space-x-3">
               <Link
                 href="/auth/login"
-                className={`text-sm font-medium transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
                   isActive('/auth/login')
-                    ? 'text-primary' 
-                    : 'text-gray-700 hover:text-primary'
+                    ? 'border-blue-600 bg-blue-100 text-blue-700' 
+                    : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
                 }`}
               >
                 Войти
               </Link>
               <Link
                 href="/auth/register"
-                className={`text-sm font-medium transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
                   isActive('/auth/register')
-                    ? 'text-primary font-semibold' 
-                    : 'text-gray-700 hover:text-primary'
+                    ? 'border-blue-700 bg-blue-700 text-white' 
+                    : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
                 }`}
               >
                 Стать специалистом
@@ -152,10 +152,10 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/login"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
                   isActive('/auth/login') 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                    ? 'border-blue-600 bg-blue-100 text-blue-700' 
+                    : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
                 }`}
                 onClick={closeMobileMenu}
               >
@@ -163,10 +163,10 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/register"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                className={`block px-4 py-2.5 rounded-lg border-2 text-base font-medium transition-all duration-200 ${
                   isActive('/auth/register')
-                    ? 'text-primary bg-primary/10 font-semibold' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                    ? 'border-blue-700 bg-blue-700 text-white' 
+                    : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
                 }`}
                 onClick={closeMobileMenu}
               >
