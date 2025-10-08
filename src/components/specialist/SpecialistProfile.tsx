@@ -53,9 +53,11 @@ interface SpecialistProfileProps {
       answer: string
     }>
   }
+  isEditMode?: boolean
+  onSaveField?: (field: string, value: string | number) => Promise<any>
 }
 
-export function SpecialistProfile({ tabs, categoryConfig, data }: SpecialistProfileProps) {
+export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = false, onSaveField }: SpecialistProfileProps) {
   const activeTab = useActiveTab(tabs)
 
   return (
@@ -66,7 +68,11 @@ export function SpecialistProfile({ tabs, categoryConfig, data }: SpecialistProf
       {/* Основной контент */}
       <div className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
         {/* О себе */}
-        <SpecialistAbout about={data.about} />
+        <SpecialistAbout 
+          about={data.about} 
+          isEditMode={isEditMode}
+          onSave={onSaveField}
+        />
 
         {/* Специализация (условно) */}
         {data.customFields && categoryConfig && (

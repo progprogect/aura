@@ -4,8 +4,9 @@ import type { Metadata } from 'next'
 import { prisma } from '@/lib/db'
 import { incrementProfileView } from '@/lib/redis'
 import { categoryConfigService } from '@/lib/category-config'
+import { getCurrentSpecialist } from '@/lib/auth/server'
 import { SpecialistHero } from '@/components/specialist/SpecialistHero'
-import { SpecialistProfile } from '@/components/specialist/SpecialistProfile'
+import { SpecialistProfileWithEdit } from '@/components/specialist/SpecialistProfileWithEdit'
 import { SpecialistNavigation } from '@/components/navigation/SpecialistNavigation'
 import type { Tab } from '@/components/specialist/SpecialistTabs'
 
@@ -108,10 +109,16 @@ export default async function SpecialistPage({ params }: PageProps) {
     notFound()
   }
 
-  // Инкремент просмотров (не блокирующий)
-  incrementProfileView(specialist.id).catch((error) => {
-    console.error('Failed to increment profile view:', error)
-  })
+  // Проверяем, является ли текущий пользователь владельцем профиля
+  const currentUser = await getCurrentSpecialist()
+  const isOwner = currentUser?.id === specialist.id
+
+  // Инкремент просмотров (не блокирующий, но не для владельца)
+  if (!isOwner) {
+    incrementProfileView(specialist.id).catch((error) => {
+      console.error('Failed to increment profile view:', error)
+    })
+  }
 
   const fullName = `${specialist.firstName} ${specialist.lastName}`
 
@@ -160,7 +167,8 @@ export default async function SpecialistPage({ params }: PageProps) {
       />
 
       {/* Профиль с табами и контентом */}
-      <SpecialistProfile
+      <SpecialistProfileWithEdit
+        isOwner={isOwner}
         tabs={tabs}
         categoryConfig={categoryConfig}
         data={{
