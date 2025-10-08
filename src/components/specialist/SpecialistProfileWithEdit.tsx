@@ -9,6 +9,7 @@ import { useState, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
 import { SpecialistHeroEdit } from './SpecialistHeroEdit'
+import { ContactsEditor } from './edit/ContactsEditor'
 import { EditModeToggle } from './edit/EditModeToggle'
 import { EditToolbar } from './edit/EditToolbar'
 import type { Tab } from './SpecialistTabs'
@@ -24,6 +25,13 @@ interface SpecialistProfileWithEditProps {
     tagline: string | null
     city: string | null
     specializations: string[]
+  }
+  contactsData: {
+    email: string | null
+    telegram: string | null
+    whatsapp: string | null
+    instagram: string | null
+    website: string | null
   }
   data: {
     id: string
@@ -70,6 +78,7 @@ export function SpecialistProfileWithEdit({
   tabs, 
   categoryConfig,
   heroData,
+  contactsData,
   data 
 }: SpecialistProfileWithEditProps) {
   const [isEditMode, setIsEditMode] = useState(false)
@@ -128,6 +137,28 @@ export function SpecialistProfileWithEdit({
     }
   }, [])
 
+  // Функция для сохранения кастомных полей
+  const handleSaveCustomField = useCallback(async (key: string, value: any) => {
+    try {
+      const response = await fetch('/api/specialist/profile/custom-fields', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value })
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Ошибка сохранения')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Ошибка сохранения кастомного поля:', error)
+      throw error
+    }
+  }, [])
+
   return (
     <>
       {/* Toolbar для режима редактирования */}
@@ -141,15 +172,29 @@ export function SpecialistProfileWithEdit({
 
       {/* Hero Edit секция (в режиме редактирования) */}
       {isEditMode && isOwner && (
-        <SpecialistHeroEdit
-          firstName={heroData.firstName}
-          lastName={heroData.lastName}
-          tagline={heroData.tagline}
-          city={heroData.city}
-          specializations={heroData.specializations}
-          onSaveField={handleSaveField}
-          onSaveArray={handleSaveArray}
-        />
+        <div className="space-y-6 pb-6">
+          <SpecialistHeroEdit
+            firstName={heroData.firstName}
+            lastName={heroData.lastName}
+            tagline={heroData.tagline}
+            city={heroData.city}
+            specializations={heroData.specializations}
+            onSaveField={handleSaveField}
+            onSaveArray={handleSaveArray}
+          />
+          
+          {/* Контакты в режиме редактирования */}
+          <div className="container mx-auto max-w-4xl px-4">
+            <ContactsEditor
+              email={contactsData.email}
+              telegram={contactsData.telegram}
+              whatsapp={contactsData.whatsapp}
+              instagram={contactsData.instagram}
+              website={contactsData.website}
+              onSave={handleSaveField}
+            />
+          </div>
+        </div>
       )}
 
       {/* Профиль */}
@@ -159,6 +204,7 @@ export function SpecialistProfileWithEdit({
         data={data}
         isEditMode={isEditMode && isOwner}
         onSaveField={handleSaveField}
+        onSaveCustomField={handleSaveCustomField}
       />
 
       {/* Floating кнопка "Редактировать" */}

@@ -55,9 +55,10 @@ interface SpecialistProfileProps {
   }
   isEditMode?: boolean
   onSaveField?: (field: string, value: string | number) => Promise<any>
+  onSaveCustomField?: (key: string, value: any) => Promise<any>
 }
 
-export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = false, onSaveField }: SpecialistProfileProps) {
+export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = false, onSaveField, onSaveCustomField }: SpecialistProfileProps) {
   const activeTab = useActiveTab(tabs)
 
   return (
@@ -75,11 +76,13 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
         />
 
         {/* Специализация (условно) */}
-        {data.customFields && categoryConfig && (
+        {(data.customFields || isEditMode) && categoryConfig && (
           <SpecialistSpecialization
             category={data.category}
             customFields={data.customFields}
             categoryConfig={categoryConfig}
+            isEditMode={isEditMode}
+            onSaveCustomField={onSaveCustomField}
           />
         )}
 

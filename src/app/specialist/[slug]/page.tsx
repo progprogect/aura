@@ -178,6 +178,13 @@ export default async function SpecialistPage({ params }: PageProps) {
           city: specialist.city,
           specializations: specialist.specializations,
         }}
+        contactsData={{
+          email: specialist.email,
+          telegram: specialist.telegram,
+          whatsapp: specialist.whatsapp,
+          instagram: specialist.instagram,
+          website: specialist.website,
+        }}
         data={{
           id: specialist.id,
           fullName,
