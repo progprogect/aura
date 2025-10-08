@@ -201,8 +201,8 @@ export function SpecialistProfileWithEdit({
       </AnimatePresence>
 
 
-      {/* Hero - показываем для владельца только в режиме просмотра */}
-      {isOwner && !isEditMode && (
+      {/* Hero - показываем всегда, кроме режима редактирования */}
+      {(!isOwner || (isOwner && !isEditMode)) && (
         <SpecialistHero
           firstName={heroData.firstName}
           lastName={heroData.lastName}
