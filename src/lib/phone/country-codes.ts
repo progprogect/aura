@@ -555,31 +555,87 @@ export function detectCountryCode(input: string): CountryCode | null {
 
 /**
  * Форматирует номер телефона согласно маске страны
+ * Исправлена логика: код страны не дублируется в национальной части
  */
 export function formatPhoneNumber(input: string, countryCode?: CountryCode): string {
   const digits = input.replace(/\D/g, '')
   if (!digits) return ''
   
   const country = countryCode || detectCountryCode(digits)
-  if (!country) return digits
+  if (!country) return '+' + digits
   
+  // Извлекаем код страны и национальные цифры
+  const codeLength = country.code.length
+  let nationalDigits = ''
+  
+  if (digits.startsWith(country.code)) {
+    // Если номер начинается с кода страны - извлекаем только национальные цифры
+    nationalDigits = digits.substring(codeLength)
+  } else {
+    // Если код страны отсутствует - все цифры считаем национальными
+    nationalDigits = digits
+  }
+  
+  // Начинаем с префикса кода страны
+  let result = `+${country.code}`
+  
+  // Если нет национальных цифр - возвращаем только код с пробелом
+  if (!nationalDigits) {
+    return result + ' '
+  }
+  
+  // Парсим формат чтобы найти где начинается национальная часть
   const format = country.format
-  let result = ''
-  let digitIndex = 0
   
-  for (let i = 0; i < format.length; i++) {
-    const char = format[i]
+  // Находим позицию где заканчивается код страны в формате
+  // Ищем строку "+код_страны" или просто "код_страны"
+  const codePrefix = `+${country.code}`
+  let formatStartIndex = format.indexOf(codePrefix)
+  
+  if (formatStartIndex === -1) {
+    // Префикс не найден, начинаем с начала
+    formatStartIndex = 0
+  } else {
+    // Пропускаем код страны и один пробел после него (если есть)
+    formatStartIndex += codePrefix.length
+    if (formatStartIndex < format.length && format[formatStartIndex] === ' ') {
+      formatStartIndex++
+    }
+  }
+  
+  // Добавляем пробел после кода страны
+  result += ' '
+  
+  // Форматируем национальные цифры начиная с позиции после кода
+  let formatIndex = formatStartIndex
+  let nationalDigitIndex = 0
+  
+  while (formatIndex < format.length && nationalDigitIndex < nationalDigits.length) {
+    const char = format[formatIndex]
     
     if (char === '#') {
-      if (digitIndex < digits.length) {
-        result += digits[digitIndex]
-        digitIndex++
-      } else {
-        break
-      }
+      // Добавляем цифру
+      result += nationalDigits[nationalDigitIndex]
+      nationalDigitIndex++
     } else {
-      result += char
+      // Это разделитель (скобка, пробел, дефис и т.д.)
+      // Проверяем: будет ли следующая цифра после этого разделителя?
+      let willHaveDigitAfter = false
+      for (let i = formatIndex + 1; i < format.length; i++) {
+        if (format[i] === '#') {
+          // Нашли # впереди - проверяем есть ли у нас цифра для него
+          willHaveDigitAfter = nationalDigitIndex < nationalDigits.length
+          break
+        }
+      }
+      
+      // Добавляем разделитель только если после него будет цифра
+      if (willHaveDigitAfter) {
+        result += char
+      }
     }
+    
+    formatIndex++
   }
   
   return result
