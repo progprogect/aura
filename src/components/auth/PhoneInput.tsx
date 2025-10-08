@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { 
@@ -35,21 +35,24 @@ export function PhoneInput({
 }: PhoneInputProps) {
   const [displayValue, setDisplayValue] = useState('')
   const [currentCountry, setCurrentCountry] = useState<any>(null)
+  const isInternalChange = useRef(false)
 
   // Форматирование номера телефона из чистых цифр
-  const formatPhone = (digits: string) => {
-    if (!digits) return ''
+  const formatPhone = (digits: string): { formatted: string; country: any } => {
+    if (!digits) return { formatted: '', country: null }
 
     if (international) {
       // Определяем страну по коду
       const country = detectCountryCode(digits)
       if (country) {
-        setCurrentCountry(country)
-        return formatPhoneNumber(digits, country)
+        return { 
+          formatted: formatPhoneNumber(digits, country),
+          country 
+        }
       }
       
       // Если страна не определена, но есть цифры - добавляем + в начало
-      return '+' + digits
+      return { formatted: '+' + digits, country: null }
     }
     
     // Старая логика для российских номеров (обратная совместимость)
@@ -69,20 +72,30 @@ export function PhoneInput({
     cleanDigits = cleanDigits.slice(0, 11)
     
     // Форматируем для отображения
-    if (cleanDigits.length === 0) return ''
-    if (cleanDigits.length === 1) return '+7'
-    if (cleanDigits.length <= 4) return `+7 (${cleanDigits.slice(1)}`
-    if (cleanDigits.length <= 7) return `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4)}`
-    if (cleanDigits.length <= 9) return `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4, 7)}-${cleanDigits.slice(7)}`
-    return `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4, 7)}-${cleanDigits.slice(7, 9)}-${cleanDigits.slice(9)}`
+    let formatted = ''
+    if (cleanDigits.length === 0) formatted = ''
+    else if (cleanDigits.length === 1) formatted = '+7'
+    else if (cleanDigits.length <= 4) formatted = `+7 (${cleanDigits.slice(1)}`
+    else if (cleanDigits.length <= 7) formatted = `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4)}`
+    else if (cleanDigits.length <= 9) formatted = `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4, 7)}-${cleanDigits.slice(7)}`
+    else formatted = `+7 (${cleanDigits.slice(1, 4)}) ${cleanDigits.slice(4, 7)}-${cleanDigits.slice(7, 9)}-${cleanDigits.slice(9)}`
+    
+    return { formatted, country: null }
   }
 
-  // Инициализация displayValue из value (только при монтировании или внешнем изменении)
+  // Инициализация displayValue из value (ТОЛЬКО при внешнем изменении)
   useEffect(() => {
+    // Пропускаем, если это внутреннее изменение из handleChange
+    if (isInternalChange.current) {
+      isInternalChange.current = false
+      return
+    }
+
     if (value) {
       const digits = value.replace(/\D/g, '')
-      const formatted = formatPhone(digits)
+      const { formatted, country } = formatPhone(digits)
       setDisplayValue(formatted)
+      setCurrentCountry(country)
     } else {
       setDisplayValue('')
       setCurrentCountry(null)
@@ -96,7 +109,10 @@ export function PhoneInput({
     const digits = input.replace(/\D/g, '')
     
     // Форматируем для отображения
-    const formatted = formatPhone(digits)
+    const { formatted, country } = formatPhone(digits)
+    
+    // Обновляем страну БЕЗ вызова ре-рендера в formatPhone
+    setCurrentCountry(country)
     
     // Нормализуем для передачи наверх
     let normalized = ''
@@ -114,6 +130,9 @@ export function PhoneInput({
         }
       }
     }
+    
+    // Помечаем что это внутреннее изменение
+    isInternalChange.current = true
     
     // Обновляем состояние
     setDisplayValue(formatted)

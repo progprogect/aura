@@ -41,9 +41,17 @@ export function InternationalPhoneInput({
   const [isCountrySelectorOpen, setIsCountrySelectorOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const isInternalChange = useRef(false)
+  const isCountryChange = useRef(false)
 
-  // Инициализация displayValue из value (только при внешнем изменении)
+  // Инициализация displayValue из value (ТОЛЬКО при внешнем изменении)
   useEffect(() => {
+    // Пропускаем, если это внутреннее изменение из handleChange
+    if (isInternalChange.current) {
+      isInternalChange.current = false
+      return
+    }
+
     if (value) {
       const digits = value.replace(/\D/g, '')
       const country = detectCountryCode(digits)
@@ -58,12 +66,19 @@ export function InternationalPhoneInput({
     }
   }, [value])
 
-  // Обновляем отображаемое значение при изменении страны
+  // Обновляем отображаемое значение при изменении страны (ТОЛЬКО при ручном выборе)
   useEffect(() => {
+    // Пропускаем если это автоматическое определение страны
+    if (isCountryChange.current) {
+      isCountryChange.current = false
+      return
+    }
+
     if (value) {
       const digits = value.replace(/\D/g, '')
       const formatted = formatPhoneNumber(digits, selectedCountry)
       const normalized = normalizePhoneNumber(digits)
+      isInternalChange.current = true
       setDisplayValue(formatted)
       onChange(normalized)
     }
@@ -78,6 +93,7 @@ export function InternationalPhoneInput({
     // Определяем страну по введённым цифрам
     const detectedCountry = detectCountryCode(digits)
     if (detectedCountry && detectedCountry.code !== selectedCountry.code) {
+      isCountryChange.current = true
       setSelectedCountry(detectedCountry)
     }
     
@@ -85,6 +101,9 @@ export function InternationalPhoneInput({
     const formatted = formatPhoneNumber(digits, detectedCountry || selectedCountry)
     // Нормализуем для передачи наверх
     const normalized = digits ? normalizePhoneNumber(digits) : ''
+    
+    // Помечаем что это внутреннее изменение
+    isInternalChange.current = true
     
     setDisplayValue(formatted)
     onChange(normalized)
