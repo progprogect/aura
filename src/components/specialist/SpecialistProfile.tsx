@@ -93,10 +93,12 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
         {data.gallery.length > 0 && <SpecialistGallery items={data.gallery} />}
 
         {/* Образование */}
-        {(data.education.length > 0 || data.certificates.length > 0) && (
+        {(data.education.length > 0 || data.certificates.length > 0 || isEditMode) && (
           <SpecialistEducation
             education={data.education}
             certificates={data.certificates}
+            isEditMode={isEditMode}
+            onRefresh={() => window.location.reload()}
           />
         )}
 
