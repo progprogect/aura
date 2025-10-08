@@ -5,68 +5,57 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Проверяем авторизацию
-    const sessionToken = request.cookies.get('session_token')?.value
+    const authSession = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
+    if (!authSession) {
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
-    // Получаем сессию и специалиста
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      },
-      include: {
-        specialist: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-            slug: true,
-            category: true,
-            specializations: true,
-            verified: true,
-            profileViews: true,
-            contactViews: true,
-            acceptingClients: true,
-            
-            // Для расчёта процента заполнения
-            tagline: true,
-            about: true,
-            city: true,
-            email: true,
-            priceFrom: true,
-            priceTo: true,
-            yearsOfPractice: true,
-            videoUrl: true,
-            
-            // Связанные данные
-            education: true,
-            certificates: true,
-            gallery: true,
-            faqs: true,
-          }
-        }
+    // Получаем полные данные специалиста
+    const specialist = await prisma.specialist.findUnique({
+      where: { id: authSession.specialistId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        slug: true,
+        category: true,
+        specializations: true,
+        verified: true,
+        profileViews: true,
+        contactViews: true,
+        acceptingClients: true,
+        
+        // Для расчёта процента заполнения
+        tagline: true,
+        about: true,
+        city: true,
+        email: true,
+        priceFrom: true,
+        priceTo: true,
+        yearsOfPractice: true,
+        videoUrl: true,
+        
+        // Связанные данные
+        education: true,
+        certificates: true,
+        gallery: true,
+        faqs: true,
       }
     })
 
-    if (!session) {
+    if (!specialist) {
       return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
+        { success: false, error: 'Специалист не найден' },
+        { status: 404 }
       )
     }
-
-    const specialist = session.specialist
 
     // Подсчитываем процент заполнения профиля
     const completionFields = {

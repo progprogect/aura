@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 const UpdateCustomFieldSchema = z.object({
   key: z.string().min(1, 'Ключ поля обязателен'),
@@ -21,30 +22,10 @@ const UpdateCustomFieldSchema = z.object({
 export async function PATCH(request: NextRequest) {
   try {
     // Проверяем авторизацию
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      },
-      include: {
-        specialist: true
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     // Парсим тело запроса
@@ -90,7 +71,7 @@ export async function PATCH(request: NextRequest) {
         {
           success: false,
           error: 'Ошибка валидации данных',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       )

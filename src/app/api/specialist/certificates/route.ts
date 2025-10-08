@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 const CertificateSchema = z.object({
   title: z.string().min(2, 'Название сертификата обязательно'),
@@ -17,27 +18,10 @@ const CertificateSchema = z.object({
 // Добавление сертификата
 export async function POST(request: NextRequest) {
   try {
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     const body = await request.json()
@@ -71,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Ошибка валидации', details: error.errors },
+        { success: false, error: 'Ошибка валидации', details: error.issues },
         { status: 400 }
       )
     }

@@ -24,18 +24,169 @@ async function getDashboardData() {
     return null
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/specialist/stats`, {
-    headers: {
-      Cookie: `session_token=${sessionToken}`
-    },
-    cache: 'no-store'
+  // Прямой запрос к БД вместо fetch (эффективнее на сервере)
+  const authSession = await prisma.authSession.findFirst({
+    where: {
+      sessionToken,
+      expiresAt: { gt: new Date() }
+    }
   })
 
-  if (!response.ok) {
+  if (!authSession) {
     return null
   }
 
-  return response.json()
+  // Получаем данные напрямую (вместо fetch к самому себе)
+  const specialist = await prisma.specialist.findUnique({
+    where: { id: authSession.specialistId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      avatar: true,
+      slug: true,
+      category: true,
+      specializations: true,
+      verified: true,
+      profileViews: true,
+      contactViews: true,
+      acceptingClients: true,
+      tagline: true,
+      about: true,
+      city: true,
+      email: true,
+      priceFrom: true,
+      priceTo: true,
+      yearsOfPractice: true,
+      videoUrl: true,
+      education: true,
+      certificates: true,
+      gallery: true,
+      faqs: true,
+    }
+  })
+
+  if (!specialist) {
+    return null
+  }
+
+  // Подсчёт процента заполнения
+  const completionFields = {
+    firstName: specialist.firstName ? 1 : 0,
+    lastName: specialist.lastName ? 1 : 0,
+    about: specialist.about ? 1 : 0,
+    specializations: specialist.specializations.length > 0 ? 1 : 0,
+    avatar: specialist.avatar ? 15 : 0,
+    tagline: specialist.tagline ? 5 : 0,
+    city: specialist.city ? 5 : 0,
+    email: specialist.email ? 5 : 0,
+    prices: (specialist.priceFrom || specialist.priceTo) ? 10 : 0,
+    yearsOfPractice: specialist.yearsOfPractice ? 5 : 0,
+    education: specialist.education.length > 0 ? 15 : 0,
+    certificates: specialist.certificates.length > 0 ? 20 : 0,
+    gallery: specialist.gallery.length > 0 ? 10 : 0,
+    faqs: specialist.faqs.length > 0 ? 5 : 0,
+    video: specialist.videoUrl ? 10 : 0,
+  }
+
+  const baseCompletion = 20
+  const additionalCompletion = Object.values(completionFields).reduce((sum, val) => sum + val, 0) - 4
+  const completionPercentage = Math.min(100, baseCompletion + additionalCompletion)
+
+  // Количество заявок за неделю
+  const consultationRequestsCount = await prisma.consultationRequest.count({
+    where: {
+      specialistId: specialist.id,
+      createdAt: {
+        gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      }
+    }
+  })
+
+  // Формируем задания
+  const tasks = []
+  
+  if (!specialist.avatar) {
+    tasks.push({
+      id: 'avatar',
+      title: 'Добавьте фото профиля',
+      description: 'Профиль с фото вызывает больше доверия',
+      bonus: 15,
+      completed: false
+    })
+  }
+  
+  if (specialist.certificates.length === 0) {
+    tasks.push({
+      id: 'certificates',
+      title: 'Загрузите сертификаты',
+      description: 'Подтвердите свою квалификацию',
+      bonus: 20,
+      completed: false
+    })
+  }
+  
+  if (specialist.education.length === 0) {
+    tasks.push({
+      id: 'education',
+      title: 'Добавьте образование',
+      description: 'Укажите ваше профессиональное образование',
+      bonus: 15,
+      completed: false
+    })
+  }
+  
+  if (specialist.gallery.length === 0) {
+    tasks.push({
+      id: 'gallery',
+      title: 'Создайте галерею',
+      description: 'Добавьте фото вашего кабинета или процесса работы',
+      bonus: 10,
+      completed: false
+    })
+  }
+  
+  if (!specialist.priceFrom && !specialist.priceTo) {
+    tasks.push({
+      id: 'pricing',
+      title: 'Укажите цены',
+      description: 'Клиентам важно знать стоимость заранее',
+      bonus: 10,
+      completed: false
+    })
+  }
+
+  if (!specialist.videoUrl) {
+    tasks.push({
+      id: 'video',
+      title: 'Добавьте видео-презентацию',
+      description: 'Видео помогает клиентам познакомиться с вами',
+      bonus: 10,
+      completed: false
+    })
+  }
+
+  return {
+    success: true,
+    specialist: {
+      id: specialist.id,
+      firstName: specialist.firstName,
+      lastName: specialist.lastName,
+      avatar: specialist.avatar,
+      slug: specialist.slug,
+      category: specialist.category,
+      specializations: specialist.specializations,
+      verified: specialist.verified,
+      acceptingClients: specialist.acceptingClients,
+    },
+    stats: {
+      profileViews: specialist.profileViews,
+      contactViews: specialist.contactViews,
+      consultationRequests: consultationRequestsCount,
+      completionPercentage,
+    },
+    tasks
+  }
 }
 
 export default async function DashboardPage() {

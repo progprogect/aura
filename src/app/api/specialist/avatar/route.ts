@@ -1,4 +1,5 @@
 /**
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
  * API для загрузки аватара специалиста
  * POST /api/specialist/avatar
  * Поддерживает:
@@ -10,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { uploadAvatar, isCloudinaryConfigured } from '@/lib/cloudinary/config'
 import { z } from 'zod'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 const AvatarSchema = z.object({
   // Либо base64 изображение
@@ -21,27 +23,10 @@ const AvatarSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Проверяем авторизацию
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     const body = await request.json()
@@ -109,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Ошибка валидации', details: error.errors },
+        { success: false, error: 'Ошибка валидации', details: error.issues },
         { status: 400 }
       )
     }

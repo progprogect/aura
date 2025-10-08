@@ -245,7 +245,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
                 <span className="hidden md:inline">Назад</span>
               </Button>
             ) : (
-              <div /> {/* Пустой div для выравнивания */}
+              <div />
             )}
 
             {/* Кнопка "Далее" / "Создать профиль" */}

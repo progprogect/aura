@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, Loader2, Check, X, Link as LinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,17 @@ export function AvatarUploader({ currentAvatar, onUploadSuccess }: AvatarUploade
   const [preview, setPreview] = useState<string | null>(null)
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
+  const [cloudinaryConfigured, setCloudinaryConfigured] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Проверяем настройку Cloudinary на клиенте
+  useEffect(() => {
+    fetch('/api/specialist/avatar', {
+      method: 'OPTIONS'
+    }).catch(() => {
+      setCloudinaryConfigured(false)
+    })
+  }, [])
 
   // Конвертация файла в base64
   const fileToBase64 = (file: File): Promise<string> => {
@@ -246,7 +256,7 @@ export function AvatarUploader({ currentAvatar, onUploadSuccess }: AvatarUploade
       )}
 
       {/* Подсказка о Cloudinary */}
-      {!isCloudinaryConfigured() && !showUrlInput && (
+      {!cloudinaryConfigured && !showUrlInput && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-sm text-amber-700">
             ⚠️ Cloudinary не настроен. Загрузка файлов временно недоступна. Используйте URL изображения.

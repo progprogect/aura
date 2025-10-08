@@ -1,4 +1,5 @@
 /**
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
  * API для редактирования/удаления конкретного образования
  * PATCH /api/specialist/education/[id] - обновление
  * DELETE /api/specialist/education/[id] - удаление
@@ -7,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 const UpdateEducationSchema = z.object({
   institution: z.string().min(2).optional(),
@@ -21,27 +23,10 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     // Проверяем что образование принадлежит специалисту
@@ -74,7 +59,7 @@ export async function PATCH(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Ошибка валидации', details: error.errors },
+        { success: false, error: 'Ошибка валидации', details: error.issues },
         { status: 400 }
       )
     }
@@ -92,27 +77,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     // Проверяем что образование принадлежит специалисту

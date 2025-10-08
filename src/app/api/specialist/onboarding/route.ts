@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { generateSlug } from '@/lib/utils/slug'
+import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 // Валидация данных онбординга
 const OnboardingSchema = z.object({
@@ -43,31 +44,10 @@ const OnboardingSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Проверяем авторизацию
-    const sessionToken = request.cookies.get('session_token')?.value
+    const session = await getAuthSession(request)
     
-    if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, error: 'Не авторизован' },
-        { status: 401 }
-      )
-    }
-
-    // Получаем сессию
-    const session = await prisma.authSession.findFirst({
-      where: {
-        sessionToken,
-        expiresAt: { gt: new Date() }
-      },
-      include: {
-        specialist: true
-      }
-    })
-
     if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Сессия истекла' },
-        { status: 401 }
-      )
+      return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
     // Проверяем, не создан ли уже профиль
@@ -127,7 +107,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Ошибка валидации данных',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       )
