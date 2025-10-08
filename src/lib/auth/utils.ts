@@ -14,8 +14,9 @@ export function validatePhone(phone: string): { isValid: boolean; error?: string
     return { isValid: false, error: 'Номер телефона обязателен' }
   }
   
-  if (!VALIDATION_RULES.phone.pattern.test(phone)) {
-    return { isValid: false, error: VALIDATION_RULES.phone.message }
+  const phonePattern = /^\+7\d{10}$/
+  if (!phonePattern.test(phone)) {
+    return { isValid: false, error: 'Номер телефона должен начинаться с +7 и содержать 10 цифр' }
   }
   
   return { isValid: true }
@@ -26,8 +27,9 @@ export function validateSMSCode(code: string): { isValid: boolean; error?: strin
     return { isValid: false, error: 'Код обязателен' }
   }
   
-  if (!VALIDATION_RULES.smsCode.pattern.test(code)) {
-    return { isValid: false, error: VALIDATION_RULES.smsCode.message }
+  const codePattern = /^\d{4}$/
+  if (!codePattern.test(code)) {
+    return { isValid: false, error: 'Код должен содержать 4 цифры' }
   }
   
   return { isValid: true }
@@ -38,16 +40,9 @@ export function validateName(name: string): { isValid: boolean; error?: string }
     return { isValid: false, error: 'Имя обязательно' }
   }
   
-  if (name.length < VALIDATION_RULES.name.minLength) {
-    return { isValid: false, error: `Имя должно содержать минимум ${VALIDATION_RULES.name.minLength} символа` }
-  }
-  
-  if (name.length > VALIDATION_RULES.name.maxLength) {
-    return { isValid: false, error: `Имя должно содержать максимум ${VALIDATION_RULES.name.maxLength} символов` }
-  }
-  
-  if (!VALIDATION_RULES.name.pattern.test(name)) {
-    return { isValid: false, error: VALIDATION_RULES.name.message }
+  const namePattern = /^[а-яёА-ЯЁa-zA-Z\s-]{2,50}$/
+  if (!namePattern.test(name)) {
+    return { isValid: false, error: 'Имя должно содержать только буквы, пробелы и дефисы (2-50 символов)' }
   }
   
   return { isValid: true }

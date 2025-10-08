@@ -157,7 +157,7 @@ export function AuthRegisterForm() {
                 <PhoneInput
                   id="phone"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={setPhone}
                   placeholder="+7 (999) 999-99-99"
                   disabled={loading}
                 />

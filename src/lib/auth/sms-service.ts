@@ -77,7 +77,7 @@ async function sendTestSMS(phone: string, code: string): Promise<{ success: bool
   console.log(`[TEST SMS] Код для ${phone}: ${code}`)
   
   // Проверяем тестовые номера
-  const testPhones = AUTH_CONFIG.testMode.testPhones || {}
+  const testPhones = AUTH_CONFIG.testMode.testPhones as Record<string, string>
   const testCode = testPhones[phone]
   
   if (testCode) {

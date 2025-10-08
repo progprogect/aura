@@ -8,13 +8,10 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-interface PhoneInputProps {
+interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value: string
   onChange: (value: string) => void
   onEnter?: () => void
-  placeholder?: string
-  disabled?: boolean
-  className?: string
 }
 
 export function PhoneInput({
@@ -23,7 +20,8 @@ export function PhoneInput({
   onEnter,
   placeholder = "+7 (999) 123-45-67",
   disabled = false,
-  className
+  className,
+  ...props
 }: PhoneInputProps) {
   const [displayValue, setDisplayValue] = useState('')
 
@@ -109,6 +107,7 @@ export function PhoneInput({
       )}
       autoComplete="tel"
       inputMode="numeric"
+      {...props}
     />
   )
 }

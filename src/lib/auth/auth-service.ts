@@ -28,10 +28,10 @@ import type {
 export async function sendVerificationSMS(phone: string, purpose: 'registration' | 'login' | 'recovery') {
   const validation = validateSendSMSRequest({ phone, purpose })
   
-  if (!validation.success) {
+  if (!validation.success || !validation.data) {
     return {
       success: false,
-      error: validation.error
+      error: validation.error || 'Ошибка валидации'
     }
   }
   
@@ -61,10 +61,10 @@ export async function sendVerificationSMS(phone: string, purpose: 'registration'
 export async function registerSpecialist(request: unknown): Promise<AuthResponse> {
   const validation = validateRegistrationRequest(request)
   
-  if (!validation.success) {
+  if (!validation.success || !validation.data) {
     return {
       success: false,
-      error: validation.error
+      error: validation.error || 'Ошибка валидации'
     }
   }
   
@@ -88,9 +88,17 @@ export async function registerSpecialist(request: unknown): Promise<AuthResponse
   }
 }
 
-async function registerWithPhone(data: ValidatedRegistrationRequest & { phone: string; code: string }): Promise<AuthResponse> {
+async function registerWithPhone(data: ValidatedRegistrationRequest): Promise<AuthResponse> {
+  if (!data.phone || !data.code) {
+    return {
+      success: false,
+      error: 'Необходимо указать номер телефона и код подтверждения'
+    }
+  }
+  
+  const { phone, code } = data
   // Проверяем код
-  const verification = await SMSVerificationService.verifyCode(data.phone, data.code, 'registration')
+  const verification = await SMSVerificationService.verifyCode(phone, code, 'registration')
   
   if (!verification.success) {
     return {
@@ -100,7 +108,7 @@ async function registerWithPhone(data: ValidatedRegistrationRequest & { phone: s
   }
   
   // Проверяем, не зарегистрирован ли уже этот номер
-  const exists = await SpecialistService.existsByPhone(data.phone)
+  const exists = await SpecialistService.existsByPhone(phone)
   if (exists) {
     return {
       success: false,
@@ -110,7 +118,7 @@ async function registerWithPhone(data: ValidatedRegistrationRequest & { phone: s
   }
   
   // Создаём специалиста
-  const specialist = await SpecialistService.createSpecialist(data.phone)
+  const specialist = await SpecialistService.createSpecialist(phone)
   
   // Создаём сессию
   const session = await SessionService.createSession(specialist.id)
@@ -126,7 +134,14 @@ async function registerWithPhone(data: ValidatedRegistrationRequest & { phone: s
   }
 }
 
-async function registerWithSocial(data: ValidatedRegistrationRequest & { socialData: any }): Promise<AuthResponse> {
+async function registerWithSocial(data: ValidatedRegistrationRequest): Promise<AuthResponse> {
+  if (!data.socialData) {
+    return {
+      success: false,
+      error: 'Необходимо указать данные социального аккаунта'
+    }
+  }
+  
   const { socialData } = data
   
   // Проверяем, не зарегистрирован ли уже этот социальный аккаунт
@@ -177,10 +192,10 @@ async function registerWithSocial(data: ValidatedRegistrationRequest & { socialD
 export async function loginSpecialist(request: unknown): Promise<AuthResponse> {
   const validation = validateLoginRequest(request)
   
-  if (!validation.success) {
+  if (!validation.success || !validation.data) {
     return {
       success: false,
-      error: validation.error
+      error: validation.error || 'Ошибка валидации'
     }
   }
   
@@ -204,9 +219,18 @@ export async function loginSpecialist(request: unknown): Promise<AuthResponse> {
   }
 }
 
-async function loginWithPhone(data: ValidatedLoginRequest & { phone: string; code: string }): Promise<AuthResponse> {
+async function loginWithPhone(data: ValidatedLoginRequest): Promise<AuthResponse> {
+  if (!data.phone || !data.code) {
+    return {
+      success: false,
+      error: 'Необходимо указать номер телефона и код подтверждения'
+    }
+  }
+  
+  const { phone, code } = data
+  
   // Проверяем код
-  const verification = await SMSVerificationService.verifyCode(data.phone, data.code, 'login')
+  const verification = await SMSVerificationService.verifyCode(phone, code, 'login')
   
   if (!verification.success) {
     return {
@@ -216,7 +240,7 @@ async function loginWithPhone(data: ValidatedLoginRequest & { phone: string; cod
   }
   
   // Ищем специалиста
-  const specialist = await SpecialistService.findByPhone(data.phone)
+  const specialist = await SpecialistService.findByPhone(phone)
   
   if (!specialist) {
     return {
@@ -239,7 +263,14 @@ async function loginWithPhone(data: ValidatedLoginRequest & { phone: string; cod
   }
 }
 
-async function loginWithSocial(data: ValidatedLoginRequest & { socialData: any }): Promise<AuthResponse> {
+async function loginWithSocial(data: ValidatedLoginRequest): Promise<AuthResponse> {
+  if (!data.socialData) {
+    return {
+      success: false,
+      error: 'Необходимо указать данные социального аккаунта'
+    }
+  }
+  
   const { socialData } = data
   
   // Ищем существующий социальный аккаунт
