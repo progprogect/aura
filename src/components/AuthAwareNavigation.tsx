@@ -1,12 +1,19 @@
+/**
+ * Навигация с учётом статуса авторизации
+ */
+
 'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { LogOut, User } from 'lucide-react'
 
-export function Navigation() {
+export function AuthAwareNavigation() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { user, isAuthenticated, logout, loading } = useAuth()
   
   const isActive = (path: string) => {
     return pathname === path
@@ -64,28 +71,53 @@ export function Navigation() {
             >
               Каталог специалистов
             </Link>
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/auth/login"
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/auth/login')
-                    ? 'text-blue-600' 
-                    : 'text-gray-700 hover:text-blue-600'
-                }`}
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth/register"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  isActive('/auth/register')
-                    ? 'bg-blue-700 text-white' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                Стать специалистом
-              </Link>
-            </div>
+            
+            {/* Показываем разные кнопки в зависимости от авторизации */}
+            {!loading && (
+              <div className="flex items-center space-x-3">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/specialist/dashboard"
+                      className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>{user?.firstName}</span>
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Выйти</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className={`text-sm font-medium transition-colors ${
+                        isActive('/auth/login')
+                          ? 'text-blue-600' 
+                          : 'text-gray-700 hover:text-blue-600'
+                      }`}
+                    >
+                      Войти
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        isActive('/auth/register')
+                          ? 'bg-blue-700 text-white' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      Стать специалистом
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Мобильное меню */}
@@ -145,28 +177,58 @@ export function Navigation() {
               >
                 Каталог специалистов
               </Link>
-              <Link
-                href="/auth/login"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/auth/login') 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth/register"
-                className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/auth/register')
-                    ? 'bg-blue-700 text-white' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Стать специалистом
-              </Link>
+              
+              {!loading && (
+                <>
+                  {isAuthenticated ? (
+                    <>
+                      <Link
+                        href="/specialist/dashboard"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                        onClick={closeMobileMenu}
+                      >
+                        <User className="w-4 h-4 inline mr-2" />
+                        Профиль ({user?.firstName})
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout()
+                          closeMobileMenu()
+                        }}
+                        className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50"
+                      >
+                        <LogOut className="w-4 h-4 inline mr-2" />
+                        Выйти
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/login"
+                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                          isActive('/auth/login') 
+                            ? 'text-primary bg-primary/10' 
+                            : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                        }`}
+                        onClick={closeMobileMenu}
+                      >
+                        Войти
+                      </Link>
+                      <Link
+                        href="/auth/register"
+                        className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                          isActive('/auth/register')
+                            ? 'bg-blue-700 text-white' 
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                        onClick={closeMobileMenu}
+                      >
+                        Стать специалистом
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}

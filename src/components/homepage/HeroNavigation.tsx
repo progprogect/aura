@@ -69,16 +69,28 @@ export function HeroNavigation() {
             >
               Специалисты
             </Link>
-            <Link
-              href="/auth/register"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                isActive('/auth/register') || isActive('/auth/login')
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
-              }`}
-            >
-              Стать специалистом
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link
+                href="/auth/login"
+                className={`text-sm font-medium transition-colors ${
+                  isActive('/auth/login')
+                    ? 'text-primary' 
+                    : 'text-gray-700 hover:text-primary'
+                }`}
+              >
+                Войти
+              </Link>
+              <Link
+                href="/auth/register"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/auth/register')
+                    ? 'bg-primary/90 text-primary-foreground' 
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                }`}
+              >
+                Стать специалистом
+              </Link>
+            </div>
           </div>
           
           {/* Мобильное меню */}
@@ -139,10 +151,21 @@ export function HeroNavigation() {
                 Специалисты
               </Link>
               <Link
+                href="/auth/login"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/auth/login') 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Войти
+              </Link>
+              <Link
                 href="/auth/register"
                 className={`block mx-3 my-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/auth/register') || isActive('/auth/login')
-                    ? 'bg-primary text-primary-foreground' 
+                  isActive('/auth/register')
+                    ? 'bg-primary/90 text-primary-foreground' 
                     : 'bg-primary text-primary-foreground hover:bg-primary/90'
                 }`}
                 onClick={closeMobileMenu}

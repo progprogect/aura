@@ -1,11 +1,12 @@
 /**
  * Условная навигация - скрывает стандартную навигацию на главной странице
+ * Использует навигацию с поддержкой авторизации
  */
 
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Navigation } from './Navigation'
+import { AuthAwareNavigation } from './AuthAwareNavigation'
 
 export function ConditionalNavigation() {
   const pathname = usePathname()
@@ -15,5 +16,5 @@ export function ConditionalNavigation() {
     return null
   }
   
-  return <Navigation />
+  return <AuthAwareNavigation />
 }

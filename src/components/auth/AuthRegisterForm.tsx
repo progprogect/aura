@@ -15,6 +15,7 @@ import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 
 type RegisterStep = 'phone' | 'code' | 'profile' | 'success'
 
@@ -27,6 +28,7 @@ export function AuthRegisterForm() {
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const router = useRouter()
+  const { login } = useAuth()
 
   // Таймер обратного отсчёта
   useState(() => {
@@ -104,8 +106,8 @@ export function AuthRegisterForm() {
       const data = await response.json()
 
       if (data.success) {
-        // Сохраняем токен сессии
-        localStorage.setItem('sessionToken', data.sessionToken)
+        // Используем хук для авторизации
+        login(data.sessionToken, data.specialist)
         setStep('success')
         
         // Перенаправляем на заполнение профиля через 2 секунды

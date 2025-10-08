@@ -15,6 +15,7 @@ import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 
 type LoginStep = 'phone' | 'code' | 'success'
 
@@ -27,6 +28,7 @@ export function AuthLoginForm() {
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const router = useRouter()
+  const { login } = useAuth()
 
   // Таймер обратного отсчёта
   useState(() => {
@@ -104,10 +106,8 @@ export function AuthLoginForm() {
 
       if (result.success) {
         setStep('success')
-        // Сохраняем токен сессии
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('session_token', result.sessionToken)
-        }
+        // Используем хук для авторизации
+        login(result.sessionToken, result.specialist)
         // Перенаправляем в личный кабинет
         setTimeout(() => {
           router.push('/specialist/dashboard')
