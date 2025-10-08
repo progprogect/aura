@@ -661,8 +661,9 @@ export function normalizePhoneNumber(input: string): string {
     return '+' + digits
   }
   
-  // Иначе добавляем код страны
-  return '+' + country.code + digits
+  // ИСПРАВЛЕНИЕ: НЕ добавляем код страны автоматически
+  // Пользователь должен сам ввести код страны
+  return digits
 }
 
 /**
