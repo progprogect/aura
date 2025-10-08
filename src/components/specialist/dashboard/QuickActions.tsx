@@ -18,16 +18,10 @@ export function QuickActions({ slug }: QuickActionsProps) {
     {
       href: `/specialist/${slug}`,
       icon: Eye,
-      label: 'Посмотреть профиль',
-      description: 'Как клиент',
-      variant: 'default' as const
-    },
-    {
-      href: `/specialist/${slug}?edit=true`,
-      icon: Edit,
-      label: 'Редактировать',
-      description: 'Изменить данные',
-      variant: 'outline' as const
+      label: 'Мой профиль',
+      description: 'Посмотреть и редактировать',
+      variant: 'default' as const,
+      isMain: true
     },
     {
       href: '#',
@@ -53,16 +47,21 @@ export function QuickActions({ slug }: QuickActionsProps) {
         <CardTitle className="text-lg">🔧 Быстрые действия</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-3">
           {actions.map((action) => {
             const Icon = action.icon
+            const isMain = (action as any).isMain
             
             return (
               <Button
                 key={action.label}
                 asChild={!action.disabled}
                 variant={action.variant}
-                className="h-auto py-4 px-4 flex items-center justify-start gap-3 text-left"
+                className={`
+                  h-auto py-4 px-4 flex items-center justify-start gap-3 text-left w-full
+                  ${isMain ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl' : ''}
+                  ${action.disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
                 disabled={action.disabled}
               >
                 {action.disabled ? (
@@ -81,17 +80,46 @@ export function QuickActions({ slug }: QuickActionsProps) {
                   </div>
                 ) : (
                   <Link href={action.href} className="flex items-center gap-3 w-full">
-                    <div className={`p-2 rounded-lg ${action.variant === 'default' ? 'bg-white/20' : 'bg-blue-50'}`}>
-                      <Icon className={`w-5 h-5 ${action.variant === 'default' ? 'text-white' : 'text-blue-600'}`} />
+                    <div className={`
+                      p-2 rounded-lg
+                      ${isMain 
+                        ? 'bg-white/20' 
+                        : action.variant === 'default' 
+                          ? 'bg-white/20' 
+                          : 'bg-blue-50'
+                      }
+                    `}>
+                      <Icon className={`
+                        w-5 h-5
+                        ${isMain 
+                          ? 'text-white' 
+                          : action.variant === 'default' 
+                            ? 'text-white' 
+                            : 'text-blue-600'
+                        }
+                      `} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm">
+                      <div className={`
+                        font-medium text-sm
+                        ${isMain ? 'text-white' : ''}
+                      `}>
                         {action.label}
                       </div>
-                      <div className="text-xs opacity-80">
+                      <div className={`
+                        text-xs
+                        ${isMain ? 'text-white/80' : 'opacity-80'}
+                      `}>
                         {action.description}
                       </div>
                     </div>
+                    {isMain && (
+                      <div className="text-white/60">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    )}
                   </Link>
                 )}
               </Button>
