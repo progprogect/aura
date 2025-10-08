@@ -20,6 +20,8 @@ import { SpecialistEducation } from './SpecialistEducation'
 import { SpecialistPricing } from './SpecialistPricing'
 import { SpecialistFAQ } from './SpecialistFAQ'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
+import { GalleryEditor } from './edit/GalleryEditor'
+import { FAQEditor } from './edit/FAQEditor'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 
@@ -307,20 +309,19 @@ export function SpecialistProfileWithEdit({
               </span>
               <span className="text-base sm:text-xl">Галерея</span>
             </h2>
-            {data.gallery.length > 0 ? (
-              <SpecialistGallery items={data.gallery} />
+            {isEditMode ? (
+              <GalleryEditor
+                items={data.gallery}
+                onRefresh={() => window.location.reload()}
+              />
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <div className="space-y-2">
-                  <p>Добавьте фото и видео в галерею</p>
-                  <p className="text-sm">Покажите примеры вашей работы</p>
-                  {isEditMode && (
-                    <p className="text-xs text-blue-600 mt-4">
-                      💡 Функционал загрузки фото/видео в разработке
-                    </p>
-                  )}
+              data.gallery.length > 0 ? (
+                <SpecialistGallery items={data.gallery} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Галерея пуста</p>
                 </div>
-              </div>
+              )
             )}
           </div>
 
@@ -367,15 +368,19 @@ export function SpecialistProfileWithEdit({
               </span>
               <span className="text-base sm:text-xl">Часто задаваемые вопросы</span>
             </h2>
-            <SpecialistFAQ
-              faqs={data.faqs}
-            />
-            {isEditMode && data.faqs.length === 0 && (
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  💡 Функционал редактирования FAQ в разработке
-                </p>
-              </div>
+            {isEditMode ? (
+              <FAQEditor
+                faqs={data.faqs}
+                onRefresh={() => window.location.reload()}
+              />
+            ) : (
+              data.faqs.length > 0 ? (
+                <SpecialistFAQ faqs={data.faqs} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>FAQ не добавлены</p>
+                </div>
+              )
             )}
           </div>
 
