@@ -133,8 +133,20 @@ export function AuthLoginForm() {
   }
 
   return (
-    <div className="bg-card rounded-xl shadow-lg border p-6 space-y-6">
-      <AnimatePresence mode="wait">
+    <div className="space-y-6">
+      {/* Заголовок */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          Добро пожаловать!
+        </h1>
+        <p className="text-muted-foreground">
+          Войдите в личный кабинет специалиста
+        </p>
+      </div>
+
+      {/* Форма */}
+      <div className="bg-card rounded-xl shadow-lg border p-6 space-y-6">
+        <AnimatePresence mode="wait">
         {/* Шаг 1: Ввод телефона */}
         {step === 'phone' && (
           <motion.div
@@ -282,5 +294,19 @@ export function AuthLoginForm() {
         )}
       </AnimatePresence>
     </div>
+
+    {/* Ссылка на регистрацию */}
+    <div className="text-center">
+      <p className="text-sm text-muted-foreground">
+        Ещё нет аккаунта?{' '}
+        <a 
+          href="/auth/register" 
+          className="text-primary hover:text-primary/80 font-medium transition-colors"
+        >
+          Зарегистрироваться
+        </a>
+      </p>
+    </div>
+  </div>
   )
 }

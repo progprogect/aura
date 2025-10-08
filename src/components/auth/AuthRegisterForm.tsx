@@ -129,8 +129,20 @@ export function AuthRegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <AnimatePresence mode="wait">
+    <div className="space-y-6">
+      {/* Заголовок */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
+          Присоединяйтесь к Ауре
+        </h1>
+        <p className="text-muted-foreground">
+          Зарегистрируйтесь как специалист и начните помогать людям
+        </p>
+      </div>
+
+      {/* Форма */}
+      <div className="bg-card rounded-xl shadow-lg border p-6 space-y-6">
+        <AnimatePresence mode="wait">
         {step === 'phone' && (
           <motion.div
             key="phone"
@@ -286,5 +298,19 @@ export function AuthRegisterForm() {
         )}
       </AnimatePresence>
     </div>
+
+    {/* Ссылка на вход */}
+    <div className="text-center">
+      <p className="text-sm text-muted-foreground">
+        Уже есть аккаунт?{' '}
+        <a 
+          href="/auth/login" 
+          className="text-primary hover:text-primary/80 font-medium transition-colors"
+        >
+          Войти
+        </a>
+      </p>
+    </div>
+  </div>
   )
 }

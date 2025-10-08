@@ -21,8 +21,18 @@ export function AuthProviderButtons({
     if (onProviderClick) {
       onProviderClick(provider)
     } else {
-      // TODO: Реализовать социальную авторизацию
-      console.log(`Вход через ${provider}`)
+      // Перенаправляем на OAuth
+      if (provider === 'google') {
+        window.location.href = `/api/auth/social/google?state=${mode}`
+      } else if (provider === 'vk') {
+        // TODO: Реализовать VK OAuth
+        alert('Авторизация через ВКонтакте скоро будет доступна')
+      } else if (provider === 'yandex') {
+        // TODO: Реализовать Yandex OAuth
+        alert('Авторизация через Яндекс скоро будет доступна')
+      } else {
+        alert(`Авторизация через ${provider} в разработке. Используйте вход по номеру телефона.`)
+      }
     }
   }
 
