@@ -103,6 +103,14 @@ async function getDashboardData() {
     }
   })
 
+  // Количество новых (непрочитанных) заявок
+  const newRequestsCount = await prisma.consultationRequest.count({
+    where: {
+      specialistId: specialist.id,
+      status: 'new'
+    }
+  })
+
   // Формируем задания
   const tasks = []
   
@@ -186,6 +194,7 @@ async function getDashboardData() {
       consultationRequests: consultationRequestsCount,
       completionPercentage,
     },
+    newRequestsCount,
     tasks
   }
 }
@@ -198,7 +207,7 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
-  const { specialist, stats, tasks } = data
+  const { specialist, stats, tasks, newRequestsCount } = data
 
   // Если профиль не заполнен → на онбординг
   // Проверяем основные поля (firstName, lastName, about)
@@ -245,7 +254,10 @@ export default async function DashboardPage() {
           {/* Правая колонка (1/3 на десктопе) */}
           <div className="space-y-6">
             {/* Быстрые действия */}
-            <QuickActions slug={specialist.slug} />
+            <QuickActions 
+              slug={specialist.slug}
+              newRequestsCount={newRequestsCount}
+            />
           </div>
         </div>
       </div>

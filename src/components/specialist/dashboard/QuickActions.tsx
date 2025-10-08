@@ -7,13 +7,15 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, Edit, BarChart3, MessageSquare } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Eye, Edit, BarChart3, MessageSquare, Inbox } from 'lucide-react'
 
 interface QuickActionsProps {
   slug: string
+  newRequestsCount?: number
 }
 
-export function QuickActions({ slug }: QuickActionsProps) {
+export function QuickActions({ slug, newRequestsCount = 0 }: QuickActionsProps) {
   const actions = [
     {
       href: `/specialist/${slug}`,
@@ -24,17 +26,18 @@ export function QuickActions({ slug }: QuickActionsProps) {
       isMain: true
     },
     {
-      href: '#',
-      icon: BarChart3,
-      label: 'Аналитика',
-      description: 'Скоро',
+      href: '/specialist/requests',
+      icon: Inbox,
+      label: 'Мои заявки',
+      description: newRequestsCount > 0 ? `${newRequestsCount} новых` : 'Заявки от клиентов',
       variant: 'outline' as const,
-      disabled: true
+      badge: newRequestsCount,
+      disabled: false
     },
     {
       href: '#',
-      icon: MessageSquare,
-      label: 'Заявки',
+      icon: BarChart3,
+      label: 'Аналитика',
       description: 'Скоро',
       variant: 'outline' as const,
       disabled: true
@@ -81,7 +84,7 @@ export function QuickActions({ slug }: QuickActionsProps) {
                 ) : (
                   <Link href={action.href} className="flex items-center gap-3 w-full">
                     <div className={`
-                      p-2 rounded-lg
+                      p-2 rounded-lg relative
                       ${isMain 
                         ? 'bg-white/20' 
                         : action.variant === 'default' 
@@ -98,13 +101,25 @@ export function QuickActions({ slug }: QuickActionsProps) {
                             : 'text-blue-600'
                         }
                       `} />
+                      {/* Бейдж для заявок */}
+                      {(action as any).badge > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {(action as any).badge}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`
-                        font-medium text-sm
+                        font-medium text-sm flex items-center gap-2
                         ${isMain ? 'text-white' : ''}
                       `}>
                         {action.label}
+                        {/* Текстовый бейдж для заявок */}
+                        {(action as any).badge > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {(action as any).badge}
+                          </Badge>
+                        )}
                       </div>
                       <div className={`
                         text-xs
