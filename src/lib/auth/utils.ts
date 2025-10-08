@@ -53,8 +53,9 @@ export function validateEmail(email: string): { isValid: boolean; error?: string
     return { isValid: false, error: 'Email обязателен' }
   }
   
-  if (!VALIDATION_RULES.email.pattern.test(email)) {
-    return { isValid: false, error: VALIDATION_RULES.email.message }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailPattern.test(email)) {
+    return { isValid: false, error: 'Неверный формат email' }
   }
   
   return { isValid: true }

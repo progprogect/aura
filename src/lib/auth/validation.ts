@@ -47,9 +47,9 @@ export const RegistrationRequestSchema = z.object({
     name: z.string().optional(),
     picture: z.string().url().optional(),
     phone: PhoneSchema.optional(),
-    rawData: z.record(z.any()).optional()
+    rawData: z.record(z.string(), z.any()).optional()
   }).optional(),
-  profile: z.record(z.any()).optional()
+  profile: z.record(z.string(), z.any()).optional()
 }).refine(
   (data) => {
     if (data.provider === 'phone') {
@@ -74,7 +74,7 @@ export const LoginRequestSchema = z.object({
     name: z.string().optional(),
     picture: z.string().url().optional(),
     phone: PhoneSchema.optional(),
-    rawData: z.record(z.any()).optional()
+    rawData: z.record(z.string(), z.any()).optional()
   }).optional(),
   rememberMe: z.boolean().optional()
 }).refine(
@@ -102,7 +102,7 @@ export function validatePhone(phone: string) {
     if (error instanceof z.ZodError) {
       return { 
         isValid: false, 
-        error: error.errors[0]?.message || 'Неверный формат телефона' 
+        error: error.issues[0]?.message || 'Неверный формат телефона' 
       }
     }
     return { isValid: false, error: 'Ошибка валидации телефона' }
@@ -117,7 +117,7 @@ export function validateSMSCode(code: string) {
     if (error instanceof z.ZodError) {
       return { 
         isValid: false, 
-        error: error.errors[0]?.message || 'Неверный формат кода' 
+        error: error.issues[0]?.message || 'Неверный формат кода' 
       }
     }
     return { isValid: false, error: 'Ошибка валидации кода' }
@@ -134,7 +134,7 @@ export function validateSendSMSRequest(data: unknown) {
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
-        error: error.errors[0]?.message || 'Неверные данные запроса' 
+        error: error.issues[0]?.message || 'Неверные данные запроса' 
       }
     }
     return { success: false, error: 'Ошибка валидации запроса' }
@@ -151,7 +151,7 @@ export function validateRegistrationRequest(data: unknown) {
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
-        error: error.errors[0]?.message || 'Неверные данные регистрации' 
+        error: error.issues[0]?.message || 'Неверные данные регистрации' 
       }
     }
     return { success: false, error: 'Ошибка валидации регистрации' }
@@ -168,7 +168,7 @@ export function validateLoginRequest(data: unknown) {
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
-        error: error.errors[0]?.message || 'Неверные данные входа' 
+        error: error.issues[0]?.message || 'Неверные данные входа' 
       }
     }
     return { success: false, error: 'Ошибка валидации входа' }
