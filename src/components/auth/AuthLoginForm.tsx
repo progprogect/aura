@@ -15,7 +15,6 @@ import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 import { useEffect, Suspense } from 'react'
 
 type LoginStep = 'phone' | 'code' | 'success'
@@ -30,7 +29,6 @@ export function AuthLoginForm() {
   const [timeLeft, setTimeLeft] = useState(0)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login } = useAuth()
 
   // Проверяем наличие ошибки в URL (от OAuth)
   useEffect(() => {
@@ -107,11 +105,7 @@ export function AuthLoginForm() {
   }
 
   const handleVerifyCode = async () => {
-    if (!code || code.length !== 4) {
-      setError('Введите 4-значный код')
-      return
-    }
-
+    // Убираем дублирующую валидацию - SMSCodeInput уже проверяет длину
     setLoading(true)
     setError('')
 
@@ -126,9 +120,7 @@ export function AuthLoginForm() {
 
       if (result.success) {
         setStep('success')
-        // Используем хук для авторизации
-        login(result.sessionToken, result.specialist)
-        // Перенаправляем в личный кабинет
+        // Токен уже установлен в cookies сервером, редиректим
         setTimeout(() => {
           router.push('/specialist/dashboard')
         }, 1500)

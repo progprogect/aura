@@ -15,7 +15,6 @@ import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
 
 type RegisterStep = 'phone' | 'code' | 'profile' | 'success'
 
@@ -28,7 +27,6 @@ export function AuthRegisterForm() {
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const router = useRouter()
-  const { login } = useAuth()
 
   // Таймер обратного отсчёта
   useState(() => {
@@ -94,11 +92,7 @@ export function AuthRegisterForm() {
   }
 
   const handleVerifyCode = async () => {
-    if (!code.trim() || code.length !== 4) {
-      setError('Введите 4-значный код')
-      return
-    }
-
+    // Убираем дублирующую валидацию - SMSCodeInput уже проверяет длину
     setLoading(true)
     setError('')
 
@@ -112,8 +106,7 @@ export function AuthRegisterForm() {
       const data = await response.json()
 
       if (data.success) {
-        // Используем хук для авторизации
-        login(data.sessionToken, data.specialist)
+        // Токен уже установлен в cookies сервером
         setStep('success')
         
         // Перенаправляем на онбординг через 1.5 секунды
