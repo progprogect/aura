@@ -86,6 +86,7 @@ export function SpecialistHeroEdit({
       <CategorySelector
         value={category}
         onSave={onSaveField}
+        onRefresh={onRefresh}
         label="Категория"
       />
 

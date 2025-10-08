@@ -27,10 +27,11 @@ const CATEGORIES: CategoryOption[] = [
 interface CategorySelectorProps {
   value: string
   onSave: (field: string, value: string) => Promise<any>
+  onRefresh?: () => void
   label?: string
 }
 
-export function CategorySelector({ value, onSave, label = 'Категория' }: CategorySelectorProps) {
+export function CategorySelector({ value, onSave, onRefresh, label = 'Категория' }: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -46,6 +47,13 @@ export function CategorySelector({ value, onSave, label = 'Категория' }
     try {
       await onSave('category', categoryValue)
       setIsOpen(false)
+      
+      // Перезагружаем страницу для обновления данных
+      if (onRefresh) {
+        setTimeout(() => {
+          onRefresh()
+        }, 300) // Небольшая задержка для закрытия dropdown
+      }
     } catch (error) {
       console.error('Ошибка сохранения категории:', error)
     } finally {
