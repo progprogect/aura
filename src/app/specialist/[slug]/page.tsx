@@ -174,6 +174,7 @@ export default async function SpecialistPage({ params }: PageProps) {
         heroData={{
           firstName: specialist.firstName,
           lastName: specialist.lastName,
+          avatar: specialist.avatar,
           tagline: specialist.tagline,
           city: specialist.city,
           specializations: specialist.specializations,

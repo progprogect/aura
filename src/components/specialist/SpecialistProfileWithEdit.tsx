@@ -22,6 +22,7 @@ interface SpecialistProfileWithEditProps {
   heroData: {
     firstName: string
     lastName: string
+    avatar: string | null
     tagline: string | null
     city: string | null
     specializations: string[]
@@ -176,11 +177,13 @@ export function SpecialistProfileWithEdit({
           <SpecialistHeroEdit
             firstName={heroData.firstName}
             lastName={heroData.lastName}
+            avatar={heroData.avatar}
             tagline={heroData.tagline}
             city={heroData.city}
             specializations={heroData.specializations}
             onSaveField={handleSaveField}
             onSaveArray={handleSaveArray}
+            onRefresh={handleExitEditMode}
           />
           
           {/* Контакты в режиме редактирования */}

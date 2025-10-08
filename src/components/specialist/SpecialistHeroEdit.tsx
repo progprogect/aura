@@ -8,25 +8,30 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { InlineInput } from './edit/InlineInput'
 import { InlineTagsEditor } from './edit/InlineTagsEditor'
+import { AvatarUploader } from './edit/AvatarUploader'
 
 interface SpecialistHeroEditProps {
   firstName: string
   lastName: string
+  avatar: string | null
   tagline: string | null
   city: string | null
   specializations: string[]
   onSaveField: (field: string, value: string | number) => Promise<any>
   onSaveArray: (field: string, values: string[]) => Promise<any>
+  onRefresh: () => void
 }
 
 export function SpecialistHeroEdit({
   firstName,
   lastName,
+  avatar,
   tagline,
   city,
   specializations,
   onSaveField,
-  onSaveArray
+  onSaveArray,
+  onRefresh
 }: SpecialistHeroEditProps) {
   return (
     <div className="bg-blue-50 border-t-4 border-blue-600 py-8">
@@ -38,6 +43,15 @@ export function SpecialistHeroEdit({
               <h3 className="text-lg font-semibold text-gray-900">
                 Редактирование профиля
               </h3>
+            </div>
+
+            {/* Аватар */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Фото профиля</h4>
+              <AvatarUploader
+                currentAvatar={avatar}
+                onUploadSuccess={onRefresh}
+              />
             </div>
 
             {/* Имя и Фамилия */}
