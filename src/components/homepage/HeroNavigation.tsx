@@ -82,7 +82,7 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/register"
-                className={`px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
                   isActive('/auth/register')
                     ? 'border-blue-700 bg-blue-700 text-white' 
                     : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
@@ -163,7 +163,7 @@ export function HeroNavigation() {
               </Link>
               <Link
                 href="/auth/register"
-                className={`block px-4 py-2.5 rounded-lg border-2 text-base font-medium transition-all duration-200 ${
+                className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
                   isActive('/auth/register')
                     ? 'border-blue-700 bg-blue-700 text-white' 
                     : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
