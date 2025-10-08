@@ -81,8 +81,16 @@ export function AuthAwareNavigation() {
                       href="/specialist/dashboard"
                       className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                     >
-                      <User className="w-4 h-4" />
-                      <span>{user?.firstName}</span>
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={`${user.firstName} ${user.lastName}`}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                      <span>{user?.firstName} {user?.lastName}</span>
                     </Link>
                     <button
                       onClick={logout}
@@ -187,8 +195,16 @@ export function AuthAwareNavigation() {
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                         onClick={closeMobileMenu}
                       >
-                        <User className="w-4 h-4 inline mr-2" />
-                        Профиль ({user?.firstName})
+                        {user?.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={`${user.firstName} ${user.lastName}`}
+                            className="w-4 h-4 rounded-full object-cover inline mr-2"
+                          />
+                        ) : (
+                          <User className="w-4 h-4 inline mr-2" />
+                        )}
+                        {user?.firstName} {user?.lastName}
                       </Link>
                       <button
                         onClick={() => {

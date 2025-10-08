@@ -19,17 +19,11 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const sessionToken = localStorage.getItem('sessionToken')
-      
-      if (!sessionToken) {
-        setUser(null)
-        setLoading(false)
-        return
-      }
-
+      // Проверяем авторизацию через API (cookies автоматически отправляются)
       const response = await fetch('/api/auth/profile', {
+        credentials: 'include', // Включаем cookies
         headers: {
-          'Authorization': `Bearer ${sessionToken}`
+          'Content-Type': 'application/json'
         }
       })
 
@@ -39,6 +33,7 @@ export function useAuth() {
         setUser(data.profile)
       } else {
         setUser(null)
+        // Очищаем localStorage если он есть (для совместимости)
         localStorage.removeItem('sessionToken')
       }
     } catch (error) {
@@ -49,14 +44,25 @@ export function useAuth() {
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('sessionToken')
-    setUser(null)
-    router.push('/')
+  const logout = async () => {
+    try {
+      // Вызываем API для очистки cookies на сервере
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      })
+    } catch (error) {
+      console.error('Ошибка при выходе:', error)
+    } finally {
+      // Очищаем localStorage если он есть (для совместимости)
+      localStorage.removeItem('sessionToken')
+      setUser(null)
+      router.push('/')
+    }
   }
 
   const login = (sessionToken: string, profile: UserProfile) => {
-    localStorage.setItem('sessionToken', sessionToken)
+    // Больше не сохраняем в localStorage - используем cookies
     setUser(profile)
   }
 
