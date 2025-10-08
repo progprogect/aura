@@ -5,6 +5,7 @@
 import { Metadata } from 'next'
 import { AuthLoginFormWrapper } from '@/components/auth/AuthLoginFormWrapper'
 import { AuthNavigation } from '@/components/auth/AuthNavigation'
+import { TestAuthPanel } from '@/components/dev/TestAuthPanel'
 
 export const metadata: Metadata = {
   title: 'Вход для специалистов | Аура',

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Copy, Phone, Key, UserPlus, LogIn } from 'lucide-react'
-import { toast } from 'sonner'
+// import { toast } from 'sonner' // Убрано для совместимости
 
 // ========================================
 // ТЕСТОВЫЕ ДАННЫЕ
@@ -66,14 +66,14 @@ export function TestAuthPanel({ className }: TestAuthPanelProps) {
       if (type === 'phone') {
         setCopiedPhone(phone || text)
         setTimeout(() => setCopiedPhone(null), 2000)
-        toast.success('Номер скопирован!')
+        console.log('✅ Номер скопирован:', text)
       } else {
         setCopiedCode(text)
         setTimeout(() => setCopiedCode(null), 2000)
-        toast.success('Код скопирован!')
+        console.log('✅ Код скопирован:', text)
       }
     } catch (error) {
-      toast.error('Не удалось скопировать')
+      console.error('❌ Не удалось скопировать:', error)
     }
   }
 
@@ -98,8 +98,8 @@ export function TestAuthPanel({ className }: TestAuthPanelProps) {
           <h4 className="font-medium text-blue-900 mb-2">📋 Как использовать:</h4>
           <ol className="text-sm text-blue-800 space-y-1">
             <li>1. Скопируйте номер телефона</li>
-            <li>2. Вставьте в поле "Номер телефона"</li>
-            <li>3. Нажмите "Отправить код"</li>
+            <li>2. Вставьте в поле &quot;Номер телефона&quot;</li>
+            <li>3. Нажмите &quot;Отправить код&quot;</li>
             <li>4. Скопируйте код из таблицы ниже</li>
             <li>5. Вставьте код и войдите</li>
           </ol>
@@ -199,9 +199,9 @@ export function TestAuthPanel({ className }: TestAuthPanelProps) {
             🔧 Для разработчиков:
           </h4>
           <div className="space-y-1 text-xs font-mono text-gray-700">
-            <div>// Проверить в консоли браузера:</div>
-            <div className="text-blue-600">console.log('[TEST SMS]')</div>
-            <div>// Или запустить скрипт:</div>
+            <div>Проверить в консоли браузера:</div>
+            <div className="text-blue-600">console.log(&apos;[TEST SMS]&apos;)</div>
+            <div>Или запустить скрипт:</div>
             <div className="text-blue-600">npx ts-node scripts/test-auth.ts</div>
           </div>
         </div>
