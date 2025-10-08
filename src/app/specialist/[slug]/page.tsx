@@ -167,6 +167,11 @@ export default async function SpecialistPage({ params }: PageProps) {
           yearsOfPractice={specialist.yearsOfPractice}
           verified={specialist.verified}
           profileViews={specialist.profileViews}
+          email={specialist.email}
+          telegram={specialist.telegram}
+          whatsapp={specialist.whatsapp}
+          instagram={specialist.instagram}
+          website={specialist.website}
         />
       )}
 

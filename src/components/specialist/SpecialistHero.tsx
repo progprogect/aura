@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Tag } from '@/components/ui/tag'
 import { cn, formatNumber } from '@/lib/utils'
 import { WORK_FORMAT_LABELS } from '@/lib/constants'
+import { ContactsModal } from './ContactsModal'
 
 export interface SpecialistHeroProps {
   firstName: string
@@ -24,6 +25,12 @@ export interface SpecialistHeroProps {
   yearsOfPractice?: number | null
   verified: boolean
   profileViews: number
+  // Контакты для модального окна
+  email?: string | null
+  telegram?: string | null
+  whatsapp?: string | null
+  instagram?: string | null
+  website?: string | null
 }
 
 export function SpecialistHero({
@@ -40,8 +47,14 @@ export function SpecialistHero({
   yearsOfPractice,
   verified,
   profileViews,
+  email,
+  telegram,
+  whatsapp,
+  instagram,
+  website,
 }: SpecialistHeroProps) {
   const fullName = `${firstName} ${lastName}`
+  const [isContactsModalOpen, setIsContactsModalOpen] = React.useState(false)
 
   // Скролл к форме связи
   const handleContactClick = () => {
@@ -49,10 +62,9 @@ export function SpecialistHero({
     contactSection?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // Показать контакты (заглушка на будущее)
+  // Показать контакты
   const handleShowContactsClick = () => {
-    // TODO: Показать модалку с контактами + аналитика
-    alert('Показать контакты - функция в разработке')
+    setIsContactsModalOpen(true)
   }
 
   return (
@@ -357,6 +369,19 @@ export function SpecialistHero({
           </div>
         </div>
       </motion.div>
+
+      {/* Модальное окно контактов */}
+      <ContactsModal
+        isOpen={isContactsModalOpen}
+        onClose={() => setIsContactsModalOpen(false)}
+        onContactClick={handleContactClick}
+        specialistName={fullName}
+        email={email}
+        telegram={telegram}
+        whatsapp={whatsapp}
+        instagram={instagram}
+        website={website}
+      />
     </>
   )
 }
