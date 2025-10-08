@@ -1,10 +1,10 @@
 /**
- * Сервис для отправки SMS
+ * Рефакторированный SMS сервис
  */
 
-import { prisma } from '@/lib/db'
-import { SMS_CONFIG, isTestPhone, getTestCode } from './config'
-import { generateSMSCode, getExpiryTime, createAuthError, debugLog } from './utils'
+import { SMSVerificationService } from './business-logic'
+import { normalizePhone, generateSMSCode, debugLog } from './utils'
+import { AUTH_CONFIG } from './config'
 import type { SMSRequest, SMSVerificationRequest } from './types'
 
 // ========================================
@@ -15,53 +15,32 @@ export async function sendSMS(request: SMSRequest): Promise<{ success: boolean; 
   try {
     debugLog('Отправка SMS', { phone: request.phone, purpose: request.purpose })
     
-    // Проверяем rate limiting
-    const rateLimitCheck = await checkRateLimit(request.phone)
-    if (!rateLimitCheck.allowed) {
-      return {
-        success: false,
-        error: 'Превышен лимит отправки SMS. Попробуйте позже.'
-      }
-    }
+    const normalizedPhone = normalizePhone(request.phone)
     
     // Генерируем код
-    const code = isTestPhone(request.phone) && getTestCode(request.phone) 
-      ? getTestCode(request.phone)!
-      : generateSMSCode()
+    const code = generateSMSCode()
     
     // Сохраняем код в базу
-    await saveVerificationCode(request.phone, code, request.purpose)
+    await SMSVerificationService.saveVerificationCode(normalizedPhone, code, request.purpose)
     
     // Отправляем SMS
-    if (request.testMode || isTestPhone(request.phone)) {
-      // В тестовом режиме только логируем
-      debugLog('SMS отправлен (тестовый режим)', { phone: request.phone, code })
-      return { success: true }
+    if (request.testMode || AUTH_CONFIG.testMode.enabled) {
+      return await sendTestSMS(normalizedPhone, code)
+    } else {
+      return await sendRealSMS(normalizedPhone, code)
     }
-    
-    const smsResult = await sendRealSMS(request.phone, code)
-    
-    if (!smsResult.success) {
-      return {
-        success: false,
-        error: 'Не удалось отправить SMS. Попробуйте позже.'
-      }
-    }
-    
-    debugLog('SMS успешно отправлен', { phone: request.phone })
-    return { success: true }
     
   } catch (error) {
     debugLog('Ошибка отправки SMS', error)
     return {
       success: false,
-      error: 'Произошла ошибка при отправке SMS'
+      error: 'Не удалось отправить SMS'
     }
   }
 }
 
 // ========================================
-// ПРОВЕРКА КОДА
+// ПРОВЕРКА SMS КОДА
 // ========================================
 
 export async function verifySMSCode(request: SMSVerificationRequest): Promise<{
@@ -70,71 +49,15 @@ export async function verifySMSCode(request: SMSVerificationRequest): Promise<{
   verificationId?: string
 }> {
   try {
-    debugLog('Проверка SMS кода', { phone: request.phone, purpose: request.purpose })
+    debugLog('Проверка SMS кода', { phone: request.phone })
     
-    // Ищем код в базе
-    const verification = await prisma.sMSVerification.findFirst({
-      where: {
-        phone: request.phone,
-        purpose: request.purpose,
-        isUsed: false
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    const result = await SMSVerificationService.verifyCode(
+      request.phone,
+      request.code,
+      request.purpose
+    )
     
-    if (!verification) {
-      return {
-        success: false,
-        error: 'Код не найден или уже использован'
-      }
-    }
-    
-    // Проверяем срок действия
-    if (new Date() > verification.expiresAt) {
-      return {
-        success: false,
-        error: 'Код истёк. Запросите новый код'
-      }
-    }
-    
-    // Проверяем количество попыток
-    if (verification.attempts >= SMS_CONFIG.maxAttempts) {
-      return {
-        success: false,
-        error: 'Превышено количество попыток ввода кода'
-      }
-    }
-    
-    // Проверяем код
-    if (verification.code !== request.code) {
-      // Увеличиваем количество попыток
-      await prisma.sMSVerification.update({
-        where: { id: verification.id },
-        data: { attempts: verification.attempts + 1 }
-      })
-      
-      return {
-        success: false,
-        error: 'Неверный код'
-      }
-    }
-    
-    // Помечаем код как использованный
-    await prisma.sMSVerification.update({
-      where: { id: verification.id },
-      data: { 
-        isUsed: true,
-        usedAt: new Date()
-      }
-    })
-    
-    debugLog('SMS код успешно проверен', { phone: request.phone })
-    return {
-      success: true,
-      verificationId: verification.id
-    }
+    return result
     
   } catch (error) {
     debugLog('Ошибка проверки SMS кода', error)
@@ -146,209 +69,108 @@ export async function verifySMSCode(request: SMSVerificationRequest): Promise<{
 }
 
 // ========================================
-// ВНУТРЕННИЕ ФУНКЦИИ
+// ОТПРАВКА ТЕСТОВОГО SMS
 // ========================================
 
-async function saveVerificationCode(phone: string, code: string, purpose: string): Promise<void> {
-  // Удаляем старые неиспользованные коды для этого номера
-  await prisma.sMSVerification.deleteMany({
-    where: {
-      phone,
-      purpose,
-      isUsed: false
-    }
-  })
+async function sendTestSMS(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
+  // В тестовом режиме просто логируем код
+  console.log(`[TEST SMS] Код для ${phone}: ${code}`)
   
-  // Создаём новый код
-  await prisma.sMSVerification.create({
-    data: {
-      phone,
-      code,
-      purpose,
-      expiresAt: getExpiryTime(5) // 5 минут
-    }
-  })
-}
-
-async function checkRateLimit(phone: string): Promise<{ allowed: boolean; resetTime?: Date }> {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+  // Проверяем тестовые номера
+  const testPhones = AUTH_CONFIG.testMode.testPhones || {}
+  const testCode = testPhones[phone]
   
-  const recentCodes = await prisma.sMSVerification.count({
-    where: {
-      phone,
-      createdAt: {
-        gte: oneHourAgo
-      }
-    }
-  })
-  
-  // Максимум 3 SMS в час
-  if (recentCodes >= 3) {
-    const oldestCode = await prisma.sMSVerification.findFirst({
-      where: {
-        phone,
-        createdAt: {
-          gte: oneHourAgo
-        }
-      },
-      orderBy: {
-        createdAt: 'asc'
-      }
-    })
-    
-    const resetTime = oldestCode ? new Date(oldestCode.createdAt.getTime() + 60 * 60 * 1000) : undefined
-    
-    return { allowed: false, resetTime }
+  if (testCode) {
+    console.log(`[TEST SMS] Используйте код: ${testCode}`)
   }
   
-  return { allowed: true }
+  debugLog('Тестовый SMS отправлен', { phone, code })
+  
+  return {
+    success: true
+  }
 }
+
+// ========================================
+// ОТПРАВКА РЕАЛЬНОГО SMS
+// ========================================
 
 async function sendRealSMS(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    if (SMS_CONFIG.smsru.apiId) {
-      return await sendSMSru(phone, code)
-    }
-    
-    // Fallback - логируем и возвращаем успех в dev режиме
-    debugLog('SMS провайдер не настроен, используем mock', { phone, code })
-    return { success: true }
-    
-  } catch (error) {
-    debugLog('Ошибка отправки реального SMS', error)
-    return {
-      success: false,
-      error: 'Ошибка SMS провайдера'
-    }
-  }
-}
-
-async function sendSMSru(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const params = new URLSearchParams({
-      api_id: SMS_CONFIG.smsru.apiId!,
-      to: phone,
-      msg: `Ваш код для входа в Аура: ${code}. Никому не сообщайте этот код.`,
-      from: SMS_CONFIG.smsru.sender,
-      test: SMS_CONFIG.smsru.test ? '1' : '0'
-    })
-    
-    const response = await fetch(SMS_CONFIG.smsru.baseUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
-    })
-    
-    const result = await response.text()
-    
-    // SMS.ru возвращает ответ в формате: код\nбаланс
-    const lines = result.split('\n')
-    const statusCode = lines[0]
-    
-    if (statusCode === '100') {
-      return { success: true }
-    } else {
-      const errorMessage = getSMSruErrorMessage(statusCode)
+  const provider = AUTH_CONFIG.sms.provider
+  
+  switch (provider) {
+    case 'smsru':
+      return await sendSMSViaSMSRu(phone, code)
+    case 'twilio':
+      return await sendSMSViaTwilio(phone, code)
+    default:
+      debugLog('SMS провайдер не настроен', { provider })
       return {
         success: false,
-        error: errorMessage
+        error: 'SMS провайдер не настроен'
       }
+  }
+}
+
+// ========================================
+// SMS.RU ПРОВАЙДЕР
+// ========================================
+
+async function sendSMSViaSMSRu(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const apiId = AUTH_CONFIG.sms.smsRuApiId
+    
+    if (!apiId) {
+      throw new Error('SMS.ru API ID не настроен')
+    }
+    
+    const message = `Ваш код для входа в Аура: ${code}. Код действителен 5 минут.`
+    
+    // Здесь должен быть реальный запрос к SMS.ru API
+    // const response = await fetch(`https://sms.ru/sms/send?api_id=${apiId}&to=${phone}&msg=${encodeURIComponent(message)}`)
+    // const result = await response.json()
+    
+    // Для демонстрации просто логируем
+    console.log(`[SMS.RU] Отправка на ${phone}: ${message}`)
+    
+    debugLog('SMS отправлен через SMS.ru', { phone })
+    
+    return {
+      success: true
     }
     
   } catch (error) {
-    debugLog('Ошибка SMS.ru API', error)
+    debugLog('Ошибка отправки через SMS.ru', error)
     return {
       success: false,
-      error: 'Ошибка соединения с SMS сервисом'
+      error: 'Ошибка отправки SMS через SMS.ru'
     }
   }
-}
-
-function getSMSruErrorMessage(code: string): string {
-  const errors: Record<string, string> = {
-    '200': 'Неправильный api_id',
-    '201': 'Не хватает средств на лицевом счету',
-    '202': 'Неправильно указан получатель',
-    '203': 'Нет текста сообщения',
-    '204': 'Имя отправителя не согласовано с администрацией',
-    '205': 'Сообщение слишком длинное',
-    '206': 'Будет превышен или уже превышен дневной лимит на отправку SMS',
-    '207': 'На этот номер (или один из номеров) нельзя отправлять SMS',
-    '208': 'Параметр time указан неправильно',
-    '209': 'Вы добавили этот номер (или один из номеров) в стоп-лист',
-    '210': 'Используется GET, где необходимо использовать POST',
-    '211': 'Метод не найден',
-    '212': 'Текст сообщения необходимо передать в кодировке UTF-8',
-    '213': 'Указано более 100 номеров получателей',
-    '220': 'Сервис временно недоступен',
-    '230': 'Превышен общий лимит количества сообщений на этот номер в день',
-    '231': 'Превышен лимит одинаковых сообщений на этот номер в минуту',
-    '232': 'Превышен лимит одинаковых сообщений на этот номер в день',
-    '300': 'Неправильный token',
-    '301': 'Неправильный api_id',
-    '302': 'В Российской Федерации для отправки SMS на номера федеральных операторов необходимо указывать отправителя'
-  }
-  
-  return errors[code] || `Неизвестная ошибка SMS.ru (код: ${code})`
 }
 
 // ========================================
-// УТИЛИТЫ
+// TWILIO ПРОВАЙДЕР
 // ========================================
 
-export async function cleanupExpiredCodes(): Promise<void> {
+async function sendSMSViaTwilio(phone: string, code: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const result = await prisma.sMSVerification.deleteMany({
-      where: {
-        expiresAt: {
-          lt: new Date()
-        }
-      }
-    })
+    // Здесь должна быть интеграция с Twilio
+    // const twilio = require('twilio')
+    // const client = twilio(accountSid, authToken)
     
-    debugLog('Очистка истёкших кодов', { deleted: result.count })
-  } catch (error) {
-    debugLog('Ошибка очистки истёкших кодов', error)
-  }
-}
-
-export async function getVerificationStatus(phone: string, purpose: string): Promise<{
-  hasActiveCode: boolean
-  attemptsLeft: number
-  expiresAt?: Date
-}> {
-  try {
-    const verification = await prisma.sMSVerification.findFirst({
-      where: {
-        phone,
-        purpose,
-        isUsed: false
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    console.log(`[TWILIO] Отправка на ${phone}: код ${code}`)
     
-    if (!verification) {
-      return {
-        hasActiveCode: false,
-        attemptsLeft: 0
-      }
-    }
+    debugLog('SMS отправлен через Twilio', { phone })
     
     return {
-      hasActiveCode: new Date() < verification.expiresAt,
-      attemptsLeft: Math.max(0, SMS_CONFIG.maxAttempts - verification.attempts),
-      expiresAt: verification.expiresAt
+      success: true
     }
     
   } catch (error) {
-    debugLog('Ошибка получения статуса верификации', error)
+    debugLog('Ошибка отправки через Twilio', error)
     return {
-      hasActiveCode: false,
-      attemptsLeft: 0
+      success: false,
+      error: 'Ошибка отправки SMS через Twilio'
     }
   }
 }

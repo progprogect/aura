@@ -3,7 +3,7 @@
  */
 
 import { randomBytes, createHash } from 'crypto'
-import { AUTH_ERRORS, VALIDATION_RULES } from './types'
+import { AUTH_ERRORS } from './types'
 
 // ========================================
 // ВАЛИДАЦИЯ ДАННЫХ

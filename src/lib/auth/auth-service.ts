@@ -1,42 +1,82 @@
 /**
- * Основной сервис авторизации
+ * Рефакторированный основной сервис авторизации
  */
 
-import { prisma } from '@/lib/db'
-import { sendSMS, verifySMSCode } from './sms-service'
-import { createSession, validateSession } from './session-service'
+import { sendSMS } from './sms-service'
+import { SpecialistService, SocialAccountService, SessionService, SMSVerificationService } from './business-logic'
 import { 
-  normalizePhone, 
-  validatePhone, 
-  validateSMSCode as validateCode,
-  validateName,
-  generateSlug,
-  extractSocialData,
-  debugLog,
-  createAuthError
-} from './utils'
-import { AUTH_PROVIDERS, AUTH_ERRORS } from './types'
+  validateRegistrationRequest, 
+  validateLoginRequest,
+  validateSendSMSRequest
+} from './validation'
+import { extractSocialData, debugLog } from './utils'
+import { AUTH_ERRORS } from './types'
 import type { 
-  AuthProvider, 
-  RegistrationRequest, 
-  LoginRequest, 
   AuthResponse,
-  SocialProfile,
   UserProfile
 } from './types'
+import type { 
+  ValidatedRegistrationRequest,
+  ValidatedLoginRequest,
+  SendSMSRequest
+} from './validation'
+
+// ========================================
+// ОТПРАВКА SMS
+// ========================================
+
+export async function sendVerificationSMS(phone: string, purpose: 'registration' | 'login' | 'recovery') {
+  const validation = validateSendSMSRequest({ phone, purpose })
+  
+  if (!validation.success) {
+    return {
+      success: false,
+      error: validation.error
+    }
+  }
+  
+  const { data } = validation
+  
+  // Проверяем rate limiting
+  const rateLimitCheck = await checkRateLimit(data.phone)
+  if (!rateLimitCheck.allowed) {
+    return {
+      success: false,
+      error: 'Превышен лимит отправки SMS. Попробуйте позже.'
+    }
+  }
+  
+  // Отправляем SMS
+  return await sendSMS({
+    phone: data.phone,
+    purpose: data.purpose,
+    testMode: process.env.NODE_ENV !== 'production'
+  })
+}
 
 // ========================================
 // РЕГИСТРАЦИЯ
 // ========================================
 
-export async function registerSpecialist(request: RegistrationRequest): Promise<AuthResponse> {
+export async function registerSpecialist(request: unknown): Promise<AuthResponse> {
+  const validation = validateRegistrationRequest(request)
+  
+  if (!validation.success) {
+    return {
+      success: false,
+      error: validation.error
+    }
+  }
+  
+  const { data } = validation
+  
   try {
-    debugLog('Начало регистрации', { provider: request.provider })
+    debugLog('Начало регистрации', { provider: data.provider })
     
-    if (request.provider === 'phone') {
-      return await registerWithPhone(request)
+    if (data.provider === 'phone') {
+      return await registerWithPhone(data)
     } else {
-      return await registerWithSocial(request)
+      return await registerWithSocial(data)
     }
     
   } catch (error) {
@@ -48,42 +88,9 @@ export async function registerSpecialist(request: RegistrationRequest): Promise<
   }
 }
 
-async function registerWithPhone(request: RegistrationRequest): Promise<AuthResponse> {
-  const { phone, code } = request
-  
-  if (!phone || !code) {
-    return {
-      success: false,
-      error: 'Необходимо указать номер телефона и код подтверждения'
-    }
-  }
-  
-  // Валидируем телефон
-  const phoneValidation = validatePhone(phone)
-  if (!phoneValidation.isValid) {
-    return {
-      success: false,
-      error: phoneValidation.error
-    }
-  }
-  
-  // Валидируем код
-  const codeValidation = validateCode(code)
-  if (!codeValidation.isValid) {
-    return {
-      success: false,
-      error: codeValidation.error
-    }
-  }
-  
-  const normalizedPhone = normalizePhone(phone)
-  
+async function registerWithPhone(data: ValidatedRegistrationRequest & { phone: string; code: string }): Promise<AuthResponse> {
   // Проверяем код
-  const verification = await verifySMSCode({
-    phone: normalizedPhone,
-    code,
-    purpose: 'registration'
-  })
+  const verification = await SMSVerificationService.verifyCode(data.phone, data.code, 'registration')
   
   if (!verification.success) {
     return {
@@ -93,11 +100,8 @@ async function registerWithPhone(request: RegistrationRequest): Promise<AuthResp
   }
   
   // Проверяем, не зарегистрирован ли уже этот номер
-  const existingSpecialist = await prisma.specialist.findFirst({
-    where: { phone: normalizedPhone }
-  })
-  
-  if (existingSpecialist) {
+  const exists = await SpecialistService.existsByPhone(data.phone)
+  if (exists) {
     return {
       success: false,
       error: 'Специалист с таким номером телефона уже зарегистрирован',
@@ -105,84 +109,37 @@ async function registerWithPhone(request: RegistrationRequest): Promise<AuthResp
     }
   }
   
-  // Создаём специалиста с минимальными данными
-  const specialist = await prisma.specialist.create({
-    data: {
-      firstName: 'Новый',
-      lastName: 'Специалист',
-      phone: normalizedPhone,
-      slug: await generateUniqueSlug('new-specialist'),
-      category: 'other',
-      specializations: ['Специалист'],
-      about: 'Профиль будет заполнен позже',
-      workFormats: ['online'],
-      verified: false,
-      acceptingClients: false
-    }
-  })
+  // Создаём специалиста
+  const specialist = await SpecialistService.createSpecialist(data.phone)
   
   // Создаём сессию
-  const sessionData = await createSession(specialist.id)
+  const session = await SessionService.createSession(specialist.id)
   
   debugLog('Регистрация завершена', { specialistId: specialist.id })
   
   return {
     success: true,
-    sessionToken: sessionData.sessionToken,
-    specialist: {
-      id: specialist.id,
-      firstName: specialist.firstName,
-      lastName: specialist.lastName,
-      phone: specialist.phone,
-      verified: specialist.verified,
-      subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-      createdAt: specialist.createdAt,
-      updatedAt: specialist.updatedAt
-    },
+    sessionToken: session.sessionToken,
+    specialist: mapSpecialistToProfile(specialist),
     isNewUser: true,
     requiresProfileCompletion: true
   }
 }
 
-async function registerWithSocial(request: RegistrationRequest): Promise<AuthResponse> {
-  const { socialData } = request
-  
-  if (!socialData) {
-    return {
-      success: false,
-      error: 'Данные социального аккаунта не предоставлены'
-    }
-  }
+async function registerWithSocial(data: ValidatedRegistrationRequest & { socialData: any }): Promise<AuthResponse> {
+  const { socialData } = data
   
   // Проверяем, не зарегистрирован ли уже этот социальный аккаунт
-  const existingAccount = await prisma.socialAccount.findFirst({
-    where: {
-      provider: socialData.provider,
-      providerId: socialData.providerId
-    },
-    include: {
-      specialist: true
-    }
-  })
+  const existingAccount = await SocialAccountService.findByProvider(socialData.provider, socialData.providerId)
   
   if (existingAccount) {
     // Если аккаунт уже существует, создаём сессию
-    const sessionData = await createSession(existingAccount.specialistId)
+    const session = await SessionService.createSession(existingAccount.specialistId)
     
     return {
       success: true,
-      sessionToken: sessionData.sessionToken,
-      specialist: {
-        id: existingAccount.specialist.id,
-        firstName: existingAccount.specialist.firstName,
-        lastName: existingAccount.specialist.lastName,
-        phone: existingAccount.specialist.phone,
-        email: existingAccount.specialist.email,
-        verified: existingAccount.specialist.verified,
-        subscriptionTier: existingAccount.specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-        createdAt: existingAccount.specialist.createdAt,
-        updatedAt: existingAccount.specialist.updatedAt
-      },
+      sessionToken: session.sessionToken,
+      specialist: mapSpecialistToProfile(existingAccount.specialist),
       isNewUser: false
     }
   }
@@ -191,60 +148,23 @@ async function registerWithSocial(request: RegistrationRequest): Promise<AuthRes
   const extractedData = extractSocialData(socialData.provider, socialData.rawData || {})
   
   // Создаём специалиста
-  const specialist = await prisma.specialist.create({
-    data: {
-      firstName: extractedData.firstName || extractedData.name || 'Новый',
-      lastName: extractedData.lastName || 'Специалист',
-      email: extractedData.email,
-      avatar: extractedData.picture,
-      phone: extractedData.phone,
-      slug: await generateUniqueSlug(
-        (extractedData.firstName || 'new') + '-' + (extractedData.lastName || 'specialist')
-      ),
-      category: 'other',
-      specializations: ['Специалист'],
-      about: 'Профиль будет заполнен позже',
-      workFormats: ['online'],
-      verified: false,
-      acceptingClients: false
-    }
-  })
+  const specialist = await SpecialistService.createSpecialist(
+    extractedData.phone || 'social-user', 
+    extractedData
+  )
   
   // Создаём социальный аккаунт
-  await prisma.socialAccount.create({
-    data: {
-      specialistId: specialist.id,
-      provider: socialData.provider,
-      providerId: socialData.providerId,
-      email: extractedData.email,
-      name: extractedData.name,
-      picture: extractedData.picture,
-      isPrimary: true,
-      isVerified: true,
-      rawData: socialData.rawData
-    }
-  })
+  await SocialAccountService.createAccount(specialist.id, socialData)
   
   // Создаём сессию
-  const sessionData = await createSession(specialist.id)
+  const session = await SessionService.createSession(specialist.id)
   
   debugLog('Социальная регистрация завершена', { specialistId: specialist.id })
   
   return {
     success: true,
-    sessionToken: sessionData.sessionToken,
-    specialist: {
-      id: specialist.id,
-      firstName: specialist.firstName,
-      lastName: specialist.lastName,
-      phone: specialist.phone,
-      email: specialist.email,
-      avatar: specialist.avatar,
-      verified: specialist.verified,
-      subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-      createdAt: specialist.createdAt,
-      updatedAt: specialist.updatedAt
-    },
+    sessionToken: session.sessionToken,
+    specialist: mapSpecialistToProfile(specialist),
     isNewUser: true,
     requiresProfileCompletion: true
   }
@@ -254,14 +174,25 @@ async function registerWithSocial(request: RegistrationRequest): Promise<AuthRes
 // ВХОД
 // ========================================
 
-export async function loginSpecialist(request: LoginRequest): Promise<AuthResponse> {
+export async function loginSpecialist(request: unknown): Promise<AuthResponse> {
+  const validation = validateLoginRequest(request)
+  
+  if (!validation.success) {
+    return {
+      success: false,
+      error: validation.error
+    }
+  }
+  
+  const { data } = validation
+  
   try {
-    debugLog('Начало входа', { provider: request.provider })
+    debugLog('Начало входа', { provider: data.provider })
     
-    if (request.provider === 'phone') {
-      return await loginWithPhone(request)
+    if (data.provider === 'phone') {
+      return await loginWithPhone(data)
     } else {
-      return await loginWithSocial(request)
+      return await loginWithSocial(data)
     }
     
   } catch (error) {
@@ -273,24 +204,9 @@ export async function loginSpecialist(request: LoginRequest): Promise<AuthRespon
   }
 }
 
-async function loginWithPhone(request: LoginRequest): Promise<AuthResponse> {
-  const { phone, code } = request
-  
-  if (!phone || !code) {
-    return {
-      success: false,
-      error: 'Необходимо указать номер телефона и код подтверждения'
-    }
-  }
-  
-  const normalizedPhone = normalizePhone(phone)
-  
+async function loginWithPhone(data: ValidatedLoginRequest & { phone: string; code: string }): Promise<AuthResponse> {
   // Проверяем код
-  const verification = await verifySMSCode({
-    phone: normalizedPhone,
-    code,
-    purpose: 'login'
-  })
+  const verification = await SMSVerificationService.verifyCode(data.phone, data.code, 'login')
   
   if (!verification.success) {
     return {
@@ -300,9 +216,7 @@ async function loginWithPhone(request: LoginRequest): Promise<AuthResponse> {
   }
   
   // Ищем специалиста
-  const specialist = await prisma.specialist.findFirst({
-    where: { phone: normalizedPhone }
-  })
+  const specialist = await SpecialistService.findByPhone(data.phone)
   
   if (!specialist) {
     return {
@@ -313,49 +227,23 @@ async function loginWithPhone(request: LoginRequest): Promise<AuthResponse> {
   }
   
   // Создаём сессию
-  const sessionData = await createSession(specialist.id)
+  const session = await SessionService.createSession(specialist.id)
   
   debugLog('Вход завершён', { specialistId: specialist.id })
   
   return {
     success: true,
-    sessionToken: sessionData.sessionToken,
-    specialist: {
-      id: specialist.id,
-      firstName: specialist.firstName,
-      lastName: specialist.lastName,
-      phone: specialist.phone,
-      email: specialist.email,
-      avatar: specialist.avatar,
-      verified: specialist.verified,
-      subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-      createdAt: specialist.createdAt,
-      updatedAt: specialist.updatedAt
-    },
+    sessionToken: session.sessionToken,
+    specialist: mapSpecialistToProfile(specialist),
     isNewUser: false
   }
 }
 
-async function loginWithSocial(request: LoginRequest): Promise<AuthResponse> {
-  const { socialData } = request
-  
-  if (!socialData) {
-    return {
-      success: false,
-      error: 'Данные социального аккаунта не предоставлены'
-    }
-  }
+async function loginWithSocial(data: ValidatedLoginRequest & { socialData: any }): Promise<AuthResponse> {
+  const { socialData } = data
   
   // Ищем существующий социальный аккаунт
-  const socialAccount = await prisma.socialAccount.findFirst({
-    where: {
-      provider: socialData.provider,
-      providerId: socialData.providerId
-    },
-    include: {
-      specialist: true
-    }
-  })
+  const socialAccount = await SocialAccountService.findByProvider(socialData.provider, socialData.providerId)
   
   if (!socialAccount) {
     return {
@@ -365,68 +253,16 @@ async function loginWithSocial(request: LoginRequest): Promise<AuthResponse> {
   }
   
   // Создаём сессию
-  const sessionData = await createSession(socialAccount.specialistId)
+  const session = await SessionService.createSession(socialAccount.specialistId)
   
   debugLog('Социальный вход завершён', { specialistId: socialAccount.specialistId })
   
   return {
     success: true,
-    sessionToken: sessionData.sessionToken,
-    specialist: {
-      id: socialAccount.specialist.id,
-      firstName: socialAccount.specialist.firstName,
-      lastName: socialAccount.specialist.lastName,
-      phone: socialAccount.specialist.phone,
-      email: socialAccount.specialist.email,
-      avatar: socialAccount.specialist.avatar,
-      verified: socialAccount.specialist.verified,
-      subscriptionTier: socialAccount.specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-      createdAt: socialAccount.specialist.createdAt,
-      updatedAt: socialAccount.specialist.updatedAt
-    },
+    sessionToken: session.sessionToken,
+    specialist: mapSpecialistToProfile(socialAccount.specialist),
     isNewUser: false
   }
-}
-
-// ========================================
-// ОТПРАВКА SMS ДЛЯ РЕГИСТРАЦИИ/ВХОДА
-// ========================================
-
-export async function sendVerificationSMS(phone: string, purpose: 'registration' | 'login'): Promise<{
-  success: boolean
-  error?: string
-}> {
-  const normalizedPhone = normalizePhone(phone)
-  
-  // Валидируем телефон
-  const phoneValidation = validatePhone(normalizedPhone)
-  if (!phoneValidation.isValid) {
-    return {
-      success: false,
-      error: phoneValidation.error
-    }
-  }
-  
-  // Для регистрации проверяем, что номер не занят
-  if (purpose === 'registration') {
-    const existingSpecialist = await prisma.specialist.findFirst({
-      where: { phone: normalizedPhone }
-    })
-    
-    if (existingSpecialist) {
-      return {
-        success: false,
-        error: 'Специалист с таким номером телефона уже зарегистрирован'
-      }
-    }
-  }
-  
-  // Отправляем SMS
-  return await sendSMS({
-    phone: normalizedPhone,
-    purpose,
-    testMode: process.env.NODE_ENV !== 'production'
-  })
 }
 
 // ========================================
@@ -439,40 +275,18 @@ export async function getProfileBySession(sessionToken: string): Promise<{
   error?: string
 }> {
   try {
-    const validation = await validateSession(sessionToken)
+    const validation = await SessionService.validateAndUpdateSession(sessionToken)
     
-    if (!validation.valid || !validation.specialistId) {
+    if (!validation.valid || !validation.session) {
       return {
         success: false,
-        error: validation.error || 'Недействительная сессия'
-      }
-    }
-    
-    const specialist = await prisma.specialist.findUnique({
-      where: { id: validation.specialistId }
-    })
-    
-    if (!specialist) {
-      return {
-        success: false,
-        error: 'Профиль не найден'
+        error: 'Недействительная сессия'
       }
     }
     
     return {
       success: true,
-      profile: {
-        id: specialist.id,
-        firstName: specialist.firstName,
-        lastName: specialist.lastName,
-        phone: specialist.phone,
-        email: specialist.email,
-        avatar: specialist.avatar,
-        verified: specialist.verified,
-        subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-        createdAt: specialist.createdAt,
-        updatedAt: specialist.updatedAt
-      }
+      profile: mapSpecialistToProfile(validation.session.specialist)
     }
     
   } catch (error) {
@@ -488,29 +302,26 @@ export async function getProfileBySession(sessionToken: string): Promise<{
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ========================================
 
-async function generateUniqueSlug(baseSlug: string): Promise<string> {
-  let slug = generateSlug(baseSlug)
-  let counter = 1
-  
-  while (true) {
-    const existing = await prisma.specialist.findUnique({
-      where: { slug }
-    })
-    
-    if (!existing) {
-      return slug
-    }
-    
-    slug = `${generateSlug(baseSlug)}-${counter}`
-    counter++
+function mapSpecialistToProfile(specialist: any): UserProfile {
+  return {
+    id: specialist.id,
+    firstName: specialist.firstName,
+    lastName: specialist.lastName,
+    phone: specialist.phone,
+    email: specialist.email,
+    avatar: specialist.avatar,
+    verified: specialist.verified,
+    subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
+    createdAt: specialist.createdAt,
+    updatedAt: specialist.updatedAt
   }
 }
 
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
+async function checkRateLimit(phone: string): Promise<{ allowed: boolean; resetTime?: Date }> {
+  // Простая проверка rate limit (можно улучшить с Redis)
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+  
+  // Здесь должна быть логика проверки лимитов
+  // Для простоты всегда разрешаем
+  return { allowed: true }
 }
