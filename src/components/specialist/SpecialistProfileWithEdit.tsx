@@ -183,30 +183,38 @@ export function SpecialistProfileWithEdit({
       {/* Профиль - разные режимы для клиентов и специалиста */}
       {isOwner ? (
         // Режим редактирования для специалиста - без табов, все поля видны
-        <div className="container mx-auto max-w-5xl space-y-8 px-4 py-8">
+        <div className="container mx-auto max-w-5xl space-y-4 px-4 py-6">
           
           {/* Hero Edit секция (в режиме редактирования) */}
           {isEditMode && (
-            <div className="space-y-6">
-              <SpecialistHeroEdit
-                firstName={heroData.firstName}
-                lastName={heroData.lastName}
-                avatar={heroData.avatar}
-                tagline={heroData.tagline}
-                city={heroData.city}
-                specializations={heroData.specializations}
-                onSaveField={handleSaveField}
-                onSaveArray={handleSaveArray}
-                onRefresh={handleExitEditMode}
-              />
+            <>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <span className="text-purple-600 text-sm">✏️</span>
+                  </span>
+                  <span className="text-base sm:text-xl">Основная информация</span>
+                </h2>
+                <SpecialistHeroEdit
+                  firstName={heroData.firstName}
+                  lastName={heroData.lastName}
+                  avatar={heroData.avatar}
+                  tagline={heroData.tagline}
+                  city={heroData.city}
+                  specializations={heroData.specializations}
+                  onSaveField={handleSaveField}
+                  onSaveArray={handleSaveArray}
+                  onRefresh={handleExitEditMode}
+                />
+              </div>
               
-              {/* Контакты в режиме редактирования */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              {/* Личные контакты в режиме редактирования */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                     <span className="text-gray-600 text-sm">📧</span>
                   </span>
-                  Личные контакты
+                  <span className="text-base sm:text-xl">Личные контакты</span>
                 </h2>
                 <ContactsEditor
                   email={contactsData.email}
@@ -217,16 +225,16 @@ export function SpecialistProfileWithEdit({
                   onSave={handleSaveField}
                 />
               </div>
-            </div>
+            </>
           )}
           
           {/* О себе */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                 <span className="text-blue-600 text-sm">👤</span>
               </span>
-              О себе
+              <span className="text-base sm:text-xl">О себе</span>
             </h2>
             <SpecialistAbout 
               about={data.about} 
@@ -236,12 +244,12 @@ export function SpecialistProfileWithEdit({
 
           {/* Специализация */}
           {categoryConfig && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                   <span className="text-purple-600 text-sm">✨</span>
                 </span>
-                Специализация
+                <span className="text-base sm:text-xl">Специализация</span>
               </h2>
               <SpecialistSpecialization
                 category={data.category}
@@ -253,12 +261,12 @@ export function SpecialistProfileWithEdit({
           )}
 
           {/* Видео-презентация */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                 <span className="text-red-600 text-sm">🎥</span>
               </span>
-              Видео-презентация
+              <span className="text-base sm:text-xl">Видео-презентация</span>
             </h2>
             {data.videoUrl ? (
               <SpecialistVideo videoUrl={data.videoUrl} />
@@ -277,12 +285,12 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Галерея */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-green-600 text-sm">📸</span>
               </span>
-              Галерея
+              <span className="text-base sm:text-xl">Галерея</span>
             </h2>
             {data.gallery.length > 0 ? (
               <SpecialistGallery items={data.gallery} />
@@ -301,12 +309,12 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Образование и сертификаты */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <span className="text-yellow-600 text-sm">🎓</span>
               </span>
-              Образование и сертификаты
+              <span className="text-base sm:text-xl">Образование и сертификаты</span>
             </h2>
             <SpecialistEducation
               education={data.education}
@@ -315,12 +323,12 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Стоимость */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
                 <span className="text-emerald-600 text-sm">💰</span>
               </span>
-              Стоимость услуг
+              <span className="text-base sm:text-xl">Стоимость услуг</span>
             </h2>
             <SpecialistPricing
               category={data.category}
@@ -333,12 +341,12 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* FAQ */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
                 <span className="text-indigo-600 text-sm">❓</span>
               </span>
-              Часто задаваемые вопросы
+              <span className="text-base sm:text-xl">Часто задаваемые вопросы</span>
             </h2>
             <SpecialistFAQ
               faqs={data.faqs}
@@ -347,12 +355,12 @@ export function SpecialistProfileWithEdit({
 
           {/* Контакты для связи - только в режиме редактирования */}
           {isEditMode && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
                   <span className="text-orange-600 text-sm">📞</span>
                 </span>
-                Контакты для связи с клиентами
+                <span className="text-base sm:text-xl">Контакты для связи с клиентами</span>
               </h2>
               <SpecialistContactForClients
                 email={contactsData.email}
