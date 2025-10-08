@@ -20,6 +20,7 @@ import { SpecialistEducation } from './SpecialistEducation'
 import { SpecialistPricing } from './SpecialistPricing'
 import { SpecialistFAQ } from './SpecialistFAQ'
 import { SpecialistContactForClients } from './SpecialistContactForClients'
+import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 
@@ -238,7 +239,8 @@ export function SpecialistProfileWithEdit({
               <span className="text-base sm:text-xl">О себе</span>
             </h2>
             <SpecialistAbout 
-              about={data.about} 
+              about={data.about}
+              isEditMode={isEditMode}
               onSave={handleSaveField}
             />
           </div>
@@ -256,6 +258,7 @@ export function SpecialistProfileWithEdit({
                 category={data.category}
                 customFields={data.customFields}
                 categoryConfig={categoryConfig}
+                isEditMode={isEditMode}
                 onSaveCustomField={handleSaveCustomField}
               />
             </div>
@@ -269,19 +272,22 @@ export function SpecialistProfileWithEdit({
               </span>
               <span className="text-base sm:text-xl">Видео-презентация</span>
             </h2>
-            {data.videoUrl ? (
-              <SpecialistVideo videoUrl={data.videoUrl} />
+            {isEditMode ? (
+              <VideoUrlEditor
+                videoUrl={data.videoUrl}
+                onSave={handleSaveField}
+                onRemove={async () => {
+                  await handleSaveField('videoUrl', '')
+                }}
+              />
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                {isEditMode ? (
-                  <div className="space-y-2">
-                    <p>Добавьте видео-презентацию</p>
-                    <p className="text-sm">Это поможет клиентам лучше узнать вас</p>
-                  </div>
-                ) : (
+              data.videoUrl ? (
+                <SpecialistVideo videoUrl={data.videoUrl} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
                   <p>Видео-презентация не добавлена</p>
-                )}
-              </div>
+                </div>
+              )
             )}
           </div>
 
@@ -297,14 +303,15 @@ export function SpecialistProfileWithEdit({
               <SpecialistGallery items={data.gallery} />
             ) : (
               <div className="text-center py-8 text-gray-500">
-                {isEditMode ? (
-                  <div className="space-y-2">
-                    <p>Добавьте фото и видео в галерею</p>
-                    <p className="text-sm">Покажите примеры вашей работы</p>
-                  </div>
-                ) : (
-                  <p>Галерея пуста</p>
-                )}
+                <div className="space-y-2">
+                  <p>Добавьте фото и видео в галерею</p>
+                  <p className="text-sm">Покажите примеры вашей работы</p>
+                  {isEditMode && (
+                    <p className="text-xs text-blue-600 mt-4">
+                      💡 Функционал загрузки фото/видео в разработке
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -320,6 +327,8 @@ export function SpecialistProfileWithEdit({
             <SpecialistEducation
               education={data.education}
               certificates={data.certificates}
+              isEditMode={isEditMode}
+              onRefresh={() => window.location.reload()}
             />
           </div>
 
@@ -337,6 +346,7 @@ export function SpecialistProfileWithEdit({
               priceTo={data.priceTo}
               currency={data.currency}
               priceDescription={data.priceDescription}
+              isEditMode={isEditMode}
               onSave={handleSaveField}
             />
           </div>
@@ -352,6 +362,13 @@ export function SpecialistProfileWithEdit({
             <SpecialistFAQ
               faqs={data.faqs}
             />
+            {isEditMode && data.faqs.length === 0 && (
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  💡 Функционал редактирования FAQ в разработке
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Контакты для связи - только в режиме редактирования */}
@@ -367,6 +384,7 @@ export function SpecialistProfileWithEdit({
                 email={contactsData.email}
                 telegram={contactsData.telegram}
                 whatsapp={contactsData.whatsapp}
+                isEditMode={isEditMode}
                 onSave={handleSaveField}
               />
             </div>
