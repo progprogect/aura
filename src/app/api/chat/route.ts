@@ -715,13 +715,13 @@ ${contextualHints.map(hint => `- ${hint}`).join('\n')}
             console.log('[Chat API] ✅ Specialists payload enqueued')
           }
 
-          // Извлекаем кнопки из ответа GPT (поддерживаем оба формата)
-          const buttonsMatch = fullResponse.match(/(?:Добавь кнопки:\s*|_BUTTONS___)\[(.*?)\]/)
+          // Извлекаем кнопки из ответа GPT (поддерживаем все форматы)
+          const buttonsMatch = fullResponse.match(/(?:__BUTTONS__|_BUTTONS___|BUTTONS)\s*(\[.*?\])/)
           let hasButtons = false
           
           if (buttonsMatch) {
             try {
-              const buttons = JSON.parse(`[${buttonsMatch[1]}]`)
+              const buttons = JSON.parse(buttonsMatch[1])
               controller.enqueue(encoder.encode(`\n\n__BUTTONS__${JSON.stringify(buttons)}`))
               hasButtons = true
               console.log('[Chat API] ✅ Buttons extracted and sent:', buttons)
@@ -730,10 +730,10 @@ ${contextualHints.map(hint => `- ${hint}`).join('\n')}
             }
           }
           
-          // Дополнительная проверка: если GPT написал _BUTTONS___ в тексте, убираем это из контента
-          if (fullResponse.includes('_BUTTONS___')) {
-            console.log('[Chat API] 🔧 Removing _BUTTONS___ from content')
-            fullResponse = fullResponse.replace(/_BUTTONS___\[.*?\]/g, '')
+          // Дополнительная проверка: убираем маркеры кнопок из контента
+          if (fullResponse.match(/(?:__BUTTONS__|_BUTTONS___|BUTTONS)\s*\[.*?\]/)) {
+            console.log('[Chat API] 🔧 Removing button markers from content')
+            fullResponse = fullResponse.replace(/(?:__BUTTONS__|_BUTTONS___|BUTTONS)\s*\[.*?\]/g, '')
           }
           
           // FALLBACK: Если GPT предлагает начать поиск, но НЕ добавил кнопки → добавляем автоматически!
