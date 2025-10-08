@@ -230,7 +230,6 @@ export function SpecialistProfileWithEdit({
             </h2>
             <SpecialistAbout 
               about={data.about} 
-              isEditMode={isEditMode}
               onSave={handleSaveField}
             />
           </div>
@@ -248,7 +247,6 @@ export function SpecialistProfileWithEdit({
                 category={data.category}
                 customFields={data.customFields}
                 categoryConfig={categoryConfig}
-                isEditMode={isEditMode}
                 onSaveCustomField={handleSaveCustomField}
               />
             </div>
@@ -313,8 +311,6 @@ export function SpecialistProfileWithEdit({
             <SpecialistEducation
               education={data.education}
               certificates={data.certificates}
-              isEditMode={isEditMode}
-              onRefresh={() => window.location.reload()}
             />
           </div>
 
@@ -327,11 +323,11 @@ export function SpecialistProfileWithEdit({
               Стоимость услуг
             </h2>
             <SpecialistPricing
+              category={data.category}
               priceFrom={data.priceFrom}
               priceTo={data.priceTo}
               currency={data.currency}
               priceDescription={data.priceDescription}
-              isEditMode={isEditMode}
               onSave={handleSaveField}
             />
           </div>
@@ -346,8 +342,6 @@ export function SpecialistProfileWithEdit({
             </h2>
             <SpecialistFAQ
               faqs={data.faqs}
-              isEditMode={isEditMode}
-              onRefresh={() => window.location.reload()}
             />
           </div>
 
@@ -362,10 +356,8 @@ export function SpecialistProfileWithEdit({
               </h2>
               <SpecialistContactForClients
                 email={contactsData.email}
-                phone={contactsData.phone}
                 telegram={contactsData.telegram}
                 whatsapp={contactsData.whatsapp}
-                isEditMode={isEditMode}
                 onSave={handleSaveField}
               />
             </div>

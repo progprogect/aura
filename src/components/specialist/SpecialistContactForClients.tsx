@@ -87,9 +87,14 @@ export function SpecialistContactForClients({
           <label className="text-sm font-medium text-gray-700">{label}</label>
           <InlineInput
             value={value || ''}
+            field={field}
+            isEditMode={true}
             placeholder={`Введите ${label.toLowerCase()}`}
-            onSave={(newValue) => onSave?.(field, newValue)}
-            className="w-full"
+            onSave={async (fieldName, newValue) => {
+              if (onSave) {
+                await onSave(fieldName, newValue)
+              }
+            }}
           />
         </div>
       )
@@ -150,7 +155,7 @@ export function SpecialistContactForClients({
       <ContactItem
         icon={Mail}
         label="Email"
-        value={email}
+        value={email || null}
         field="contactEmail"
         type="email"
         href={email ? `mailto:${email}` : undefined}
@@ -160,7 +165,7 @@ export function SpecialistContactForClients({
       <ContactItem
         icon={Phone}
         label="Телефон"
-        value={phone}
+        value={phone || null}
         field="contactPhone"
         type="phone"
         href={phone ? `tel:${phone}` : undefined}
@@ -170,7 +175,7 @@ export function SpecialistContactForClients({
       <ContactItem
         icon={MessageCircle}
         label="Telegram"
-        value={telegram}
+        value={telegram || null}
         field="contactTelegram"
         href={telegram ? getTelegramUrl(telegram) : undefined}
       />
@@ -179,7 +184,7 @@ export function SpecialistContactForClients({
       <ContactItem
         icon={MessageSquare}
         label="WhatsApp"
-        value={whatsapp}
+        value={whatsapp || null}
         field="contactWhatsapp"
         type="phone"
         href={whatsapp ? getWhatsappUrl(whatsapp) : undefined}
