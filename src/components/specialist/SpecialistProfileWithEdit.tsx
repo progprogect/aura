@@ -199,6 +199,7 @@ export function SpecialistProfileWithEdit({
                   firstName={heroData.firstName}
                   lastName={heroData.lastName}
                   avatar={heroData.avatar}
+                  category={data.category}
                   tagline={heroData.tagline}
                   city={heroData.city}
                   specializations={heroData.specializations}

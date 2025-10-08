@@ -9,11 +9,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { InlineInput } from './edit/InlineInput'
 import { InlineTagsEditor } from './edit/InlineTagsEditor'
 import { AvatarUploader } from './edit/AvatarUploader'
+import { CategorySelector } from './edit/CategorySelector'
 
 interface SpecialistHeroEditProps {
   firstName: string
   lastName: string
   avatar: string | null
+  category: string
   tagline: string | null
   city: string | null
   specializations: string[]
@@ -26,6 +28,7 @@ export function SpecialistHeroEdit({
   firstName,
   lastName,
   avatar,
+  category,
   tagline,
   city,
   specializations,
@@ -74,6 +77,13 @@ export function SpecialistHeroEdit({
                 label="Фамилия"
               />
             </div>
+
+            {/* Категория */}
+            <CategorySelector
+              value={category}
+              onSave={onSaveField}
+              label="Категория"
+            />
 
             {/* Слоган */}
             <InlineInput

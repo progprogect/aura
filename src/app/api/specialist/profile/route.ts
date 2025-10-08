@@ -13,6 +13,7 @@ const UpdateProfileSchema = z.object({
   field: z.enum([
     'firstName',
     'lastName',
+    'category',
     'tagline',
     'about',
     'city',
