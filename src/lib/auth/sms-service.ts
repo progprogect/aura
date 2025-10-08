@@ -11,7 +11,7 @@ import type { SMSRequest, SMSVerificationRequest } from './types'
 // ОТПРАВКА SMS
 // ========================================
 
-export async function sendSMS(request: SMSRequest): Promise<{ success: boolean; error?: string }> {
+export async function sendSMS(request: SMSRequest): Promise<{ success: boolean; error?: string; code?: string }> {
   try {
     debugLog('Отправка SMS', { phone: request.phone, purpose: request.purpose })
     
@@ -23,11 +23,14 @@ export async function sendSMS(request: SMSRequest): Promise<{ success: boolean; 
     // Сохраняем код в базу
     await SMSVerificationService.saveVerificationCode(normalizedPhone, code, request.purpose)
     
-    // Отправляем SMS
-    if (request.testMode || AUTH_CONFIG.testMode.enabled) {
-      return await sendTestSMS(normalizedPhone, code)
-    } else {
-      return await sendRealSMS(normalizedPhone, code)
+    // УПРОЩЁННАЯ ВЕРСИЯ: Всегда выводим код в консоль
+    // В будущем здесь будет настоящая отправка SMS
+    console.log(`\n🔐 SMS КОД для ${normalizedPhone}: ${code}\n`)
+    console.log(`📱 Используйте этот код для ${request.purpose === 'login' ? 'входа' : 'регистрации'}\n`)
+    
+    return {
+      success: true,
+      code // Возвращаем код для показа в UI
     }
     
   } catch (error) {

@@ -90,6 +90,12 @@ export function AuthLoginForm() {
       if (result.success) {
         setStep('code')
         setCodeExpiry(new Date(Date.now() + 5 * 60 * 1000)) // 5 минут
+        
+        // Показываем код в alert (временное решение до настройки SMS провайдера)
+        if (result.code) {
+          alert(`🔐 Ваш код для входа: ${result.code}\n\n(Код также выведен в консоль браузера)`)
+          console.log(`🔐 SMS КОД: ${result.code}`)
+        }
       } else {
         setError(result.error || 'Ошибка отправки SMS')
       }
