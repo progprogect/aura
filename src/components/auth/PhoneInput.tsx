@@ -1,5 +1,6 @@
 /**
  * Компонент ввода номера телефона с форматированием
+ * Поддерживает как российские, так и международные номера
  */
 
 'use client'
@@ -7,11 +8,19 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { 
+  detectCountryCode, 
+  formatPhoneNumber, 
+  normalizePhoneNumber,
+  getPlaceholder,
+  validatePhoneNumber 
+} from '@/lib/phone/country-codes'
 
 interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value: string
   onChange: (value: string) => void
   onEnter?: () => void
+  international?: boolean // Включить поддержку международных номеров
 }
 
 export function PhoneInput({
@@ -21,13 +30,24 @@ export function PhoneInput({
   placeholder = "+7 (999) 123-45-67",
   disabled = false,
   className,
+  international = true,
   ...props
 }: PhoneInputProps) {
   const [displayValue, setDisplayValue] = useState('')
+  const [currentCountry, setCurrentCountry] = useState<any>(null)
 
   // Форматирование номера телефона
   const formatPhone = (input: string) => {
-    // Убираем все символы кроме цифр
+    if (international) {
+      // Используем новую логику для международных номеров
+      const country = detectCountryCode(input)
+      if (country) {
+        setCurrentCountry(country)
+        return formatPhoneNumber(input, country)
+      }
+    }
+    
+    // Старая логика для российских номеров (обратная совместимость)
     const digits = input.replace(/\D/g, '')
     
     // Если начинается с 8, заменяем на 7
@@ -55,6 +75,11 @@ export function PhoneInput({
 
   // Преобразование отформатированного номера в чистый формат
   const normalizePhone = (formatted: string) => {
+    if (international) {
+      return normalizePhoneNumber(formatted)
+    }
+    
+    // Старая логика
     const digits = formatted.replace(/\D/g, '')
     if (digits.startsWith('8')) {
       return '+7' + digits.slice(1)
@@ -70,7 +95,7 @@ export function PhoneInput({
     if (value && value !== normalizePhone(displayValue)) {
       setDisplayValue(formatPhone(value))
     }
-  }, [value])
+  }, [value, international]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value
@@ -92,22 +117,41 @@ export function PhoneInput({
     e.target.select()
   }
 
+  const validation = validatePhoneNumber(value)
+  const dynamicPlaceholder = international && currentCountry ? 
+    getPlaceholder(currentCountry) : placeholder
+
   return (
-    <Input
-      type="tel"
-      value={displayValue}
-      onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      onFocus={handleFocus}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={cn(
-        "text-base h-12",
-        className
+    <div className="space-y-1">
+      <Input
+        type="tel"
+        value={displayValue}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        placeholder={dynamicPlaceholder}
+        disabled={disabled}
+        className={cn(
+          "text-base h-12",
+          !validation.isValid && "border-red-500 focus:ring-red-500",
+          className
+        )}
+        autoComplete="tel"
+        inputMode="numeric"
+        {...props}
+      />
+      
+      {/* Сообщение об ошибке */}
+      {!validation.isValid && value && (
+        <p className="text-sm text-red-500">{validation.error}</p>
       )}
-      autoComplete="tel"
-      inputMode="numeric"
-      {...props}
-    />
+      
+      {/* Информация о стране */}
+      {validation.isValid && value && currentCountry && international && (
+        <p className="text-sm text-gray-500">
+          {currentCountry.flag} {currentCountry.name} (+{currentCountry.code})
+        </p>
+      )}
+    </div>
   )
 }

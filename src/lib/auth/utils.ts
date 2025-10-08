@@ -14,12 +14,19 @@ export function validatePhone(phone: string): { isValid: boolean; error?: string
     return { isValid: false, error: 'Номер телефона обязателен' }
   }
   
-  const phonePattern = /^\+7\d{10}$/
-  if (!phonePattern.test(phone)) {
-    return { isValid: false, error: 'Номер телефона должен начинаться с +7 и содержать 10 цифр' }
+  // Поддержка международных номеров
+  const internationalPattern = /^\+\d{1,4}\d{6,14}$/
+  if (internationalPattern.test(phone)) {
+    return { isValid: true }
   }
   
-  return { isValid: true }
+  // Обратная совместимость с российскими номерами
+  const phonePattern = /^\+7\d{10}$/
+  if (phonePattern.test(phone)) {
+    return { isValid: true }
+  }
+  
+  return { isValid: false, error: 'Неверный формат номера телефона' }
 }
 
 export function validateSMSCode(code: string): { isValid: boolean; error?: string } {
