@@ -10,7 +10,7 @@ import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { User, Phone, Mail, Stethoscope, Settings, Eye } from 'lucide-react'
+import { User, Phone, Mail, Stethoscope } from 'lucide-react'
 import Link from 'next/link'
 import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats'
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
@@ -382,43 +382,16 @@ export default async function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Быстрые действия специалиста */}
-            {user.hasSpecialistProfile && user.specialistProfile && (
-              <QuickActions 
-                slug={user.specialistProfile.slug}
-                newRequestsCount={user.newRequestsCount || 0}
-              />
-            )}
+            {/* Быстрые действия */}
+            <QuickActions 
+              slug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
+              newRequestsCount={user.newRequestsCount || 0}
+              isSpecialist={user.hasSpecialistProfile}
+            />
 
-            {/* Действия */}
+            {/* Кнопка выхода */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Меню</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {user.hasSpecialistProfile ? (
-                  <>
-                    {user.specialistProfile && (
-                      <Link href={`/specialist/${user.specialistProfile.slug}`} className="block">
-                        <Button className="w-full" variant="default">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Посмотреть мой профиль
-                        </Button>
-                      </Link>
-                    )}
-                  </>
-                ) : (
-                  <Link href="/auth/user/become-specialist" className="block">
-                    <Button className="w-full" variant="default">
-                      <Stethoscope className="h-4 w-4 mr-2" />
-                      Стать специалистом
-                    </Button>
-                  </Link>
-                )}
-                
+              <CardContent className="pt-6">
                 <LogoutButton />
               </CardContent>
             </Card>

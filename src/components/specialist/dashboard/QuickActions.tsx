@@ -8,15 +8,16 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Edit, BarChart3, MessageSquare, Inbox } from 'lucide-react'
+import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope } from 'lucide-react'
 
 interface QuickActionsProps {
-  slug: string
+  slug?: string
   newRequestsCount?: number
+  isSpecialist?: boolean
 }
 
-export function QuickActions({ slug, newRequestsCount = 0 }: QuickActionsProps) {
-  const actions = [
+export function QuickActions({ slug, newRequestsCount = 0, isSpecialist = true }: QuickActionsProps) {
+  const specialistActions = [
     {
       href: `/specialist/${slug}`,
       icon: Eye,
@@ -43,6 +44,19 @@ export function QuickActions({ slug, newRequestsCount = 0 }: QuickActionsProps) 
       disabled: true
     }
   ]
+
+  const userActions = [
+    {
+      href: '/auth/user/become-specialist',
+      icon: Stethoscope,
+      label: 'Стать специалистом',
+      description: 'Создать профиль специалиста',
+      variant: 'default' as const,
+      isMain: true
+    }
+  ]
+
+  const actions = isSpecialist ? specialistActions : userActions
 
   return (
     <Card className="shadow-sm">
