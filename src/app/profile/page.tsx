@@ -10,11 +10,12 @@ import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { User, Phone, Mail, Calendar, Stethoscope, Settings, LogOut, BarChart, Users, Eye, MessageSquare } from 'lucide-react'
+import { User, Phone, Mail, Stethoscope, Settings, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats'
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
+import { LogoutButton } from '@/components/profile/LogoutButton'
 
 async function getUserData() {
   try {
@@ -377,21 +378,15 @@ export default async function ProfilePage() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Settings className="h-5 w-5" />
-                  <span>Действия</span>
+                  <span>Меню</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {user.hasSpecialistProfile ? (
                   <>
-                    <Link href="/specialist/profile/edit" className="block">
-                      <Button className="w-full" variant="default">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Настройки профиля
-                      </Button>
-                    </Link>
                     {user.specialistProfile && (
                       <Link href={`/specialist/${user.specialistProfile.slug}`} className="block">
-                        <Button className="w-full" variant="outline">
+                        <Button className="w-full" variant="default">
                           <Eye className="h-4 w-4 mr-2" />
                           Посмотреть мой профиль
                         </Button>
@@ -407,38 +402,7 @@ export default async function ProfilePage() {
                   </Link>
                 )}
                 
-                <form action="/api/auth/logout" method="POST" className="block">
-                  <Button type="submit" className="w-full" variant="outline">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Выйти
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Статистика */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Активность</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Регистрация</span>
-                    <span className="text-sm font-medium">
-                      {new Date(user.createdAt).toLocaleDateString('ru-RU')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Тип аккаунта</span>
-                    <span className="text-sm font-medium">
-                      {user.hasSpecialistProfile ? 'Специалист' : 'Пользователь'}
-                    </span>
-                  </div>
-                </div>
+                <LogoutButton />
               </CardContent>
             </Card>
           </div>
