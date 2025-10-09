@@ -22,11 +22,11 @@ export function middleware(request: NextRequest) {
   const isSpecialistRoute = specialistRoutes.some(route => pathname.startsWith(route))
   
   // Защищённые маршруты обычных пользователей
-  const userProtectedRoutes: string[] = ['/profile', '/favorites']
+  const userProtectedRoutes: string[] = ['/profile', '/favorites', '/auth/user/become-specialist']
   const isUserProtectedRoute = userProtectedRoutes.some(route => pathname.startsWith(route))
   
   // Маршруты авторизации
-  const authRoutes = ['/auth/login', '/auth/register', '/auth/user/login', '/auth/user/register']
+  const authRoutes = ['/auth/login', '/auth/register', '/auth/user/login', '/auth/user/register', '/auth/user/become-specialist']
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
   
   // Если не авторизован и пытается зайти на защищённый маршрут специалиста

@@ -169,7 +169,7 @@ export default async function ProfilePage() {
                     </Link>
                   </>
                 ) : (
-                  <Link href="/api/auth/user/become-specialist" className="block">
+                  <Link href="/auth/user/become-specialist" className="block">
                     <Button className="w-full" variant="default">
                       <Stethoscope className="h-4 w-4 mr-2" />
                       Стать специалистом
