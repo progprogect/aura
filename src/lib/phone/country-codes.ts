@@ -648,22 +648,25 @@ export function normalizePhoneNumber(input: string): string {
   const digits = input.replace(/\D/g, '')
   if (!digits) return ''
   
-  const country = detectCountryCode(digits)
-  if (!country) return digits
+  // УНИФИЦИРОВАНО С normalizePhone для совместимости
   
-  // Если номер начинается с 8 и это Россия, заменяем на 7
-  if (country.code === '7' && digits.startsWith('8')) {
-    return '+' + '7' + digits.slice(1)
+  // Если номер начинается с 8, заменяем на +7 (как в старой функции)
+  if (digits.startsWith('8')) {
+    return '+7' + digits.slice(1)
   }
   
-  // Если номер уже содержит код страны, добавляем +
-  if (digits.startsWith(country.code)) {
+  // Если номер начинается с 7, добавляем +
+  if (digits.startsWith('7')) {
     return '+' + digits
   }
   
-  // ИСПРАВЛЕНИЕ: НЕ добавляем код страны автоматически
-  // Пользователь должен сам ввести код страны
-  return digits
+  // Если номер уже в формате +7, возвращаем как есть
+  if (input.startsWith('+7')) {
+    return input
+  }
+  
+  // В остальных случаях добавляем +7 (для российских номеров)
+  return '+7' + digits
 }
 
 /**
