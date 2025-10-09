@@ -72,9 +72,19 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       return
     }
 
-    if (type === 'link' && !linkUrl.trim()) {
-      alert('Укажите ссылку')
-      return
+    if (type === 'link') {
+      if (!linkUrl.trim()) {
+        alert('Укажите ссылку')
+        return
+      }
+      
+      // Проверяем, является ли строка валидным URL
+      try {
+        new URL(linkUrl.trim())
+      } catch {
+        alert('Укажите корректную ссылку (например: https://example.com)')
+        return
+      }
     }
 
     if (type === 'file' && !file && !editingMagnet?.fileUrl) {
@@ -121,8 +131,8 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           type,
           title: title.trim(),
           description: description.trim(),
-          linkUrl: type === 'link' ? linkUrl.trim() : null,
-          fileUrl: type === 'file' ? editingMagnet?.fileUrl : null,
+          ...(type === 'link' && { linkUrl: linkUrl.trim() }),
+          ...(type === 'file' && editingMagnet?.fileUrl && { fileUrl: editingMagnet.fileUrl }),
           emoji,
         }),
       })
@@ -305,7 +315,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
             {type === 'link' && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900">
-                  Ссылка
+                  Ссылка <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="url"
@@ -313,6 +323,20 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://youtube.com/..."
                 />
+                <p className="text-xs text-gray-500">
+                  {linkUrl && linkUrl.trim() ? (
+                    (() => {
+                      try {
+                        new URL(linkUrl.trim())
+                        return <span className="text-green-600">✅ Корректная ссылка</span>
+                      } catch {
+                        return <span className="text-red-500">⚠️ Неверный формат URL</span>
+                      }
+                    })()
+                  ) : (
+                    'Введите ссылку (например: https://example.com)'
+                  )}
+                </p>
               </div>
             )}
 
