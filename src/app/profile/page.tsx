@@ -16,6 +16,7 @@ import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { LogoutButton } from '@/components/profile/LogoutButton'
+import { ensureSlugExists } from '@/lib/auth/server'
 
 async function getUserData() {
   try {
@@ -73,6 +74,22 @@ async function getUserData() {
     // Если специалист - добавляем данные профиля специалиста
     if (hasSpecialistProfile && user.specialistProfile) {
       const profile = user.specialistProfile
+
+      // 🔍 ДИАГНОСТИКА: Проверяем slug
+      console.log('[Profile Page] Проверка slug для пользователя:', user.id)
+      console.log('[Profile Page] Текущий slug:', profile.slug)
+      
+      // Проверяем и восстанавливаем slug если нужно
+      if (!profile.slug || profile.slug.trim().length === 0) {
+        console.warn('[Profile Page] ⚠️ Slug отсутствует! Вызываем ensureSlugExists...')
+        const fixedSlug = await ensureSlugExists(user.id)
+        if (fixedSlug) {
+          profile.slug = fixedSlug
+          console.log('[Profile Page] ✅ Slug восстановлен:', fixedSlug)
+        } else {
+          console.error('[Profile Page] ❌ Не удалось восстановить slug')
+        }
+      }
 
       // Подсчёт процента заполнения
       const completionFields = {

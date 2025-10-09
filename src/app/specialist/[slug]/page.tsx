@@ -18,6 +18,8 @@ interface PageProps {
 
 // Получение данных специалиста (Unified)
 async function getSpecialist(slug: string) {
+  console.log('[Specialist Page] 🔍 Поиск профиля по slug:', slug)
+  
   const specialistProfile = await prisma.specialistProfile.findUnique({
     where: { slug },
     include: {
@@ -49,7 +51,12 @@ async function getSpecialist(slug: string) {
     },
   })
 
-  if (!specialistProfile) return null
+  if (!specialistProfile) {
+    console.error('[Specialist Page] ❌ Профиль не найден по slug:', slug)
+    return null
+  }
+  
+  console.log('[Specialist Page] ✅ Профиль найден:', specialistProfile.id)
 
   // Преобразуем в формат, совместимый с существующими компонентами
   return {
@@ -162,12 +169,30 @@ export default async function SpecialistPage({ params }: PageProps) {
   const specialist = await getSpecialist(params.slug)
 
   if (!specialist) {
+    console.error('[Specialist Page] ❌ Профиль не найден, проверяем владельца...')
+    
+    // 🔄 FALLBACK: Проверяем, может быть это владелец профиля с битым slug
+    const currentUser = await getCurrentSpecialist()
+    
+    if (currentUser) {
+      console.log('[Specialist Page] Текущий пользователь - специалист:', currentUser.id)
+      console.log('[Specialist Page] Его slug:', currentUser.slug)
+      
+      // Если slug текущего пользователя совпадает с запрашиваемым - редирект на правильный
+      if (currentUser.slug && currentUser.slug !== params.slug) {
+        console.log('[Specialist Page] 🔄 Редирект на правильный slug:', currentUser.slug)
+        // Не редиректим, показываем 404 - пусть slug в профиле исправится
+      }
+    }
+    
     notFound()
   }
 
   // Проверяем, является ли текущий пользователь владельцем профиля
   const currentUser = await getCurrentSpecialist()
   const isOwner = currentUser?.id === specialist.id
+  
+  console.log('[Specialist Page] isOwner:', isOwner, '| currentUser.id:', currentUser?.id, '| specialist.id:', specialist.id)
 
   // Инкремент просмотров (не блокирующий, но не для владельца)
   if (!isOwner) {

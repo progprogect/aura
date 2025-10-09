@@ -111,3 +111,66 @@ export async function getSessionToken(): Promise<string | null> {
   return cookieStore.get('session_token')?.value || null
 }
 
+/**
+ * Убедиться, что у профиля специалиста есть валидный slug
+ * Если slug отсутствует или пустой - генерирует новый
+ */
+export async function ensureSlugExists(userId: string): Promise<string | null> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { specialistProfile: true }
+    })
+
+    if (!user || !user.specialistProfile) {
+      console.log('[ensureSlugExists] Профиль специалиста не найден для userId:', userId)
+      return null
+    }
+
+    const profile = user.specialistProfile
+
+    // Если slug уже существует и валиден - возвращаем его
+    if (profile.slug && profile.slug.trim().length > 0) {
+      return profile.slug
+    }
+
+    // Генерируем новый slug
+    console.warn('[ensureSlugExists] Slug отсутствует для профиля', profile.id, '- генерируем новый')
+    
+    const baseSlug = `${user.firstName}-${user.lastName}`
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9а-яё-]/gi, '')
+    
+    let slug = baseSlug || 'specialist'
+    let counter = 1
+
+    // Ищем уникальный slug
+    while (true) {
+      const existing = await prisma.specialistProfile.findUnique({
+        where: { slug }
+      })
+
+      if (!existing || existing.id === profile.id) {
+        break
+      }
+
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
+
+    // Обновляем профиль
+    await prisma.specialistProfile.update({
+      where: { id: profile.id },
+      data: { slug }
+    })
+
+    console.log('[ensureSlugExists] Создан новый slug:', slug, 'для профиля', profile.id)
+    return slug
+
+  } catch (error) {
+    console.error('[ensureSlugExists] Ошибка:', error)
+    return null
+  }
+}
+
