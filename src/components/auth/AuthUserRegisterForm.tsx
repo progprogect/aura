@@ -94,7 +94,7 @@ export function AuthUserRegisterForm() {
     }
   }
 
-  const handleVerifyCode = async () => {
+  const handleVerifyCode = async (smsCode?: string) => {
     // Очищаем ошибку и переходим к вводу имени и фамилии
     // Валидация не нужна, т.к. onComplete вызывается только при length=4
     setError('')
@@ -257,7 +257,7 @@ export function AuthUserRegisterForm() {
 
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={handleVerifyCode}
+                  onClick={() => handleVerifyCode()}
                   disabled={loading || code.length !== 4}
                   className="w-full"
                   size="lg"

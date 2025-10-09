@@ -92,8 +92,16 @@ export function AuthUnifiedLoginForm() {
     }
   }
 
-  const handleVerifyCode = async () => {
-    // Валидация не нужна, т.к. onComplete вызывается только при length=4
+  const handleVerifyCode = async (smsCode?: string) => {
+    // Используем переданный код или текущее состояние
+    const codeToUse = smsCode || code
+    
+    // Валидация
+    if (!codeToUse || codeToUse.length !== 4) {
+      setError('Введите код из 4 цифр')
+      return
+    }
+    
     setLoading(true)
     setError('')
 
@@ -102,7 +110,7 @@ export function AuthUnifiedLoginForm() {
       const response = await fetch('/api/auth/unified-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, code }),
+        body: JSON.stringify({ phone, code: codeToUse }),
       })
 
       const data = await response.json()
@@ -245,7 +253,7 @@ export function AuthUnifiedLoginForm() {
 
               <div className="space-y-3">
                 <Button
-                  onClick={handleVerifyCode}
+                  onClick={() => handleVerifyCode()}
                   disabled={loading || !code || code.length !== 4}
                   className="w-full"
                   size="lg"

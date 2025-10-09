@@ -91,8 +91,10 @@ export function AuthRegisterForm() {
     }
   }
 
-  const handleVerifyCode = async () => {
-    // Валидация не нужна, т.к. onComplete вызывается только при length=4
+  const handleVerifyCode = async (smsCode?: string) => {
+    // Используем переданный код или текущее состояние
+    const codeToUse = smsCode || code
+    
     setLoading(true)
     setError('')
 
@@ -100,7 +102,7 @@ export function AuthRegisterForm() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'phone', phone, code }),
+        body: JSON.stringify({ provider: 'phone', phone, code: codeToUse }),
       })
 
       const data = await response.json()
@@ -233,7 +235,7 @@ export function AuthRegisterForm() {
 
               <Button 
                 className="w-full" 
-                onClick={handleVerifyCode}
+                onClick={() => handleVerifyCode()}
                 disabled={loading || code.length !== 4}
               >
                 {loading ? 'Проверка...' : 'Подтвердить'}
