@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getUserFromSession } from '@/lib/auth/user-auth-service'
+import { getUnifiedUserFromSession } from '@/lib/auth/unified-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Получаем текущего пользователя
-    const currentUser = await getUserFromSession(sessionToken)
+    const currentUser = await getUnifiedUserFromSession(sessionToken)
 
     if (!currentUser) {
       return NextResponse.json(

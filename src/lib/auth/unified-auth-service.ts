@@ -115,8 +115,8 @@ export async function unifiedLogin(data: UnifiedLoginData): Promise<UnifiedAuthR
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
-        email: user.email,
-        avatar: user.avatar,
+        email: user.email || undefined,
+        avatar: user.avatar || undefined,
         hasSpecialistProfile: !!user.specialistProfile,
         specialistProfileSlug: user.specialistProfile?.slug,
         specialistProfileId: user.specialistProfile?.id
@@ -175,6 +175,7 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
     })
     
     // 4. Если роль specialist - создаём профиль специалиста
+    let createdSlug: string | undefined
     if (role === 'specialist') {
       // Генерируем уникальный slug
       const baseSlug = `${user.firstName.toLowerCase()}-${user.lastName.toLowerCase()}`.replace(/\s+/g, '-')
@@ -192,12 +193,14 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
           slug,
           category: 'other',
           specializations: [],
-          description: '',
-          experience: 0,
-          pricePerHour: 0,
-          verified: false
+          about: '',
+          workFormats: ['online'],
+          verified: false,
+          acceptingClients: false
         }
       })
+      
+      createdSlug = slug
     }
     
     // 5. Создаём сессию
@@ -224,10 +227,10 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
-        email: user.email,
-        avatar: user.avatar,
+        email: user.email || undefined,
+        avatar: user.avatar || undefined,
         hasSpecialistProfile: role === 'specialist',
-        specialistProfileSlug: role === 'specialist' ? slug : undefined
+        specialistProfileSlug: createdSlug
       }
     }
     
@@ -278,8 +281,8 @@ export async function getUnifiedUserFromSession(sessionToken: string) {
       firstName: session.user.firstName,
       lastName: session.user.lastName,
       phone: session.user.phone,
-      email: session.user.email,
-      avatar: session.user.avatar,
+      email: session.user.email || undefined,
+      avatar: session.user.avatar || undefined,
       hasSpecialistProfile: !!session.user.specialistProfile,
       specialistProfileSlug: session.user.specialistProfile?.slug,
       specialistProfileId: session.user.specialistProfile?.id

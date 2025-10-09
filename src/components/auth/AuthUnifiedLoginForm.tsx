@@ -179,9 +179,7 @@ export function AuthUnifiedLoginForm() {
               className="space-y-4"
             >
               <div className="space-y-2 text-center">
-                <h2 className="text-2xl font-bold">
-                  {role === 'specialist' ? 'Вход специалиста' : 'Вход пользователя'}
-                </h2>
+                <h2 className="text-2xl font-bold">Вход в систему</h2>
                 <p className="text-muted-foreground">
                   Введите номер телефона для получения кода подтверждения
                 </p>
@@ -238,7 +236,7 @@ export function AuthUnifiedLoginForm() {
               <SMSCodeInput
                 value={code}
                 onChange={setCode}
-                onEnter={handleVerifyCode}
+                onComplete={handleVerifyCode}
                 disabled={loading}
               />
 
