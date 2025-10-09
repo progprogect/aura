@@ -10,92 +10,115 @@ datasource db {
 }
 
 // ========================================
-// ОСНОВНАЯ МОДЕЛЬ СПЕЦИАЛИСТА
+// БАЗОВАЯ МОДЕЛЬ ПОЛЬЗОВАТЕЛЯ (для всех)
 // ========================================
 
-model Specialist {
-  id              String   @id @default(cuid())
-  
-  // Основная информация
-  firstName       String?                   // Заполняется при онбординге
-  lastName        String?                   // Заполняется при онбординге
-  avatar          String?
-  slug            String   @unique
-  
+model User {
+  id String @id @default(cuid())
+
+  // Базовая информация (обязательна для всех)
+  firstName String
+  lastName  String
+  phone     String  @unique
+  email     String? @unique
+  avatar    String?
+
+  // Опциональный профиль специалиста
+  specialistProfile SpecialistProfile?
+
+  // Авторизация (единая для всех)
+  authSessions   AuthSession[]
+  socialAccounts SocialAccount[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+}
+
+// ========================================
+// ПРОФИЛЬ СПЕЦИАЛИСТА (опциональное расширение User)
+// ========================================
+
+model SpecialistProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Публичная информация
+  slug String @unique
+
   // Категоризация
-  category        String                    // "psychology" | "fitness" | "nutrition" | "massage" | "wellness" | "coaching" | "medicine" | "other"
-  specializations String[]                  // Гибкие теги: ["КПТ-терапевт", "Тренер по йоге", "Нутрициолог"]
-  
+  category        String // "psychology" | "fitness" | "nutrition" | "massage" | "wellness" | "coaching" | "medicine" | "other"
+  specializations String[] // Гибкие теги: ["КПТ-терапевт", "Тренер по йоге", "Нутрициолог"]
+
   // Описание
-  tagline         String?                   // Краткий слоган (1-2 предложения)
-  about           String                    // Подробное описание подхода
-  
+  tagline String? // Краткий слоган (1-2 предложения)
+  about   String // Подробное описание подхода
+
   // Локация и формат работы
-  city            String?
-  country         String   @default("Россия")
-  workFormats     String[]                  // ["online", "offline", "hybrid"]
-  
+  city        String?
+  country     String   @default("Россия")
+  workFormats String[] // ["online", "offline", "hybrid"]
+
   // Опыт
   yearsOfPractice Int?
-  
-  // Контакты
-  phone           String?
-  email           String?
-  telegram        String?
-  whatsapp        String?
-  instagram       String?
-  website         String?
-  
+
+  // Контакты (публичные)
+  telegram  String?
+  whatsapp  String?
+  instagram String?
+  website   String?
+
   // Стоимость
-  priceFrom       Int?                      // Цена от (в копейках для точности)
-  priceTo         Int?                      // Цена до
-  currency        String   @default("RUB")
-  priceDescription String?                  // "за сессию 60 мин" или "за программу 3 месяца"
-  
+  priceFrom        Int? // Цена от (в копейках для точности)
+  priceTo          Int? // Цена до
+  currency         String  @default("RUB")
+  priceDescription String? // "за сессию 60 мин" или "за программу 3 месяца"
+
   // Гибкие поля (специфичные для категории)
-  customFields    Json?
+  customFields Json?
   // Примеры:
-  // psychology: { "methods": ["КПТ", "Майндфулнесс"], "worksWith": ["Тревога", "Депрессия"], "sessionFormats": ["individual", "couples"], "sessionDuration": 60 }
+  // psychology: { "methods": ["КПТ", "Майндфулнесь"], "worksWith": ["Тревога", "Депрессия"], "sessionFormats": ["individual", "couples"], "sessionDuration": 60 }
   // fitness: { "trainingTypes": ["Силовые", "Кроссфит"], "sessionFormats": ["personal", "group"], "gymLocation": "FitnessPark, Москва", "achievements": ["КМС по пауэрлифтингу"] }
   // nutrition: { "approaches": ["КБЖУ", "Интуитивное питание"], "specializations": ["Похудение", "Набор массы"], "programDuration": "1-3 месяца" }
-  
+
   // Связи
-  education       Education[]
-  certificates    Certificate[]
-  gallery         GalleryItem[]
-  faqs            FAQ[]
-  leadMagnets     LeadMagnet[]
+  education            Education[]
+  certificates         Certificate[]
+  gallery              GalleryItem[]
+  faqs                 FAQ[]
+  leadMagnets          LeadMagnet[]
   consultationRequests ConsultationRequest[]
-  
-  // Авторизация
-  authSessions    AuthSession[]
-  socialAccounts  SocialAccount[]
-  
+
   // Медиа
-  videoUrl        String?                   // YouTube/Vimeo URL для видео-презентации
-  
+  videoUrl String? // YouTube/Vimeo URL для видео-презентации
+
   // Верификация и статус
-  verified        Boolean  @default(false)
-  verifiedAt      DateTime?
-  acceptingClients Boolean @default(true)
-  
+  verified         Boolean   @default(false)
+  verifiedAt       DateTime?
+  acceptingClients Boolean   @default(true)
+
   // SEO
   metaTitle       String?
   metaDescription String?
-  
+
   // Монетизация
-  subscriptionTier String  @default("FREE")  // FREE, PREMIUM
-  
+  subscriptionTier String @default("FREE") // FREE, PREMIUM
+
   // Аналитика (кеш из Redis)
-  profileViews    Int      @default(0)
-  contactViews    Int      @default(0)
-  
+  profileViews Int @default(0)
+  contactViews Int @default(0)
+
   // Timestamps
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  @@index([category])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
   @@index([slug])
+  @@index([category])
   @@index([verified])
 }
 
@@ -104,19 +127,19 @@ model Specialist {
 // ========================================
 
 model Education {
-  id            String     @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  institution   String                    // ВУЗ или учебное заведение
-  degree        String                    // Степень/специальность
-  year          Int                       // Год окончания
-  description   String?                   // Дополнительное описание
-  
-  order         Int        @default(0)    // Порядок отображения
-  createdAt     DateTime   @default(now())
-  
-  @@index([specialistId])
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  institution String // ВУЗ или учебное заведение
+  degree      String // Степень/специальность
+  year        Int // Год окончания
+  description String? // Дополнительное описание
+
+  order     Int      @default(0) // Порядок отображения
+  createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
 }
 
 // ========================================
@@ -124,19 +147,19 @@ model Education {
 // ========================================
 
 model Certificate {
-  id            String     @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  title         String                    // Название сертификата
-  organization  String                    // Организация, выдавшая сертификат
-  year          Int                       // Год получения
-  fileUrl       String?                   // Ссылка на файл/скан сертификата
-  
-  order         Int        @default(0)    // Порядок отображения
-  createdAt     DateTime   @default(now())
-  
-  @@index([specialistId])
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  title        String // Название сертификата
+  organization String // Организация, выдавшая сертификат
+  year         Int // Год получения
+  fileUrl      String? // Ссылка на файл/скан сертификата
+
+  order     Int      @default(0) // Порядок отображения
+  createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
 }
 
 // ========================================
@@ -144,19 +167,19 @@ model Certificate {
 // ========================================
 
 model GalleryItem {
-  id            String     @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  type          String                    // "photo" | "video"
-  url           String                    // URL медиафайла
-  thumbnailUrl  String?                   // URL превью (для видео)
-  caption       String?                   // Подпись к медиа
-  
-  order         Int        @default(0)    // Порядок отображения
-  createdAt     DateTime   @default(now())
-  
-  @@index([specialistId])
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  type         String // "photo" | "video"
+  url          String // URL медиафайла
+  thumbnailUrl String? // URL превью (для видео)
+  caption      String? // Подпись к медиа
+
+  order     Int      @default(0) // Порядок отображения
+  createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
 }
 
 // ========================================
@@ -164,17 +187,17 @@ model GalleryItem {
 // ========================================
 
 model FAQ {
-  id            String     @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  question      String
-  answer        String                    // Можно использовать Markdown
-  
-  order         Int        @default(0)    // Порядок отображения
-  createdAt     DateTime   @default(now())
-  
-  @@index([specialistId])
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  question String
+  answer   String // Можно использовать Markdown
+
+  order     Int      @default(0) // Порядок отображения
+  createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
 }
 
 // ========================================
@@ -182,31 +205,31 @@ model FAQ {
 // ========================================
 
 model LeadMagnet {
-  id            String     @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  type          String                    // "file" | "link" | "service"
-  title         String                    // Название лид-магнита
-  description   String                    // Краткое описание
-  
-  fileUrl       String?                   // Для типа "file" - URL файла в Cloudinary
-  linkUrl       String?                   // Для типа "link" - внешняя ссылка
-  
-  emoji         String     @default("🎁")
-  order         Int        @default(0)
-  isActive      Boolean    @default(true)
-  
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  type        String // "file" | "link" | "service"
+  title       String // Название лид-магнита
+  description String // Краткое описание
+
+  fileUrl String? // Для типа "file" - URL файла в Cloudinary
+  linkUrl String? // Для типа "link" - внешняя ссылка
+
+  emoji    String  @default("🎁")
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
   // Аналитика
-  viewCount     Int        @default(0)
-  downloadCount Int        @default(0)
-  
+  viewCount     Int @default(0)
+  downloadCount Int @default(0)
+
   consultationRequests ConsultationRequest[]
-  
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  
-  @@index([specialistId, isActive])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([specialistProfileId, isActive])
 }
 
 // ========================================
@@ -214,27 +237,27 @@ model LeadMagnet {
 // ========================================
 
 model ConsultationRequest {
-  id            String      @id @default(cuid())
-  specialistId  String
-  specialist    Specialist  @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
   // Лид-магнит (если заявка через лид-магнит)
-  leadMagnetId  String?
-  leadMagnet    LeadMagnet? @relation(fields: [leadMagnetId], references: [id], onDelete: SetNull)
-  
+  leadMagnetId String?
+  leadMagnet   LeadMagnet? @relation(fields: [leadMagnetId], references: [id], onDelete: SetNull)
+
   // Данные клиента
-  name          String
-  contact       String                    // Email или телефон
-  message       String?                   // Сообщение от клиента
-  
+  name    String
+  contact String // Email или телефон
+  message String? // Сообщение от клиента
+
   // Статус обработки
-  status        String     @default("new") // "new" | "contacted" | "scheduled" | "declined"
-  
+  status String @default("new") // "new" | "contacted" | "scheduled" | "declined"
+
   // Timestamps
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  
-  @@index([specialistId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([specialistProfileId])
   @@index([status])
   @@index([leadMagnetId])
 }
@@ -244,44 +267,44 @@ model ConsultationRequest {
 // ========================================
 
 model Category {
-  id          String   @id @default(cuid())
-  key         String   @unique              // "psychology", "fitness", "nutrition"
-  name        String                        // "Психология и терапия"
-  emoji       String                        // "🧠"
-  priceLabel  String                        // "за сессию"
-  order       Int      @default(0)          // Порядок отображения
-  isActive    Boolean  @default(true)       // Активна ли категория
-  
-  fields      CategoryField[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String  @id @default(cuid())
+  key        String  @unique // "psychology", "fitness", "nutrition"
+  name       String // "Психология и терапия"
+  emoji      String // "🧠"
+  priceLabel String // "за сессию"
+  order      Int     @default(0) // Порядок отображения
+  isActive   Boolean @default(true) // Активна ли категория
+
+  fields CategoryField[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([key])
   @@index([isActive])
 }
 
 model CategoryField {
-  id          String   @id @default(cuid())
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  
-  key         String                        // "methods", "worksWith"
-  label       String                        // "Методы"
-  icon        String                        // "🧠"
-  type        String                        // "array", "string", "number", "boolean"
-  
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  key   String // "methods", "worksWith"
+  label String // "Методы"
+  icon  String // "🧠"
+  type  String // "array", "string", "number", "boolean"
+
   // Настройки поля
-  required    Boolean  @default(false)      // Обязательное ли поле
-  placeholder String?                       // Плейсхолдер для input
-  helpText    String?                       // Подсказка
-  
-  order       Int      @default(0)          // Порядок отображения
-  isActive    Boolean  @default(true)       // Активно ли поле
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  required    Boolean @default(false) // Обязательное ли поле
+  placeholder String? // Плейсхолдер для input
+  helpText    String? // Подсказка
+
+  order    Int     @default(0) // Порядок отображения
+  isActive Boolean @default(true) // Активно ли поле
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([categoryId, key])
   @@index([categoryId])
   @@index([isActive])
@@ -293,80 +316,80 @@ model CategoryField {
 // См. src/lib/ai/mongodb-client.ts
 
 // ========================================
-// СИСТЕМА АВТОРИЗАЦИИ СПЕЦИАЛИСТОВ
+// СИСТЕМА АВТОРИЗАЦИИ (единая для всех)
 // ========================================
 
 model AuthSession {
-  id            String   @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Данные сессии
-  sessionToken  String   @unique
+  sessionToken      String  @unique
   deviceFingerprint String?
-  userAgent     String?
-  ipAddress     String?
-  
+  userAgent         String?
+  ipAddress         String?
+
   // Статус и время
-  isActive      Boolean  @default(true)
-  expiresAt     DateTime
-  lastUsedAt    DateTime @default(now())
-  
+  isActive   Boolean  @default(true)
+  expiresAt  DateTime
+  lastUsedAt DateTime @default(now())
+
   // Метаданные
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@index([specialistId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
   @@index([sessionToken])
   @@index([expiresAt])
 }
 
-model SMSVerification {
-  id            String   @id @default(cuid())
-  
-  // Данные верификации
-  phone         String
-  code          String
-  purpose       String   // "registration" | "login" | "recovery"
-  
-  // Статус и время
-  isUsed        Boolean  @default(false)
-  attempts      Int      @default(0)
-  expiresAt     DateTime
-  
+model SocialAccount {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Данные социального аккаунта
+  provider   String // "google" | "vk" | "yandex" | "whatsapp" | "telegram"
+  providerId String // ID в системе провайдера
+  email      String?
+  name       String?
+  picture    String?
+  rawData    Json? // Полные данные от провайдера
+
+  // Статус
+  isPrimary  Boolean @default(false)
+  isVerified Boolean @default(false)
+
   // Метаданные
-  createdAt     DateTime @default(now())
-  usedAt        DateTime?
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@index([provider])
+}
+
+model SMSVerification {
+  id String @id @default(cuid())
+
+  // Данные верификации
+  phone   String
+  code    String
+  purpose String // "registration" | "login" | "recovery"
+
+  // Статус и время
+  isUsed    Boolean  @default(false)
+  attempts  Int      @default(0)
+  expiresAt DateTime
+
+  // Метаданные
+  createdAt DateTime  @default(now())
+  usedAt    DateTime?
+
   @@index([phone])
   @@index([code])
   @@index([expiresAt])
-}
-
-model SocialAccount {
-  id            String   @id @default(cuid())
-  specialistId  String
-  specialist    Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
-  
-  // Данные социального аккаунта
-  provider      String   // "google" | "vk" | "yandex" | "whatsapp" | "telegram"
-  providerId    String   // ID в системе провайдера
-  email         String?
-  name          String?
-  picture       String?
-  rawData       Json?    // Полные данные от провайдера
-  
-  // Статус
-  isPrimary     Boolean  @default(false)
-  isVerified    Boolean  @default(false)
-  
-  // Метаданные
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@unique([provider, providerId])
-  @@index([specialistId])
-  @@index([provider])
 }
 
 // ========================================
@@ -374,37 +397,37 @@ model SocialAccount {
 // ========================================
 
 model ChatSession {
-  id               String     @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Опционально: связь с пользователем (для будущей авторизации)
-  userId           String?
-  
+  userId String?
+
   // История сообщений
-  messages         Json       @db.JsonB
+  messages Json @db.JsonB
   // Формат: [{id, role: 'user'|'assistant', content, specialists?: [], timestamp}]
-  
+
   // Контекст диалога (извлечённые параметры)
-  extractedFilters Json?      @db.JsonB
+  extractedFilters Json? @db.JsonB
   // Формат: {category, workFormats, city, minExperience, maxPrice, problem, preferences}
-  
+
   // IDs показанных специалистов (для избежания дубликатов)
-  recommendedIds   String[]
-  
+  recommendedIds String[]
+
   // Метаданные
-  status           String     @default("active") // "active" | "completed" | "abandoned"
-  source           String     @default("chat_page") // "chat_page" | "homepage" | "catalog"
-  
+  status String @default("active") // "active" | "completed" | "abandoned"
+  source String @default("chat_page") // "chat_page" | "homepage" | "catalog"
+
   // Аналитика
-  messageCount     Int        @default(0)
-  specialistsShown Int        @default(0)
-  clickedProfiles  String[]   @default([])
-  
+  messageCount     Int      @default(0)
+  specialistsShown Int      @default(0)
+  clickedProfiles  String[] @default([])
+
   // TTL: удаляем через 7 дней неактивности
-  expiresAt        DateTime
-  
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([status])
   @@index([expiresAt])
@@ -416,27 +439,27 @@ model ChatSession {
 // ========================================
 
 model ChatAnalytics {
-  id               String     @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Временной интервал (день/час)
-  date             DateTime   @db.Date
-  hour             Int?       // Час дня (0-23), null = агрегация за день
-  
+  date DateTime @db.Date
+  hour Int? // Час дня (0-23), null = агрегация за день
+
   // Метрики
-  sessionsStarted  Int        @default(0)
-  messagesTotal    Int        @default(0)
-  completedChats   Int        @default(0)  // Дошли до рекомендаций
-  abandonedChats   Int        @default(0)
-  
-  profileClicks    Int        @default(0)  // Переходы к профилю
-  catalogClicks    Int        @default(0)  // "Открыть в каталоге"
-  
-  avgMessagesPerSession Float  @default(0)
-  avgSpecialistsShown   Float  @default(0)
-  
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  
+  sessionsStarted Int @default(0)
+  messagesTotal   Int @default(0)
+  completedChats  Int @default(0) // Дошли до рекомендаций
+  abandonedChats  Int @default(0)
+
+  profileClicks Int @default(0) // Переходы к профилю
+  catalogClicks Int @default(0) // "Открыть в каталоге"
+
+  avgMessagesPerSession Float @default(0)
+  avgSpecialistsShown   Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([date, hour])
   @@index([date])
 }

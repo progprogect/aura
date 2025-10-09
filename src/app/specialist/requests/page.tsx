@@ -27,18 +27,28 @@ async function getRequests() {
   const authSession = await prisma.authSession.findFirst({
     where: {
       sessionToken,
-      expiresAt: { gt: new Date() }
+      expiresAt: { gt: new Date() },
+      isActive: true
+    },
+    include: {
+      user: {
+        include: {
+          specialistProfile: {
+            select: { id: true }
+          }
+        }
+      }
     }
   })
 
-  if (!authSession) {
+  if (!authSession || !authSession.user.specialistProfile) {
     return null
   }
 
   // Получаем заявки
   const requests = await prisma.consultationRequest.findMany({
     where: {
-      specialistId: authSession.specialistId
+      specialistProfileId: authSession.user.specialistProfile.id
     },
     include: {
       leadMagnet: {

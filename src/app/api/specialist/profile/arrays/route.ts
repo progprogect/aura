@@ -22,23 +22,29 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Парсим тело запроса
     const body = await request.json()
     const { field, value } = UpdateArraySchema.parse(body)
 
-    // Обновляем профиль
-    const specialist = await prisma.specialist.update({
-      where: { id: session.specialistId },
+    // Обновляем профиль специалиста
+    const specialistProfile = await prisma.specialistProfile.update({
+      where: { id: session.specialistProfile!.id },
       data: {
         [field]: value,
-        updatedAt: new Date()
       }
     })
 
     return NextResponse.json({
       success: true,
       field,
-      value: specialist[field as keyof typeof specialist],
+      value: specialistProfile[field as keyof typeof specialistProfile],
       message: 'Профиль обновлён'
     })
 

@@ -5,8 +5,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://aura.ru'
   
   try {
-    // Получаем всех специалистов для генерации URL
-    const specialists = await prisma.specialist.findMany({
+    // Получаем всех специалистов для генерации URL (Unified)
+    const specialistProfiles = await prisma.specialistProfile.findMany({
       where: { acceptingClients: true },
       select: { slug: true, updatedAt: true },
     })
@@ -28,9 +28,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]
 
     // Страницы специалистов
-    const specialistPages = specialists.map((specialist) => ({
-      url: `${baseUrl}/specialist/${specialist.slug}`,
-      lastModified: specialist.updatedAt,
+    const specialistPages = specialistProfiles.map((profile) => ({
+      url: `${baseUrl}/specialist/${profile.slug}`,
+      lastModified: profile.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }))

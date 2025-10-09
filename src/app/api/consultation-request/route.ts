@@ -21,19 +21,19 @@ export async function POST(request: NextRequest) {
     
     const { specialistId, name, contact, message } = validationResult.data
 
-    // Проверяем, что специалист существует
-    const specialist = await prisma.specialist.findUnique({
+    // Проверяем, что специалист существует (specialistId теперь = specialistProfileId)
+    const specialistProfile = await prisma.specialistProfile.findUnique({
       where: { id: specialistId },
     })
 
-    if (!specialist) {
+    if (!specialistProfile) {
       return NextResponse.json({ error: 'Специалист не найден' }, { status: 404 })
     }
 
     // Создаем запрос на консультацию
     const consultationRequest = await prisma.consultationRequest.create({
       data: {
-        specialistId,
+        specialistProfileId: specialistId,
         name,
         contact,
         message: message || null,

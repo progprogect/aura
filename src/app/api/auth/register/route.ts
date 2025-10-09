@@ -1,15 +1,24 @@
 /**
- * API endpoint для регистрации специалиста
+ * API endpoint для регистрации специалиста (Unified)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { registerSpecialist } from '@/lib/auth'
+import { registerSpecialistUnified } from '@/lib/auth/specialist-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { phone, code } = body
 
-    const result = await registerSpecialist(body)
+    // Валидация
+    if (!phone || !code) {
+      return NextResponse.json(
+        { success: false, error: 'Номер телефона и код обязательны' },
+        { status: 400 }
+      )
+    }
+
+    const result = await registerSpecialistUnified({ phone, code })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

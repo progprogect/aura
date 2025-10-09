@@ -28,12 +28,25 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Парсим тело запроса
     const body = await request.json()
     const { key, value } = UpdateCustomFieldSchema.parse(body)
 
+    // Получаем текущий профиль
+    const currentProfile = await prisma.specialistProfile.findUnique({
+      where: { id: session.specialistProfile!.id },
+      select: { customFields: true }
+    })
+
     // Получаем текущие customFields
-    const currentCustomFields = (session.specialist.customFields as Record<string, any>) || {}
+    const currentCustomFields = (currentProfile?.customFields as Record<string, any>) || {}
 
     // Обновляем конкретное поле
     const updatedCustomFields = {
@@ -47,11 +60,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Сохраняем в БД
-    const specialist = await prisma.specialist.update({
-      where: { id: session.specialistId },
+    const specialistProfile = await prisma.specialistProfile.update({
+      where: { id: session.specialistProfile!.id },
       data: {
         customFields: updatedCustomFields,
-        updatedAt: new Date()
       }
     })
 
@@ -59,7 +71,7 @@ export async function PATCH(request: NextRequest) {
       success: true,
       key,
       value,
-      customFields: specialist.customFields,
+      customFields: specialistProfile.customFields,
       message: 'Поле обновлено'
     })
 

@@ -24,19 +24,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const body = await request.json()
     const data = CertificateSchema.parse(body)
 
     // Получаем максимальный order
     const maxOrder = await prisma.certificate.findFirst({
-      where: { specialistId: session.specialistId },
+      where: { specialistProfileId: session.specialistProfile!.id },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
 
     const certificate = await prisma.certificate.create({
       data: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         title: data.title,
         organization: data.organization,
         year: data.year,

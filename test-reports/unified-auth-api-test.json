@@ -1,0 +1,346 @@
+{
+  "timestamp": "2025-10-09T10:36:55.537Z",
+  "summary": {
+    "total": 16,
+    "passed": 11,
+    "failed": 5,
+    "successRate": 69,
+    "avgDuration": 1411
+  },
+  "results": [
+    {
+      "name": "Каталог специалистов",
+      "endpoint": "/api/specialists",
+      "method": "GET",
+      "status": 200,
+      "success": true,
+      "duration": 528,
+      "data": {
+        "specialists": [
+          {
+            "id": "cmgj9mxi60002j6zk2apkm5xm",
+            "firstName": "Анна",
+            "lastName": "Иванова",
+            "avatar": "/avatars/анна-иванова-psychology.png",
+            "slug": "anna-ivanova-psiholog",
+            "category": "psychology",
+            "specializations": [
+              "Психолог",
+              "КПТ-терапевт"
+            ],
+            "tagline": "Помогаю справиться с тревогой и обрести внутренний покой",
+            "about": "Более 8 лет я работаю с людьми, которые сталкиваются с тревогой, паническими атаками, депрессией и другими эмоциональными трудностями.",
+            "city": "Москва",
+            "country": "Россия",
+            "workFormats": [
+              "online",
+              "offline"
+            ],
+            "yearsOfPractice": 8,
+            "priceFrom": 300000,
+            "priceTo": 500000,
+            "currency": "RUB",
+            "priceDescription": "за сессию 60 минут",
+            "verified": true,
+            "profileViews": 100,
+            "customFields": {
+              "methods": [
+                "КПТ",
+                "Майндфулнесс"
+              ],
+              "worksWith": [
+                "Тревога",
+                "Депрессия",
+                "ОКР"
+              ],
+              "sessionFormats": [
+                "individual"
+              ],
+              "sessionDuration": 60
+            },
+            "fullName": "Анна Иванова",
+            "shortAbout": "Более 8 лет я работаю с людьми, которые сталкиваются с тревогой, паническими атаками, депрессией и другими эмоциональными трудностями."
+          }
+        ],
+        "pagination": {
+          "page": 1,
+          "limit": 12,
+          "totalCount": 1,
+          "totalPages": 1,
+          "hasNext": false,
+          "hasPrev": false
+        }
+      }
+    },
+    {
+      "name": "Список категорий",
+      "endpoint": "/api/categories",
+      "method": "GET",
+      "status": 200,
+      "success": true,
+      "duration": 23,
+      "data": {
+        "categories": []
+      }
+    },
+    {
+      "name": "Отправка SMS кода",
+      "endpoint": "/api/auth/send-sms",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 335,
+      "data": {
+        "success": true,
+        "code": "3390"
+      }
+    },
+    {
+      "name": "Регистрация пользователя",
+      "endpoint": "/api/auth/user/register",
+      "method": "POST",
+      "status": 400,
+      "success": false,
+      "duration": 988,
+      "data": {
+        "success": false,
+        "error": "Пользователь с таким номером уже зарегистрирован"
+      }
+    },
+    {
+      "name": "SMS для входа",
+      "endpoint": "/api/auth/send-sms",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 340,
+      "data": {
+        "success": true,
+        "code": "5019"
+      }
+    },
+    {
+      "name": "Вход пользователя",
+      "endpoint": "/api/auth/user/login",
+      "method": "POST",
+      "status": 400,
+      "success": false,
+      "duration": 492,
+      "data": {
+        "success": false,
+        "error": "Пользователь не найден. Пожалуйста, зарегистрируйтесь"
+      }
+    },
+    {
+      "name": "Профиль пользователя (без auth)",
+      "endpoint": "/api/auth/user/me",
+      "method": "GET",
+      "status": 401,
+      "success": false,
+      "duration": 11,
+      "data": {
+        "success": false,
+        "error": "Не авторизован"
+      }
+    },
+    {
+      "name": "SMS для специалиста",
+      "endpoint": "/api/auth/send-sms",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 336,
+      "data": {
+        "success": true,
+        "code": "4830"
+      }
+    },
+    {
+      "name": "Регистрация специалиста",
+      "endpoint": "/api/auth/register",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 1812,
+      "data": {
+        "success": true,
+        "sessionToken": "5a6af6c41ab11f265411012ac8f575c3a0b051dbc1583d63160d6ce542875d01",
+        "user": {
+          "id": "cmgja8va30007vrpzkn946hkm",
+          "firstName": null,
+          "lastName": null,
+          "phone": "+79991234569",
+          "email": null,
+          "avatar": null,
+          "hasSpecialistProfile": true,
+          "specialistProfileSlug": "new-specialist",
+          "specialistProfileId": "cmgja8vs50009vrpz9bquy9cg"
+        },
+        "requiresProfileCompletion": true
+      }
+    },
+    {
+      "name": "SMS для входа специалиста",
+      "endpoint": "/api/auth/send-sms",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 366,
+      "data": {
+        "success": true,
+        "code": "4844"
+      }
+    },
+    {
+      "name": "Вход специалиста",
+      "endpoint": "/api/auth/login",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 984,
+      "data": {
+        "success": true,
+        "sessionToken": "0d965198ba4b59ba123842b603704da7962a88279ee5f521e06ec0fbb2784d69",
+        "user": {
+          "id": "cmgja8va30007vrpzkn946hkm",
+          "firstName": null,
+          "lastName": null,
+          "phone": "+79991234569",
+          "email": null,
+          "avatar": null,
+          "hasSpecialistProfile": true,
+          "specialistProfileSlug": "new-specialist",
+          "specialistProfileId": "cmgja8vs50009vrpz9bquy9cg"
+        }
+      }
+    },
+    {
+      "name": "Онбординг специалиста",
+      "endpoint": "/api/specialist/onboarding",
+      "method": "POST",
+      "status": 400,
+      "success": false,
+      "duration": 2007,
+      "data": {
+        "success": false,
+        "error": "Ошибка валидации данных",
+        "details": [
+          {
+            "origin": "string",
+            "code": "too_small",
+            "minimum": 50,
+            "inclusive": true,
+            "path": [
+              "about"
+            ],
+            "message": "Описание должно содержать минимум 50 символов"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Профиль специалиста (без auth)",
+      "endpoint": "/api/specialist/profile",
+      "method": "PATCH",
+      "status": 401,
+      "success": false,
+      "duration": 218,
+      "data": {
+        "success": false,
+        "error": "Не авторизован"
+      }
+    },
+    {
+      "name": "Статистика специалиста",
+      "endpoint": "/api/specialist/stats",
+      "method": "GET",
+      "status": 200,
+      "success": true,
+      "duration": 2829,
+      "data": {
+        "success": true,
+        "specialist": {
+          "id": "cmgja8vs50009vrpz9bquy9cg",
+          "firstName": "",
+          "lastName": "",
+          "avatar": null,
+          "slug": "new-specialist",
+          "category": "other",
+          "specializations": [
+            "Специалист"
+          ],
+          "verified": false,
+          "acceptingClients": false
+        },
+        "stats": {
+          "profileViews": 0,
+          "contactViews": 0,
+          "consultationRequests": 0,
+          "completionPercentage": 17
+        },
+        "tasks": [
+          {
+            "id": "avatar",
+            "title": "Добавьте фото профиля",
+            "description": "Профиль с фото вызывает больше доверия",
+            "bonus": 15,
+            "completed": false
+          },
+          {
+            "id": "certificates",
+            "title": "Загрузите сертификаты",
+            "description": "Подтвердите свою квалификацию",
+            "bonus": 20,
+            "completed": false
+          },
+          {
+            "id": "education",
+            "title": "Добавьте образование",
+            "description": "Укажите ваше профессиональное образование",
+            "bonus": 15,
+            "completed": false
+          },
+          {
+            "id": "gallery",
+            "title": "Создайте галерею",
+            "description": "Добавьте фото вашего кабинета или процесса работы",
+            "bonus": 10,
+            "completed": false
+          },
+          {
+            "id": "pricing",
+            "title": "Укажите цены",
+            "description": "Клиентам важно знать стоимость заранее",
+            "bonus": 10,
+            "completed": false
+          },
+          {
+            "id": "video",
+            "title": "Добавьте видео-презентацию",
+            "description": "Видео помогает клиентам познакомиться с вами",
+            "bonus": 10,
+            "completed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AI чат",
+      "endpoint": "/api/chat",
+      "method": "POST",
+      "status": 200,
+      "success": true,
+      "duration": 9879,
+      "data": null
+    },
+    {
+      "name": "Публичный профиль (anna-ivanova-psiholog)",
+      "endpoint": "/specialist/anna-ivanova-psiholog",
+      "method": "GET",
+      "status": 200,
+      "success": true,
+      "duration": 1430,
+      "data": null
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 /**
- * Утилиты для проверки авторизации в API routes
+ * Утилиты для проверки авторизации в API routes (Unified)
  * DRY принцип - используем везде вместо дублирования
  */
 
@@ -8,12 +8,25 @@ import { prisma } from '@/lib/db'
 
 export interface AuthSession {
   sessionToken: string
-  specialistId: string
-  specialist: any
+  userId: string
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    phone: string | null
+    email: string | null
+    avatar: string | null
+  }
+  specialistProfile: {
+    id: string
+    slug: string
+    category: string
+    verified: boolean
+  } | null
 }
 
 /**
- * Получить авторизованную сессию из request
+ * Получить авторизованную сессию из request (Unified)
  * Возвращает null если не авторизован или сессия истекла
  */
 export async function getAuthSession(request: NextRequest): Promise<AuthSession | null> {
@@ -26,21 +39,41 @@ export async function getAuthSession(request: NextRequest): Promise<AuthSession 
   const session = await prisma.authSession.findFirst({
     where: {
       sessionToken,
-      expiresAt: { gt: new Date() }
+      expiresAt: { gt: new Date() },
+      isActive: true
     },
     include: {
-      specialist: true
+      user: {
+        include: {
+          specialistProfile: {
+            select: {
+              id: true,
+              slug: true,
+              category: true,
+              verified: true
+            }
+          }
+        }
+      }
     }
   })
 
-  if (!session) {
+  if (!session || !session.user) {
     return null
   }
 
   return {
     sessionToken: session.sessionToken,
-    specialistId: session.specialistId,
-    specialist: session.specialist
+    userId: session.user.id,
+    user: {
+      id: session.user.id,
+      firstName: session.user.firstName,
+      lastName: session.user.lastName,
+      phone: session.user.phone,
+      email: session.user.email,
+      avatar: session.user.avatar
+    },
+    specialistProfile: session.user.specialistProfile || null
   }
 }
 

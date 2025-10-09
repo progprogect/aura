@@ -28,37 +28,33 @@ async function getDashboardData() {
   const authSession = await prisma.authSession.findFirst({
     where: {
       sessionToken,
-      expiresAt: { gt: new Date() }
+      expiresAt: { gt: new Date() },
+      isActive: true
+    },
+    include: {
+      user: {
+        include: {
+          specialistProfile: true
+        }
+      }
     }
   })
 
-  if (!authSession) {
+  if (!authSession || !authSession.user.specialistProfile) {
     return null
   }
 
-  // Получаем данные напрямую (вместо fetch к самому себе)
-  const specialist = await prisma.specialist.findUnique({
-    where: { id: authSession.specialistId },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      avatar: true,
-      slug: true,
-      category: true,
-      specializations: true,
-      verified: true,
-      profileViews: true,
-      contactViews: true,
-      acceptingClients: true,
-      tagline: true,
-      about: true,
-      city: true,
-      email: true,
-      priceFrom: true,
-      priceTo: true,
-      yearsOfPractice: true,
-      videoUrl: true,
+  const user = authSession.user
+  const profile = user.specialistProfile
+
+  if (!profile) {
+    return null
+  }
+
+  // Получаем полные данные профиля
+  const fullProfile = await prisma.specialistProfile.findUnique({
+    where: { id: profile.id },
+    include: {
       education: true,
       certificates: true,
       gallery: true,
@@ -69,8 +65,36 @@ async function getDashboardData() {
     }
   })
 
-  if (!specialist) {
+  if (!fullProfile) {
     return null
+  }
+
+  // Формируем полный объект специалиста
+  const specialist = {
+    id: fullProfile.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatar: user.avatar,
+    slug: fullProfile.slug,
+    category: fullProfile.category,
+    specializations: fullProfile.specializations,
+    verified: fullProfile.verified,
+    profileViews: fullProfile.profileViews,
+    contactViews: fullProfile.contactViews,
+    acceptingClients: fullProfile.acceptingClients,
+    tagline: fullProfile.tagline,
+    about: fullProfile.about,
+    city: fullProfile.city,
+    email: user.email,
+    priceFrom: fullProfile.priceFrom,
+    priceTo: fullProfile.priceTo,
+    yearsOfPractice: fullProfile.yearsOfPractice,
+    videoUrl: fullProfile.videoUrl,
+    education: fullProfile.education,
+    certificates: fullProfile.certificates,
+    gallery: fullProfile.gallery,
+    faqs: fullProfile.faqs,
+    leadMagnets: fullProfile.leadMagnets,
   }
 
   // Подсчёт процента заполнения
@@ -100,7 +124,7 @@ async function getDashboardData() {
   // Количество заявок за неделю
   const consultationRequestsCount = await prisma.consultationRequest.count({
     where: {
-      specialistId: specialist.id,
+      specialistProfileId: specialist.id,
       createdAt: {
         gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       }
@@ -110,7 +134,7 @@ async function getDashboardData() {
   // Количество новых (непрочитанных) заявок
   const newRequestsCount = await prisma.consultationRequest.count({
     where: {
-      specialistId: specialist.id,
+      specialistProfileId: specialist.id,
       status: 'new'
     }
   })

@@ -47,6 +47,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    // Проверяем, есть ли профиль специалиста
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Парсим тело запроса
     const body = await request.json()
     const { field, value } = UpdateProfileSchema.parse(body)
@@ -59,19 +67,48 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // Обновляем профиль
-    const specialist = await prisma.specialist.update({
-      where: { id: session.specialistId },
-      data: {
-        [field]: processedValue,
-        updatedAt: new Date()
-      }
-    })
+    // Поля User (обновляем в таблице User)
+    const userFields = ['firstName', 'lastName', 'email']
+    
+    // Поля SpecialistProfile (обновляем в таблице SpecialistProfile)
+    const specialistFields = [
+      'category', 'tagline', 'about', 'city', 'country',
+      'telegram', 'whatsapp', 'instagram', 'website',
+      'priceFrom', 'priceTo', 'priceDescription',
+      'yearsOfPractice', 'videoUrl', 'acceptingClients'
+    ]
+
+    let updatedValue
+    
+    if (userFields.includes(field)) {
+      // Обновляем User
+      const user = await prisma.user.update({
+        where: { id: session.userId },
+        data: {
+          [field]: processedValue,
+        }
+      })
+      updatedValue = user[field as keyof typeof user]
+    } else if (specialistFields.includes(field)) {
+      // Обновляем SpecialistProfile
+      const specialistProfile = await prisma.specialistProfile.update({
+        where: { id: session.specialistProfile!.id },
+        data: {
+          [field]: processedValue,
+        }
+      })
+      updatedValue = specialistProfile[field as keyof typeof specialistProfile]
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Неизвестное поле' },
+        { status: 400 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
       field,
-      value: specialist[field as keyof typeof specialist],
+      value: updatedValue,
       message: 'Профиль обновлён'
     })
 

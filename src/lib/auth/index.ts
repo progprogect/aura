@@ -6,10 +6,22 @@
 // Основные сервисы
 export { 
   sendVerificationSMS,
-  registerSpecialist,
-  loginSpecialist,
   getProfileBySession
 } from './auth-service'
+
+// Unified auth для специалистов
+export {
+  registerSpecialistUnified as registerSpecialist,
+  loginSpecialistUnified as loginSpecialist
+} from './specialist-auth-service'
+
+// Unified auth для обычных пользователей
+export {
+  registerUser,
+  loginUser,
+  getUserFromSession,
+  logoutUser
+} from './user-auth-service'
 
 export { 
   sendSMS,
@@ -31,9 +43,6 @@ export {
 
 // Бизнес-логика
 export {
-  SpecialistService,
-  SocialAccountService,
-  SessionService,
   SMSVerificationService
 } from './business-logic'
 

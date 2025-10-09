@@ -16,6 +16,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const type = formData.get('type') as string
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Проверяем, не слишком ли много элементов в галерее
     const currentCount = await prisma.galleryItem.count({
-      where: { specialistId: session.specialistId }
+      where: { specialistProfileId: session.specialistProfile!.id }
     })
 
     if (currentCount >= 20) {
@@ -81,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     // Получаем максимальный order
     const maxOrder = await prisma.galleryItem.findFirst({
-      where: { specialistId: session.specialistId },
+      where: { specialistProfileId: session.specialistProfile!.id },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
@@ -89,7 +96,7 @@ export async function POST(request: NextRequest) {
     // Создаём элемент галереи
     const galleryItem = await prisma.galleryItem.create({
       data: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         type: type,
         url: url,
         thumbnailUrl: type === 'video' ? url : null,

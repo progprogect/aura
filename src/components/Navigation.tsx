@@ -66,9 +66,9 @@ export function Navigation() {
             </Link>
             <div className="flex items-center space-x-3">
               <Link
-                href="/auth/login"
+                href="/auth/user/login"
                 className={`text-sm font-medium transition-colors ${
-                  isActive('/auth/login')
+                  isActive('/auth/user/login')
                     ? 'text-blue-600' 
                     : 'text-gray-700 hover:text-blue-600'
                 }`}
@@ -146,9 +146,9 @@ export function Navigation() {
                 Каталог специалистов
               </Link>
               <Link
-                href="/auth/login"
+                href="/auth/user/login"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/auth/login') 
+                  isActive('/auth/user/login') 
                     ? 'text-primary bg-primary/10' 
                     : 'text-gray-700 hover:text-primary hover:bg-gray-50'
                 }`}

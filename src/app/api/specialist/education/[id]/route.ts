@@ -29,12 +29,19 @@ export async function PATCH(
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Проверяем что образование принадлежит специалисту
     const existing = await prisma.education.findUnique({
       where: { id: params.id }
     })
 
-    if (!existing || existing.specialistId !== session.specialistId) {
+    if (!existing || existing.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Образование не найдено' },
         { status: 404 }
@@ -83,12 +90,19 @@ export async function DELETE(
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Проверяем что образование принадлежит специалисту
     const existing = await prisma.education.findUnique({
       where: { id: params.id }
     })
 
-    if (!existing || existing.specialistId !== session.specialistId) {
+    if (!existing || existing.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Образование не найдено' },
         { status: 404 }

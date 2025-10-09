@@ -7,15 +7,30 @@ import { prisma } from '@/lib/db'
 import { saveEmbedding } from './mongodb-client'
 
 /**
- * Генерирует embedding для специалиста
+ * Генерирует embedding для специалиста (Unified)
  */
-export async function generateSpecialistEmbedding(specialistId: string) {
-  const specialist = await prisma.specialist.findUnique({
-    where: { id: specialistId },
+export async function generateSpecialistEmbedding(specialistProfileId: string) {
+  const specialistProfile = await prisma.specialistProfile.findUnique({
+    where: { id: specialistProfileId },
+    include: {
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        }
+      }
+    }
   })
 
-  if (!specialist) {
-    throw new Error(`Specialist ${specialistId} not found`)
+  if (!specialistProfile) {
+    throw new Error(`SpecialistProfile ${specialistProfileId} not found`)
+  }
+
+  // Объединяем данные для совместимости
+  const specialist = {
+    ...specialistProfile,
+    firstName: specialistProfile.user.firstName,
+    lastName: specialistProfile.user.lastName,
   }
 
   // Формируем текст для embedding
@@ -32,7 +47,7 @@ export async function generateSpecialistEmbedding(specialistId: string) {
   const embedding = response.data[0].embedding
 
   // Сохраняем в MongoDB (с категорией для фильтрации!)
-  await saveEmbedding(specialistId, specialist.category, embedding, sourceText, MODELS.EMBEDDING)
+  await saveEmbedding(specialistProfileId, specialist.category, embedding, sourceText, MODELS.EMBEDDING)
 
   console.log(`[Embeddings] ✓ Saved for ${specialist.firstName} ${specialist.lastName}`)
 
@@ -128,25 +143,33 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
 }
 
 /**
- * Генерирует embeddings для всех специалистов (batch)
+ * Генерирует embeddings для всех специалистов (batch) (Unified)
  */
 export async function generateAllEmbeddings() {
-  const specialists = await prisma.specialist.findMany({
+  const specialistProfiles = await prisma.specialistProfile.findMany({
     where: { acceptingClients: true },
-    select: { id: true, firstName: true, lastName: true },
+    select: { 
+      id: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+        }
+      }
+    },
   })
 
-  console.log(`[Embeddings] Starting generation for ${specialists.length} specialists...`)
+  console.log(`[Embeddings] Starting generation for ${specialistProfiles.length} specialists...`)
 
   let successCount = 0
   let errorCount = 0
 
-  for (const specialist of specialists) {
+  for (const profile of specialistProfiles) {
     try {
-      await generateSpecialistEmbedding(specialist.id)
+      await generateSpecialistEmbedding(profile.id)
       successCount++
     } catch (error) {
-      console.error(`[Embeddings] Error for ${specialist.firstName} ${specialist.lastName}:`, error)
+      console.error(`[Embeddings] Error for ${profile.user.firstName} ${profile.user.lastName}:`, error)
       errorCount++
     }
 
@@ -157,7 +180,7 @@ export async function generateAllEmbeddings() {
 
   console.log(`[Embeddings] Completed: ${successCount} success, ${errorCount} errors`)
 
-  return { successCount, errorCount, total: specialists.length }
+  return { successCount, errorCount, total: specialistProfiles.length }
 }
 
 // ========================================

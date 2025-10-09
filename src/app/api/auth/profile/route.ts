@@ -20,32 +20,30 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Получаем профиль специалиста
-    const specialist = await prisma.specialist.findUnique({
-      where: { id: session.specialistId },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        avatar: true,
-        slug: true,
-        category: true,
-        specializations: true,
-        verified: true,
-        acceptingClients: true,
-        tagline: true,
-        about: true,
-        city: true,
-        phone: true,
-        priceFrom: true,
-        priceTo: true,
-        yearsOfPractice: true,
-        videoUrl: true,
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
+    // Получаем полный профиль специалиста
+    const specialistProfile = await prisma.specialistProfile.findUnique({
+      where: { id: session.specialistProfile.id },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            avatar: true,
+          }
+        }
       }
     })
 
-    if (!specialist) {
+    if (!specialistProfile) {
       return NextResponse.json(
         { success: false, error: 'Специалист не найден' },
         { status: 404 }
@@ -54,24 +52,24 @@ export async function GET(request: NextRequest) {
 
     // Преобразуем в формат UserProfile
     const profile = {
-      id: specialist.id,
-      firstName: specialist.firstName,
-      lastName: specialist.lastName,
-      email: specialist.email,
-      avatar: specialist.avatar,
-      slug: specialist.slug,
-      category: specialist.category,
-      specializations: specialist.specializations,
-      verified: specialist.verified,
-      acceptingClients: specialist.acceptingClients,
-      tagline: specialist.tagline,
-      about: specialist.about,
-      city: specialist.city,
-      phone: specialist.phone,
-      priceFrom: specialist.priceFrom,
-      priceTo: specialist.priceTo,
-      yearsOfPractice: specialist.yearsOfPractice,
-      videoUrl: specialist.videoUrl,
+      id: specialistProfile.id,
+      firstName: specialistProfile.user.firstName,
+      lastName: specialistProfile.user.lastName,
+      email: specialistProfile.user.email,
+      avatar: specialistProfile.user.avatar,
+      phone: specialistProfile.user.phone,
+      slug: specialistProfile.slug,
+      category: specialistProfile.category,
+      specializations: specialistProfile.specializations,
+      verified: specialistProfile.verified,
+      acceptingClients: specialistProfile.acceptingClients,
+      tagline: specialistProfile.tagline,
+      about: specialistProfile.about,
+      city: specialistProfile.city,
+      priceFrom: specialistProfile.priceFrom,
+      priceTo: specialistProfile.priceTo,
+      yearsOfPractice: specialistProfile.yearsOfPractice,
+      videoUrl: specialistProfile.videoUrl,
     }
 
     return NextResponse.json({ 

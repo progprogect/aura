@@ -85,19 +85,23 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
     where.verified = true
   }
 
-  // 4. Получаем специалистов из PostgreSQL
+  // 4. Получаем специалистов из PostgreSQL (Unified)
   console.log('[Semantic Search] 🗄️ Querying PostgreSQL...')
   console.log('[Semantic Search] 📋 Where clause:', JSON.stringify(where, null, 2))
   
-  const specialists = await prisma.specialist.findMany({
+  const specialistProfiles = await prisma.specialistProfile.findMany({
     where,
     take: limit,
     select: {
       id: true,
-      firstName: true,
-      lastName: true,
-      avatar: true,
       slug: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        }
+      },
       category: true,
       specializations: true,
       tagline: true,
@@ -115,12 +119,12 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
     },
   })
 
-  console.log('[Semantic Search] 📊 PostgreSQL returned:', specialists.length, 'specialists')
+  console.log('[Semantic Search] 📊 PostgreSQL returned:', specialistProfiles.length, 'specialists')
   
-  if (specialists.length === 0) {
+  if (specialistProfiles.length === 0) {
     console.warn('[Semantic Search] ⚠️ PostgreSQL returned 0 - checking why...')
     // Проверяем без фильтров для debug
-    const allFromIds = await prisma.specialist.findMany({
+    const allFromIds = await prisma.specialistProfile.findMany({
       where: { id: { in: specialistIds } },
       select: { id: true, category: true, acceptingClients: true }
     })
@@ -129,6 +133,29 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
       console.log('[Semantic Search] 🔍 First specialist:', allFromIds[0])
     }
   }
+
+  // Преобразуем specialistProfiles в формат Specialist для совместимости
+  const specialists = specialistProfiles.map(profile => ({
+    id: profile.id,
+    firstName: profile.user.firstName,
+    lastName: profile.user.lastName,
+    avatar: profile.user.avatar,
+    slug: profile.slug,
+    category: profile.category,
+    specializations: profile.specializations,
+    tagline: profile.tagline,
+    about: profile.about,
+    city: profile.city,
+    country: profile.country,
+    workFormats: profile.workFormats,
+    yearsOfPractice: profile.yearsOfPractice,
+    priceFrom: profile.priceFrom,
+    priceTo: profile.priceTo,
+    currency: profile.currency,
+    priceDescription: profile.priceDescription,
+    verified: profile.verified,
+    customFields: profile.customFields,
+  }))
 
   // 5. Сортируем по similarity из MongoDB
   const specialistsWithSimilarity = specialists.map((specialist) => {
@@ -174,22 +201,19 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
   if (query) {
     const searchTerm = query.toLowerCase()
     ;(where as any).OR = [
-      { firstName: { contains: searchTerm, mode: 'insensitive' } },
-      { lastName: { contains: searchTerm, mode: 'insensitive' } },
+      { user: { firstName: { contains: searchTerm, mode: 'insensitive' } } },
+      { user: { lastName: { contains: searchTerm, mode: 'insensitive' } } },
       { tagline: { contains: searchTerm, mode: 'insensitive' } },
       { about: { contains: searchTerm, mode: 'insensitive' } },
     ]
   }
 
-  const results = await prisma.specialist.findMany({
+  const results = await prisma.specialistProfile.findMany({
     where,
     take: limit,
     orderBy: [{ verified: 'desc' }, { profileViews: 'desc' }],
     select: {
       id: true,
-      firstName: true,
-      lastName: true,
-      avatar: true,
       slug: true,
       category: true,
       specializations: true,
@@ -205,11 +229,39 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
       priceDescription: true,
       verified: true,
       customFields: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        }
+      }
     },
   })
 
   console.log(`[Keyword Search] Found ${results.length} specialists`)
 
-  return results as Specialist[]
+  // Преобразуем в формат Specialist
+  return results.map(profile => ({
+    id: profile.id,
+    firstName: profile.user.firstName,
+    lastName: profile.user.lastName,
+    avatar: profile.user.avatar,
+    slug: profile.slug,
+    category: profile.category,
+    specializations: profile.specializations,
+    tagline: profile.tagline,
+    about: profile.about,
+    city: profile.city,
+    country: profile.country,
+    workFormats: profile.workFormats,
+    yearsOfPractice: profile.yearsOfPractice,
+    priceFrom: profile.priceFrom,
+    priceTo: profile.priceTo,
+    currency: profile.currency,
+    priceDescription: profile.priceDescription,
+    verified: profile.verified,
+    customFields: profile.customFields,
+  })) as Specialist[]
 }
 

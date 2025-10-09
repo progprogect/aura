@@ -1,25 +1,11 @@
 /**
- * Рефакторированный основной сервис авторизации
+ * Auth service (только общие функции)
+ * Специфичные функции перенесены в specialist-auth-service.ts и user-auth-service.ts
  */
 
 import { sendSMS } from './sms-service'
-import { SpecialistService, SocialAccountService, SessionService, SMSVerificationService } from './business-logic'
-import { 
-  validateRegistrationRequest, 
-  validateLoginRequest,
-  validateSendSMSRequest
-} from './validation'
-import { extractSocialData, debugLog } from './utils'
-import { AUTH_ERRORS } from './types'
-import type { 
-  AuthResponse,
-  UserProfile
-} from './types'
-import type { 
-  ValidatedRegistrationRequest,
-  ValidatedLoginRequest,
-  SendSMSRequest
-} from './validation'
+import { validateSendSMSRequest } from './validation'
+import { prisma } from '@/lib/db'
 
 // ========================================
 // ОТПРАВКА SMS
@@ -55,306 +41,98 @@ export async function sendVerificationSMS(phone: string, purpose: 'registration'
 }
 
 // ========================================
-// РЕГИСТРАЦИЯ
+// RATE LIMITING
 // ========================================
 
-export async function registerSpecialist(request: unknown): Promise<AuthResponse> {
-  const validation = validateRegistrationRequest(request)
-  
-  if (!validation.success || !validation.data) {
-    return {
-      success: false,
-      error: validation.error || 'Ошибка валидации'
-    }
-  }
-  
-  const { data } = validation
-  
-  try {
-    debugLog('Начало регистрации', { provider: data.provider })
-    
-    if (data.provider === 'phone') {
-      return await registerWithPhone(data)
-    } else {
-      return await registerWithSocial(data)
-    }
-    
-  } catch (error) {
-    console.error('[auth-service] Ошибка регистрации:', error)
-    debugLog('Ошибка регистрации', error)
-    return {
-      success: false,
-      error: 'Произошла ошибка при регистрации'
-    }
-  }
+interface RateLimitResult {
+  allowed: boolean
+  remaining?: number
+  resetAt?: Date
 }
 
-async function registerWithPhone(data: ValidatedRegistrationRequest): Promise<AuthResponse> {
-  if (!data.phone || !data.code) {
-    return {
-      success: false,
-      error: 'Необходимо указать номер телефона и код подтверждения'
-    }
-  }
-  
-  const { phone, code } = data
-  // Проверяем код
-  const verification = await SMSVerificationService.verifyCode(phone, code, 'registration')
-  
-  if (!verification.success) {
-    return {
-      success: false,
-      error: verification.error
-    }
-  }
-  
-  // Проверяем, не зарегистрирован ли уже этот номер
-  const exists = await SpecialistService.existsByPhone(phone)
-  if (exists) {
-    return {
-      success: false,
-      error: 'Специалист с таким номером телефона уже зарегистрирован',
-      errorCode: AUTH_ERRORS.PHONE_ALREADY_EXISTS
-    }
-  }
-  
-  // Создаём специалиста
-  const specialist = await SpecialistService.createSpecialist(phone)
-  
-  // Создаём сессию
-  const session = await SessionService.createSession(specialist.id)
-  
-  debugLog('Регистрация завершена', { specialistId: specialist.id })
-  
-  return {
-    success: true,
-    sessionToken: session.sessionToken,
-    specialist: mapSpecialistToProfile(specialist),
-    isNewUser: true,
-    requiresProfileCompletion: true
-  }
-}
+// Простой in-memory rate limiting (можно заменить на Redis в production)
+const smsRateLimits = new Map<string, { count: number; resetAt: number }>()
 
-async function registerWithSocial(data: ValidatedRegistrationRequest): Promise<AuthResponse> {
-  if (!data.socialData) {
-    return {
-      success: false,
-      error: 'Необходимо указать данные социального аккаунта'
-    }
+async function checkRateLimit(phone: string): Promise<RateLimitResult> {
+  const now = Date.now()
+  const windowMs = 60 * 60 * 1000 // 1 час
+  const maxRequests = 5 // Максимум 5 SMS в час
+  
+  const current = smsRateLimits.get(phone)
+  
+  // Если нет записи или окно истекло
+  if (!current || current.resetAt < now) {
+    smsRateLimits.set(phone, {
+      count: 1,
+      resetAt: now + windowMs
+    })
+    return { allowed: true, remaining: maxRequests - 1, resetAt: new Date(now + windowMs) }
   }
   
-  const { socialData } = data
-  
-  // Проверяем, не зарегистрирован ли уже этот социальный аккаунт
-  const existingAccount = await SocialAccountService.findByProvider(socialData.provider, socialData.providerId)
-  
-  if (existingAccount) {
-    // Если аккаунт уже существует, создаём сессию
-    const session = await SessionService.createSession(existingAccount.specialistId)
-    
-    return {
-      success: true,
-      sessionToken: session.sessionToken,
-      specialist: mapSpecialistToProfile(existingAccount.specialist),
-      isNewUser: false
-    }
+  // Проверяем лимит
+  if (current.count >= maxRequests) {
+    return { allowed: false, resetAt: new Date(current.resetAt) }
   }
   
-  // Извлекаем данные из социального профиля
-  const extractedData = extractSocialData(socialData.provider, socialData.rawData || {})
-  
-  // Создаём специалиста
-  const specialist = await SpecialistService.createSpecialist(
-    extractedData.phone || 'social-user', 
-    extractedData
-  )
-  
-  // Создаём социальный аккаунт
-  await SocialAccountService.createAccount(specialist.id, socialData)
-  
-  // Создаём сессию
-  const session = await SessionService.createSession(specialist.id)
-  
-  debugLog('Социальная регистрация завершена', { specialistId: specialist.id })
-  
-  return {
-    success: true,
-    sessionToken: session.sessionToken,
-    specialist: mapSpecialistToProfile(specialist),
-    isNewUser: true,
-    requiresProfileCompletion: true
-  }
+  // Увеличиваем счётчик
+  current.count++
+  return { allowed: true, remaining: maxRequests - current.count, resetAt: new Date(current.resetAt) }
 }
 
 // ========================================
-// ВХОД
+// ПОЛУЧЕНИЕ ПРОФИЛЯ (Legacy compatibility)
 // ========================================
 
-export async function loginSpecialist(request: unknown): Promise<AuthResponse> {
-  const validation = validateLoginRequest(request)
-  
-  if (!validation.success || !validation.data) {
-    return {
-      success: false,
-      error: validation.error || 'Ошибка валидации'
-    }
-  }
-  
-  const { data } = validation
-  
-  try {
-    debugLog('Начало входа', { provider: data.provider })
-    
-    if (data.provider === 'phone') {
-      return await loginWithPhone(data)
-    } else {
-      return await loginWithSocial(data)
-    }
-    
-  } catch (error) {
-    debugLog('Ошибка входа', error)
-    return {
-      success: false,
-      error: 'Произошла ошибка при входе'
-    }
-  }
-}
-
-async function loginWithPhone(data: ValidatedLoginRequest): Promise<AuthResponse> {
-  if (!data.phone || !data.code) {
-    return {
-      success: false,
-      error: 'Необходимо указать номер телефона и код подтверждения'
-    }
-  }
-  
-  const { phone, code } = data
-  
-  // Проверяем код
-  const verification = await SMSVerificationService.verifyCode(phone, code, 'login')
-  
-  if (!verification.success) {
-    return {
-      success: false,
-      error: verification.error
-    }
-  }
-  
-  // Ищем специалиста
-  const specialist = await SpecialistService.findByPhone(phone)
-  
-  if (!specialist) {
-    return {
-      success: false,
-      error: 'Специалист с таким номером телефона не найден',
-      errorCode: AUTH_ERRORS.SESSION_INVALID
-    }
-  }
-  
-  // Создаём сессию
-  const session = await SessionService.createSession(specialist.id)
-  
-  debugLog('Вход завершён', { specialistId: specialist.id })
-  
-  return {
-    success: true,
-    sessionToken: session.sessionToken,
-    specialist: mapSpecialistToProfile(specialist),
-    isNewUser: false
-  }
-}
-
-async function loginWithSocial(data: ValidatedLoginRequest): Promise<AuthResponse> {
-  if (!data.socialData) {
-    return {
-      success: false,
-      error: 'Необходимо указать данные социального аккаунта'
-    }
-  }
-  
-  const { socialData } = data
-  
-  // Ищем существующий социальный аккаунт
-  const socialAccount = await SocialAccountService.findByProvider(socialData.provider, socialData.providerId)
-  
-  if (!socialAccount) {
-    return {
-      success: false,
-      error: 'Аккаунт не найден. Зарегистрируйтесь сначала'
-    }
-  }
-  
-  // Создаём сессию
-  const session = await SessionService.createSession(socialAccount.specialistId)
-  
-  debugLog('Социальный вход завершён', { specialistId: socialAccount.specialistId })
-  
-  return {
-    success: true,
-    sessionToken: session.sessionToken,
-    specialist: mapSpecialistToProfile(socialAccount.specialist),
-    isNewUser: false
-  }
-}
-
-// ========================================
-// ПОЛУЧЕНИЕ ПРОФИЛЯ ПО СЕССИИ
-// ========================================
-
-export async function getProfileBySession(sessionToken: string): Promise<{
-  success: boolean
-  profile?: UserProfile
-  error?: string
-}> {
-  try {
-    const validation = await SessionService.validateAndUpdateSession(sessionToken)
-    
-    if (!validation.valid || !validation.session) {
-      return {
-        success: false,
-        error: 'Недействительная сессия'
+export async function getProfileBySession(sessionToken: string) {
+  const session = await prisma.authSession.findFirst({
+    where: {
+      sessionToken,
+      expiresAt: { gt: new Date() },
+      isActive: true
+    },
+    include: {
+      user: {
+        include: {
+          specialistProfile: true
+        }
       }
     }
-    
+  }) as any
+
+  if (!session || !session.user) {
+    return null
+  }
+
+  // Если есть профиль специалиста, возвращаем его
+  if (session.user.specialistProfile) {
+    const profile = session.user.specialistProfile
     return {
-      success: true,
-      profile: mapSpecialistToProfile(validation.session.specialist)
-    }
-    
-  } catch (error) {
-    debugLog('Ошибка получения профиля', error)
-    return {
-      success: false,
-      error: 'Произошла ошибка при получении профиля'
+      id: profile.id,
+      firstName: session.user.firstName || null,
+      lastName: session.user.lastName || null,
+      phone: session.user.phone,
+      email: session.user.email,
+      avatar: session.user.avatar,
+      slug: profile.slug,
+      verified: profile.verified,
+      subscriptionTier: profile.subscriptionTier,
+      createdAt: session.user.createdAt,
+      updatedAt: session.user.updatedAt,
     }
   }
-}
 
-// ========================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// ========================================
-
-function mapSpecialistToProfile(specialist: any): UserProfile {
+  // Иначе возвращаем базовый профиль пользователя
   return {
-    id: specialist.id,
-    firstName: specialist.firstName,
-    lastName: specialist.lastName,
-    phone: specialist.phone,
-    email: specialist.email,
-    avatar: specialist.avatar,
-    slug: specialist.slug,
-    verified: specialist.verified,
-    subscriptionTier: specialist.subscriptionTier as 'FREE' | 'PREMIUM',
-    createdAt: specialist.createdAt,
-    updatedAt: specialist.updatedAt
+    id: session.user.id,
+    firstName: session.user.firstName,
+    lastName: session.user.lastName,
+    phone: session.user.phone,
+    email: session.user.email,
+    avatar: session.user.avatar,
+    slug: null,
+    verified: false,
+    subscriptionTier: 'FREE',
+    createdAt: session.user.createdAt,
+    updatedAt: session.user.updatedAt,
   }
-}
-
-async function checkRateLimit(phone: string): Promise<{ allowed: boolean; resetTime?: Date }> {
-  // Простая проверка rate limit (можно улучшить с Redis)
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-  
-  // Здесь должна быть логика проверки лимитов
-  // Для простоты всегда разрешаем
-  return { allowed: true }
 }

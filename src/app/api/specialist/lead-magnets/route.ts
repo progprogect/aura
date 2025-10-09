@@ -27,9 +27,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const leadMagnets = await prisma.leadMagnet.findMany({
       where: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         isActive: true
       },
       orderBy: { order: 'asc' }
@@ -54,10 +61,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     // Проверяем лимит (макс 6)
     const count = await prisma.leadMagnet.count({
       where: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         isActive: true
       }
     })
@@ -116,14 +130,14 @@ export async function POST(request: NextRequest) {
 
     // Получаем максимальный order
     const maxOrder = await prisma.leadMagnet.findFirst({
-      where: { specialistId: session.specialistId },
+      where: { specialistProfileId: session.specialistProfile!.id },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
 
     const leadMagnet = await prisma.leadMagnet.create({
       data: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         type: data.type,
         title: data.title,
         description: data.description,

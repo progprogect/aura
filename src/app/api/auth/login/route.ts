@@ -1,15 +1,24 @@
 /**
- * API endpoint для входа специалиста
+ * API endpoint для входа специалиста (Unified)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { loginSpecialist } from '@/lib/auth'
+import { loginSpecialistUnified } from '@/lib/auth/specialist-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { phone, code } = body
 
-    const result = await loginSpecialist(body)
+    // Валидация
+    if (!phone || !code) {
+      return NextResponse.json(
+        { success: false, error: 'Номер телефона и код обязательны' },
+        { status: 400 }
+      )
+    }
+
+    const result = await loginSpecialistUnified({ phone, code })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

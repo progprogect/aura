@@ -21,19 +21,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const body = await request.json()
     const data = CreateFAQSchema.parse(body)
 
     // Получаем максимальный order для нового FAQ
     const maxOrder = await prisma.fAQ.findFirst({
-      where: { specialistId: session.specialistId },
+      where: { specialistProfileId: session.specialistProfile!.id },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
 
     const newFAQ = await prisma.fAQ.create({
       data: {
-        specialistId: session.specialistId,
+        specialistProfileId: session.specialistProfile!.id,
         question: data.question,
         answer: data.answer,
         order: (maxOrder?.order || 0) + 1,

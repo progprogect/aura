@@ -18,12 +18,19 @@ export async function DELETE(
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const itemId = params.id
 
     // Проверяем, что элемент принадлежит текущему специалисту
     const item = await prisma.galleryItem.findUnique({
       where: { id: itemId },
-      select: { specialistId: true }
+      select: { specialistProfileId: true }
     })
 
     if (!item) {
@@ -33,7 +40,7 @@ export async function DELETE(
       )
     }
 
-    if (item.specialistId !== session.specialistId) {
+    if (item.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Нет доступа' },
         { status: 403 }

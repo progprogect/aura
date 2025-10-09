@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Получаем все заявки специалиста
     const requests = await prisma.consultationRequest.findMany({
       where: {
-        specialistId: session.specialistId
+        specialistProfileId: session.specialistProfile!.id
       },
       include: {
         leadMagnet: {

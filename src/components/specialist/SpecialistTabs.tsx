@@ -73,7 +73,7 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
       )}
     >
       <div className="container mx-auto max-w-5xl px-4">
-        <div className="scrollbar-hide flex space-x-6 overflow-x-auto md:space-x-8">
+        <div className="scrollbar-hide flex space-x-4 sm:space-x-6 overflow-x-auto md:space-x-8">
           {tabs.map(tab => {
             const iconPath = tab.icon ? ICON_MAP[tab.icon as IconName] || tab.icon : null
             return (
@@ -102,7 +102,7 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
 
                 {/* Активная линия снизу */}
                 {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
                 )}
               </button>
             )

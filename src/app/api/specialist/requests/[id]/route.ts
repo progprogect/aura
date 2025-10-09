@@ -30,7 +30,7 @@ export async function PATCH(
     // Проверяем, что заявка принадлежит текущему специалисту
     const consultationRequest = await prisma.consultationRequest.findUnique({
       where: { id: requestId },
-      select: { specialistId: true }
+      select: { specialistProfileId: true }
     })
 
     if (!consultationRequest) {
@@ -40,7 +40,7 @@ export async function PATCH(
       )
     }
 
-    if (consultationRequest.specialistId !== session.specialistId) {
+    if (consultationRequest.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Нет доступа' },
         { status: 403 }

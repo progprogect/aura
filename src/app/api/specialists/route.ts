@@ -115,8 +115,8 @@ export async function GET(request: NextRequest) {
       // Экранируем специальные символы для безопасности
       const escapedSearch = finalSearch.replace(/[%_]/g, '\\$&')
       where.OR = [
-        { firstName: { contains: escapedSearch, mode: 'insensitive' } },
-        { lastName: { contains: escapedSearch, mode: 'insensitive' } },
+        { user: { firstName: { contains: escapedSearch, mode: 'insensitive' } } },
+        { user: { lastName: { contains: escapedSearch, mode: 'insensitive' } } },
         { tagline: { contains: escapedSearch, mode: 'insensitive' } },
         { about: { contains: escapedSearch, mode: 'insensitive' } },
         { specializations: { hasSome: [escapedSearch] } },
@@ -149,18 +149,15 @@ export async function GET(request: NextRequest) {
         break
     }
     
-    // Получение специалистов с пагинацией
-    const [specialists, totalCount] = await Promise.all([
-      prisma.specialist.findMany({
+    // Получение специалистов с пагинацией (Unified)
+    const [specialistProfiles, totalCount] = await Promise.all([
+      prisma.specialistProfile.findMany({
         where,
         orderBy,
         skip: (finalPage - 1) * finalLimit,
         take: finalLimit,
         select: {
           id: true,
-          firstName: true,
-          lastName: true,
-          avatar: true,
           slug: true,
           category: true,
           specializations: true,
@@ -177,19 +174,46 @@ export async function GET(request: NextRequest) {
           verified: true,
           profileViews: true,
           customFields: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            }
+          }
         }
       }),
-      prisma.specialist.count({ where })
+      prisma.specialistProfile.count({ where })
     ])
     
     // Подготовка данных для фронтенда (используем трансформер)
-    const formattedSpecialists = specialists.map(specialist => ({
-      ...specialist,
-      fullName: `${specialist.firstName} ${specialist.lastName}`,
+    const formattedSpecialists = specialistProfiles.map(profile => ({
+      id: profile.id,
+      firstName: profile.user.firstName,
+      lastName: profile.user.lastName,
+      avatar: profile.user.avatar,
+      slug: profile.slug,
+      category: profile.category,
+      specializations: profile.specializations,
+      tagline: profile.tagline,
+      about: profile.about,
+      city: profile.city,
+      country: profile.country,
+      workFormats: profile.workFormats,
+      yearsOfPractice: profile.yearsOfPractice,
+      priceFrom: profile.priceFrom,
+      priceTo: profile.priceTo,
+      currency: profile.currency,
+      priceDescription: profile.priceDescription,
+      verified: profile.verified,
+      profileViews: profile.profileViews,
+      customFields: profile.customFields,
+      fullName: `${profile.user.firstName} ${profile.user.lastName}`,
       // Обрезаем описание до 150 символов для карточек
-      shortAbout: specialist.about.length > 150 
-        ? specialist.about.substring(0, 150) + '...' 
-        : specialist.about,
+      shortAbout: profile.about.length > 150 
+        ? profile.about.substring(0, 150) + '...' 
+        : profile.about,
     }))
     
     return NextResponse.json({

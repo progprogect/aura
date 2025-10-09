@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      avatarUrl = await uploadAvatar(data.image, session.specialistId)
+      if (!session.specialistProfile) {
+        return NextResponse.json(
+          { success: false, error: 'Профиль специалиста не найден' },
+          { status: 404 }
+        )
+      }
+      avatarUrl = await uploadAvatar(data.image, session.specialistProfile!.id)
     }
     // Вариант 2: Сохранение URL
     else if (data.imageUrl) {
@@ -74,18 +80,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Сохраняем URL в БД
-    const specialist = await prisma.specialist.update({
-      where: { id: session.specialistId },
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
+    // Сохраняем URL в User (аватар общий)
+    const user = await prisma.user.update({
+      where: { id: session.userId },
       data: {
         avatar: avatarUrl,
-        updatedAt: new Date()
       }
     })
 
     return NextResponse.json({
       success: true,
-      avatarUrl: specialist.avatar,
+      avatarUrl: user.avatar,
       message: 'Аватар обновлён'
     })
 

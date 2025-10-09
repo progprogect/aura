@@ -32,7 +32,7 @@ export async function PUT(
 
     const leadMagnet = await prisma.leadMagnet.findUnique({
       where: { id: params.id },
-      select: { specialistId: true }
+      select: { specialistProfileId: true }
     })
 
     if (!leadMagnet) {
@@ -42,7 +42,7 @@ export async function PUT(
       )
     }
 
-    if (leadMagnet.specialistId !== session.specialistId) {
+    if (leadMagnet.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Нет доступа' },
         { status: 403 }
@@ -142,7 +142,7 @@ export async function DELETE(
 
     const leadMagnet = await prisma.leadMagnet.findUnique({
       where: { id: params.id },
-      select: { specialistId: true }
+      select: { specialistProfileId: true }
     })
 
     if (!leadMagnet) {
@@ -152,7 +152,7 @@ export async function DELETE(
       )
     }
 
-    if (leadMagnet.specialistId !== session.specialistId) {
+    if (leadMagnet.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Нет доступа' },
         { status: 403 }

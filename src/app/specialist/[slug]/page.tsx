@@ -16,11 +16,20 @@ interface PageProps {
   }
 }
 
-// Получение данных специалиста
+// Получение данных специалиста (Unified)
 async function getSpecialist(slug: string) {
-  const specialist = await prisma.specialist.findUnique({
+  const specialistProfile = await prisma.specialistProfile.findUnique({
     where: { slug },
     include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatar: true,
+        }
+      },
       education: {
         orderBy: { order: 'asc' },
       },
@@ -40,7 +49,50 @@ async function getSpecialist(slug: string) {
     },
   })
 
-  return specialist
+  if (!specialistProfile) return null
+
+  // Преобразуем в формат, совместимый с существующими компонентами
+  return {
+    id: specialistProfile.id,
+    firstName: specialistProfile.user.firstName,
+    lastName: specialistProfile.user.lastName,
+    email: specialistProfile.user.email,
+    avatar: specialistProfile.user.avatar,
+    slug: specialistProfile.slug,
+    category: specialistProfile.category,
+    specializations: specialistProfile.specializations,
+    tagline: specialistProfile.tagline,
+    about: specialistProfile.about,
+    city: specialistProfile.city,
+    country: specialistProfile.country,
+    workFormats: specialistProfile.workFormats,
+    yearsOfPractice: specialistProfile.yearsOfPractice,
+    telegram: specialistProfile.telegram,
+    whatsapp: specialistProfile.whatsapp,
+    instagram: specialistProfile.instagram,
+    website: specialistProfile.website,
+    priceFrom: specialistProfile.priceFrom,
+    priceTo: specialistProfile.priceTo,
+    currency: specialistProfile.currency,
+    priceDescription: specialistProfile.priceDescription,
+    customFields: specialistProfile.customFields,
+    videoUrl: specialistProfile.videoUrl,
+    verified: specialistProfile.verified,
+    verifiedAt: specialistProfile.verifiedAt,
+    acceptingClients: specialistProfile.acceptingClients,
+    metaTitle: specialistProfile.metaTitle,
+    metaDescription: specialistProfile.metaDescription,
+    subscriptionTier: specialistProfile.subscriptionTier,
+    profileViews: specialistProfile.profileViews,
+    contactViews: specialistProfile.contactViews,
+    createdAt: specialistProfile.createdAt,
+    updatedAt: specialistProfile.updatedAt,
+    education: specialistProfile.education,
+    certificates: specialistProfile.certificates,
+    gallery: specialistProfile.gallery,
+    faqs: specialistProfile.faqs,
+    leadMagnets: specialistProfile.leadMagnets,
+  }
 }
 
 // ISR: страницы генерируются по требованию и кешируются на 60 секунд

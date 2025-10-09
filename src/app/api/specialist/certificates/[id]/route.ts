@@ -26,11 +26,18 @@ export async function PATCH(
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const existing = await prisma.certificate.findUnique({
       where: { id: params.id }
     })
 
-    if (!existing || existing.specialistId !== session.specialistId) {
+    if (!existing || existing.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Сертификат не найден' },
         { status: 404 }
@@ -79,11 +86,18 @@ export async function DELETE(
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
+    if (!session.specialistProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
     const existing = await prisma.certificate.findUnique({
       where: { id: params.id }
     })
 
-    if (!existing || existing.specialistId !== session.specialistId) {
+    if (!existing || existing.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Сертификат не найден' },
         { status: 404 }

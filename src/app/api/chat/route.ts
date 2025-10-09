@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
       else if (isShowPreviousRequest && session.recommendedIds.length > 0) {
         console.log('[Chat API] 🔄 Loading previously shown specialists:', session.recommendedIds.length)
         
-        specialists = await prisma.specialist.findMany({
+        const specialistProfiles = await prisma.specialistProfile.findMany({
           where: {
             id: { in: session.recommendedIds },
             acceptingClients: true,
@@ -283,9 +283,6 @@ export async function POST(request: NextRequest) {
           take: 10,
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
             slug: true,
             category: true,
             specializations: true,
@@ -301,8 +298,38 @@ export async function POST(request: NextRequest) {
             priceDescription: true,
             verified: true,
             customFields: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              }
+            }
           },
         })
+
+        // Преобразуем в формат Specialist
+        specialists = specialistProfiles.map(profile => ({
+          id: profile.id,
+          firstName: profile.user.firstName,
+          lastName: profile.user.lastName,
+          avatar: profile.user.avatar,
+          slug: profile.slug,
+          category: profile.category,
+          specializations: profile.specializations,
+          tagline: profile.tagline,
+          about: profile.about,
+          city: profile.city,
+          country: profile.country,
+          workFormats: profile.workFormats,
+          yearsOfPractice: profile.yearsOfPractice,
+          priceFrom: profile.priceFrom,
+          priceTo: profile.priceTo,
+          currency: profile.currency,
+          priceDescription: profile.priceDescription,
+          verified: profile.verified,
+          customFields: profile.customFields,
+        }))
         
         console.log('[Chat API] ✅ Loaded previous specialists:', specialists.length)
       } else {

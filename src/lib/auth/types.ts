@@ -229,7 +229,18 @@ export interface LoginRequest {
 export interface AuthResponse {
   success: boolean
   sessionToken?: string
-  specialist?: UserProfile
+  specialist?: UserProfile  // Legacy
+  user?: {                  // Unified format
+    id: string
+    firstName: string | null
+    lastName: string | null
+    phone: string | null
+    email: string | null
+    avatar: string | null
+    hasSpecialistProfile?: boolean
+    specialistProfileSlug?: string
+    specialistProfileId?: string
+  }
   isNewUser?: boolean
   requiresProfileCompletion?: boolean
   error?: string

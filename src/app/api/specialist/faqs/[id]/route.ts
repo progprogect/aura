@@ -23,7 +23,7 @@ export async function DELETE(
     // Проверяем, что FAQ принадлежит текущему специалисту
     const faq = await prisma.fAQ.findUnique({
       where: { id: faqId },
-      select: { specialistId: true }
+      select: { specialistProfileId: true }
     })
 
     if (!faq) {
@@ -33,7 +33,7 @@ export async function DELETE(
       )
     }
 
-    if (faq.specialistId !== session.specialistId) {
+    if (faq.specialistProfileId !== session.specialistProfile!.id) {
       return NextResponse.json(
         { success: false, error: 'Нет доступа' },
         { status: 403 }

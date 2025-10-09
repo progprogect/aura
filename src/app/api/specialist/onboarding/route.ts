@@ -50,10 +50,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 })
     }
 
-    // Проверяем, не создан ли уже профиль
-    if (session.specialist.firstName && session.specialist.lastName && session.specialist.about) {
+    // Проверяем, есть ли профиль специалиста
+    if (!session.specialistProfile) {
       return NextResponse.json(
-        { success: false, error: 'Профиль уже создан', slug: session.specialist.slug },
+        { success: false, error: 'Профиль специалиста не найден' },
+        { status: 404 }
+      )
+    }
+
+    // Проверяем, не заполнен ли уже профиль
+    const existingProfile = await prisma.specialistProfile.findUnique({
+      where: { id: session.specialistProfile!.id }
+    })
+
+    if (existingProfile && existingProfile.about && existingProfile.about.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'Профиль уже создан', slug: existingProfile.slug },
         { status: 400 }
       )
     }
@@ -67,24 +79,31 @@ export async function POST(request: NextRequest) {
     let slug = baseSlug
     let counter = 1
 
-    while (await prisma.specialist.findUnique({ where: { slug } })) {
+    while (await prisma.specialistProfile.findUnique({ where: { slug } })) {
       slug = `${baseSlug}-${counter}`
       counter++
     }
 
-    // Обновляем профиль специалиста
-    const specialist = await prisma.specialist.update({
-      where: { id: session.specialistId },
+    // Обновляем User (имя и фамилию)
+    await prisma.user.update({
+      where: { id: session.userId },
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
+        phone: data.phone,
+        email: data.email || null,
+      }
+    })
+
+    // Обновляем профиль специалиста
+    const specialistProfile = await prisma.specialistProfile.update({
+      where: { id: session.specialistProfile!.id },
+      data: {
         slug,
         category: data.category,
         tagline: data.tagline || null,
         about: data.about,
         specializations: data.specializations,
-        phone: data.phone,
-        email: data.email || null,
         city: data.city || null,
         country: data.country,
         workFormats: data.workFormats,
@@ -94,8 +113,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      specialistId: specialist.id,
-      slug: specialist.slug,
+      specialistProfileId: specialistProfile.id,
+      slug: specialistProfile.slug,
       message: 'Профиль успешно создан'
     })
 

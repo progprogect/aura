@@ -25,14 +25,46 @@ async function getSpecialist() {
   const session = await prisma.authSession.findFirst({
     where: {
       sessionToken,
-      expiresAt: { gt: new Date() }
+      expiresAt: { gt: new Date() },
+      isActive: true
     },
     include: {
-      specialist: true
+      user: {
+        include: {
+          specialistProfile: true
+        }
+      }
     }
   })
 
-  return session?.specialist || null
+  if (!session || !session.user.specialistProfile) {
+    return null
+  }
+
+  // Преобразуем в формат старой модели для совместимости
+  const user = session.user
+  const profile = user.specialistProfile
+
+  if (!profile) {
+    return null
+  }
+
+  return {
+    id: profile.id,
+    firstName: user.firstName || null,
+    lastName: user.lastName || null,
+    phone: user.phone,
+    avatar: user.avatar,
+    slug: profile.slug,
+    category: profile.category,
+    specializations: profile.specializations,
+    tagline: profile.tagline,
+    about: profile.about,
+    city: profile.city,
+    country: profile.country,
+    workFormats: profile.workFormats,
+    yearsOfPractice: profile.yearsOfPractice,
+  }
 }
 
 export default async function OnboardingPage() {
