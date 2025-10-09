@@ -1,5 +1,5 @@
 /**
- * API endpoint для входа специалиста (Unified)
+ * Единый API endpoint для входа (автоматическое определение типа пользователя)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await unifiedLogin({ phone, code, role: 'specialist' })
+    // Пытаемся войти без указания роли - система определит автоматически
+    const result = await unifiedLogin({ phone, code })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies
@@ -33,7 +34,8 @@ export async function POST(request: NextRequest) {
       
       // Отладочные логи
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[API/login] Cookie установлен: session_token=${result.sessionToken.substring(0, 10)}...`)
+        console.log(`[API/unified-login] Cookie установлен: session_token=${result.sessionToken.substring(0, 10)}...`)
+        console.log(`[API/unified-login] Тип пользователя: ${result.user?.hasSpecialistProfile ? 'specialist' : 'user'}`)
       }
       
       return response
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('[API/auth/login] Ошибка:', error)
+    console.error('[API/auth/unified-login] Ошибка:', error)
     return NextResponse.json(
       { success: false, error: 'Внутренняя ошибка сервера' },
       { status: 500 }

@@ -9,19 +9,15 @@ export {
   getProfileBySession
 } from './auth-service'
 
-// Unified auth для специалистов
+// Unified auth для всех типов пользователей
 export {
-  registerSpecialistUnified as registerSpecialist,
-  loginSpecialistUnified as loginSpecialist
-} from './specialist-auth-service'
-
-// Unified auth для обычных пользователей
-export {
-  registerUser,
-  loginUser,
-  getUserFromSession,
-  logoutUser
-} from './user-auth-service'
+  unifiedLogin as loginUser,
+  unifiedRegister as registerUser,
+  unifiedRegister as registerSpecialist,
+  unifiedLogin as loginSpecialist,
+  getUnifiedUserFromSession as getUserFromSession,
+  unifiedLogout as logoutUser
+} from './unified-auth-service'
 
 export { 
   sendSMS,

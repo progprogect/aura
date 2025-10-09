@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserFromSession } from '@/lib/auth/user-auth-service'
+import { getUnifiedUserFromSession } from '@/lib/auth/unified-auth-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const user = await getUserFromSession(sessionToken)
+    const user = await getUnifiedUserFromSession(sessionToken)
 
     if (!user) {
       return NextResponse.json(

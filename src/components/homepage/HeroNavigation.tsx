@@ -218,9 +218,9 @@ export function HeroNavigation() {
                   ) : (
                     <>
                       <Link
-                        href="/auth/login"
+                        href="/auth/user/login"
                         className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
-                          isActive('/auth/login') 
+                          isActive('/auth/user/login') 
                             ? 'border-blue-600 bg-blue-100 text-blue-700' 
                             : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
                         }`}

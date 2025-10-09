@@ -1,9 +1,9 @@
 /**
- * API endpoint для входа обычного пользователя
+ * API endpoint для входа обычного пользователя (Unified)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { loginUser } from '@/lib/auth/user-auth-service'
+import { unifiedLogin } from '@/lib/auth/unified-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await loginUser({ phone, code })
+    const result = await unifiedLogin({ phone, code, role: 'user' })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

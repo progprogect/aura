@@ -1,28 +1,27 @@
 /**
- * Страница входа для специалистов
+ * Единая страница входа для всех типов пользователей
  */
 
 import { Metadata } from 'next'
-import { AuthLoginFormWrapper } from '@/components/auth/AuthLoginFormWrapper'
-import { AuthNavigation } from '@/components/auth/AuthNavigation'
+import { AuthUnifiedLoginForm } from '@/components/auth/AuthUnifiedLoginForm'
 
 export const metadata: Metadata = {
-  title: 'Вход для специалистов | Аура',
-  description: 'Войдите в личный кабинет специалиста для управления профилем и заявками',
+  title: 'Вход | Aura',
+  description: 'Войдите в свой аккаунт Aura',
   robots: {
-    index: false, // Не индексируем страницы авторизации
+    index: false,
     follow: false,
   },
 }
 
-export default function LoginPage() {
+export default function UnifiedLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10">
       {/* Основной контент */}
       <div className="flex items-center justify-center min-h-screen px-4 py-8">
         <div className="w-full max-w-md">
-          {/* Форма входа */}
-          <AuthLoginFormWrapper />
+          {/* Единая форма входа */}
+          <AuthUnifiedLoginForm />
         </div>
       </div>
     </div>

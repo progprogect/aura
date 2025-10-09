@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { registerSpecialistUnified } from '@/lib/auth/specialist-auth-service'
+import { unifiedRegister } from '@/lib/auth/unified-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await registerSpecialistUnified({ phone, code })
+    const result = await unifiedRegister({ phone, code, role: 'specialist' })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

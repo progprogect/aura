@@ -1,9 +1,9 @@
 /**
- * API endpoint для регистрации обычного пользователя
+ * API endpoint для регистрации обычного пользователя (Unified)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { registerUser } from '@/lib/auth/user-auth-service'
+import { unifiedRegister } from '@/lib/auth/unified-auth-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await registerUser({ phone, code, firstName, lastName })
+    const result = await unifiedRegister({ phone, code, role: 'user', firstName, lastName })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

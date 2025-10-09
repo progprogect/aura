@@ -15,6 +15,7 @@ import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 type RegisterStep = 'phone' | 'code' | 'profile' | 'success'
 
@@ -386,6 +387,19 @@ export function AuthUserRegisterForm() {
           </motion.div>
         )}
         </AnimatePresence>
+      </div>
+
+      {/* Ссылка на вход */}
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
+          Уже есть аккаунт?{' '}
+          <Link 
+            href="/auth/login" 
+            className="text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            Войти
+          </Link>
+        </p>
       </div>
     </div>
   )
