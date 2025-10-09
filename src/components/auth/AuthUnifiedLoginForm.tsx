@@ -93,11 +93,7 @@ export function AuthUnifiedLoginForm() {
   }
 
   const handleVerifyCode = async () => {
-    if (!code || code.length !== 4) {
-      setError('Введите код из 4 цифр')
-      return
-    }
-
+    // Валидация не нужна, т.к. onComplete вызывается только при length=4
     setLoading(true)
     setError('')
 

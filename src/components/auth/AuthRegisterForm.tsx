@@ -92,12 +92,7 @@ export function AuthRegisterForm() {
   }
 
   const handleVerifyCode = async () => {
-    // Проверяем длину кода
-    if (!code || code.length !== 4) {
-      setError('Код обязателен')
-      return
-    }
-
+    // Валидация не нужна, т.к. onComplete вызывается только при length=4
     setLoading(true)
     setError('')
 

@@ -95,14 +95,10 @@ export function AuthUserRegisterForm() {
   }
 
   const handleVerifyCode = async () => {
-    if (!code || code.length !== 4) {
-      setError('Введите код из 4 цифр')
-      return
-    }
-
-    // Переходим к вводу имени и фамилии
-    setStep('profile')
+    // Очищаем ошибку и переходим к вводу имени и фамилии
+    // Валидация не нужна, т.к. onComplete вызывается только при length=4
     setError('')
+    setStep('profile')
   }
 
   const handleRegister = async () => {
