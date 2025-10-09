@@ -263,9 +263,12 @@ export function SpecialistHero({
                 transition={{ delay: 0.4 }}
                 className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-600 md:justify-start lg:text-base"
               >
-                {/* Основная специализация */}
+                {/* Категория и специализация */}
                 <span className="font-medium">
-                  {categoryEmoji} {categoryName || specializations[0] || 'Специалист'}
+                  {categoryEmoji} {categoryName || 'Специалист'}
+                  {specializations[0] && specializations[0] !== categoryName && (
+                    <span className="text-gray-500"> • {specializations[0]}</span>
+                  )}
                 </span>
 
                 {/* Разделитель */}
