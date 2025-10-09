@@ -105,7 +105,12 @@ export function AuthLoginForm() {
   }
 
   const handleVerifyCode = async () => {
-    // Убираем дублирующую валидацию - SMSCodeInput уже проверяет длину
+    // Проверяем длину кода
+    if (!code || code.length !== 4) {
+      setError('Код обязателен')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -223,7 +228,6 @@ export function AuthLoginForm() {
             <SMSCodeInput
               value={code}
               onChange={setCode}
-              onComplete={handleVerifyCode}
               disabled={loading}
               length={4}
             />

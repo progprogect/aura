@@ -92,7 +92,12 @@ export function AuthRegisterForm() {
   }
 
   const handleVerifyCode = async () => {
-    // Убираем дублирующую валидацию - SMSCodeInput уже проверяет длину
+    // Проверяем длину кода
+    if (!code || code.length !== 4) {
+      setError('Код обязателен')
+      return
+    }
+
     setLoading(true)
     setError('')
 
