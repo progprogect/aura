@@ -5,7 +5,8 @@
 
 import { prisma } from '@/lib/db'
 import { SMSVerificationService } from './business-logic'
-import { generateSessionToken, normalizePhone } from './utils'
+import { generateSessionToken } from './utils'
+import { normalizePhoneNumber } from '@/lib/phone/country-codes'
 
 export type UserRole = 'user' | 'specialist'
 
@@ -60,7 +61,7 @@ export async function unifiedLogin(data: UnifiedLoginData): Promise<UnifiedAuthR
       }
     }
     
-    const normalizedPhone = normalizePhone(phone)
+    const normalizedPhone = normalizePhoneNumber(phone)
     
     // 2. Ищем пользователя
     const user = await prisma.user.findUnique({
@@ -151,7 +152,7 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
       }
     }
     
-    const normalizedPhone = normalizePhone(phone)
+    const normalizedPhone = normalizePhoneNumber(phone)
     
     // 2. Проверяем что пользователь не существует
     const existingUser = await prisma.user.findUnique({

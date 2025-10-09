@@ -83,13 +83,15 @@ export function usePhoneValidation(
     // 2. Мало цифр для валидации
     // 3. Валидация в процессе (debounce)
     // 4. Номер валидный
-    if (!value || digitCount < minLengthForValidation || isPending || validation.isValid) {
+    // 5. Номер слишком короткий (меньше 7 цифр)
+    if (!value || digitCount < minLengthForValidation || isPending || validation.isValid || digitCount < 7) {
       return false
     }
 
     // Показываем ошибку если:
     // 1. Валидация немедленная ИЛИ пользователь покинул поле
-    return immediate || hasBlurred
+    // 2. И номер достаточно длинный для валидации
+    return (immediate || hasBlurred) && digitCount >= 7
   }, [value, digitCount, minLengthForValidation, isPending, validation.isValid, immediate, hasBlurred])
 
   return {

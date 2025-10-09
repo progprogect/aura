@@ -683,12 +683,18 @@ export function validatePhoneNumber(input: string): { isValid: boolean; error?: 
     return { isValid: false, error: 'Номер телефона обязателен' }
   }
   
-  const country = detectCountryCode(digits)
-  if (!country) {
-    return { isValid: false, error: 'Неверный код страны' }
+  // Если номер слишком короткий для валидации - не показываем ошибку
+  if (digits.length < 4) {
+    return { isValid: true } // Считаем валидным пока пользователь вводит
   }
   
-  if (digits.length < country.length - 1) {
+  const country = detectCountryCode(digits)
+  if (!country) {
+    return { isValid: false, error: 'Неверный формат номера телефона' }
+  }
+  
+  // Проверяем длину только если номер достаточно длинный
+  if (digits.length >= country.length - 2 && digits.length < country.length - 1) {
     return { isValid: false, error: `Номер слишком короткий для ${country.name}` }
   }
   
