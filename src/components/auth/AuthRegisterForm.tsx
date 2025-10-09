@@ -110,8 +110,9 @@ export function AuthRegisterForm() {
         setStep('success')
         
         // Перенаправляем на онбординг через 1.5 секунды
+        // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          router.push('/specialist/onboarding')
+          window.location.href = '/specialist/onboarding'
         }, 1500)
       } else {
         setError(data.error || 'Неверный код')

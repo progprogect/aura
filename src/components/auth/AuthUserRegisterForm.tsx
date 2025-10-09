@@ -128,9 +128,9 @@ export function AuthUserRegisterForm() {
         setStep('success')
         
         // Редирект на главную через 2 секунды
+        // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          router.push('/')
-          router.refresh()
+          window.location.href = '/'
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при регистрации')

@@ -114,13 +114,13 @@ export function AuthUnifiedLoginForm() {
         setStep('success')
         
         // Редирект в зависимости от типа пользователя
+        // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
           if (isSpecialist) {
-            router.push('/specialist/dashboard')
+            window.location.href = '/specialist/dashboard'
           } else {
-            router.push('/')
+            window.location.href = '/'
           }
-          router.refresh()
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при входе')
