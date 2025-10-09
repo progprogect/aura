@@ -1,6 +1,7 @@
 /**
- * Auth service (только общие функции)
- * Специфичные функции перенесены в specialist-auth-service.ts и user-auth-service.ts
+ * Auth service - Legacy совместимость
+ * Основная логика авторизации в unified-auth-service.ts
+ * Этот файл содержит только общие утилиты (SMS, rate limiting, сессии)
  */
 
 import { sendSMS } from './sms-service'

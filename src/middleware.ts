@@ -17,16 +17,17 @@ export function middleware(request: NextRequest) {
     console.log(`[Middleware] ${pathname} - sessionToken: ${sessionToken ? 'exists' : 'missing'}`)
   }
   
-  // Защищённые маршруты специалистов (требуют SpecialistProfile)
-  const specialistRoutes = ['/specialist/dashboard', '/specialist/profile', '/specialist/onboarding']
+  // Защищённые маршруты специалистов
+  // Note: /specialist/dashboard редиректит на /profile (см. src/app/specialist/dashboard/page.tsx)
+  const specialistRoutes = ['/specialist/profile', '/specialist/onboarding', '/specialist/requests']
   const isSpecialistRoute = specialistRoutes.some(route => pathname.startsWith(route))
   
   // Защищённые маршруты обычных пользователей
   const userProtectedRoutes: string[] = ['/profile', '/favorites', '/auth/user/become-specialist']
   const isUserProtectedRoute = userProtectedRoutes.some(route => pathname.startsWith(route))
   
-  // Маршруты авторизации
-  const authRoutes = ['/auth/login', '/auth/register', '/auth/user/login', '/auth/user/register', '/auth/user/become-specialist']
+  // Маршруты авторизации (не требуют дополнительных проверок)
+  const authRoutes = ['/auth/login', '/auth/register', '/auth/user/register', '/auth/user/become-specialist']
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
   
   // Если не авторизован и пытается зайти на защищённый маршрут специалиста
