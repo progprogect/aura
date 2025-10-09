@@ -63,10 +63,10 @@ export function FeaturedSpecialists() {
             </div>
 
             {/* Мобильный */}
-            <div className="md:hidden -mx-6">
-              <div className="flex gap-4 overflow-x-auto pb-4 mb-8 snap-x snap-mandatory scrollbar-hide px-6">
+            <div className="md:hidden -mx-4 sm:-mx-6">
+              <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 mb-8 snap-x snap-mandatory scrollbar-hide px-4 sm:px-6">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="min-w-[280px] snap-start flex-shrink-0">
+                  <div key={i} className="w-[calc(100vw-2rem)] min-w-[260px] max-w-[300px] sm:min-w-[280px] snap-start flex-shrink-0">
                     <SkeletonCard />
                   </div>
                 ))}
@@ -82,11 +82,11 @@ export function FeaturedSpecialists() {
               ))}
             </div>
 
-            {/* Мобильный: Горизонтальный скролл */}
-            <div className="md:hidden -mx-6">
-              <div className="flex gap-4 overflow-x-auto pb-4 mb-12 snap-x snap-mandatory scrollbar-hide px-6">
+            {/* Мобильный: Адаптивный горизонтальный скролл */}
+            <div className="md:hidden -mx-4 sm:-mx-6">
+              <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 mb-12 snap-x snap-mandatory scrollbar-hide px-4 sm:px-6">
                 {specialists.map((specialist) => (
-                  <div key={specialist.id} className="min-w-[280px] snap-start flex-shrink-0">
+                  <div key={specialist.id} className="w-[calc(100vw-2rem)] min-w-[260px] max-w-[300px] sm:min-w-[280px] snap-start flex-shrink-0">
                     <SpecialistCard specialist={specialist} />
                   </div>
                 ))}
