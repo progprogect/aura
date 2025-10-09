@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getUnifiedUserFromSession } from '@/lib/auth/unified-auth-service'
+import { generateSlug } from '@/lib/utils/slug'
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,11 +37,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Генерируем уникальный slug
-    const baseSlug = `${currentUser.firstName}-${currentUser.lastName}`.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9а-я-]/gi, '')
-    
+    // Генерируем уникальный slug с транслитерацией
+    const baseSlug = generateSlug(`${currentUser.firstName} ${currentUser.lastName}`) || 'specialist'
     const slug = await generateUniqueSlug(baseSlug)
 
     // Создаём профиль специалиста

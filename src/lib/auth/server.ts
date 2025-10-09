@@ -4,6 +4,7 @@
 
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
+import { generateSlug } from '@/lib/utils/slug'
 
 /**
  * Получить текущего авторизованного пользователя (с профилем специалиста если есть)
@@ -134,15 +135,11 @@ export async function ensureSlugExists(userId: string): Promise<string | null> {
       return profile.slug
     }
 
-    // Генерируем новый slug
+    // Генерируем новый slug с транслитерацией
     console.warn('[ensureSlugExists] Slug отсутствует для профиля', profile.id, '- генерируем новый')
     
-    const baseSlug = `${user.firstName}-${user.lastName}`
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9а-яё-]/gi, '')
-    
-    let slug = baseSlug || 'specialist'
+    const baseSlug = generateSlug(`${user.firstName} ${user.lastName}`) || 'specialist'
+    let slug = baseSlug
     let counter = 1
 
     // Ищем уникальный slug

@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db'
 import { SMSVerificationService } from './business-logic'
+import { generateSlug } from '@/lib/utils/slug'
 import { generateSessionToken } from './utils'
 import { normalizePhoneNumber } from '@/lib/phone/country-codes'
 
@@ -178,8 +179,8 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
     // 4. Если роль specialist - создаём профиль специалиста
     let createdSlug: string | undefined
     if (role === 'specialist') {
-      // Генерируем уникальный slug
-      const baseSlug = `${user.firstName.toLowerCase()}-${user.lastName.toLowerCase()}`.replace(/\s+/g, '-')
+      // Генерируем уникальный slug с транслитерацией
+      const baseSlug = generateSlug(`${user.firstName} ${user.lastName}`) || 'specialist'
       let slug = baseSlug
       let counter = 1
       
