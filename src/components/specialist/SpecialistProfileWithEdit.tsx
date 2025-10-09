@@ -38,6 +38,7 @@ interface SpecialistProfileWithEditProps {
     avatar: string | null
     category: string
     categoryEmoji?: string
+    categoryName?: string
     tagline: string | null
     city: string | null
     country?: string
@@ -209,6 +210,7 @@ export function SpecialistProfileWithEdit({
           avatar={heroData.avatar}
           category={heroData.category}
           categoryEmoji={heroData.categoryEmoji}
+          categoryName={heroData.categoryName}
           specializations={heroData.specializations}
           tagline={heroData.tagline}
           city={heroData.city}

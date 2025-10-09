@@ -41,13 +41,15 @@ export function SpecialistSpecialization({
     return value
   }
 
-  // Фильтруем только те поля, которые есть в customFields и в конфиге (для режима просмотра)
-  const fields = Object.entries(config.fields)
-    .filter(([key]) => customFields?.[key])
-    .map(([key, fieldConfig]) => ({
-      ...fieldConfig,
-      value: customFields[key],
-    }))
+  // В режиме просмотра фильтруем только заполненные поля
+  const fields = !isEditMode 
+    ? Object.entries(config.fields)
+        .filter(([key]) => customFields?.[key])
+        .map(([key, fieldConfig]) => ({
+          ...fieldConfig,
+          value: customFields[key],
+        }))
+    : [] // В режиме редактирования используем CustomFieldsEditor
 
   if (!isEditMode && fields.length === 0) {
     return null

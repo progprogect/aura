@@ -166,6 +166,7 @@ export default async function SpecialistPage({ params }: PageProps) {
           avatar: specialist.avatar,
           category: specialist.category,
           categoryEmoji: categoryConfig?.emoji,
+          categoryName: categoryConfig?.name,
           tagline: specialist.tagline,
           city: specialist.city,
           country: specialist.country,

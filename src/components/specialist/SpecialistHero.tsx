@@ -17,6 +17,7 @@ export interface SpecialistHeroProps {
   avatar?: string | null
   category: string
   categoryEmoji?: string
+  categoryName?: string
   specializations: string[]
   tagline?: string | null
   city?: string | null
@@ -39,6 +40,7 @@ export function SpecialistHero({
   avatar,
   category,
   categoryEmoji = '✨',
+  categoryName,
   specializations,
   tagline,
   city,
@@ -263,7 +265,7 @@ export function SpecialistHero({
               >
                 {/* Основная специализация */}
                 <span className="font-medium">
-                  {categoryEmoji} {specializations[0] || 'Специалист'}
+                  {categoryEmoji} {categoryName || specializations[0] || 'Специалист'}
                 </span>
 
                 {/* Разделитель */}
