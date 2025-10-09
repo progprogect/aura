@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,7 +29,7 @@ export function AuthRegisterForm() {
   const router = useRouter()
 
   // Таймер обратного отсчёта
-  useState(() => {
+  useEffect(() => {
     if (!codeExpiry) return
 
     const timer = setInterval(() => {
@@ -45,7 +45,7 @@ export function AuthRegisterForm() {
     }, 1000)
 
     return () => clearInterval(timer)
-  })
+  }, [codeExpiry])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
