@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Upload, Loader2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,9 +15,18 @@ interface LeadMagnetModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  editingMagnet?: {
+    id: string
+    type: 'file' | 'link' | 'service'
+    title: string
+    description: string
+    fileUrl?: string | null
+    linkUrl?: string | null
+    emoji: string
+  } | null
 }
 
-export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalProps) {
+export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: LeadMagnetModalProps) {
   const [type, setType] = useState<'file' | 'link' | 'service'>('file')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -27,9 +36,39 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
   const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Инициализация данных при редактировании
+  React.useEffect(() => {
+    if (editingMagnet) {
+      setType(editingMagnet.type)
+      setTitle(editingMagnet.title)
+      setDescription(editingMagnet.description)
+      setLinkUrl(editingMagnet.linkUrl || '')
+      setEmoji(editingMagnet.emoji)
+      setFile(null)
+    } else {
+      resetForm()
+    }
+  }, [editingMagnet, isOpen])
+
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim()) {
-      alert('Заполните название и описание')
+    // Улучшенная валидация с указанием требований
+    if (!title.trim()) {
+      alert('Название обязательно (минимум 5 символов)')
+      return
+    }
+
+    if (title.trim().length < 5) {
+      alert('Название должно содержать минимум 5 символов')
+      return
+    }
+
+    if (!description.trim()) {
+      alert('Описание обязательно (минимум 10 символов)')
+      return
+    }
+
+    if (description.trim().length < 10) {
+      alert('Описание должно содержать минимум 10 символов')
       return
     }
 
@@ -38,7 +77,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
       return
     }
 
-    if (type === 'file' && !file) {
+    if (type === 'file' && !file && !editingMagnet?.fileUrl) {
       alert('Загрузите файл')
       return
     }
@@ -46,6 +85,10 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
     setIsSaving(true)
 
     try {
+      const isEditing = !!editingMagnet
+      const url = isEditing ? `/api/specialist/lead-magnets/${editingMagnet.id}` : '/api/specialist/lead-magnets'
+      const method = isEditing ? 'PUT' : 'POST'
+
       // Для файла используем FormData
       if (type === 'file' && file) {
         const formData = new FormData()
@@ -55,44 +98,45 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
         formData.append('description', description.trim())
         formData.append('emoji', emoji)
 
-        const response = await fetch('/api/specialist/lead-magnets', {
-          method: 'POST',
+        const response = await fetch(url, {
+          method,
           body: formData,
         })
 
         if (response.ok) {
           onSuccess()
-          resetForm()
+          if (!isEditing) resetForm()
         } else {
           const error = await response.json()
-          alert(error.error || 'Ошибка создания')
+          alert(error.error || `Ошибка ${isEditing ? 'обновления' : 'создания'}`)
         }
         return
       }
 
       // Для ссылки и услуги используем JSON
-      const response = await fetch('/api/specialist/lead-magnets', {
-        method: 'POST',
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type,
           title: title.trim(),
           description: description.trim(),
           linkUrl: type === 'link' ? linkUrl.trim() : null,
+          fileUrl: type === 'file' ? editingMagnet?.fileUrl : null,
           emoji,
         }),
       })
 
       if (response.ok) {
         onSuccess()
-        resetForm()
+        if (!isEditing) resetForm()
       } else {
         const error = await response.json()
-        alert(error.error || 'Ошибка создания')
+        alert(error.error || `Ошибка ${isEditing ? 'обновления' : 'создания'}`)
       }
     } catch (error) {
       console.error('Ошибка:', error)
-      alert('Ошибка создания лид-магнита')
+      alert(`Ошибка ${editingMagnet ? 'обновления' : 'создания'} лид-магнита`)
     } finally {
       setIsSaving(false)
     }
@@ -143,7 +187,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
             <h2 className="text-xl font-semibold text-gray-900">
-              Добавить лид-магнит
+              {editingMagnet ? 'Редактировать лид-магнит' : 'Добавить лид-магнит'}
             </h2>
             <button
               onClick={onClose}
@@ -198,7 +242,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
             {/* Название */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900">
-                Название
+                Название <span className="text-red-500">*</span>
               </label>
               <Input
                 value={title}
@@ -206,13 +250,18 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
                 placeholder="Чек-лист: 10 признаков тревоги"
                 maxLength={100}
               />
-              <p className="text-xs text-gray-500">{title.length}/100</p>
+              <p className="text-xs text-gray-500">
+                Минимум 5 символов. Сейчас: {title.length}/100
+                {title.length > 0 && title.length < 5 && (
+                  <span className="text-red-500 ml-2">⚠️ Слишком коротко</span>
+                )}
+              </p>
             </div>
 
             {/* Описание */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900">
-                Описание
+                Описание <span className="text-red-500">*</span>
               </label>
               <Textarea
                 value={description}
@@ -221,7 +270,12 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess }: LeadMagnetModalP
                 rows={3}
                 maxLength={200}
               />
-              <p className="text-xs text-gray-500">{description.length}/200</p>
+              <p className="text-xs text-gray-500">
+                Минимум 10 символов. Сейчас: {description.length}/200
+                {description.length > 0 && description.length < 10 && (
+                  <span className="text-red-500 ml-2">⚠️ Слишком коротко</span>
+                )}
+              </p>
             </div>
 
             {/* Поле в зависимости от типа */}

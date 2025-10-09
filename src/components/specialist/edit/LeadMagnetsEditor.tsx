@@ -5,7 +5,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, FileText, Link as LinkIcon, Gift } from 'lucide-react'
+import { Plus, Trash2, Edit, FileText, Link as LinkIcon, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LeadMagnetModal } from './LeadMagnetModal'
 
@@ -26,6 +26,7 @@ interface LeadMagnetsEditorProps {
 
 export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingMagnet, setEditingMagnet] = useState<LeadMagnet | null>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
@@ -116,13 +117,21 @@ export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorP
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDelete(magnet.id)}
-                    disabled={isDeleting === magnet.id}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setEditingMagnet(magnet)}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(magnet.id)}
+                      disabled={isDeleting === magnet.id}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             )
@@ -151,6 +160,17 @@ export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorP
           setIsModalOpen(false)
           onRefresh()
         }}
+      />
+
+      {/* Модальное окно редактирования */}
+      <LeadMagnetModal
+        isOpen={!!editingMagnet}
+        onClose={() => setEditingMagnet(null)}
+        onSuccess={() => {
+          setEditingMagnet(null)
+          onRefresh()
+        }}
+        editingMagnet={editingMagnet}
       />
     </div>
   )
