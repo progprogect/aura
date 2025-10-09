@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (data.type === 'link' && !data.linkUrl) {
+    if (data.type === 'link' && (!data.linkUrl || data.linkUrl.trim() === '')) {
       return NextResponse.json(
         { success: false, error: 'Ссылка обязательна для типа "link"' },
         { status: 400 }

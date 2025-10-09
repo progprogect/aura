@@ -131,7 +131,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           type,
           title: title.trim(),
           description: description.trim(),
-          ...(type === 'link' && { linkUrl: linkUrl.trim() }),
+          ...(type === 'link' && linkUrl.trim() && { linkUrl: linkUrl.trim() }),
           ...(type === 'file' && editingMagnet?.fileUrl && { fileUrl: editingMagnet.fileUrl }),
           emoji,
         }),
