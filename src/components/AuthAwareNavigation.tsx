@@ -78,7 +78,7 @@ export function AuthAwareNavigation() {
                 {isAuthenticated ? (
                   <>
                     <Link
-                      href="/specialist/dashboard"
+                      href="/profile"
                       className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                     >
                       {user?.avatar ? (
@@ -191,7 +191,7 @@ export function AuthAwareNavigation() {
                   {isAuthenticated ? (
                     <>
                       <Link
-                        href="/specialist/dashboard"
+                        href="/profile"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                         onClick={closeMobileMenu}
                       >
@@ -220,9 +220,9 @@ export function AuthAwareNavigation() {
                   ) : (
                     <>
                       <Link
-                        href="/auth/user/login"
+                        href="/auth/login"
                         className={`block px-4 py-2.5 rounded-lg border text-base font-medium transition-all duration-200 ${
-                          isActive('/auth/user/login') 
+                          isActive('/auth/login') 
                             ? 'border-blue-600 bg-blue-100 text-blue-700' 
                             : 'border-gray-300 text-gray-700 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100'
                         }`}

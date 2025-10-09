@@ -38,9 +38,9 @@ export default function BecomeSpecialistPage() {
         setSuccess(true)
         setSpecialistSlug(data.specialistProfile.slug)
         
-        // Редирект на онбординг через 3 секунды
+        // Редирект в личный кабинет через 3 секунды
         setTimeout(() => {
-          window.location.href = '/specialist/onboarding'
+          window.location.href = '/profile'
         }, 3000)
       } else {
         setError(data.error || 'Произошла ошибка при создании профиля специалиста')
@@ -73,21 +73,21 @@ export default function BecomeSpecialistPage() {
               <Alert>
                 <CheckCircle2 className="h-4 w-4" />
                 <AlertDescription>
-                  Профиль специалиста создан. Теперь заполните информацию о себе, чтобы клиенты могли вас найти.
+                  Профиль специалиста создан. Теперь вы можете заполнить информацию о себе в личном кабинете.
                 </AlertDescription>
               </Alert>
               
               <div className="text-center">
                 <p className="text-sm text-gray-500 mb-4">
-                  Перенаправление на страницу настройки профиля через 3 секунды...
+                  Перенаправление в личный кабинет через 3 секунды...
                 </p>
                 <Button 
-                  onClick={() => window.location.href = '/specialist/onboarding'}
+                  onClick={() => window.location.href = '/profile'}
                   className="w-full"
                   size="lg"
                 >
                   <Stethoscope className="h-4 w-4 mr-2" />
-                  Перейти к настройке профиля
+                  Перейти в личный кабинет
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>

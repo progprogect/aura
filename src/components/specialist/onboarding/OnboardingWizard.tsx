@@ -139,7 +139,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
         setCurrentStep(4) // "Успех" экран
         
         setTimeout(() => {
-          router.push('/specialist/dashboard')
+          router.push('/profile')
         }, 2000)
       } else {
         // Обрабатываем ошибки валидации с сервера

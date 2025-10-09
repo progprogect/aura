@@ -121,14 +121,10 @@ export function AuthUnifiedLoginForm() {
         setUserType(isSpecialist ? 'specialist' : 'user')
         setStep('success')
         
-        // Редирект в зависимости от типа пользователя
+        // Редирект в личный кабинет (единый для всех)
         // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          if (isSpecialist) {
-            window.location.href = '/specialist/dashboard'
-          } else {
-            window.location.href = '/profile'
-          }
+          window.location.href = '/profile'
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при входе')
