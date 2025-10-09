@@ -263,12 +263,9 @@ export function SpecialistHero({
                 transition={{ delay: 0.4 }}
                 className="mt-2 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-600 md:justify-start lg:text-base"
               >
-                {/* Категория и специализация */}
+                {/* Категория */}
                 <span className="font-medium">
                   {categoryEmoji} {categoryName || 'Специалист'}
-                  {specializations[0] && specializations[0] !== categoryName && (
-                    <span className="text-gray-500"> • {specializations[0]}</span>
-                  )}
                 </span>
 
                 {/* Разделитель */}
@@ -328,15 +325,15 @@ export function SpecialistHero({
                 </span>
               </motion.div>
 
-              {/* Дополнительные специализации (теги) */}
-              {specializations.length > 1 && (
+              {/* Специализации (теги) */}
+              {specializations.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
                   className="mt-4 flex flex-wrap justify-center gap-2 md:justify-start"
                 >
-                  {specializations.slice(1, 4).map((spec, index) => (
+                  {specializations.slice(0, 4).map((spec, index) => (
                     <Tag key={index} variant="default">
                       {spec}
                     </Tag>
