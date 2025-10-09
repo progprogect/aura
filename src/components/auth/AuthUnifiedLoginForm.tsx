@@ -127,7 +127,7 @@ export function AuthUnifiedLoginForm() {
           if (isSpecialist) {
             window.location.href = '/specialist/dashboard'
           } else {
-            window.location.href = '/'
+            window.location.href = '/profile'
           }
         }, 2000)
       } else {

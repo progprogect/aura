@@ -19,18 +19,51 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      // Проверяем авторизацию через API (cookies автоматически отправляются)
-      const response = await fetch('/api/auth/profile', {
-        credentials: 'include', // Включаем cookies
+      // Сначала пробуем получить данные пользователя (для всех типов)
+      const userResponse = await fetch('/api/auth/user/me', {
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
       })
 
-      const data = await response.json()
+      const userData = await userResponse.json()
 
-      if (data.success && data.profile) {
-        setUser(data.profile)
+      if (userData.success && userData.user) {
+        // Если пользователь - специалист, получаем полный профиль
+        if (userData.user.hasSpecialistProfile) {
+          const profileResponse = await fetch('/api/auth/profile', {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+
+          const profileData = await profileResponse.json()
+          if (profileData.success && profileData.profile) {
+            setUser(profileData.profile)
+          } else {
+            // Если профиль специалиста не найден, используем базовые данные
+            setUser({
+              id: userData.user.id,
+              firstName: userData.user.firstName,
+              lastName: userData.user.lastName,
+              email: userData.user.email,
+              phone: userData.user.phone,
+              avatar: userData.user.avatar
+            } as any)
+          }
+        } else {
+          // Обычный пользователь - используем базовые данные
+          setUser({
+            id: userData.user.id,
+            firstName: userData.user.firstName,
+            lastName: userData.user.lastName,
+            email: userData.user.email,
+            phone: userData.user.phone,
+            avatar: userData.user.avatar
+          } as any)
+        }
       } else {
         setUser(null)
         // Очищаем localStorage если он есть (для совместимости)

@@ -21,8 +21,8 @@ export function middleware(request: NextRequest) {
   const specialistRoutes = ['/specialist/dashboard', '/specialist/profile', '/specialist/onboarding']
   const isSpecialistRoute = specialistRoutes.some(route => pathname.startsWith(route))
   
-  // Защищённые маршруты обычных пользователей (пока пустой массив, добавим позже)
-  const userProtectedRoutes: string[] = [] // например: ['/profile', '/favorites']
+  // Защищённые маршруты обычных пользователей
+  const userProtectedRoutes: string[] = ['/profile', '/favorites']
   const isUserProtectedRoute = userProtectedRoutes.some(route => pathname.startsWith(route))
   
   // Маршруты авторизации
@@ -40,7 +40,7 @@ export function middleware(request: NextRequest) {
   // Если не авторизован и пытается зайти на защищённый маршрут пользователя
   if (isUserProtectedRoute && !sessionToken) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/user/login' // Для пользователей редирект на вход пользователя
+    url.pathname = '/auth/login' // Используем единый вход
     url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
   }

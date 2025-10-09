@@ -127,10 +127,10 @@ export function AuthUserRegisterForm() {
       if (data.success) {
         setStep('success')
         
-        // Редирект на главную через 2 секунды
+        // Редирект в личный кабинет через 2 секунды
         // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          window.location.href = '/'
+          window.location.href = '/profile'
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при регистрации')
