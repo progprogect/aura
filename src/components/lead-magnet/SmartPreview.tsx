@@ -379,7 +379,7 @@ function ServiceRequestForm({
 
   return (
     <div className={cn(
-      "w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-4 flex flex-col justify-center",
+      "w-full h-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-center",
     )}>
       {isSuccess ? (
         <motion.div
@@ -394,29 +394,16 @@ function ServiceRequestForm({
           </p>
         </motion.div>
       ) : (
-        <div className="space-y-4">
-          {/* Заголовок формы */}
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-2">
-              <span className="text-2xl text-white">{leadMagnet.emoji || '💼'}</span>
-            </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">
-              Заявка на услугу
-            </h3>
-            <p className="text-xs text-gray-600">
-              Заполните форму для связи
-            </p>
-          </div>
-
-          {/* Компактная форма */}
+        <div className="space-y-3">
+          {/* Минималистичная форма */}
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ваше имя *"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                placeholder="Ваше имя"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
             </div>
@@ -426,8 +413,8 @@ function ServiceRequestForm({
                 type="text"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                placeholder="Телефон или Telegram *"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                placeholder="Телефон или Telegram"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 required
               />
             </div>
@@ -438,14 +425,14 @@ function ServiceRequestForm({
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Сообщение (необязательно)"
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm resize-none"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
             </button>
