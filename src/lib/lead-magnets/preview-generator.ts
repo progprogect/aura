@@ -349,7 +349,7 @@ export function getAspectRatio(type: string, platform?: Platform): string {
   }
   
   if (type === 'image') {
-    return 'aspect-[4/3]' // 4:3 для изображений
+    return 'aspect-auto' // Автоматические пропорции для изображений
   }
   
   if (type === 'document' && platform === 'figma') {
@@ -365,4 +365,35 @@ export function getAspectRatio(type: string, platform?: Platform): string {
   }
   
   return 'aspect-[4/3]' // По умолчанию
+}
+
+/**
+ * Получает динамические стили для превью с учетом пропорций
+ */
+export function getPreviewStyles(type: string, platform?: Platform): {
+  aspectRatio: string
+  maxHeight?: string
+  objectFit?: string
+} {
+  const aspectRatio = getAspectRatio(type, platform)
+  
+  if (type === 'image') {
+    return {
+      aspectRatio: 'auto',
+      maxHeight: '500px', // Ограничиваем высоту для изображений
+      objectFit: 'contain'
+    }
+  }
+  
+  if (type === 'video') {
+    return {
+      aspectRatio: '16/9',
+      objectFit: 'cover'
+    }
+  }
+  
+  return {
+    aspectRatio: aspectRatio.replace('aspect-', '').replace('[', '').replace(']', ''),
+    objectFit: 'cover'
+  }
 }

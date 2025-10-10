@@ -5,12 +5,15 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetPreviewData, getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
-import { generateLinkPreview, generateFilePreview, getAspectRatio } from '@/lib/lead-magnets/preview-generator'
+import { generateLinkPreview, generateFilePreview, getAspectRatio, getPreviewStyles } from '@/lib/lead-magnets/preview-generator'
 import { ServicePreview } from './ServicePreview'
+import { LeadMagnetRequestModal } from '@/components/specialist/LeadMagnetRequestModal'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SmartPreviewProps {
-  leadMagnet: Pick<LeadMagnet, 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title' | 'description' | 'highlights'>
+  leadMagnet: Pick<LeadMagnet, 'id' | 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title' | 'description' | 'highlights'>
+  specialistId?: string
+  specialistName?: string
   className?: string
 }
 
@@ -310,8 +313,77 @@ function DocumentPreview({ url, title, type }: { url: string; title: string; typ
   )
 }
 
-export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
+// Компонент формы заявки на услугу
+function ServiceRequestForm({ 
+  leadMagnet, 
+  onOpenModal 
+}: { 
+  leadMagnet: Pick<LeadMagnet, 'title' | 'description' | 'emoji' | 'highlights'>
+  onOpenModal: () => void 
+}) {
+  return (
+    <div className={cn(
+      "w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 flex flex-col",
+    )}>
+      {/* Заголовок с иконкой */}
+      <div className="text-center mb-4">
+        <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <span className="text-3xl text-white">{leadMagnet.emoji || '💼'}</span>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {leadMagnet.title}
+        </h3>
+        {leadMagnet.description && (
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {leadMagnet.description}
+          </p>
+        )}
+      </div>
+
+      {/* Highlights если есть */}
+      {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
+        <div className="flex-1 mb-4">
+          <h4 className="text-sm font-medium text-gray-900 mb-2">
+            Что включает:
+          </h4>
+          <ul className="space-y-1">
+            {leadMagnet.highlights.slice(0, 3).map((highlight, index) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="flex items-start space-x-2 text-xs text-gray-700"
+              >
+                <div className="flex-shrink-0 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                </div>
+                <span>{highlight}</span>
+              </motion.li>
+            ))}
+            {leadMagnet.highlights.length > 3 && (
+              <li className="text-xs text-gray-500 ml-6">
+                и ещё {leadMagnet.highlights.length - 3} пункт{leadMagnet.highlights.length === 4 ? '' : 'ов'}
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      {/* CTA кнопка */}
+      <button
+        onClick={onOpenModal}
+        className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-center"
+      >
+        Записаться на консультацию
+      </button>
+    </div>
+  )
+}
+
+export function SmartPreview({ leadMagnet, specialistId, specialistName, className }: SmartPreviewProps) {
   const previewData = getLeadMagnetPreviewData(leadMagnet)
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
 
   // Определяем правильный aspect-ratio для превью
   const getPreviewAspectRatio = () => {
@@ -327,8 +399,28 @@ export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
       return getAspectRatio(filePreview.type, filePreview.platform)
     }
 
-    // Для сервисов и остальных - универсальный формат
+    // Для сервисов - квадратный формат для формы
+    if (leadMagnet.type === 'service') {
+      return 'aspect-square'
+    }
+
+    // Для остальных - универсальный формат
     return 'aspect-[4/3]'
+  }
+
+  // Получаем динамические стили для превью
+  const getDynamicPreviewStyles = () => {
+    if (leadMagnet.type === 'link' && leadMagnet.linkUrl) {
+      const linkPreview = generateLinkPreview(leadMagnet.linkUrl, leadMagnet.ogImage || undefined)
+      return getPreviewStyles(linkPreview.type, linkPreview.platform)
+    }
+
+    if (leadMagnet.type === 'file' && leadMagnet.fileUrl) {
+      const filePreview = generateFilePreview(leadMagnet.fileUrl, leadMagnet.fileUrl.split('/').pop())
+      return getPreviewStyles(filePreview.type, filePreview.platform)
+    }
+
+    return { aspectRatio: '4/3', objectFit: 'cover' }
   }
 
   // Логика определения типа превью
@@ -425,9 +517,9 @@ export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
       }
     }
 
-    // Для сервисов - показываем информационное превью
+    // Для сервисов - показываем форму заявки
     if (leadMagnet.type === 'service') {
-      return <ServicePreview leadMagnet={leadMagnet} />
+      return <ServiceRequestForm leadMagnet={leadMagnet} onOpenModal={() => setIsRequestModalOpen(true)} />
     }
 
     // Fallback - используем градиент с иконкой
@@ -445,19 +537,42 @@ export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
   }
 
   const aspectRatio = getPreviewAspectRatio()
+  const dynamicStyles = getDynamicPreviewStyles()
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className={cn(
-        "w-full",
-        aspectRatio,
-        className
+    <>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className={cn(
+          "w-full",
+          aspectRatio,
+          className
+        )}
+        style={{
+          ...(dynamicStyles.aspectRatio === 'auto' && { aspectRatio: 'auto' }),
+          ...(dynamicStyles.maxHeight && { maxHeight: dynamicStyles.maxHeight }),
+        }}
+      >
+        {getPreviewContent()}
+      </motion.div>
+
+      {/* Модальное окно заявки для услуг */}
+      {leadMagnet.type === 'service' && specialistId && specialistName && (
+        <LeadMagnetRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+          specialistId={specialistId}
+          specialistName={specialistName}
+          leadMagnet={{
+            id: leadMagnet.id,
+            title: leadMagnet.title,
+            description: leadMagnet.description || '',
+            emoji: leadMagnet.emoji || '💼'
+          }}
+        />
       )}
-    >
-      {getPreviewContent()}
-    </motion.div>
+    </>
   )
 }

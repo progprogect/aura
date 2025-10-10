@@ -36,7 +36,11 @@ export function LeadMagnetSlide({
         {/* Mobile: вертикальная стопка */}
         <div className="block md:hidden space-y-8">
           {/* Превью */}
-          <SmartPreview leadMagnet={leadMagnet} />
+                 <SmartPreview 
+                   leadMagnet={leadMagnet} 
+                   specialistId={specialistId}
+                   specialistName={specialistName}
+                 />
           
           {/* Контент с интегрированной кнопкой */}
           <SlideContent 
@@ -50,7 +54,11 @@ export function LeadMagnetSlide({
         <div className="hidden md:block lg:hidden space-y-12">
           {/* Превью + контент с интегрированной кнопкой */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <SmartPreview leadMagnet={leadMagnet} />
+                 <SmartPreview 
+                   leadMagnet={leadMagnet} 
+                   specialistId={specialistId}
+                   specialistName={specialistName}
+                 />
             <SlideContent 
               leadMagnet={leadMagnet}
               specialistId={specialistId}
@@ -65,7 +73,11 @@ export function LeadMagnetSlide({
           <div className="grid grid-cols-12 gap-12">
             {/* Превью - 5 колонок (40%) */}
             <div className="col-span-5">
-              <SmartPreview leadMagnet={leadMagnet} />
+                 <SmartPreview 
+                   leadMagnet={leadMagnet} 
+                   specialistId={specialistId}
+                   specialistName={specialistName}
+                 />
             </div>
             
             {/* Контент с интегрированной кнопкой - 7 колонок (60%) */}
