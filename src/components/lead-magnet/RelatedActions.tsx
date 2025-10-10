@@ -46,35 +46,29 @@ export function RelatedActions({
         </section>
       )}
 
-      {/* Призыв к консультации */}
+      {/* Призыв к консультации (консистентный стиль) */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
-        className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100"
+        className="bg-gray-50 rounded-xl p-6 border border-gray-200"
       >
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <MessageCircle className="w-6 h-6 text-blue-600" />
-          </div>
-          
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Готовы к консультации?
-          </h3>
-          
-          <p className="text-gray-600 mb-4">
-            Получите персональную помощь от {specialistName}
-          </p>
-          
-          <Link
-            href={`/specialist/${specialistSlug}#contact`}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors duration-200 group"
-          >
-            <span>Связаться с {specialistName.split(' ')[0]}</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
-          </Link>
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Готовы к консультации?
+        </h3>
+        
+        <p className="text-gray-600 mb-4">
+          Получите персональную помощь от {specialistName}
+        </p>
+        
+        <Link
+          href={`/specialist/${specialistSlug}#contact`}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors duration-200 group"
+        >
+          <span>Связаться с {specialistName.split(' ')[0]}</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+        </Link>
       </motion.section>
     </div>
   )

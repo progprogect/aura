@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { Download, ExternalLink, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
@@ -12,7 +13,7 @@ interface SlideCTAProps {
   className?: string
 }
 
-// Компонент для главной кнопки CTA
+// Компонент для главной кнопки CTA (консистентный стиль)
 function CTAButton({ 
   leadMagnet, 
   specialistId, 
@@ -22,29 +23,28 @@ function CTAButton({
   specialistId: string
   specialistName: string
 }) {
-  const getButtonText = () => {
+  const getButtonConfig = () => {
     switch (leadMagnet.type) {
       case 'file':
-        return 'Скачать файл'
+        return {
+          text: 'Скачать файл',
+          icon: Download,
+        }
       case 'link':
-        return 'Перейти по ссылке'
+        return {
+          text: 'Перейти по ссылке',
+          icon: ExternalLink,
+        }
       case 'service':
-        return 'Записаться на консультацию'
+        return {
+          text: 'Записаться на консультацию',
+          icon: MessageCircle,
+        }
       default:
-        return 'Получить доступ'
-    }
-  }
-
-  const getButtonIcon = () => {
-    switch (leadMagnet.type) {
-      case 'file':
-        return '📥'
-      case 'link':
-        return '🔗'
-      case 'service':
-        return '💬'
-      default:
-        return '✨'
+        return {
+          text: 'Получить доступ',
+          icon: Download,
+        }
     }
   }
 
@@ -53,51 +53,42 @@ function CTAButton({
     switch (leadMagnet.type) {
       case 'file':
         if (leadMagnet.fileUrl) {
-          // Открываем файл в новой вкладке
           window.open(leadMagnet.fileUrl, '_blank')
         }
         break
       case 'link':
         if (leadMagnet.linkUrl) {
-          // Открываем ссылку в новой вкладке
           window.open(leadMagnet.linkUrl, '_blank')
         }
         break
       case 'service':
-        // Здесь можно открыть модальное окно для записи на консультацию
-        // или перенаправить на страницу записи
         console.log('Запись на консультацию к', specialistName)
         break
     }
   }
 
+  const { text, icon: Icon } = getButtonConfig()
+
   return (
     <motion.button
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, delay: 0.4 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.2 }}
       onClick={handleClick}
       className={cn(
-        "group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white rounded-xl shadow-lg transition-all duration-300",
-        "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800",
-        "focus:outline-none focus:ring-4 focus:ring-blue-500/50",
+        "inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white rounded-xl transition-colors duration-200",
+        "bg-blue-600 hover:bg-blue-700",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2",
         "w-full md:w-auto md:min-w-[200px]"
       )}
     >
-      <span className="flex items-center space-x-3">
-        <span className="text-xl">{getButtonIcon()}</span>
-        <span>{getButtonText()}</span>
-      </span>
-      
-      {/* Hover эффект */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <Icon className="w-5 h-5" />
+      <span>{text}</span>
     </motion.button>
   )
 }
 
-// Компонент для социального доказательства
+// Компонент для социального доказательства (минималистичный)
 function SocialProof({ 
   downloadCount 
 }: { 
@@ -111,23 +102,14 @@ function SocialProof({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.5 }}
-      className="flex items-center justify-center space-x-2 text-sm text-gray-600"
+      transition={{ duration: 0.3, delay: 0.3 }}
+      className="flex items-center gap-2 text-sm text-gray-600"
     >
-      <div className="flex -space-x-1">
-        {/* Аватары пользователей */}
-        {Array.from({ length: 3 }, (_, i) => (
-          <div
-            key={i}
-            className="w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-medium"
-          >
-            {i + 1}
-          </div>
-        ))}
+      <div className="flex items-center gap-1">
+        <Download className="w-4 h-4 text-gray-400" />
+        <span className="font-medium text-gray-900">{downloadCount}</span>
       </div>
-      <span>
-        Уже скачали <span className="font-semibold text-gray-900">{downloadCount}</span> человек
-      </span>
+      <span>скачиваний</span>
     </motion.div>
   )
 }
