@@ -251,6 +251,7 @@ export default async function SpecialistPage({ params }: PageProps) {
           workFormats: specialist.workFormats,
           yearsOfPractice: specialist.yearsOfPractice,
           verified: specialist.verified,
+          acceptingClients: specialist.acceptingClients,
           profileViews: specialist.profileViews,
           specializations: specialist.specializations,
         }}

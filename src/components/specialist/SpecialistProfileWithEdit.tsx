@@ -13,6 +13,7 @@ import { SpecialistHeroEdit } from './SpecialistHeroEdit'
 import { ContactsEditor } from './edit/ContactsEditor'
 import { EditModeToggle } from './edit/EditModeToggle'
 import { EditToolbar } from './edit/EditToolbar'
+import { AcceptingClientsToggle } from './edit/AcceptingClientsToggle'
 import { SpecialistAbout } from './SpecialistAbout'
 import { SpecialistSpecialization } from './SpecialistSpecialization'
 import { SpecialistVideo } from './SpecialistVideo'
@@ -45,6 +46,7 @@ interface SpecialistProfileWithEditProps {
     workFormats: string[]
     yearsOfPractice?: number | null
     verified: boolean
+    acceptingClients: boolean
     profileViews: number
     specializations: string[]
   }
@@ -115,6 +117,7 @@ export function SpecialistProfileWithEdit({
   data 
 }: SpecialistProfileWithEditProps) {
   const [isEditMode, setIsEditMode] = useState(false)
+  const [acceptingClients, setAcceptingClients] = useState(heroData.acceptingClients)
 
   const handleToggleEditMode = useCallback(() => {
     setIsEditMode(prev => !prev)
@@ -127,7 +130,7 @@ export function SpecialistProfileWithEdit({
   }, [])
 
   // Функция для сохранения одного поля
-  const handleSaveField = useCallback(async (field: string, value: string | number) => {
+  const handleSaveField = useCallback(async (field: string, value: string | number | boolean) => {
     try {
       const response = await fetch('/api/specialist/profile', {
         method: 'PATCH',
@@ -169,6 +172,14 @@ export function SpecialistProfileWithEdit({
       throw error
     }
   }, [])
+
+  // Функция для переключения статуса приема клиентов
+  const handleToggleAcceptingClients = useCallback(async (value: boolean) => {
+    const result = await handleSaveField('acceptingClients', value)
+    if (result.success) {
+      setAcceptingClients(value)
+    }
+  }, [handleSaveField])
 
   // Функция для сохранения кастомных полей
   const handleSaveCustomField = useCallback(async (key: string, value: any) => {
@@ -291,6 +302,12 @@ export function SpecialistProfileWithEdit({
                   onSave={handleSaveField}
                 />
               </div>
+
+              {/* Статус приема клиентов */}
+              <AcceptingClientsToggle
+                acceptingClients={acceptingClients}
+                onToggle={handleToggleAcceptingClients}
+              />
             </>
           )}
           
