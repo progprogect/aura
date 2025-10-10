@@ -194,3 +194,39 @@ export function formatSocialProof(downloadCount: number): string {
   
   return `${downloadCount} скачиваний`
 }
+
+// Получить данные превью для лид-магнита
+export function getLeadMagnetPreviewData(leadMagnet: {
+  type: 'file' | 'link' | 'service'
+  fileUrl?: string | null
+  linkUrl?: string | null
+  ogImage?: string | null
+  emoji?: string | null
+  title?: string
+}) {
+  const gradient = getPreviewGradient(leadMagnet.type, getFileExtension(leadMagnet.fileUrl))
+  const fileExtension = getFileExtension(leadMagnet.fileUrl)
+  const IconComponent = getFileIcon(fileExtension)
+  const typeLabel = getFileType(fileExtension)
+  
+  return {
+    gradient,
+    icon: leadMagnet.emoji || '✨',
+    typeLabel: leadMagnet.type === 'file' ? typeLabel : leadMagnet.type === 'link' ? 'Ссылка' : 'Сервис',
+    fileExtension
+  }
+}
+
+// Получить цвет для бейджа типа лид-магнита
+export function getLeadMagnetBadgeColor(type: 'file' | 'link' | 'service'): string {
+  switch (type) {
+    case 'file':
+      return 'bg-blue-100 text-blue-800'
+    case 'link':
+      return 'bg-purple-100 text-purple-800'
+    case 'service':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}

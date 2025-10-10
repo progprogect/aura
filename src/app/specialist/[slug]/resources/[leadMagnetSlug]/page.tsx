@@ -7,10 +7,7 @@ import { Metadata } from 'next'
 import { cache } from 'react'
 import { prisma } from '@/lib/db'
 import { LeadMagnetBreadcrumbs } from '@/components/lead-magnet/Breadcrumbs'
-import { HeroPreview } from '@/components/lead-magnet/HeroPreview'
-import { HighlightsList } from '@/components/lead-magnet/HighlightsList'
-import { MetadataRow } from '@/components/lead-magnet/MetadataRow'
-import { CTAButton } from '@/components/lead-magnet/CTAButton'
+import { LeadMagnetSlide } from '@/components/lead-magnet/LeadMagnetSlide'
 import { RelatedActions } from '@/components/lead-magnet/RelatedActions'
 import { shouldShowPreview, generateOGTags } from '@/lib/lead-magnets/utils'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
@@ -135,50 +132,26 @@ export default async function LeadMagnetPage({ params }: PageProps) {
         leadMagnetTitle={leadMagnet.title}
       />
 
-      {/* Content */}
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-8">
-        {/* Hero Preview */}
-        <HeroPreview leadMagnet={leadMagnet} />
-
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            {leadMagnet.title}
-          </h1>
-          <p className="text-base text-gray-600 leading-relaxed">
-            {leadMagnet.description}
-          </p>
-        </div>
-
-        {/* Metadata row */}
-        <MetadataRow
-          targetAudience={leadMagnet.targetAudience}
-          downloadCount={leadMagnet.downloadCount}
-          fileSize={leadMagnet.fileSize}
-          type={leadMagnet.type}
-        />
-
-        {/* Highlights (if exists) */}
-        {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
-          <HighlightsList items={leadMagnet.highlights} />
-        )}
-
-        {/* CTA */}
-        <div className="pt-4">
-          <CTAButton
-            leadMagnet={leadMagnet}
-            specialistId={specialist.id}
-            specialistName={specialistName}
-          />
-        </div>
-
-        {/* Related Actions */}
-        <RelatedActions
-          otherLeadMagnets={otherLeadMagnets}
+      {/* Main Slide */}
+      <main className="px-4 py-8 md:py-12 lg:py-16">
+        <LeadMagnetSlide
+          leadMagnet={leadMagnet}
+          specialistId={specialist.id}
           specialistSlug={specialist.slug}
           specialistName={specialistName}
         />
       </main>
+
+      {/* Related Actions */}
+      <div className="px-4 pb-8 md:pb-12 lg:pb-16">
+        <div className="max-w-7xl mx-auto">
+          <RelatedActions
+            otherLeadMagnets={otherLeadMagnets}
+            specialistSlug={specialist.slug}
+            specialistName={specialistName}
+          />
+        </div>
+      </div>
     </div>
   )
 }
