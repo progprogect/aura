@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetPreviewData, getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
 import { generateLinkPreview, generateFilePreview, getAspectRatio, getPreviewStyles } from '@/lib/lead-magnets/preview-generator'
+import { generatePDFPreview, isPDFPreviewSupported, getPDFFallbackPreview } from '@/lib/pdf-preview'
 import { ServicePreview } from './ServicePreview'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
@@ -38,10 +39,58 @@ function VideoEmbed({ url, platform }: { url: string; platform?: string }) {
   )
 }
 
-// Компонент для PDF preview
+// Компонент для PDF preview с первой страницей
 function PDFPreview({ url, title }: { url: string; title: string }) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+
+  // Генерируем превью при монтировании
+  React.useEffect(() => {
+    const generatePreview = async () => {
+      try {
+        if (!isPDFPreviewSupported()) {
+          // Если PDF.js не поддерживается, используем iframe
+          setIsLoaded(true)
+          return
+        }
+
+        const preview = await generatePDFPreview(url)
+        if (preview) {
+          setPreviewImage(preview)
+        }
+        setIsLoaded(true)
+      } catch (error) {
+        console.error('Ошибка генерации PDF превью:', error)
+        setHasError(true)
+        setIsLoaded(true)
+      }
+    }
+
+    generatePreview()
+  }, [url])
+
+  // Если есть превью изображение, показываем его
+  if (previewImage) {
+    return (
+      <div className="w-full h-full relative bg-gray-100 rounded-lg overflow-hidden">
+        <Image
+          src={previewImage}
+          alt={`Preview: ${title}`}
+          fill
+          className="object-contain"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            setHasError(true)
+            setIsLoaded(true)
+          }}
+        />
+      </div>
+    )
+  }
+
+  // Fallback с градиентом и иконкой
+  const fallback = getPDFFallbackPreview()
 
   return (
     <div className="w-full h-full relative bg-gray-100 rounded-lg overflow-hidden">
@@ -52,18 +101,19 @@ function PDFPreview({ url, title }: { url: string; title: string }) {
       )}
       
       {hasError ? (
-        <div className="w-full h-full flex items-center justify-center bg-gray-50">
-          <div className="text-center p-6">
-            <div className="text-4xl mb-2">📄</div>
-            <p className="text-sm text-gray-600 mb-2">PDF документ</p>
-            <p className="text-xs text-gray-500">
+        <div className={cn("w-full h-full flex items-center justify-center bg-gradient-to-br", fallback.gradient)}>
+          <div className="text-center text-white p-6">
+            <div className="text-6xl mb-4">{fallback.icon}</div>
+            <div className="text-lg font-medium">{fallback.typeLabel}</div>
+            <p className="text-sm opacity-90 mt-2">
               Нажмите кнопку &quot;Скачать файл&quot; для просмотра
             </p>
           </div>
         </div>
-      ) : (
+      ) : !previewImage ? (
+        // Если нет превью, но PDF.js поддерживается, показываем iframe
         <iframe
-          src={`${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+          src={`${url}#page=1&toolbar=0&navpanes=0&scrollbar=0&view=FitH&zoom=FitH`}
           className="w-full h-full"
           title={`Preview: ${title}`}
           onLoad={() => setIsLoaded(true)}
@@ -72,7 +122,7 @@ function PDFPreview({ url, title }: { url: string; title: string }) {
             setHasError(true)
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }
