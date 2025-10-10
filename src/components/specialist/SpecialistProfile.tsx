@@ -11,13 +11,16 @@ import { SpecialistEducation } from './SpecialistEducation'
 import { SpecialistPricing } from './SpecialistPricing'
 import { SpecialistFAQ } from './SpecialistFAQ'
 import { SpecialistContact } from './SpecialistContact'
+import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import type { CategoryConfig } from '@/lib/category-config'
+import type { LeadMagnetUI } from '@/types/lead-magnet'
 
 interface SpecialistProfileProps {
   tabs: Tab[]
   categoryConfig: CategoryConfig | null // Конфигурация категории из сервера
   data: {
     id: string
+    slug: string
     fullName: string
     category: string
     about: string
@@ -53,6 +56,7 @@ interface SpecialistProfileProps {
       question: string
       answer: string
     }>
+    leadMagnets?: LeadMagnetUI[]
   }
   isEditMode?: boolean
   onSaveField?: (field: string, value: string | number) => Promise<any>
@@ -120,6 +124,15 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
 
         {/* FAQ */}
         {data.faqs.length > 0 && <SpecialistFAQ faqs={data.faqs} />}
+
+        {/* Лид-магниты */}
+        {data.leadMagnets && data.leadMagnets.length > 0 && (
+          <SpecialistLeadMagnets
+            leadMagnets={data.leadMagnets}
+            specialistSlug={data.slug}
+            specialistName={data.fullName}
+          />
+        )}
 
         {/* Форма связи */}
         <SpecialistContact specialistId={data.id} specialistName={data.fullName} />

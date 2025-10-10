@@ -300,15 +300,7 @@ export default async function SpecialistPage({ params }: PageProps) {
             question: faq.question,
             answer: faq.answer,
           })),
-          leadMagnets: specialist.leadMagnets.map(lm => ({
-            id: lm.id,
-            type: lm.type as 'file' | 'link' | 'service',
-            title: lm.title,
-            description: lm.description,
-            fileUrl: lm.fileUrl,
-            linkUrl: lm.linkUrl,
-            emoji: lm.emoji,
-          })),
+          leadMagnets: specialist.leadMagnets, // Уже преобразовано fromPrismaLeadMagnet() на строке 102
         }}
       />
     </div>

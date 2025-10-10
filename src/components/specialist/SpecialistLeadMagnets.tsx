@@ -20,7 +20,11 @@ export function SpecialistLeadMagnets({
   specialistSlug,
   specialistName,
 }: SpecialistLeadMagnetsProps) {
-  if (leadMagnets.length === 0) {
+  // Фильтруем только лид-магниты со slug
+  const validLeadMagnets = leadMagnets.filter(magnet => magnet.slug && magnet.slug !== '')
+  
+  // Graceful degradation: если нет валидных лид-магнитов
+  if (validLeadMagnets.length === 0) {
     return null
   }
 
@@ -42,9 +46,7 @@ export function SpecialistLeadMagnets({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {leadMagnets
-              .filter(magnet => magnet.slug && magnet.slug !== '') // Показываем только лид-магниты со slug
-              .map((magnet, index) => {
+            {validLeadMagnets.map((magnet, index) => {
                 const href = `/specialist/${specialistSlug}/resources/${magnet.slug}`
                 
                 return (
