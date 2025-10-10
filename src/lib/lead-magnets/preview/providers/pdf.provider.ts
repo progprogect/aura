@@ -5,7 +5,21 @@
 
 import { BasePreviewProvider } from './base.provider'
 import type { PreviewGenerationOptions, PreviewGenerationResult } from '../core/types'
-import { generatePDFCardPreview, isPDFUrl } from '../../pdf-preview-server'
+
+// Динамический импорт PDF preview для избежания проблем с canvas на сервере
+async function loadPDFPreview() {
+  try {
+    const pdfPreviewModule = await import('../../pdf-preview-server')
+    return pdfPreviewModule
+  } catch (error) {
+    console.warn('[PDFPreviewProvider] PDF preview недоступен (canvas not available):', error)
+    return null
+  }
+}
+
+function isPDFUrl(url: string): boolean {
+  return url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('.pdf?')
+}
 
 export class PDFPreviewProvider extends BasePreviewProvider {
   name = 'PDFPreviewProvider'
@@ -26,7 +40,15 @@ export class PDFPreviewProvider extends BasePreviewProvider {
     try {
       console.log(`[${this.name}] Генерация превью для PDF: ${options.title}`)
 
-      const pdfBuffer = await generatePDFCardPreview(options.fileUrl)
+      // Динамическая загрузка PDF preview модуля
+      const pdfModule = await loadPDFPreview()
+      
+      if (!pdfModule) {
+        console.warn(`[${this.name}] Canvas недоступен, пропускаем PDF preview`)
+        return this.errorResult('PDF preview not available (canvas module not loaded)')
+      }
+
+      const pdfBuffer = await pdfModule.generatePDFCardPreview(options.fileUrl)
 
       if (!pdfBuffer) {
         return this.errorResult('Failed to generate PDF preview')
