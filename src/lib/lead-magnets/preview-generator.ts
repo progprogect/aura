@@ -95,8 +95,8 @@ export function generateLinkPreview(linkUrl: string, ogImage?: string): PreviewD
       platform: contentInfo.platform,
       icon: CONTENT_ICONS[contentInfo.platform] || CONTENT_ICONS.video,
       gradient: CONTENT_GRADIENTS.video,
-      thumbnailUrl,
-      embedUrl,
+      thumbnailUrl: thumbnailUrl || undefined,
+      embedUrl: embedUrl || undefined,
       platformColor,
       isEmbeddable: true,
       label: getPlatformLabel(contentInfo.platform)
@@ -113,7 +113,7 @@ export function generateLinkPreview(linkUrl: string, ogImage?: string): PreviewD
       platform: contentInfo.platform,
       icon: CONTENT_ICONS[contentInfo.platform] || CONTENT_ICONS.document,
       gradient: CONTENT_GRADIENTS.document,
-      embedUrl,
+      embedUrl: embedUrl || undefined,
       platformColor,
       isEmbeddable: true,
       label: getPlatformLabel(contentInfo.platform)
@@ -130,7 +130,7 @@ export function generateLinkPreview(linkUrl: string, ogImage?: string): PreviewD
       platform: contentInfo.platform,
       icon: CONTENT_ICONS[contentInfo.platform] || CONTENT_ICONS.audio,
       gradient: CONTENT_GRADIENTS.audio,
-      embedUrl,
+      embedUrl: embedUrl || undefined,
       platformColor,
       isEmbeddable: true,
       label: getPlatformLabel(contentInfo.platform)
@@ -147,7 +147,7 @@ export function generateLinkPreview(linkUrl: string, ogImage?: string): PreviewD
       platform: contentInfo.platform,
       icon: CONTENT_ICONS[contentInfo.platform] || CONTENT_ICONS.social,
       gradient: CONTENT_GRADIENTS.social,
-      embedUrl,
+      embedUrl: embedUrl || undefined,
       platformColor,
       isEmbeddable: true,
       label: getPlatformLabel(contentInfo.platform)
