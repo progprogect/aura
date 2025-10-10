@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils'
 import { getLeadMagnetPreviewData, getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
 import { generateLinkPreview, generateFilePreview, getAspectRatio, getPreviewStyles } from '@/lib/lead-magnets/preview-generator'
 import { generatePDFPreview, isPDFPreviewSupported, getPDFFallbackPreview } from '@/lib/pdf-preview'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 import { ServicePreview } from './ServicePreview'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
@@ -428,9 +430,7 @@ function ServiceRequestForm({
   }
 
   return (
-    <div className={cn(
-      "w-full h-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-center",
-    )}>
+    <div className="w-full bg-white rounded-lg border border-gray-200 p-6">
       {isSuccess ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -444,50 +444,96 @@ function ServiceRequestForm({
           </p>
         </motion.div>
       ) : (
-        <div className="space-y-3">
-          {/* Минималистичная форма */}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ваше имя"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                required
-              />
-            </div>
-
-            <div>
-              <input
-                type="text"
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                placeholder="Телефон или Telegram"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                required
-              />
-            </div>
-
-            <div>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Сообщение (необязательно)"
-                rows={2}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Имя */}
+          <div>
+            <label
+              htmlFor="service-name"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
             >
-              {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
-            </button>
-          </form>
-        </div>
+              Ваше имя *
+            </label>
+            <input
+              type="text"
+              id="service-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className={cn(
+                'w-full rounded-lg border border-gray-300 px-4 py-2.5',
+                'text-gray-900 placeholder-gray-400',
+                'transition-colors',
+                'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20'
+              )}
+              placeholder="Как к вам обращаться?"
+            />
+          </div>
+
+          {/* Контакт */}
+          <div>
+            <label
+              htmlFor="service-contact"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
+              Телефон или Telegram *
+            </label>
+            <input
+              type="text"
+              id="service-contact"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              required
+              className={cn(
+                'w-full rounded-lg border border-gray-300 px-4 py-2.5',
+                'text-gray-900 placeholder-gray-400',
+                'transition-colors',
+                'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20'
+              )}
+              placeholder="+7 (999) 123-45-67 или @username"
+            />
+          </div>
+
+          {/* Сообщение */}
+          <div>
+            <label
+              htmlFor="service-message"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
+              Сообщение (необязательно)
+            </label>
+            <textarea
+              id="service-message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              className={cn(
+                'w-full rounded-lg border border-gray-300 px-4 py-2.5',
+                'text-gray-900 placeholder-gray-400',
+                'transition-colors',
+                'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+                'resize-none'
+              )}
+              placeholder="Расскажите кратко о вашем запросе..."
+            />
+          </div>
+
+          {/* Кнопка отправки */}
+          <Button
+            type="submit"
+            size="lg"
+            disabled={isSubmitting}
+            className="w-full gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Отправка...
+              </>
+            ) : (
+              'Отправить заявку'
+            )}
+          </Button>
+        </form>
       )}
     </div>
   )
@@ -510,9 +556,9 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       return getAspectRatio(filePreview.type, filePreview.platform)
     }
 
-    // Для сервисов - более высокий формат для формы
+    // Для сервисов - высота определяется контентом формы
     if (leadMagnet.type === 'service') {
-      return 'aspect-[3/4]' // Высота больше ширины для формы
+      return '' // Естественный размер по контенту
     }
 
     // Для остальных - универсальный формат
@@ -531,9 +577,9 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       return getPreviewStyles(filePreview.type, filePreview.platform)
     }
 
-    // Для сервисов - специальные стили для формы
+    // Для сервисов - естественный размер по контенту
     if (leadMagnet.type === 'service') {
-      return { aspectRatio: '3/4', objectFit: 'contain' }
+      return {} // Естественный размер по контенту
     }
 
     return { aspectRatio: '4/3', objectFit: 'cover' }
@@ -670,14 +716,14 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       className={cn(
         "w-full",
         // Применяем класс aspect ratio только если нет динамических стилей с auto
-        dynamicStyles.aspectRatio === 'auto' ? '' : aspectRatio,
+        (dynamicStyles as any).aspectRatio === 'auto' ? '' : aspectRatio,
         className
       )}
       style={{
         // Применяем динамические стили
-        ...(dynamicStyles.aspectRatio && dynamicStyles.aspectRatio !== 'auto' && { aspectRatio: dynamicStyles.aspectRatio }),
-        ...(dynamicStyles.maxHeight && { maxHeight: dynamicStyles.maxHeight }),
-        ...(dynamicStyles.objectFit && { objectFit: dynamicStyles.objectFit as any }),
+        ...((dynamicStyles as any).aspectRatio && (dynamicStyles as any).aspectRatio !== 'auto' && { aspectRatio: (dynamicStyles as any).aspectRatio }),
+        ...((dynamicStyles as any).maxHeight && { maxHeight: (dynamicStyles as any).maxHeight }),
+        ...((dynamicStyles as any).objectFit && { objectFit: (dynamicStyles as any).objectFit }),
       }}
     >
       {getPreviewContent()}
