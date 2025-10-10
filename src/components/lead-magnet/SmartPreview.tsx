@@ -558,12 +558,15 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
         transition={{ duration: 0.5, delay: 0.1 }}
         className={cn(
           "w-full",
-          aspectRatio,
+          // Применяем класс aspect ratio только если нет динамических стилей с auto
+          dynamicStyles.aspectRatio === 'auto' ? '' : aspectRatio,
           className
         )}
         style={{
-          ...(dynamicStyles.aspectRatio === 'auto' && { aspectRatio: 'auto' }),
+          // Применяем динамические стили
+          ...(dynamicStyles.aspectRatio && dynamicStyles.aspectRatio !== 'auto' && { aspectRatio: dynamicStyles.aspectRatio }),
           ...(dynamicStyles.maxHeight && { maxHeight: dynamicStyles.maxHeight }),
+          ...(dynamicStyles.objectFit && { objectFit: dynamicStyles.objectFit as any }),
         }}
       >
         {getPreviewContent()}

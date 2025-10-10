@@ -393,7 +393,7 @@ export function getPreviewStyles(type: string, platform?: Platform): {
   }
   
   return {
-    aspectRatio: aspectRatio.replace('aspect-', '').replace('[', '').replace(']', ''),
+    aspectRatio: aspectRatio.replace('aspect-', '').replace(/\[|\]/g, ''),
     objectFit: 'cover'
   }
 }
