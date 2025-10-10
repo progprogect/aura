@@ -24,7 +24,8 @@ export function QuickActions({ slug, newRequestsCount = 0, isSpecialist = true }
       label: 'Мой профиль',
       description: 'Посмотреть и редактировать',
       variant: 'default' as const,
-      isMain: true
+      isMain: true,
+      disabled: false
     },
     {
       href: '/specialist/requests',
@@ -52,7 +53,8 @@ export function QuickActions({ slug, newRequestsCount = 0, isSpecialist = true }
       label: 'Стать специалистом',
       description: 'Создать профиль специалиста',
       variant: 'default' as const,
-      isMain: true
+      isMain: true,
+      disabled: false
     }
   ]
 
