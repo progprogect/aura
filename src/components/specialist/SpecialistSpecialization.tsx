@@ -64,12 +64,7 @@ export function SpecialistSpecialization({
       transition={{ duration: 0.5, delay: 0.1 }}
     >
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            🎯 Специализация
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="pt-6 space-y-6">
           {isEditMode && onSaveCustomField ? (
             // Режим редактирования - используем CustomFieldsEditor
             <>

@@ -24,12 +24,7 @@ export function SpecialistAbout({ about, isEditMode = false, onSave }: Specialis
       transition={{ duration: 0.5 }}
     >
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            💼 О себе
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {isEditMode && onSave ? (
             <InlineTextarea
               value={about}
