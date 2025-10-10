@@ -316,9 +316,13 @@ function DocumentPreview({ url, title, type }: { url: string; title: string; typ
 // Компонент формы заявки на услугу
 function ServiceRequestForm({ 
   leadMagnet, 
+  specialistId, 
+  specialistName,
   onOpenModal 
 }: { 
-  leadMagnet: Pick<LeadMagnet, 'title' | 'description' | 'emoji' | 'highlights'>
+  leadMagnet: Pick<LeadMagnet, 'id' | 'title' | 'description' | 'emoji' | 'highlights'>
+  specialistId?: string
+  specialistName?: string
   onOpenModal: () => void 
 }) {
   return (
@@ -519,7 +523,14 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
 
     // Для сервисов - показываем форму заявки
     if (leadMagnet.type === 'service') {
-      return <ServiceRequestForm leadMagnet={leadMagnet} onOpenModal={() => setIsRequestModalOpen(true)} />
+      return (
+        <ServiceRequestForm 
+          leadMagnet={leadMagnet} 
+          specialistId={specialistId}
+          specialistName={specialistName}
+          onOpenModal={() => setIsRequestModalOpen(true)} 
+        />
+      )
     }
 
     // Fallback - используем градиент с иконкой
