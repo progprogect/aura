@@ -2,7 +2,20 @@ FROM node:20-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# Установка build dependencies для canvas и native modules
+RUN apt-get update && apt-get install -y \
+    openssl \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    libpixman-1-dev \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Install dependencies
@@ -13,11 +26,20 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 
-# Установка libssl1.1 для Prisma (из Debian Bullseye)
+# Установка dependencies для build и Prisma
 RUN echo "deb http://deb.debian.org/debian bullseye main" >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y libssl1.1 && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    libssl1.1 \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    libpixman-1-dev \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -40,11 +62,18 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Установка libssl1.1 для Prisma runtime (из Debian Bullseye)
+# Установка runtime dependencies для Prisma и canvas
 RUN echo "deb http://deb.debian.org/debian bullseye main" >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y libssl1.1 && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    libssl1.1 \
+    libcairo2 \
+    libpango1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    libpixman-1-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
