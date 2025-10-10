@@ -230,3 +230,73 @@ export function getLeadMagnetBadgeColor(type: 'file' | 'link' | 'service'): stri
       return 'bg-gray-100 text-gray-800'
   }
 }
+
+// Извлечь YouTube video ID из URL
+export function extractYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+    /youtube\.com\/embed\/([^&\n?#]+)/,
+  ]
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match && match[1]) {
+      return match[1]
+    }
+  }
+  
+  return null
+}
+
+// Получить YouTube thumbnail URL
+export function getYouTubeThumbnail(url: string): string | null {
+  const videoId = extractYouTubeVideoId(url)
+  if (!videoId) return null
+  
+  // maxresdefault - лучшее качество (1280x720)
+  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+}
+
+// Проверить является ли URL YouTube видео
+export function isYouTubeUrl(url: string): boolean {
+  return url.includes('youtube.com') || url.includes('youtu.be')
+}
+
+// Проверить является ли URL Vimeo видео
+export function isVimeoUrl(url: string): boolean {
+  return url.includes('vimeo.com')
+}
+
+// Получить умные бейджи для лид-магнита
+export function getValueBadges(leadMagnet: {
+  downloadCount?: number
+  createdAt?: Date | string
+  targetAudience?: string | null
+}): Array<{ label: string; color: string }> {
+  const badges: Array<{ label: string; color: string }> = []
+  
+  // Популярное (>100 скачиваний)
+  if (leadMagnet.downloadCount && leadMagnet.downloadCount > 100) {
+    badges.push({ 
+      label: '🔥 Популярное', 
+      color: 'bg-orange-100 text-orange-800' 
+    })
+  }
+  
+  // Новое (<7 дней)
+  if (leadMagnet.createdAt) {
+    const createdDate = typeof leadMagnet.createdAt === 'string' 
+      ? new Date(leadMagnet.createdAt) 
+      : leadMagnet.createdAt
+    const daysSinceCreation = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (daysSinceCreation < 7) {
+      badges.push({ 
+        label: '✨ Новое', 
+        color: 'bg-green-100 text-green-800' 
+      })
+    }
+  }
+  
+  return badges
+}

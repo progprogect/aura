@@ -63,6 +63,7 @@ export interface LeadMagnetUI {
   ogImage?: string | null
   viewCount?: number
   downloadCount?: number
+  createdAt?: Date | string
 }
 
 // Версия для редактирования (может быть без ID при создании)
