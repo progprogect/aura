@@ -27,12 +27,19 @@ export function HeroPreview({ leadMagnet }: HeroPreviewProps) {
 
   return (
     <div className="w-full">
-      {/* Hero-превью */}
+      {/* Hero-превью с улучшенным дизайном */}
       <div className={cn(
         "relative w-full h-48 md:h-64 lg:h-80 rounded-2xl overflow-hidden",
         "bg-gradient-to-br flex items-center justify-center",
         gradient
       )}>
+        {/* Декоративные фоновые элементы */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -ml-24 -mb-24" />
+          <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-white rounded-full" />
+        </div>
+
         {/* Для ссылок с изображением */}
         {leadMagnet.type === 'link' && leadMagnet.fileUrl && (
           <Image
@@ -44,42 +51,58 @@ export function HeroPreview({ leadMagnet }: HeroPreviewProps) {
           />
         )}
 
-        {/* Для файлов - крупная иконка */}
+        {/* Для файлов - улучшенная карточка */}
         {leadMagnet.type === 'file' && (
-          <div className="text-center">
-            <FileIcon className="w-16 h-16 md:w-20 md:h-20 text-white mb-3 mx-auto" />
-            <div className="text-white text-lg font-medium">
-              {fileType}
+          <div className="text-center z-10">
+            <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+              <FileIcon className="w-20 h-20 md:w-24 md:h-24 text-white mb-4 mx-auto drop-shadow-lg" />
+              <div className="text-white text-xl md:text-2xl font-semibold drop-shadow">
+                {fileType}
+              </div>
+              {fileExtension && (
+                <div className="text-white/80 text-sm md:text-base mt-2">
+                  {fileExtension.toUpperCase()}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Для сервисов - иконка + описание */}
+        {/* Для сервисов - улучшенная карточка */}
         {leadMagnet.type === 'service' && (
-          <div className="text-center">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-3 mx-auto">
-              <span className="text-2xl md:text-3xl">{leadMagnet.emoji}</span>
-            </div>
-            <div className="text-white text-lg font-medium">
-              Услуга
+          <div className="text-center z-10">
+            <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-white/30 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                <span className="text-4xl md:text-5xl">{leadMagnet.emoji || '💼'}</span>
+              </div>
+              <div className="text-white text-xl md:text-2xl font-semibold drop-shadow">
+                Услуга
+              </div>
+              {leadMagnet.description && (
+                <div className="text-white/80 text-sm md:text-base mt-2 max-w-sm">
+                  {leadMagnet.description}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Для ссылок без изображения */}
+        {/* Для ссылок без изображения - улучшенная карточка */}
         {leadMagnet.type === 'link' && !leadMagnet.fileUrl && (
-          <div className="text-center">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-3 mx-auto">
-              <span className="text-2xl md:text-3xl">{leadMagnet.emoji}</span>
-            </div>
-            <div className="text-white text-lg font-medium">
-              Внешняя ссылка
+          <div className="text-center z-10">
+            <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-white/30 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                <span className="text-4xl md:text-5xl">{leadMagnet.emoji || '🔗'}</span>
+              </div>
+              <div className="text-white text-xl md:text-2xl font-semibold drop-shadow">
+                Внешняя ссылка
+              </div>
             </div>
           </div>
         )}
 
-        {/* Декоративные элементы */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        {/* Тонкий градиент для глубины */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
       </div>
     </div>
   )

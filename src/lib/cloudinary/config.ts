@@ -172,6 +172,64 @@ export async function uploadAvatar(
 }
 
 /**
+ * Генерация превью URL для PDF через Cloudinary трансформации
+ * Cloudinary может генерировать превью из PDF без canvas!
+ * @param pdfUrl - URL PDF файла в Cloudinary (raw)
+ * @param size - размер превью (thumbnail/card/detail)
+ * @returns URL превью изображения
+ */
+export function generatePDFPreviewUrl(
+  pdfUrl: string,
+  size: 'thumbnail' | 'card' | 'detail' = 'card'
+): string {
+  // Проверяем что это Cloudinary URL
+  if (!pdfUrl.includes('res.cloudinary.com')) {
+    console.warn('generatePDFPreviewUrl: не Cloudinary URL, возвращаем исходный')
+    return pdfUrl
+  }
+
+  // Проверяем что это raw/upload (PDF)
+  if (!pdfUrl.includes('/raw/upload/')) {
+    console.warn('generatePDFPreviewUrl: не raw resource, возвращаем исходный')
+    return pdfUrl
+  }
+
+  // Параметры трансформации для разных размеров
+  const transformations = {
+    thumbnail: 'f_jpg,pg_1,w_400,h_300,c_fit,q_80',  // первая страница, 400x300
+    card: 'f_jpg,pg_1,w_800,h_600,c_fit,q_85',       // первая страница, 800x600
+    detail: 'f_jpg,pg_1,w_1200,h_900,c_fit,q_90'     // первая страница, 1200x900
+  }
+
+  // Заменяем /raw/upload/ на /image/upload/ + добавляем трансформации
+  const previewUrl = pdfUrl.replace(
+    '/raw/upload/',
+    `/image/upload/${transformations[size]}/`
+  )
+
+  console.log(`[Cloudinary] Генерация PDF preview (${size}):`, previewUrl)
+  
+  return previewUrl
+}
+
+/**
+ * Генерация всех размеров превью для PDF
+ * @param pdfUrl - URL PDF файла в Cloudinary
+ * @returns Объект с URL для всех размеров
+ */
+export function generatePDFPreviewUrls(pdfUrl: string): {
+  thumbnail: string
+  card: string
+  detail: string
+} {
+  return {
+    thumbnail: generatePDFPreviewUrl(pdfUrl, 'thumbnail'),
+    card: generatePDFPreviewUrl(pdfUrl, 'card'),
+    detail: generatePDFPreviewUrl(pdfUrl, 'detail')
+  }
+}
+
+/**
  * Удаление изображения из Cloudinary
  */
 export async function deleteImage(publicId: string): Promise<void> {

@@ -1,24 +1,19 @@
 /**
  * PDF Preview Provider
- * Генерирует превью первой страницы PDF
+ * Использует Cloudinary трансформации для генерации превью PDF
+ * БЕЗ canvas! 100% надежность!
  */
 
 import { BasePreviewProvider } from './base.provider'
 import type { PreviewGenerationOptions, PreviewGenerationResult } from '../core/types'
-
-// Динамический импорт PDF preview для избежания проблем с canvas на сервере
-async function loadPDFPreview() {
-  try {
-    const pdfPreviewModule = await import('../../pdf-preview-server')
-    return pdfPreviewModule
-  } catch (error) {
-    console.warn('[PDFPreviewProvider] PDF preview недоступен (canvas not available):', error)
-    return null
-  }
-}
+import { generatePDFPreviewUrls } from '@/lib/cloudinary/config'
 
 function isPDFUrl(url: string): boolean {
   return url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('.pdf?')
+}
+
+function isCloudinaryPDF(url: string): boolean {
+  return url.includes('res.cloudinary.com') && url.includes('/raw/upload/')
 }
 
 export class PDFPreviewProvider extends BasePreviewProvider {
@@ -29,7 +24,8 @@ export class PDFPreviewProvider extends BasePreviewProvider {
       return false
     }
 
-    return isPDFUrl(options.fileUrl)
+    // Работаем только с PDF из Cloudinary
+    return isPDFUrl(options.fileUrl) && isCloudinaryPDF(options.fileUrl)
   }
 
   async generate(options: PreviewGenerationOptions): Promise<PreviewGenerationResult> {
@@ -38,30 +34,30 @@ export class PDFPreviewProvider extends BasePreviewProvider {
     }
 
     try {
-      console.log(`[${this.name}] Генерация превью для PDF: ${options.title}`)
+      console.log(`[${this.name}] 🎨 Генерация PDF preview через Cloudinary трансформации`)
+      console.log(`[${this.name}]   PDF: ${options.title}`)
 
-      // Динамическая загрузка PDF preview модуля
-      const pdfModule = await loadPDFPreview()
-      
-      if (!pdfModule) {
-        console.warn(`[${this.name}] Canvas недоступен, пропускаем PDF preview`)
-        return this.errorResult('PDF preview not available (canvas module not loaded)')
+      // Генерируем preview URLs через Cloudinary трансформации
+      // Cloudinary автоматически конвертирует первую страницу PDF в JPG!
+      const previewUrls = generatePDFPreviewUrls(options.fileUrl)
+
+      console.log(`[${this.name}] ✅ PDF preview URLs сгенерированы:`)
+      console.log(`[${this.name}]   - Thumbnail: ${previewUrls.thumbnail}`)
+      console.log(`[${this.name}]   - Card: ${previewUrls.card}`)
+      console.log(`[${this.name}]   - Detail: ${previewUrls.detail}`)
+
+      // Возвращаем результат БЕЗ buffer (используем прямые URL)
+      return {
+        success: true,
+        previewBuffer: undefined, // Не нужен buffer - у нас уже есть URL!
+        previewUrls, // Cloudinary трансформации
+        metadata: {
+          format: 'jpg',
+          size: 0
+        }
       }
-
-      const pdfBuffer = await pdfModule.generatePDFCardPreview(options.fileUrl)
-
-      if (!pdfBuffer) {
-        return this.errorResult('Failed to generate PDF preview')
-      }
-
-      console.log(`[${this.name}] ✅ PDF превью сгенерировано`)
-
-      return this.successResult(pdfBuffer, 'pdf', {
-        format: 'png',
-        size: pdfBuffer.length
-      })
     } catch (error) {
-      return this.handleError(error, 'PDF generation failed')
+      return this.handleError(error, 'PDF preview generation failed')
     }
   }
 }

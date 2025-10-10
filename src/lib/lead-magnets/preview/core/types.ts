@@ -11,6 +11,7 @@ import type { LeadMagnet } from '@/types/lead-magnet'
 export interface PreviewGenerationResult {
   success: boolean
   previewBuffer?: Buffer
+  previewUrls?: ResponsivePreviewUrls  // Для Cloudinary трансформаций (PDF, etc)
   previewType?: 'image' | 'video-thumbnail' | 'pdf' | 'service-card' | 'og-image'
   error?: string
   metadata?: {

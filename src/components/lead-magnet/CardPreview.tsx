@@ -172,25 +172,47 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
     )
   }
 
-  // Универсальный fallback с градиентом
+  // Улучшенный fallback с информативной карточкой
+  const fileTypeLabel = fileExtension 
+    ? fileExtension.toUpperCase().replace('.', '') 
+    : leadMagnet.type.toUpperCase()
+
   return (
     <div className={cn(
-      'bg-gradient-to-br flex items-center justify-center',
+      'bg-gradient-to-br flex items-center justify-center relative overflow-hidden',
       gradient,
       dimensions.width,
       dimensions.height,
       className
     )}>
-      {leadMagnet.emoji ? (
+      {/* Декоративные элементы для красоты */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12" />
+      </div>
+
+      {/* Основной контент */}
+      <div className="relative text-center z-10">
+        {leadMagnet.emoji ? (
+          <div className={cn(
+            'mb-2',
+            size === 'mobile' ? 'text-3xl' : size === 'responsive' ? 'text-4xl sm:text-5xl md:text-6xl' : 'text-4xl md:text-6xl'
+          )}>{leadMagnet.emoji}</div>
+        ) : (
+          <FileIcon className={cn(
+            'mx-auto mb-2 text-white/90',
+            size === 'mobile' ? 'w-8 h-8' : size === 'responsive' ? 'w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16' : 'w-10 h-10 md:w-16 md:h-16'
+          )} />
+        )}
+        
+        {/* Метка типа файла */}
         <div className={cn(
-          size === 'mobile' ? 'text-2xl' : size === 'responsive' ? 'text-3xl sm:text-4xl md:text-5xl' : 'text-3xl md:text-5xl'
-        )}>{leadMagnet.emoji}</div>
-      ) : (
-        <FileIcon className={cn(
-          'text-white',
-          size === 'mobile' ? 'w-6 h-6' : size === 'responsive' ? 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12' : 'w-8 h-8 md:w-12 md:h-12'
-        )} />
-      )}
+          'text-white/90 font-medium',
+          size === 'mobile' ? 'text-xs' : size === 'responsive' ? 'text-sm sm:text-base' : 'text-sm md:text-base'
+        )}>
+          {fileTypeLabel}
+        </div>
+      </div>
     </div>
   )
 }

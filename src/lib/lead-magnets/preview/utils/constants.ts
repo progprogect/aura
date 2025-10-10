@@ -3,19 +3,19 @@
  * Объединённые из preview.ts и preview-generator.ts
  */
 
-// Градиенты для разных типов контента
+// Градиенты для разных типов контента (СВЕТЛЫЕ ПАСТЕЛЬНЫЕ)
 export const CONTENT_GRADIENTS = {
-  video: 'from-red-600 to-red-700',
-  document: 'from-blue-600 to-blue-700',
-  image: 'from-green-600 to-green-700',
-  audio: 'from-purple-600 to-purple-700',
-  archive: 'from-orange-600 to-orange-700',
-  text: 'from-gray-600 to-gray-700',
-  presentation: 'from-yellow-600 to-yellow-700',
-  spreadsheet: 'from-emerald-600 to-emerald-700',
-  social: 'from-pink-600 to-pink-700',
-  service: 'from-indigo-600 to-blue-600',
-  unknown: 'from-slate-600 to-gray-700'
+  video: 'from-red-300 to-orange-300',
+  document: 'from-blue-300 to-cyan-300',
+  image: 'from-green-300 to-emerald-300',
+  audio: 'from-purple-300 to-pink-300',
+  archive: 'from-orange-300 to-amber-300',
+  text: 'from-gray-300 to-slate-300',
+  presentation: 'from-yellow-300 to-orange-300',
+  spreadsheet: 'from-emerald-300 to-teal-300',
+  social: 'from-pink-300 to-rose-300',
+  service: 'from-indigo-300 to-blue-300',
+  unknown: 'from-slate-300 to-gray-300'
 } as const
 
 // Иконки для разных типов контента

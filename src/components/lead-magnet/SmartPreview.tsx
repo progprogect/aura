@@ -706,14 +706,26 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       }
     }
 
-    // Fallback - используем градиент с иконкой для всех остальных случаев
+    // Улучшенный fallback с информативной карточкой
     return (
       <div className="w-full h-full relative overflow-hidden rounded-lg">
         <div className={cn("absolute inset-0 bg-gradient-to-br", previewData.gradient)} />
+        
+        {/* Декоративные элементы */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16" />
+          <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white rounded-full -ml-12 -mt-12" />
+        </div>
+
+        {/* Основной контент */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white">
-            <div className="text-6xl mb-4">{previewData.icon}</div>
-            <div className="text-lg font-medium">{previewData.typeLabel}</div>
+          <div className="text-center text-white z-10">
+            <div className="text-7xl mb-4 drop-shadow-lg">{previewData.icon}</div>
+            <div className="text-xl font-semibold mb-2 drop-shadow">{previewData.typeLabel}</div>
+            <div className="text-sm opacity-90 max-w-xs mx-auto px-4">
+              {leadMagnet.description || 'Нажмите для просмотра'}
+            </div>
           </div>
         </div>
       </div>
