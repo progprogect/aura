@@ -17,12 +17,12 @@ const UpdateLeadMagnetSchema = z.object({
   title: z.string().min(5).max(100),
   description: z.string().min(10).max(200),
   fileUrl: z.string().optional(),
-  linkUrl: z.string().url().optional(),
+  linkUrl: z.string().url().optional().or(z.literal('')),  // Разрешаем пустую строку
   emoji: z.string().default('🎁'),
   // Новые опциональные поля
   highlights: z.array(z.string()).max(5).optional(),
   targetAudience: z.string().max(50).optional(),
-  ogImage: z.string().url().optional(),
+  ogImage: z.string().url().optional().or(z.literal('')),  // Разрешаем пустую строку
 })
 
 export async function PUT(
