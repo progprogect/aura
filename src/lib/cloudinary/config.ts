@@ -61,6 +61,40 @@ export async function uploadImage(
 }
 
 /**
+ * Загрузка документа в Cloudinary (без трансформаций)
+ * @param base64File - файл в формате base64
+ * @param folder - папка в Cloudinary (например: 'lead-magnets', 'documents')
+ * @param publicId - уникальный идентификатор (опционально)
+ */
+export async function uploadDocument(
+  base64File: string,
+  folder: string,
+  publicId?: string
+): Promise<{ url: string; publicId: string }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary не настроен. Проверьте переменные окружения.')
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(base64File, {
+      folder: `aura/${folder}`,
+      public_id: publicId,
+      // БЕЗ трансформаций для сохранения оригинального формата
+      overwrite: true,
+      invalidate: true
+    })
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки документа в Cloudinary:', error)
+    throw error
+  }
+}
+
+/**
  * Загрузка аватара с оптимизацией
  * Автоматически обрезает до квадрата и ресайзит до 400x400
  */
