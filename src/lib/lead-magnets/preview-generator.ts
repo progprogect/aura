@@ -52,18 +52,18 @@ export const CONTENT_ICONS = {
   unknown: '📎'
 }
 
-// Градиенты для разных типов
+// Градиенты для разных типов (контрастные и красивые)
 export const CONTENT_GRADIENTS = {
-  video: 'from-red-500 to-red-600',
-  document: 'from-blue-500 to-blue-600',
-  image: 'from-green-500 to-green-600',
-  audio: 'from-purple-500 to-purple-600',
-  archive: 'from-orange-500 to-orange-600',
-  text: 'from-gray-500 to-gray-600',
-  presentation: 'from-yellow-500 to-yellow-600',
-  spreadsheet: 'from-emerald-500 to-emerald-600',
-  social: 'from-pink-500 to-pink-600',
-  unknown: 'from-gray-400 to-gray-500'
+  video: 'from-red-600 to-red-700',
+  document: 'from-blue-600 to-blue-700',
+  image: 'from-green-600 to-green-700',
+  audio: 'from-purple-600 to-purple-700',
+  archive: 'from-orange-600 to-orange-700',
+  text: 'from-gray-600 to-gray-700',
+  presentation: 'from-yellow-600 to-yellow-700',
+  spreadsheet: 'from-emerald-600 to-emerald-700',
+  social: 'from-pink-600 to-pink-700',
+  unknown: 'from-slate-600 to-gray-700'
 }
 
 export interface PreviewData {

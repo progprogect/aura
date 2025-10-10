@@ -15,27 +15,27 @@ import {
   Download
 } from 'lucide-react'
 
-// Градиенты для превью по типу ресурса
+// Градиенты для превью по типу ресурса (более контрастные и красивые)
 export const PREVIEW_GRADIENTS = {
   file: {
-    pdf: 'from-red-500 to-orange-500',
-    doc: 'from-blue-500 to-cyan-500',
-    docx: 'from-blue-500 to-cyan-500',
-    xls: 'from-green-500 to-emerald-500',
-    xlsx: 'from-green-500 to-emerald-500',
-    ppt: 'from-orange-500 to-red-500',
-    pptx: 'from-orange-500 to-red-500',
-    jpg: 'from-purple-500 to-pink-500',
-    jpeg: 'from-purple-500 to-pink-500',
-    png: 'from-purple-500 to-pink-500',
-    gif: 'from-purple-500 to-pink-500',
-    mp4: 'from-indigo-500 to-purple-500',
-    avi: 'from-indigo-500 to-purple-500',
-    mov: 'from-indigo-500 to-purple-500',
-    default: 'from-gray-500 to-slate-500'
+    pdf: 'from-red-600 to-orange-600',
+    doc: 'from-blue-600 to-cyan-600',
+    docx: 'from-blue-600 to-cyan-600',
+    xls: 'from-green-600 to-emerald-600',
+    xlsx: 'from-green-600 to-emerald-600',
+    ppt: 'from-orange-600 to-red-600',
+    pptx: 'from-orange-600 to-red-600',
+    jpg: 'from-purple-600 to-pink-600',
+    jpeg: 'from-purple-600 to-pink-600',
+    png: 'from-purple-600 to-pink-600',
+    gif: 'from-purple-600 to-pink-600',
+    mp4: 'from-indigo-600 to-purple-600',
+    avi: 'from-indigo-600 to-purple-600',
+    mov: 'from-indigo-600 to-purple-600',
+    default: 'from-slate-600 to-gray-700'
   },
-  link: 'from-purple-500 to-pink-500',
-  service: 'from-indigo-500 to-blue-500'
+  link: 'from-purple-600 to-pink-600',
+  service: 'from-indigo-600 to-blue-600'
 } as const
 
 // Иконки файлов по расширению
