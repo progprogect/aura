@@ -312,7 +312,7 @@ function DocumentPreview({ url, title, type }: { url: string; title: string; typ
   )
 }
 
-// Компонент формы заявки на услугу (встроенная форма)
+// Компонент формы заявки на услугу (компактная форма)
 function ServiceRequestForm({ 
   leadMagnet, 
   specialistId, 
@@ -379,54 +379,8 @@ function ServiceRequestForm({
 
   return (
     <div className={cn(
-      "w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 flex flex-col",
+      "w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-4 flex flex-col justify-center",
     )}>
-      {/* Заголовок с иконкой */}
-      <div className="text-center mb-4">
-        <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <span className="text-3xl text-white">{leadMagnet.emoji || '💼'}</span>
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {leadMagnet.title}
-        </h3>
-        {leadMagnet.description && (
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {leadMagnet.description}
-          </p>
-        )}
-      </div>
-
-      {/* Highlights если есть */}
-      {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
-        <div className="mb-4">
-          <h4 className="text-sm font-medium text-gray-900 mb-2">
-            Что включает:
-          </h4>
-          <ul className="space-y-1">
-            {leadMagnet.highlights.slice(0, 3).map((highlight, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex items-start space-x-2 text-xs text-gray-700"
-              >
-                <div className="flex-shrink-0 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                </div>
-                <span>{highlight}</span>
-              </motion.li>
-            ))}
-            {leadMagnet.highlights.length > 3 && (
-              <li className="text-xs text-gray-500 ml-6">
-                и ещё {leadMagnet.highlights.length - 3} пункт{leadMagnet.highlights.length === 4 ? '' : 'ов'}
-              </li>
-            )}
-          </ul>
-        </div>
-      )}
-
-      {/* Встроенная форма заявки */}
       {isSuccess ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -440,56 +394,63 @@ function ServiceRequestForm({
           </p>
         </motion.div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3 flex-1 flex flex-col">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ваше имя <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Как вас зовут?"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-              required
-            />
+        <div className="space-y-4">
+          {/* Заголовок формы */}
+          <div className="text-center">
+            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mx-auto mb-2">
+              <span className="text-2xl text-white">{leadMagnet.emoji || '💼'}</span>
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">
+              Заявка на услугу
+            </h3>
+            <p className="text-xs text-gray-600">
+              Заполните форму для связи
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Контакт <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              placeholder="Телефон или Telegram"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-              required
-            />
-          </div>
+          {/* Компактная форма */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ваше имя *"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                required
+              />
+            </div>
 
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Сообщение (необязательно)
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Кратко опишите ваш запрос..."
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm resize-none"
-            />
-          </div>
+            <div>
+              <input
+                type="text"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="Телефон или Telegram *"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                required
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-center disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
-          >
-            {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
-          </button>
-        </form>
+            <div>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Сообщение (необязательно)"
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm resize-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
+            </button>
+          </form>
+        </div>
       )}
     </div>
   )
@@ -512,9 +473,9 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       return getAspectRatio(filePreview.type, filePreview.platform)
     }
 
-    // Для сервисов - квадратный формат для формы
+    // Для сервисов - более высокий формат для формы
     if (leadMagnet.type === 'service') {
-      return 'aspect-square'
+      return 'aspect-[3/4]' // Высота больше ширины для формы
     }
 
     // Для остальных - универсальный формат
@@ -531,6 +492,11 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
     if (leadMagnet.type === 'file' && leadMagnet.fileUrl) {
       const filePreview = generateFilePreview(leadMagnet.fileUrl, leadMagnet.fileUrl.split('/').pop())
       return getPreviewStyles(filePreview.type, filePreview.platform)
+    }
+
+    // Для сервисов - специальные стили для формы
+    if (leadMagnet.type === 'service') {
+      return { aspectRatio: '3/4', objectFit: 'contain' }
     }
 
     return { aspectRatio: '4/3', objectFit: 'cover' }
