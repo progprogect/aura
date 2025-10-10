@@ -1,6 +1,7 @@
 /**
  * Специализированный компонент превью для карточек лид-магнитов
  * Оптимизирован для размера карточки с lazy loading
+ * Поддерживает режим 'responsive' для адаптивных вертикальных карточек
  */
 
 'use client'
@@ -21,7 +22,7 @@ import {
 interface CardPreviewProps {
   leadMagnet: LeadMagnetUI
   className?: string
-  size?: 'mobile' | 'desktop'
+  size?: 'mobile' | 'desktop' | 'responsive'
 }
 
 export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPreviewProps) {
@@ -54,6 +55,8 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   // Размеры в зависимости от размера карточки
   const dimensions = size === 'mobile' 
     ? { width: 'w-20', height: 'h-20' }
+    : size === 'responsive'
+    ? { width: 'w-full', height: 'h-32 sm:h-36 md:h-40' }
     : { width: 'w-full', height: 'h-40' }
 
   // Если есть изображение - показываем его
@@ -93,7 +96,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
             <div className="bg-red-600 rounded-full p-2 sm:p-3 md:p-4 group-hover:scale-110 transition-transform">
               <Play className={cn(
                 'text-white fill-white',
-                size === 'mobile' ? 'w-4 h-4' : 'w-6 h-6 md:w-8 md:h-8'
+                size === 'mobile' ? 'w-4 h-4' : size === 'responsive' ? 'w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8' : 'w-6 h-6 md:w-8 md:h-8'
               )} />
             </div>
           </div>
@@ -115,11 +118,11 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
         <div className="text-center">
           <FileIcon className={cn(
             'text-gray-600 mx-auto mb-1',
-            size === 'mobile' ? 'w-6 h-6' : 'w-8 h-8 md:w-12 md:h-12'
+            size === 'mobile' ? 'w-6 h-6' : size === 'responsive' ? 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12' : 'w-8 h-8 md:w-12 md:h-12'
           )} />
           <div className={cn(
             'text-gray-500 font-medium',
-            size === 'mobile' ? 'text-xs' : 'text-xs md:text-sm'
+            size === 'mobile' ? 'text-xs' : 'text-xs sm:text-sm'
           )}>PDF</div>
         </div>
       </div>
@@ -139,11 +142,11 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
         <div className="text-center text-white">
           <div className={cn(
             'mb-1',
-            size === 'mobile' ? 'text-xl' : 'text-2xl md:text-4xl'
+            size === 'mobile' ? 'text-xl' : size === 'responsive' ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-2xl md:text-4xl'
           )}>{leadMagnet.emoji || '💼'}</div>
           <div className={cn(
             'font-medium',
-            size === 'mobile' ? 'text-xs' : 'text-xs md:text-sm'
+            size === 'mobile' ? 'text-xs' : 'text-xs sm:text-sm'
           )}>Услуга</div>
         </div>
       </div>
@@ -161,12 +164,12 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
     )}>
       {leadMagnet.emoji ? (
         <div className={cn(
-          size === 'mobile' ? 'text-2xl' : 'text-3xl md:text-5xl'
+          size === 'mobile' ? 'text-2xl' : size === 'responsive' ? 'text-3xl sm:text-4xl md:text-5xl' : 'text-3xl md:text-5xl'
         )}>{leadMagnet.emoji}</div>
       ) : (
         <FileIcon className={cn(
           'text-white',
-          size === 'mobile' ? 'w-6 h-6' : 'w-8 h-8 md:w-12 md:h-12'
+          size === 'mobile' ? 'w-6 h-6' : size === 'responsive' ? 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12' : 'w-8 h-8 md:w-12 md:h-12'
         )} />
       )}
     </div>
