@@ -33,7 +33,10 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   const gradient = getPreviewGradient(leadMagnet.type, fileExtension)
   const FileIcon = getFileIcon(fileExtension)
 
-  // Проверяем наличие сгенерированного превью
+  // Проверяем наличие responsive превью (новая система)
+  const hasResponsivePreview = !!leadMagnet.previewUrls && !imageError
+  
+  // Проверяем наличие старого превью (обратная совместимость)
   const hasPreviewImage = !!leadMagnet.previewImage && !imageError
   
   // Проверяем YouTube
@@ -43,14 +46,26 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   // Проверяем OG image
   const hasOgImage = !!leadMagnet.ogImage && !imageError
   
-  // Определяем источник изображения (приоритет: previewImage > YouTube thumbnail > OG image)
-  const imageSource = hasPreviewImage 
+  // Определяем источник изображения (приоритет: previewUrls > previewImage > YouTube > OG)
+  const imageSource = hasResponsivePreview
+    ? leadMagnet.previewUrls!.card  // Используем card размер для карточек
+    : hasPreviewImage 
     ? leadMagnet.previewImage 
     : youtubeThumbnail 
     ? youtubeThumbnail 
     : hasOgImage 
     ? leadMagnet.ogImage 
     : null
+  
+  // srcSet для responsive images (если есть previewUrls)
+  const srcSet = hasResponsivePreview 
+    ? `${leadMagnet.previewUrls!.thumbnail} 400w, ${leadMagnet.previewUrls!.card} 800w`
+    : undefined
+  
+  // sizes для браузера
+  const sizes = hasResponsivePreview
+    ? size === 'mobile' ? '80px' : size === 'responsive' ? '(max-width: 640px) 100vw, 400px' : '400px'
+    : undefined
 
   // Размеры в зависимости от размера карточки
   const dimensions = size === 'mobile' 
@@ -73,7 +88,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
           <div className="absolute inset-0 bg-gray-200 animate-pulse" />
         )}
 
-        {/* Изображение */}
+        {/* Изображение (Next.js автоматически оптимизирует) */}
         <Image
           src={imageSource}
           alt={leadMagnet.title}
@@ -87,7 +102,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
             setImageError(true)
             setIsLoading(false)
           }}
-          sizes="(max-width: 768px) 80px, 400px"
+          sizes={sizes || "(max-width: 768px) 80px, 400px"}
         />
 
         {/* Play button для YouTube */}

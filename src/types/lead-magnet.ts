@@ -29,6 +29,14 @@ export function fromPrismaLeadMagnet(prismaObj: any): LeadMagnet {
   }
 }
 
+// Responsive preview URLs
+export interface PreviewUrls {
+  thumbnail: string
+  card: string
+  detail: string
+  original?: string
+}
+
 // Базовый интерфейс лид-магнита
 export interface LeadMagnet {
   id: string
@@ -43,7 +51,8 @@ export interface LeadMagnet {
   targetAudience?: string | null
   fileSize?: string | null
   ogImage?: string | null
-  previewImage?: string | null
+  previewImage?: string | null  // DEPRECATED: использовать previewUrls
+  previewUrls?: PreviewUrls | null  // Responsive превью URLs
   viewCount?: number
   downloadCount?: number
 }
@@ -62,7 +71,8 @@ export interface LeadMagnetUI {
   targetAudience?: string | null
   fileSize?: string | null
   ogImage?: string | null
-  previewImage?: string | null
+  previewImage?: string | null  // DEPRECATED: использовать previewUrls
+  previewUrls?: PreviewUrls | null
   viewCount?: number
   downloadCount?: number
   createdAt?: Date | string

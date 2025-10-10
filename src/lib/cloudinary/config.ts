@@ -79,6 +79,8 @@ export async function uploadDocument(
     const result = await cloudinary.uploader.upload(base64File, {
       folder: `aura/${folder}`,
       public_id: publicId,
+      resource_type: 'raw', // 🔴 КРИТИЧНО: для PDF и других документов
+      type: 'upload', // Публичная загрузка
       // БЕЗ трансформаций для сохранения оригинального формата
       overwrite: true,
       invalidate: true
@@ -90,6 +92,43 @@ export async function uploadDocument(
     }
   } catch (error) {
     console.error('Ошибка загрузки документа в Cloudinary:', error)
+    throw error
+  }
+}
+
+/**
+ * Загрузка PDF файла в Cloudinary
+ * Специализированная функция для PDF с правильными настройками доступа
+ * @param base64File - PDF файл в формате base64
+ * @param folder - папка в Cloudinary
+ * @param publicId - уникальный идентификатор (опционально)
+ */
+export async function uploadPDF(
+  base64File: string,
+  folder: string,
+  publicId?: string
+): Promise<{ url: string; publicId: string }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary не настроен. Проверьте переменные окружения.')
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(base64File, {
+      folder: `aura/${folder}`,
+      public_id: publicId,
+      resource_type: 'raw', // КРИТИЧНО для PDF
+      type: 'upload', // Публичный доступ
+      access_mode: 'public', // Явно указываем публичный доступ
+      overwrite: true,
+      invalidate: true
+    })
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки PDF в Cloudinary:', error)
     throw error
   }
 }
