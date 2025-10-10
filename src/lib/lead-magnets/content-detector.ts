@@ -284,6 +284,25 @@ export function detectContentFromUrl(url: string): ContentInfo {
       }
     }
 
+    // Проверяем популярные сервисы изображений
+    const imageServices = [
+      'unsplash.com',
+      'images.unsplash.com',
+      'cdn.unsplash.com',
+      'pixabay.com',
+      'pexels.com',
+      'imgur.com',
+      'flickr.com'
+    ]
+    
+    if (imageServices.some(service => hostname.includes(service))) {
+      return {
+        type: 'image',
+        extension: '.jpg', // По умолчанию для изображений с сервисов
+        isEmbeddable: true
+      }
+    }
+
     // Проверяем прямые ссылки на изображения
     const imageExtensions = FILE_EXTENSIONS.image
     const isImageUrl = imageExtensions.some(ext => pathname.toLowerCase().endsWith(ext))
@@ -330,6 +349,7 @@ export function detectContentFromFileExtension(filename: string): ContentInfo {
     isEmbeddable: false
   }
 }
+
 
 /**
  * Определяет тип файла по MIME типу

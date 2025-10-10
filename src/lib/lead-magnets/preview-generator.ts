@@ -193,7 +193,13 @@ export function generateLinkPreview(linkUrl: string, ogImage?: string): PreviewD
  * Генерирует превью для файла
  */
 export function generateFilePreview(fileUrl: string, filename?: string): PreviewData {
-  const contentInfo = detectContentFromFileExtension(filename || fileUrl)
+  // Сначала пробуем определить по URL (для сервисов без расширений)
+  let contentInfo = detectContentFromUrl(fileUrl)
+  
+  // Если не удалось определить по URL, пробуем по расширению файла
+  if (contentInfo.type === 'unknown' && filename) {
+    contentInfo = detectContentFromFileExtension(filename)
+  }
   
   switch (contentInfo.type) {
     case 'image':

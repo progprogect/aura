@@ -195,7 +195,7 @@ export function formatSocialProof(downloadCount: number): string {
   return `${downloadCount} скачиваний`
 }
 
-// Получить данные превью для лид-магнита
+// Получить данные превью для лид-магнита (fallback для случаев когда превью не генерируется)
 export function getLeadMagnetPreviewData(leadMagnet: {
   type: 'file' | 'link' | 'service'
   fileUrl?: string | null
@@ -204,8 +204,18 @@ export function getLeadMagnetPreviewData(leadMagnet: {
   emoji?: string | null
   title?: string
 }) {
-  const gradient = getPreviewGradient(leadMagnet.type, getFileExtension(leadMagnet.fileUrl))
-  const fileExtension = getFileExtension(leadMagnet.fileUrl)
+  // Для файлов используем расширение из URL или определяем по сервису
+  let fileExtension = getFileExtension(leadMagnet.fileUrl)
+  
+  // Если нет расширения, но это популярный сервис изображений
+  if (!fileExtension && leadMagnet.fileUrl) {
+    const url = leadMagnet.fileUrl.toLowerCase()
+    if (url.includes('unsplash.com') || url.includes('pixabay.com') || url.includes('pexels.com')) {
+      fileExtension = '.jpg'
+    }
+  }
+  
+  const gradient = getPreviewGradient(leadMagnet.type, fileExtension)
   const IconComponent = getFileIcon(fileExtension)
   const typeLabel = getFileType(fileExtension)
   
