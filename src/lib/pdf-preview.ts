@@ -37,6 +37,7 @@ export async function generatePDFPreview(pdfUrl: string): Promise<string | null>
     
     // Рендерим страницу в canvas
     const renderContext = {
+      canvas: canvas,
       canvasContext: context,
       viewport: viewport,
     }
