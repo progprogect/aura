@@ -486,8 +486,8 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
     if (leadMagnet.type === 'file' && leadMagnet.fileUrl) {
       const filePreview = generateFilePreview(leadMagnet.fileUrl, leadMagnet.fileUrl.split('/').pop())
       
-      // PDF файлы
-      if (filePreview.type === 'document' && leadMagnet.fileUrl.toLowerCase().includes('.pdf')) {
+      // PDF файлы - используем extension из filePreview для надежного определения
+      if (filePreview.type === 'document' && filePreview.extension === '.pdf') {
         return <PDFPreview url={leadMagnet.fileUrl} title={leadMagnet.title} />
       }
       

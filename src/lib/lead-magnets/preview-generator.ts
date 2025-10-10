@@ -76,6 +76,7 @@ export interface PreviewData {
   platformColor?: string
   isEmbeddable: boolean
   label: string
+  extension?: string  // Расширение файла для определения типа (.pdf, .doc, и т.д.)
 }
 
 /**
@@ -229,7 +230,8 @@ export function generateFilePreview(fileUrl: string, filename?: string): Preview
         icon: contentInfo.extension === '.pdf' ? CONTENT_ICONS.pdf : CONTENT_ICONS.document,
         gradient: contentInfo.extension === '.pdf' ? CONTENT_GRADIENTS.document : CONTENT_GRADIENTS.document,
         isEmbeddable: true,
-        label: getFileLabel(contentInfo.extension || '')
+        label: getFileLabel(contentInfo.extension || ''),
+        extension: contentInfo.extension  // Добавляем extension для определения PDF
       }
       
     case 'presentation':
