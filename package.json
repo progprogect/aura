@@ -15,7 +15,11 @@
     "test:ai-chat": "tsx scripts/test-ai-chat-api.ts",
     "test:duplication": "tsx scripts/test-duplication-fix.ts",
     "test:personalized-chat": "tsx scripts/test-personalized-chat.ts",
-    "chat": "tsx scripts/interactive-chat.ts"
+    "chat": "tsx scripts/interactive-chat.ts",
+    "worker:preview": "tsx src/lib/queue/worker-start.ts",
+    "migrate:fix-pdf": "tsx prisma/scripts/fix-pdf-access.ts",
+    "migrate:to-cdn": "tsx prisma/scripts/migrate-preview-to-cdn.ts",
+    "migrate:all-previews": "npm run migrate:fix-pdf && npm run migrate:to-cdn"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
