@@ -587,7 +587,19 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
 
   // Логика определения типа превью
   const getPreviewContent = () => {
-    // ПРИОРИТЕТ 1: Если есть сгенерированное превью - используем его
+    // ПРИОРИТЕТ 1: Для сервисов - ВСЕГДА показываем форму заявки (не картинку!)
+    if (leadMagnet.type === 'service') {
+      return (
+        <ServiceRequestForm 
+          leadMagnet={leadMagnet} 
+          specialistId={specialistId}
+          specialistName={specialistName}
+          onOpenModal={() => {}} 
+        />
+      )
+    }
+
+    // ПРИОРИТЕТ 2: Если есть сгенерированное превью - используем его
     if (leadMagnet.previewImage) {
       return (
         <div className="w-full h-full relative">
@@ -602,7 +614,7 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       )
     }
 
-    // ПРИОРИТЕТ 2: Для ссылок - умное определение типа контента с embed
+    // ПРИОРИТЕТ 3: Для ссылок - умное определение типа контента с embed
     if (leadMagnet.type === 'link' && leadMagnet.linkUrl) {
       const linkPreview = generateLinkPreview(leadMagnet.linkUrl, leadMagnet.ogImage || undefined)
       
@@ -692,18 +704,6 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       if (filePreview.isEmbeddable) {
         return <DocumentPreview url={leadMagnet.fileUrl} title={leadMagnet.title} type={filePreview.type} />
       }
-    }
-
-    // Для сервисов - показываем форму заявки
-    if (leadMagnet.type === 'service') {
-      return (
-        <ServiceRequestForm 
-          leadMagnet={leadMagnet} 
-          specialistId={specialistId}
-          specialistName={specialistName}
-          onOpenModal={() => {}} 
-        />
-      )
     }
 
     // Fallback - используем градиент с иконкой для всех остальных случаев

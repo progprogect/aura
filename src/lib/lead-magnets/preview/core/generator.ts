@@ -102,6 +102,11 @@ export async function generatePreview(
 export function shouldGeneratePreview(
   options: PreviewGenerationOptions
 ): boolean {
+  // Для сервисов НЕ генерируем превью - показываем форму заявки
+  if (options.type === 'service') {
+    return false
+  }
+  
   return previewGenerator.shouldGeneratePreview(options)
 }
 
