@@ -6,6 +6,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
 import { SpecialistHero } from './SpecialistHero'
@@ -116,6 +117,7 @@ export function SpecialistProfileWithEdit({
   contactsData,
   data 
 }: SpecialistProfileWithEditProps) {
+  const router = useRouter()
   const [isEditMode, setIsEditMode] = useState(false)
   const [acceptingClients, setAcceptingClients] = useState(heroData.acceptingClients)
 
@@ -125,9 +127,9 @@ export function SpecialistProfileWithEdit({
 
   const handleExitEditMode = useCallback(() => {
     setIsEditMode(false)
-    // Перезагружаем страницу чтобы обновить данные
-    window.location.reload()
-  }, [])
+    // Обновляем данные из сервера (без полной перезагрузки страницы)
+    router.refresh()
+  }, [router])
 
   // Функция для сохранения одного поля
   const handleSaveField = useCallback(async (field: string, value: string | number | boolean) => {
@@ -383,7 +385,7 @@ export function SpecialistProfileWithEdit({
             {isEditMode ? (
               <GalleryEditor
                 items={data.gallery}
-                onRefresh={() => window.location.reload()}
+                onRefresh={() => router.refresh()}
               />
             ) : (
               data.gallery.length > 0 ? (
@@ -408,7 +410,7 @@ export function SpecialistProfileWithEdit({
               education={data.education}
               certificates={data.certificates}
               isEditMode={isEditMode}
-              onRefresh={() => window.location.reload()}
+              onRefresh={() => router.refresh()}
             />
           </div>
 
@@ -442,7 +444,7 @@ export function SpecialistProfileWithEdit({
             {isEditMode ? (
               <FAQEditor
                 faqs={data.faqs}
-                onRefresh={() => window.location.reload()}
+                onRefresh={() => router.refresh()}
               />
             ) : (
               data.faqs.length > 0 ? (
@@ -466,7 +468,7 @@ export function SpecialistProfileWithEdit({
             {isEditMode ? (
               <LeadMagnetsEditor
                 leadMagnets={data.leadMagnets}
-                onRefresh={() => window.location.reload()}
+                onRefresh={() => router.refresh()}
               />
             ) : (
               data.leadMagnets.length > 0 ? (

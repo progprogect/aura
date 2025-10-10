@@ -1,5 +1,4 @@
 /**
-import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
  * API для загрузки аватара специалиста
  * POST /api/specialist/avatar
  * Поддерживает:
@@ -12,6 +11,7 @@ import { prisma } from '@/lib/db'
 import { uploadAvatar, isCloudinaryConfigured } from '@/lib/cloudinary/config'
 import { z } from 'zod'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { revalidateSpecialistProfile } from '@/lib/revalidation'
 
 const AvatarSchema = z.object({
   // Либо base64 изображение
@@ -94,6 +94,17 @@ export async function POST(request: NextRequest) {
         avatar: avatarUrl,
       }
     })
+
+    // Инвалидируем кеш профиля
+    if (session.specialistProfile) {
+      const specialistProfile = await prisma.specialistProfile.findUnique({
+        where: { id: session.specialistProfile.id },
+        select: { slug: true }
+      })
+      if (specialistProfile) {
+        await revalidateSpecialistProfile(specialistProfile.slug)
+      }
+    }
 
     return NextResponse.json({
       success: true,

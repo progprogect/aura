@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { getAuthSession, UNAUTHORIZED_RESPONSE, SESSION_EXPIRED_RESPONSE } from '@/lib/auth/api-auth'
+import { revalidateSpecialistProfile } from '@/lib/revalidation'
 
 // Схема для обновления профиля
 const UpdateProfileSchema = z.object({
@@ -103,6 +104,17 @@ export async function PATCH(request: NextRequest) {
         { success: false, error: 'Неизвестное поле' },
         { status: 400 }
       )
+    }
+
+    // Инвалидируем кеш профиля
+    if (session.specialistProfile) {
+      const specialistProfile = await prisma.specialistProfile.findUnique({
+        where: { id: session.specialistProfile.id },
+        select: { slug: true }
+      })
+      if (specialistProfile) {
+        await revalidateSpecialistProfile(specialistProfile.slug)
+      }
     }
 
     return NextResponse.json({

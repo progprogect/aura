@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { SpecialistTabs, useActiveTab, type Tab } from './SpecialistTabs'
 import { SpecialistAbout } from './SpecialistAbout'
 import { SpecialistSpecialization } from './SpecialistSpecialization'
@@ -59,6 +60,7 @@ interface SpecialistProfileProps {
 }
 
 export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = false, onSaveField, onSaveCustomField }: SpecialistProfileProps) {
+  const router = useRouter()
   const activeTab = useActiveTab(tabs)
 
   return (
@@ -98,7 +100,7 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
             education={data.education}
             certificates={data.certificates}
             isEditMode={isEditMode}
-            onRefresh={() => window.location.reload()}
+            onRefresh={() => router.refresh()}
           />
         )}
 

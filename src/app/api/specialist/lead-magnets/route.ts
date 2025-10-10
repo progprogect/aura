@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { uploadImage } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
+import { revalidateSpecialistProfile } from '@/lib/revalidation'
 
 const CreateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -198,6 +199,15 @@ export async function POST(request: NextRequest) {
         ogImage: data.ogImage,
       }
     })
+
+    // Инвалидируем кеш профиля для мгновенного отображения
+    const specialistProfile = await prisma.specialistProfile.findUnique({
+      where: { id: session.specialistProfile!.id },
+      select: { slug: true }
+    })
+    if (specialistProfile) {
+      await revalidateSpecialistProfile(specialistProfile.slug)
+    }
 
     return NextResponse.json({ success: true, leadMagnet })
 

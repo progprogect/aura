@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { revalidateSpecialistProfile } from '@/lib/revalidation'
 
 const UpdateArraySchema = z.object({
   field: z.enum(['specializations', 'workFormats']),
@@ -40,6 +41,9 @@ export async function PATCH(request: NextRequest) {
         [field]: value,
       }
     })
+
+    // Инвалидируем кеш профиля
+    await revalidateSpecialistProfile(specialistProfile.slug)
 
     return NextResponse.json({
       success: true,

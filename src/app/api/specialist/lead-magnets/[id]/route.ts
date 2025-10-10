@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { uploadImage } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
+import { revalidateSpecialistProfile } from '@/lib/revalidation'
 
 const UpdateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -178,6 +179,15 @@ export async function PUT(
       data: updateData
     })
 
+    // Инвалидируем кеш профиля
+    const specialistProfile = await prisma.specialistProfile.findUnique({
+      where: { id: leadMagnet.specialistProfileId },
+      select: { slug: true }
+    })
+    if (specialistProfile) {
+      await revalidateSpecialistProfile(specialistProfile.slug)
+    }
+
     return NextResponse.json({ success: true, leadMagnet: updatedLeadMagnet })
 
   } catch (error) {
@@ -230,6 +240,15 @@ export async function DELETE(
     await prisma.leadMagnet.delete({
       where: { id: params.id }
     })
+
+    // Инвалидируем кеш профиля
+    const specialistProfile = await prisma.specialistProfile.findUnique({
+      where: { id: leadMagnet.specialistProfileId },
+      select: { slug: true }
+    })
+    if (specialistProfile) {
+      await revalidateSpecialistProfile(specialistProfile.slug)
+    }
 
     return NextResponse.json({ success: true })
 
