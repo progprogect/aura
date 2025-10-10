@@ -608,10 +608,10 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
       )
     }
 
-    // Fallback - используем градиент с иконкой
+    // Fallback - используем градиент с иконкой для всех остальных случаев
     return (
       <div className="w-full h-full relative overflow-hidden rounded-lg">
-        <div className={cn("absolute inset-0", previewData.gradient)} />
+        <div className={cn("absolute inset-0 bg-gradient-to-br", previewData.gradient)} />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <div className="text-6xl mb-4">{previewData.icon}</div>
