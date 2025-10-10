@@ -5,10 +5,11 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetPreviewData, getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
+import { ServicePreview } from './ServicePreview'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SmartPreviewProps {
-  leadMagnet: Pick<LeadMagnet, 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title'>
+  leadMagnet: Pick<LeadMagnet, 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title' | 'description' | 'highlights'>
   className?: string
 }
 
@@ -101,96 +102,6 @@ function PDFPreview({ url, title }: { url: string; title: string }) {
   )
 }
 
-// Компонент для формы заявки на сервис
-function ServiceForm({ title }: { title: string }) {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Здесь будет логика отправки формы
-    setIsSubmitted(true)
-  }
-
-  if (isSubmitted) {
-    return (
-      <div className="w-full h-full bg-green-50 rounded-lg flex items-center justify-center p-6">
-        <div className="text-center">
-          <div className="text-4xl mb-3">✅</div>
-          <h3 className="text-lg font-semibold text-green-800 mb-2">
-            Заявка отправлена!
-          </h3>
-          <p className="text-sm text-green-600">
-            Мы свяжемся с вами в ближайшее время
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="w-full h-full bg-white rounded-lg border border-gray-200 p-6 flex flex-col">
-      <div className="text-center mb-6">
-        <div className="text-4xl mb-3">📋</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Заявка на услугу
-        </h3>
-        <p className="text-sm text-gray-600">
-          Заполните форму, и мы свяжемся с вами
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Имя *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ваше имя"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email *
-          </label>
-          <input
-            type="email"
-            required
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="your@email.com"
-          />
-        </div>
-
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Сообщение
-          </label>
-          <textarea
-            value={formData.message}
-            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            className="w-full h-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            placeholder="Опишите ваши потребности..."
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
-        >
-          Отправить заявку
-        </button>
-      </form>
-    </div>
-  )
-}
 
 export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
   const previewData = getLeadMagnetPreviewData(leadMagnet)
@@ -255,9 +166,9 @@ export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
       }
     }
 
-    // Для сервисов - показываем форму заявки
+    // Для сервисов - показываем информационное превью
     if (leadMagnet.type === 'service') {
-      return <ServiceForm title={leadMagnet.title} />
+      return <ServicePreview leadMagnet={leadMagnet} />
     }
 
     // Fallback - используем градиент с иконкой

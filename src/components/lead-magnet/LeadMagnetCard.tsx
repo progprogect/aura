@@ -43,6 +43,9 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
   
   // Проверяем является ли это PDF файл
   const isPDF = leadMagnet.type === 'file' && leadMagnet.fileUrl && leadMagnet.fileUrl.toLowerCase().includes('.pdf')
+  
+  // Проверяем является ли это услуга
+  const isService = leadMagnet.type === 'service'
 
   return (
     <motion.div
@@ -64,8 +67,8 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
         {/* Превью - слева на мобилке */}
         <div className={cn(
           "flex-shrink-0 w-20 h-20 md:w-full md:h-40 relative overflow-hidden rounded-lg md:rounded-t-xl md:rounded-b-none",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && "bg-gradient-to-br flex items-center justify-center",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && gradient
+          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && "bg-gradient-to-br flex items-center justify-center",
+          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && gradient
         )}>
           {/* PDF превью */}
           {isPDF ? (
@@ -73,6 +76,13 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
               <div className="text-center">
                 <FileIcon className="w-8 h-8 text-gray-600 mx-auto mb-1" />
                 <div className="text-xs text-gray-500 font-medium">PDF</div>
+              </div>
+            </div>
+          ) : isService ? (
+            <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="text-2xl mb-1">{leadMagnet.emoji || '💼'}</div>
+                <div className="text-xs font-medium">Услуга</div>
               </div>
             </div>
           ) : youtubeThumbnail ? (
@@ -162,8 +172,8 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
         {/* Превью - сверху на desktop */}
         <div className={cn(
           "w-full h-40 relative overflow-hidden",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && "bg-gradient-to-br flex items-center justify-center",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && gradient
+          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && "bg-gradient-to-br flex items-center justify-center",
+          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && gradient
         )}>
           {/* PDF превью */}
           {isPDF ? (
@@ -171,6 +181,13 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
               <div className="text-center">
                 <FileIcon className="w-12 h-12 text-gray-600 mx-auto mb-2" />
                 <div className="text-sm text-gray-500 font-medium">PDF</div>
+              </div>
+            </div>
+          ) : isService ? (
+            <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+              <div className="text-center text-white">
+                <div className="text-4xl mb-2">{leadMagnet.emoji || '💼'}</div>
+                <div className="text-sm font-medium">Услуга</div>
               </div>
             </div>
           ) : youtubeThumbnail ? (
