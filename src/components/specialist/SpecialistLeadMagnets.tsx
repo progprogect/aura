@@ -1,12 +1,12 @@
 /**
- * Отображение лид-магнитов в профиле специалиста (упрощенная версия)
+ * Отображение лид-магнитов в профиле специалиста (современный UX 2025)
+ * Карточки-превью с визуальным акцентом, без лишних оберток
  */
 
 'use client'
 
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LeadMagnetCard } from '@/components/lead-magnet/LeadMagnetCard'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 
 interface SpecialistLeadMagnetsProps {
@@ -29,55 +29,35 @@ export function SpecialistLeadMagnets({
   }
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
+      className="space-y-4"
     >
-      <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            🎁 Бесплатные материалы
-          </CardTitle>
-          <p className="text-sm text-gray-600 mt-2">
-            Полезные ресурсы от {specialistName.split(' ')[0]}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {validLeadMagnets.map((magnet, index) => {
-                const href = `/specialist/${specialistSlug}/resources/${magnet.slug}`
-                
-                return (
-                  <motion.div
-                    key={magnet.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link 
-                      href={href}
-                      className="block border border-gray-200 rounded-lg p-4 hover:shadow-sm hover:border-gray-300 transition-all group"
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{magnet.emoji}</span>
-                        <h3 className="font-medium text-gray-900 text-sm group-hover:text-gray-700 flex-1">
-                          {magnet.title}
-                        </h3>
-                      </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {magnet.description}
-                      </p>
-                    </Link>
-                  </motion.div>
-                )
-              })}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+      {/* Заголовок */}
+      <div>
+        <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+          🎁 Бесплатные материалы
+        </h2>
+        <p className="text-sm text-gray-600 mt-1">
+          Полезные ресурсы от {specialistName.split(' ')[0]}
+        </p>
+      </div>
+
+      {/* Сетка карточек */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {validLeadMagnets.map((magnet, index) => (
+          <LeadMagnetCard
+            key={magnet.id}
+            leadMagnet={magnet}
+            specialistSlug={specialistSlug}
+            index={index}
+          />
+        ))}
+      </div>
+    </motion.section>
   )
 }
 

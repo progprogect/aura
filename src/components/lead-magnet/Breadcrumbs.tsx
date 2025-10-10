@@ -1,38 +1,32 @@
 /**
- * Breadcrumbs для навигации с лид-магнита обратно к профилю
+ * Breadcrumbs для детальной страницы лид-магнита
+ * Консистентность с остальным приложением
  */
 
-'use client'
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs'
+import { BreadcrumbItem } from '@/lib/navigation/types'
 
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
-
-interface BreadcrumbsProps {
+interface LeadMagnetBreadcrumbsProps {
   specialistSlug: string
   specialistName: string
   leadMagnetTitle: string
+  category?: string
 }
 
-export function Breadcrumbs({ 
+export function LeadMagnetBreadcrumbs({ 
   specialistSlug, 
-  specialistName, 
-  leadMagnetTitle 
-}: BreadcrumbsProps) {
-  return (
-    <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
-      <div className="max-w-2xl mx-auto">
-        <Link 
-          href={`/specialist/${specialistSlug}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ChevronLeft size={16} />
-          <span className="font-medium">{specialistName}</span>
-        </Link>
-        <div className="text-xs text-gray-500 mt-1 ml-5 truncate">
-          {leadMagnetTitle}
-        </div>
-      </div>
-    </div>
-  )
+  specialistName,
+  leadMagnetTitle,
+  category
+}: LeadMagnetBreadcrumbsProps) {
+  // Генерируем breadcrumbs в стиле приложения
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Главная', href: '/' },
+    { label: 'Каталог специалистов', href: '/catalog' },
+    { label: specialistName, href: `/specialist/${specialistSlug}` },
+    { label: leadMagnetTitle, isActive: true },
+  ]
+
+  return <Breadcrumbs items={breadcrumbs} />
 }
 

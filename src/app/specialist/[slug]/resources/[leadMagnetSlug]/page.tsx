@@ -6,11 +6,12 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { cache } from 'react'
 import { prisma } from '@/lib/db'
-import { Breadcrumbs } from '@/components/lead-magnet/Breadcrumbs'
-import { PreviewBlock } from '@/components/lead-magnet/PreviewBlock'
+import { LeadMagnetBreadcrumbs } from '@/components/lead-magnet/Breadcrumbs'
+import { HeroPreview } from '@/components/lead-magnet/HeroPreview'
 import { HighlightsList } from '@/components/lead-magnet/HighlightsList'
 import { MetadataRow } from '@/components/lead-magnet/MetadataRow'
 import { CTAButton } from '@/components/lead-magnet/CTAButton'
+import { RelatedActions } from '@/components/lead-magnet/RelatedActions'
 import { shouldShowPreview, generateOGTags } from '@/lib/lead-magnets/utils'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 
@@ -32,6 +33,13 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
           lastName: true,
           avatar: true,
         }
+      },
+      leadMagnets: {
+        where: { 
+          isActive: true,
+          slug: { not: null }
+        },
+        orderBy: { order: 'asc' }
       }
     }
   })
@@ -59,6 +67,11 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
     console.error('[LeadMagnet] Ошибка трекинга просмотра:', error)
   }
 
+  // Получаем другие лид-магниты (исключая текущий)
+  const otherLeadMagnets = specialist.leadMagnets
+    .filter(lm => lm.id !== leadMagnet.id)
+    .map(fromPrismaLeadMagnet)
+
   return {
     specialist: {
       id: specialist.id,
@@ -67,7 +80,8 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
       lastName: specialist.user.lastName,
       avatar: specialist.user.avatar,
     },
-    leadMagnet: fromPrismaLeadMagnet(leadMagnet) // Конвертируем Prisma объект в типизированный
+    leadMagnet: fromPrismaLeadMagnet(leadMagnet), // Конвертируем Prisma объект в типизированный
+    otherLeadMagnets
   }
 })
 
@@ -109,37 +123,32 @@ export default async function LeadMagnetPage({ params }: PageProps) {
     notFound()
   }
 
-  const { specialist, leadMagnet } = data
+  const { specialist, leadMagnet, otherLeadMagnets } = data
   const specialistName = `${specialist.firstName} ${specialist.lastName}`
-  const showPreview = shouldShowPreview(leadMagnet)
 
   return (
-    <div className="min-h-screen bg-white pb-24 md:pb-6">
-      {/* Breadcrumbs (sticky) */}
-      <Breadcrumbs
+    <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumbs */}
+      <LeadMagnetBreadcrumbs
         specialistSlug={specialist.slug}
         specialistName={specialistName}
         leadMagnetTitle={leadMagnet.title}
       />
 
-      {/* Content (max-w-2xl, centered, padding) */}
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Preview (conditional) */}
-        {showPreview && <PreviewBlock leadMagnet={leadMagnet} />}
+      {/* Content */}
+      <main className="max-w-3xl mx-auto px-4 py-6 space-y-8">
+        {/* Hero Preview */}
+        <HeroPreview leadMagnet={leadMagnet} />
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-start gap-2">
-            <span className="text-3xl md:text-4xl">{leadMagnet.emoji}</span>
-            <span className="flex-1">{leadMagnet.title}</span>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+            {leadMagnet.title}
           </h1>
           <p className="text-base text-gray-600 leading-relaxed">
             {leadMagnet.description}
           </p>
         </div>
-
-        {/* Highlights (if exists) */}
-        <HighlightsList items={leadMagnet.highlights || []} />
 
         {/* Metadata row */}
         <MetadataRow
@@ -148,14 +157,28 @@ export default async function LeadMagnetPage({ params }: PageProps) {
           fileSize={leadMagnet.fileSize}
           type={leadMagnet.type}
         />
-      </main>
 
-      {/* CTA (sticky on mobile, regular on desktop) */}
-      <CTAButton
-        leadMagnet={leadMagnet}
-        specialistId={specialist.id}
-        specialistName={specialistName}
-      />
+        {/* Highlights (if exists) */}
+        {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
+          <HighlightsList items={leadMagnet.highlights} />
+        )}
+
+        {/* CTA */}
+        <div className="pt-4">
+          <CTAButton
+            leadMagnet={leadMagnet}
+            specialistId={specialist.id}
+            specialistName={specialistName}
+          />
+        </div>
+
+        {/* Related Actions */}
+        <RelatedActions
+          otherLeadMagnets={otherLeadMagnets}
+          specialistSlug={specialist.slug}
+          specialistName={specialistName}
+        />
+      </main>
     </div>
   )
 }
