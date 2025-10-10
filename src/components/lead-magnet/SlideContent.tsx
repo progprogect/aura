@@ -1,12 +1,15 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { Download, ExternalLink, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SlideContentProps {
-  leadMagnet: Pick<LeadMagnet, 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights'>
+  leadMagnet: Pick<LeadMagnet, 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl'>
+  specialistId?: string
+  specialistName?: string
   className?: string
 }
 
@@ -98,7 +101,81 @@ function HighlightsList({ highlights }: { highlights: string[] }) {
   )
 }
 
-export function SlideContent({ leadMagnet, className }: SlideContentProps) {
+// Компонент для кнопки CTA (интегрированная)
+function CTAButton({ 
+  leadMagnet, 
+  specialistId, 
+  specialistName 
+}: {
+  leadMagnet: Pick<LeadMagnet, 'type' | 'fileUrl' | 'linkUrl'>
+  specialistId?: string
+  specialistName?: string
+}) {
+  const getButtonConfig = () => {
+    switch (leadMagnet.type) {
+      case 'file':
+        return {
+          text: 'Скачать файл',
+          icon: Download,
+        }
+      case 'link':
+        return {
+          text: 'Перейти по ссылке',
+          icon: ExternalLink,
+        }
+      case 'service':
+        return {
+          text: 'Записаться на консультацию',
+          icon: MessageCircle,
+        }
+      default:
+        return {
+          text: 'Получить доступ',
+          icon: Download,
+        }
+    }
+  }
+
+  const handleClick = () => {
+    switch (leadMagnet.type) {
+      case 'file':
+        if (leadMagnet.fileUrl) {
+          window.open(leadMagnet.fileUrl, '_blank')
+        }
+        break
+      case 'link':
+        if (leadMagnet.linkUrl) {
+          window.open(leadMagnet.linkUrl, '_blank')
+        }
+        break
+      case 'service':
+        console.log('Запись на консультацию к', specialistName)
+        break
+    }
+  }
+
+  const { text, icon: Icon } = getButtonConfig()
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.4 }}
+      onClick={handleClick}
+      className={cn(
+        "inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white rounded-xl transition-colors duration-200",
+        "bg-blue-600 hover:bg-blue-700",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2",
+        "w-full md:w-auto"
+      )}
+    >
+      <Icon className="w-5 h-5" />
+      <span>{text}</span>
+    </motion.button>
+  )
+}
+
+export function SlideContent({ leadMagnet, specialistId, specialistName, className }: SlideContentProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,6 +215,15 @@ export function SlideContent({ leadMagnet, className }: SlideContentProps) {
           <HighlightsList highlights={leadMagnet.highlights} />
         </div>
       )}
+
+      {/* CTA кнопка (интегрированная) */}
+      <div className="pt-2">
+        <CTAButton
+          leadMagnet={leadMagnet}
+          specialistId={specialistId}
+          specialistName={specialistName}
+        />
+      </div>
     </motion.div>
   )
 }
