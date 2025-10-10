@@ -57,6 +57,12 @@ export interface LeadMagnetUI {
   fileUrl?: string | null
   linkUrl?: string | null
   slug?: string | null
+  highlights?: string[]
+  targetAudience?: string | null
+  fileSize?: string | null
+  ogImage?: string | null
+  viewCount?: number
+  downloadCount?: number
 }
 
 // Версия для редактирования (может быть без ID при создании)

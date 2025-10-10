@@ -36,15 +36,7 @@ export function SpecialistLeadMagnets({
       transition={{ duration: 0.5 }}
       className="space-y-4"
     >
-      {/* Заголовок */}
-      <div>
-        <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-          🎁 Бесплатные материалы
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Полезные ресурсы от {specialistName.split(' ')[0]}
-        </p>
-      </div>
+      {/* Заголовок убран - он уже есть в родительском компоненте */}
 
       {/* Сетка карточек */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

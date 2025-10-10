@@ -19,13 +19,7 @@ import {
 } from '@/lib/lead-magnets/preview'
 
 interface LeadMagnetCardProps {
-  leadMagnet: LeadMagnetUI & {
-    fileSize?: string | null
-    downloadCount?: number
-    targetAudience?: string | null
-    description?: string
-    ogImage?: string | null
-  }
+  leadMagnet: LeadMagnetUI
   specialistSlug: string
   index: number
 }
