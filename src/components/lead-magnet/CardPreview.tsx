@@ -20,6 +20,25 @@ import {
 } from '@/lib/lead-magnets/preview'
 import { parsePreviewUrls } from '@/lib/lead-magnets/preview/utils/parse-preview-urls'
 
+// Клиентская версия generatePDFPreviewUrls (без Cloudinary SDK)
+function generatePDFPreviewUrlsClient(pdfUrl: string) {
+  if (!pdfUrl.includes('res.cloudinary.com') || !pdfUrl.includes('/raw/upload/')) {
+    return null
+  }
+
+  const transformations = {
+    thumbnail: 'f_jpg,pg_1,w_400,h_300,c_fit,q_80',
+    card: 'f_jpg,pg_1,w_800,h_600,c_fit,q_85',
+    detail: 'f_jpg,pg_1,w_1200,h_900,c_fit,q_90'
+  }
+
+  return {
+    thumbnail: pdfUrl.replace('/raw/upload/', `/image/upload/${transformations.thumbnail}/`),
+    card: pdfUrl.replace('/raw/upload/', `/image/upload/${transformations.card}/`),
+    detail: pdfUrl.replace('/raw/upload/', `/image/upload/${transformations.detail}/`)
+  }
+}
+
 interface CardPreviewProps {
   leadMagnet: LeadMagnetUI
   className?: string
@@ -35,7 +54,17 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   const FileIcon = getFileIcon(fileExtension)
 
   // Безопасный парсинг previewUrls (может быть JSON string из БД)
-  const previewUrls = parsePreviewUrls(leadMagnet.previewUrls)
+  let previewUrls = parsePreviewUrls(leadMagnet.previewUrls)
+  
+  // 🎨 АВТОМАТИЧЕСКАЯ ГЕНЕРАЦИЯ PDF PREVIEW для Cloudinary файлов
+  // Если нет previewUrls, но это PDF файл из Cloudinary - генерируем URLs на лету
+  if (!previewUrls && leadMagnet.type === 'file' && leadMagnet.fileUrl) {
+    const generatedUrls = generatePDFPreviewUrlsClient(leadMagnet.fileUrl)
+    if (generatedUrls) {
+      console.log('[CardPreview] 🎨 Автоматическая генерация PDF preview URLs для:', leadMagnet.title)
+      previewUrls = generatedUrls
+    }
+  }
   
   // Проверяем наличие responsive превью (новая система)
   const hasResponsivePreview = !!previewUrls && !imageError
@@ -51,7 +80,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   const hasOgImage = !!leadMagnet.ogImage && !imageError
   
   // Определяем источник изображения (приоритет: previewUrls > previewImage > YouTube > OG)
-  const imageSource = hasResponsivePreview
+  const imageSource = hasResponsivePreview && previewUrls
     ? previewUrls.card  // Используем card размер для карточек
     : hasPreviewImage 
     ? leadMagnet.previewImage 
@@ -62,7 +91,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
     : null
   
   // srcSet для responsive images (если есть previewUrls)
-  const srcSet = hasResponsivePreview 
+  const srcSet = hasResponsivePreview && previewUrls
     ? `${previewUrls.thumbnail} 400w, ${previewUrls.card} 800w`
     : undefined
   
