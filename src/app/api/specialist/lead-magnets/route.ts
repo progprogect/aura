@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { uploadImage } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 
 const CreateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -17,6 +18,10 @@ const CreateLeadMagnetSchema = z.object({
   fileUrl: z.string().optional(),
   linkUrl: z.string().url().optional(),
   emoji: z.string().default('🎁'),
+  // Новые опциональные поля
+  highlights: z.array(z.string()).max(5).optional().default([]),
+  targetAudience: z.string().max(50).optional(),
+  ogImage: z.string().url().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -85,6 +90,7 @@ export async function POST(request: NextRequest) {
 
     const contentType = request.headers.get('content-type')
     let data: any
+    let fileSize: string | null = null
 
     // Обработка FormData (для файлов) или JSON
     if (contentType?.includes('multipart/form-data')) {
@@ -94,6 +100,8 @@ export async function POST(request: NextRequest) {
       const title = formData.get('title') as string
       const description = formData.get('description') as string
       const emoji = formData.get('emoji') as string || '🎁'
+      const highlightsRaw = formData.get('highlights') as string || '[]'
+      const targetAudience = formData.get('targetAudience') as string || undefined
 
       // Загружаем файл
       const bytes = await file.arrayBuffer()
@@ -101,12 +109,25 @@ export async function POST(request: NextRequest) {
       const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
       const uploadResult = await uploadImage(base64, 'lead-magnets')
 
+      // Вычисляем размер файла
+      fileSize = formatFileSize(file.size)
+
+      // Парсим highlights
+      let highlights: string[] = []
+      try {
+        highlights = JSON.parse(highlightsRaw)
+      } catch (e) {
+        // Игнорируем ошибки парсинга
+      }
+
       data = {
         type,
         title,
         description,
         fileUrl: uploadResult.url,
-        emoji
+        emoji,
+        highlights,
+        targetAudience,
       }
     } else {
       const body = await request.json()
@@ -128,6 +149,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Валидируем highlights
+    const highlightsValidation = validateHighlights(data.highlights || [])
+    if (!highlightsValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: highlightsValidation.error },
+        { status: 400 }
+      )
+    }
+
+    // Получаем существующие slugs для проверки уникальности
+    const existingSlugs = await prisma.leadMagnet.findMany({
+      where: { 
+        specialistProfileId: session.specialistProfile!.id,
+        slug: { not: null }
+      },
+      select: { slug: true }
+    })
+
+    // Генерируем уникальный slug
+    const slug = generateSlug(
+      data.title,
+      existingSlugs.map(lm => lm.slug).filter(Boolean) as string[]
+    )
+
     // Получаем максимальный order
     const maxOrder = await prisma.leadMagnet.findFirst({
       where: { specialistProfileId: session.specialistProfile!.id },
@@ -145,6 +190,12 @@ export async function POST(request: NextRequest) {
         linkUrl: data.linkUrl,
         emoji: data.emoji,
         order: (maxOrder?.order || 0) + 1,
+        // Новые поля
+        slug,
+        highlights: highlightsValidation.sanitized,
+        targetAudience: data.targetAudience,
+        fileSize: fileSize,
+        ogImage: data.ogImage,
       }
     })
 

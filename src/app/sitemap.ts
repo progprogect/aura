@@ -11,6 +11,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, updatedAt: true },
     })
 
+    // Получаем все активные лид-магниты с slug
+    const leadMagnets = await prisma.leadMagnet.findMany({
+      where: {
+        isActive: true,
+        slug: { not: null },
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+        specialistProfile: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    })
+
     // Статические страницы
     const staticPages = [
       {
@@ -35,7 +52,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }))
 
-    return [...staticPages, ...specialistPages]
+    // Страницы лид-магнитов
+    const leadMagnetPages = leadMagnets.map((lm) => ({
+      url: `${baseUrl}/specialist/${lm.specialistProfile.slug}/resources/${lm.slug}`,
+      lastModified: lm.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }))
+
+    return [...staticPages, ...specialistPages, ...leadMagnetPages]
   } catch (error) {
     console.error('Error generating sitemap:', error)
     

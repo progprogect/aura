@@ -220,6 +220,13 @@ model LeadMagnet {
   order    Int     @default(0)
   isActive Boolean @default(true)
 
+  // SEO и детализация (новые поля для улучшенного UX)
+  slug           String?   // URL-friendly slug для отдельной страницы
+  highlights     String[]  @default([]) // Список "Что внутри" (max 5 пунктов)
+  targetAudience String?   // "Для новичков", "Для продвинутых" и т.д.
+  fileSize       String?   // "2.5 MB" - для файлов
+  ogImage        String?   // Кеш Open Graph изображения (для ссылок)
+
   // Аналитика
   viewCount     Int @default(0)
   downloadCount Int @default(0)
@@ -229,7 +236,9 @@ model LeadMagnet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([specialistProfileId, slug])
   @@index([specialistProfileId, isActive])
+  @@index([slug])
 }
 
 // ========================================

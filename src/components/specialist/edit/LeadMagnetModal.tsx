@@ -10,20 +10,13 @@ import { X, Upload, Loader2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import type { EditableLeadMagnet } from '@/types/lead-magnet'
 
 interface LeadMagnetModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
-  editingMagnet?: {
-    id: string
-    type: 'file' | 'link' | 'service'
-    title: string
-    description: string
-    fileUrl?: string | null
-    linkUrl?: string | null
-    emoji: string
-  } | null
+  editingMagnet?: EditableLeadMagnet | null
 }
 
 export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: LeadMagnetModalProps) {
@@ -35,6 +28,11 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const [file, setFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Новые поля
+  const [highlights, setHighlights] = useState<string[]>([''])
+  const [targetAudience, setTargetAudience] = useState('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   // Инициализация данных при редактировании
   React.useEffect(() => {
@@ -45,6 +43,10 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       setLinkUrl(editingMagnet.linkUrl || '')
       setEmoji(editingMagnet.emoji)
       setFile(null)
+      // Инициализация новых полей
+      setHighlights(editingMagnet.highlights && editingMagnet.highlights.length > 0 ? editingMagnet.highlights : [''])
+      setTargetAudience(editingMagnet.targetAudience || '')
+      setShowAdvanced(!!editingMagnet.highlights?.length || !!editingMagnet.targetAudience)
     } else {
       resetForm()
     }
@@ -99,6 +101,9 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       const url = isEditing ? `/api/specialist/lead-magnets/${editingMagnet.id}` : '/api/specialist/lead-magnets'
       const method = isEditing ? 'PUT' : 'POST'
 
+      // Подготовка highlights (убираем пустые)
+      const cleanHighlights = highlights.filter(h => h.trim() !== '')
+      
       // Для файла используем FormData
       if (type === 'file' && file) {
         const formData = new FormData()
@@ -107,6 +112,10 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
         formData.append('title', title.trim())
         formData.append('description', description.trim())
         formData.append('emoji', emoji)
+        formData.append('highlights', JSON.stringify(cleanHighlights))
+        if (targetAudience.trim()) {
+          formData.append('targetAudience', targetAudience.trim())
+        }
 
         const response = await fetch(url, {
           method,
@@ -134,6 +143,8 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           ...(type === 'link' && linkUrl.trim() && { linkUrl: linkUrl.trim() }),
           ...(type === 'file' && editingMagnet?.fileUrl && { fileUrl: editingMagnet.fileUrl }),
           emoji,
+          highlights: cleanHighlights,
+          ...(targetAudience.trim() && { targetAudience: targetAudience.trim() }),
         }),
       })
 
@@ -159,6 +170,25 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     setLinkUrl('')
     setEmoji('🎁')
     setFile(null)
+    setHighlights([''])
+    setTargetAudience('')
+    setShowAdvanced(false)
+  }
+  
+  const addHighlight = () => {
+    if (highlights.length < 5) {
+      setHighlights([...highlights, ''])
+    }
+  }
+  
+  const updateHighlight = (index: number, value: string) => {
+    const newHighlights = [...highlights]
+    newHighlights[index] = value
+    setHighlights(newHighlights)
+  }
+  
+  const removeHighlight = (index: number) => {
+    setHighlights(highlights.filter((_, i) => i !== index))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,6 +390,73 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                 placeholder="🎁"
                 maxLength={2}
               />
+            </div>
+
+            {/* Дополнительно (секция скрыта по умолчанию) */}
+            <div className="border-t border-gray-200 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center gap-1"
+              >
+                {showAdvanced ? '▼' : '▶'} Дополнительно (опционально)
+              </button>
+              
+              {showAdvanced && (
+                <div className="mt-4 space-y-4">
+                  {/* Что внутри (highlights) */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-900">
+                      Что внутри (по пунктам, максимум 5)
+                    </label>
+                    {highlights.map((highlight, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={highlight}
+                          onChange={(e) => updateHighlight(index, e.target.value)}
+                          placeholder={`Пункт ${index + 1}`}
+                          className="flex-1"
+                        />
+                        {highlights.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeHighlight(index)}
+                            className="px-3"
+                          >
+                            ✕
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    {highlights.length < 5 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addHighlight}
+                        className="w-full"
+                      >
+                        + Добавить пункт
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Для кого */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-900">
+                      Для кого
+                    </label>
+                    <Input
+                      value={targetAudience}
+                      onChange={(e) => setTargetAudience(e.target.value)}
+                      placeholder="Для новичков"
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Действия */}

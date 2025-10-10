@@ -10,20 +10,14 @@ import { X, Send, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
-interface LeadMagnet {
-  id: string
-  title: string
-  description: string
-  emoji: string
-}
+import type { LeadMagnetUI } from '@/types/lead-magnet'
 
 interface LeadMagnetRequestModalProps {
   isOpen: boolean
   onClose: () => void
   specialistId: string
   specialistName: string
-  leadMagnet: LeadMagnet
+  leadMagnet: Pick<LeadMagnetUI, 'id' | 'title' | 'description' | 'emoji'>
 }
 
 export function LeadMagnetRequestModal({

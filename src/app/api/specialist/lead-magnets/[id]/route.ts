@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { uploadImage } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 
 const UpdateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -17,6 +18,10 @@ const UpdateLeadMagnetSchema = z.object({
   fileUrl: z.string().optional(),
   linkUrl: z.string().url().optional(),
   emoji: z.string().default('🎁'),
+  // Новые опциональные поля
+  highlights: z.array(z.string()).max(5).optional(),
+  targetAudience: z.string().max(50).optional(),
+  ogImage: z.string().url().optional(),
 })
 
 export async function PUT(
@@ -51,6 +56,7 @@ export async function PUT(
 
     const contentType = request.headers.get('content-type')
     let data: any
+    let fileSize: string | null = null
 
     // Обработка FormData (для файлов) или JSON
     if (contentType?.includes('multipart/form-data')) {
@@ -60,6 +66,9 @@ export async function PUT(
       const title = formData.get('title') as string
       const description = formData.get('description') as string
       const emoji = formData.get('emoji') as string || '🎁'
+      const highlightsRaw = formData.get('highlights') as string || '[]'
+      const targetAudience = formData.get('targetAudience') as string || undefined
+      const ogImage = formData.get('ogImage') as string || undefined
 
       // Загружаем файл только если он есть
       let fileUrl = undefined
@@ -69,6 +78,15 @@ export async function PUT(
         const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
         const uploadResult = await uploadImage(base64, 'lead-magnets')
         fileUrl = uploadResult.url
+        fileSize = formatFileSize(file.size)
+      }
+
+      // Парсим highlights
+      let highlights: string[] = []
+      try {
+        highlights = JSON.parse(highlightsRaw)
+      } catch (e) {
+        // Игнорируем ошибки парсинга
       }
 
       data = {
@@ -76,7 +94,10 @@ export async function PUT(
         title,
         description,
         fileUrl,
-        emoji
+        emoji,
+        highlights,
+        targetAudience,
+        ogImage,
       }
     } else {
       const body = await request.json()
@@ -98,16 +119,63 @@ export async function PUT(
       )
     }
 
+    // Валидируем highlights если они есть
+    let sanitizedHighlights = data.highlights
+    if (data.highlights && data.highlights.length > 0) {
+      const highlightsValidation = validateHighlights(data.highlights)
+      if (!highlightsValidation.valid) {
+        return NextResponse.json(
+          { success: false, error: highlightsValidation.error },
+          { status: 400 }
+        )
+      }
+      sanitizedHighlights = highlightsValidation.sanitized
+    }
+
+    // Проверяем, изменился ли title - если да, регенерируем slug
+    const currentLeadMagnet = await prisma.leadMagnet.findUnique({
+      where: { id: params.id },
+      select: { title: true, slug: true, specialistProfileId: true }
+    })
+
+    let newSlug = currentLeadMagnet?.slug
+    if (currentLeadMagnet && data.title !== currentLeadMagnet.title) {
+      // Получаем существующие slugs
+      const existingSlugs = await prisma.leadMagnet.findMany({
+        where: { 
+          specialistProfileId: currentLeadMagnet.specialistProfileId,
+          slug: { not: null },
+          id: { not: params.id } // Исключаем текущий лид-магнит
+        },
+        select: { slug: true }
+      })
+
+      newSlug = generateSlug(
+        data.title,
+        existingSlugs.map(lm => lm.slug).filter(Boolean) as string[]
+      )
+    }
+
+    // Подготавливаем данные для обновления
+    const updateData: any = {
+      type: data.type,
+      title: data.title,
+      description: data.description,
+      emoji: data.emoji,
+    }
+
+    // Добавляем опциональные поля только если они указаны
+    if (data.fileUrl !== undefined) updateData.fileUrl = data.fileUrl
+    if (data.linkUrl !== undefined) updateData.linkUrl = data.linkUrl
+    if (sanitizedHighlights !== undefined) updateData.highlights = sanitizedHighlights
+    if (data.targetAudience !== undefined) updateData.targetAudience = data.targetAudience
+    if (data.ogImage !== undefined) updateData.ogImage = data.ogImage
+    if (fileSize !== null) updateData.fileSize = fileSize
+    if (newSlug !== currentLeadMagnet?.slug) updateData.slug = newSlug
+
     const updatedLeadMagnet = await prisma.leadMagnet.update({
       where: { id: params.id },
-      data: {
-        type: data.type,
-        title: data.title,
-        description: data.description,
-        fileUrl: data.fileUrl,
-        linkUrl: data.linkUrl,
-        emoji: data.emoji,
-      }
+      data: updateData
     })
 
     return NextResponse.json({ success: true, leadMagnet: updatedLeadMagnet })

@@ -8,25 +8,16 @@ import { useState } from 'react'
 import { Plus, Trash2, Edit, FileText, Link as LinkIcon, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LeadMagnetModal } from './LeadMagnetModal'
-
-interface LeadMagnet {
-  id: string
-  type: 'file' | 'link' | 'service'
-  title: string
-  description: string
-  fileUrl?: string | null
-  linkUrl?: string | null
-  emoji: string
-}
+import type { LeadMagnetUI } from '@/types/lead-magnet'
 
 interface LeadMagnetsEditorProps {
-  leadMagnets: LeadMagnet[]
+  leadMagnets: LeadMagnetUI[]
   onRefresh: () => void
 }
 
 export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingMagnet, setEditingMagnet] = useState<LeadMagnet | null>(null)
+  const [editingMagnet, setEditingMagnet] = useState<LeadMagnetUI | null>(null)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {

@@ -453,7 +453,7 @@ export function SpecialistProfileWithEdit({
               data.leadMagnets.length > 0 ? (
                 <SpecialistLeadMagnets
                   leadMagnets={data.leadMagnets}
-                  specialistId={data.id}
+                  specialistSlug={data.slug}
                   specialistName={data.fullName}
                 />
               ) : (
