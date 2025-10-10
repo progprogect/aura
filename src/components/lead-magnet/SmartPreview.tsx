@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 import { getLeadMagnetPreviewData, getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
 import { generateLinkPreview, generateFilePreview, getAspectRatio, getPreviewStyles } from '@/lib/lead-magnets/preview-generator'
 import { ServicePreview } from './ServicePreview'
-import { LeadMagnetRequestModal } from '@/components/specialist/LeadMagnetRequestModal'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SmartPreviewProps {
@@ -313,7 +312,7 @@ function DocumentPreview({ url, title, type }: { url: string; title: string; typ
   )
 }
 
-// Компонент формы заявки на услугу
+// Компонент формы заявки на услугу (встроенная форма)
 function ServiceRequestForm({ 
   leadMagnet, 
   specialistId, 
@@ -325,6 +324,59 @@ function ServiceRequestForm({
   specialistName?: string
   onOpenModal: () => void 
 }) {
+  const [name, setName] = useState('')
+  const [contact, setContact] = useState('')
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!name.trim() || !contact.trim()) {
+      alert('Заполните имя и контакт')
+      return
+    }
+
+    if (!specialistId) {
+      alert('Ошибка: не указан специалист')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/consultation-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          specialistId,
+          leadMagnetId: leadMagnet.id,
+          name: name.trim(),
+          contact: contact.trim(),
+          message: message.trim() || `Заявка на: ${leadMagnet.title}`,
+        }),
+      })
+
+      if (response.ok) {
+        setIsSuccess(true)
+        setTimeout(() => {
+          setIsSuccess(false)
+          setName('')
+          setContact('')
+          setMessage('')
+        }, 3000)
+      } else {
+        alert('Ошибка отправки заявки')
+      }
+    } catch (error) {
+      console.error('Ошибка:', error)
+      alert('Ошибка отправки заявки')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className={cn(
       "w-full h-full bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 flex flex-col",
@@ -346,7 +398,7 @@ function ServiceRequestForm({
 
       {/* Highlights если есть */}
       {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
-        <div className="flex-1 mb-4">
+        <div className="mb-4">
           <h4 className="text-sm font-medium text-gray-900 mb-2">
             Что включает:
           </h4>
@@ -374,20 +426,77 @@ function ServiceRequestForm({
         </div>
       )}
 
-      {/* CTA кнопка */}
-      <button
-        onClick={onOpenModal}
-        className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-center"
-      >
-        Записаться на консультацию
-      </button>
+      {/* Встроенная форма заявки */}
+      {isSuccess ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-green-100 border border-green-300 rounded-lg p-4 text-center"
+        >
+          <div className="text-3xl mb-2">✅</div>
+          <p className="text-green-800 font-medium">Заявка отправлена!</p>
+          <p className="text-sm text-green-700 mt-1">
+            {specialistName} свяжется с вами в ближайшее время
+          </p>
+        </motion.div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3 flex-1 flex flex-col">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ваше имя <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Как вас зовут?"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Контакт <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="Телефон или Telegram"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+              required
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Сообщение (необязательно)
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Кратко опишите ваш запрос..."
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm resize-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-center disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
+          >
+            {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
+          </button>
+        </form>
+      )}
     </div>
   )
 }
 
 export function SmartPreview({ leadMagnet, specialistId, specialistName, className }: SmartPreviewProps) {
   const previewData = getLeadMagnetPreviewData(leadMagnet)
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
 
   // Определяем правильный aspect-ratio для превью
   const getPreviewAspectRatio = () => {
@@ -528,7 +637,7 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
           leadMagnet={leadMagnet} 
           specialistId={specialistId}
           specialistName={specialistName}
-          onOpenModal={() => setIsRequestModalOpen(true)} 
+          onOpenModal={() => {}} 
         />
       )
     }
@@ -551,42 +660,24 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
   const dynamicStyles = getDynamicPreviewStyles()
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className={cn(
-          "w-full",
-          // Применяем класс aspect ratio только если нет динамических стилей с auto
-          dynamicStyles.aspectRatio === 'auto' ? '' : aspectRatio,
-          className
-        )}
-        style={{
-          // Применяем динамические стили
-          ...(dynamicStyles.aspectRatio && dynamicStyles.aspectRatio !== 'auto' && { aspectRatio: dynamicStyles.aspectRatio }),
-          ...(dynamicStyles.maxHeight && { maxHeight: dynamicStyles.maxHeight }),
-          ...(dynamicStyles.objectFit && { objectFit: dynamicStyles.objectFit as any }),
-        }}
-      >
-        {getPreviewContent()}
-      </motion.div>
-
-      {/* Модальное окно заявки для услуг */}
-      {leadMagnet.type === 'service' && specialistId && specialistName && (
-        <LeadMagnetRequestModal
-          isOpen={isRequestModalOpen}
-          onClose={() => setIsRequestModalOpen(false)}
-          specialistId={specialistId}
-          specialistName={specialistName}
-          leadMagnet={{
-            id: leadMagnet.id,
-            title: leadMagnet.title,
-            description: leadMagnet.description || '',
-            emoji: leadMagnet.emoji || '💼'
-          }}
-        />
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      className={cn(
+        "w-full",
+        // Применяем класс aspect ratio только если нет динамических стилей с auto
+        dynamicStyles.aspectRatio === 'auto' ? '' : aspectRatio,
+        className
       )}
-    </>
+      style={{
+        // Применяем динамические стили
+        ...(dynamicStyles.aspectRatio && dynamicStyles.aspectRatio !== 'auto' && { aspectRatio: dynamicStyles.aspectRatio }),
+        ...(dynamicStyles.maxHeight && { maxHeight: dynamicStyles.maxHeight }),
+        ...(dynamicStyles.objectFit && { objectFit: dynamicStyles.objectFit as any }),
+      }}
+    >
+      {getPreviewContent()}
+    </motion.div>
   )
 }
