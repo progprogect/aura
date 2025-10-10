@@ -177,6 +177,34 @@ function ServiceForm({ title }: { title: string }) {
 export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
   const previewData = getLeadMagnetPreviewData(leadMagnet)
 
+  // Определяем правильный aspect-ratio для превью
+  const getAspectRatio = () => {
+    // Для видео - всегда 16:9
+    if (leadMagnet.type === 'link' && leadMagnet.linkUrl) {
+      if (leadMagnet.linkUrl.includes('youtube.com') || 
+          leadMagnet.linkUrl.includes('youtu.be') || 
+          leadMagnet.linkUrl.includes('vimeo.com')) {
+        return 'aspect-video'
+      }
+    }
+
+    // Для файлов - определяем по типу
+    if (leadMagnet.type === 'file' && leadMagnet.fileUrl) {
+      const url = leadMagnet.fileUrl.toLowerCase()
+      if (url.includes('.pdf')) {
+        return 'aspect-[3/4]' // PDF - вертикальный документ
+      }
+      if (url.includes('.doc') || url.includes('.docx') || 
+          url.includes('.xls') || url.includes('.xlsx') ||
+          url.includes('.ppt') || url.includes('.pptx')) {
+        return 'aspect-[4/3]' // Office документы - горизонтальные
+      }
+    }
+
+    // Для сервисов и остальных - универсальный формат
+    return 'aspect-[4/3]'
+  }
+
   // Логика определения типа превью
   const getPreviewContent = () => {
     // Для ссылок - пытаемся встроить видео
@@ -228,13 +256,16 @@ export function SmartPreview({ leadMagnet, className }: SmartPreviewProps) {
     )
   }
 
+  const aspectRatio = getAspectRatio()
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: 0.1 }}
       className={cn(
-        "w-full h-64 md:h-80 lg:h-96",
+        "w-full",
+        aspectRatio,
         className
       )}
     >

@@ -132,36 +132,7 @@ function SocialProof({
   )
 }
 
-// Компонент для дополнительных действий
-function AdditionalActions({ 
-  specialistSlug, 
-  specialistName 
-}: { 
-  specialistSlug: string
-  specialistName: string 
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.6 }}
-      className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-6 text-sm"
-    >
-      <a
-        href={`/specialist/${specialistSlug}`}
-        className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-      >
-        ← Вернуться к профилю {specialistName.split(' ')[0]}
-      </a>
-      
-      <span className="text-gray-400 hidden sm:inline">•</span>
-      
-      <button className="text-gray-600 hover:text-gray-700 font-medium transition-colors">
-        Поделиться
-      </button>
-    </motion.div>
-  )
-}
+// Дополнительные действия убраны для фокуса на главной CTA
 
 export function SlideCTA({ 
   leadMagnet, 
@@ -175,10 +146,10 @@ export function SlideCTA({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className={cn("space-y-6", className)}
+      className={cn("space-y-4", className)}
     >
-      {/* Главная кнопка CTA */}
-      <div className="flex justify-center">
+      {/* Главная кнопка CTA - выравнивание по левому краю */}
+      <div className="flex justify-start">
         <CTAButton
           leadMagnet={leadMagnet}
           specialistId={specialistId}
@@ -186,17 +157,9 @@ export function SlideCTA({
         />
       </div>
 
-      {/* Социальное доказательство */}
-      <div className="flex justify-center">
+      {/* Социальное доказательство - тоже слева */}
+      <div className="flex justify-start">
         <SocialProof downloadCount={leadMagnet.downloadCount} />
-      </div>
-
-      {/* Дополнительные действия */}
-      <div className="flex justify-center">
-        <AdditionalActions 
-          specialistSlug={specialistSlug}
-          specialistName={specialistName}
-        />
       </div>
     </motion.div>
   )

@@ -32,67 +32,64 @@ export function LeadMagnetSlide({
         className
       )}
     >
-      {/* Главный контейнер слайда */}
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* Hero Zone с адаптивной сеткой */}
-        <div className="p-8 md:p-12 lg:p-16">
-          {/* Mobile: вертикальная стопка */}
-          <div className="block md:hidden space-y-8">
-            {/* Превью */}
-            <SmartPreview leadMagnet={leadMagnet} />
-            
-            {/* Контент */}
-            <SlideContent leadMagnet={leadMagnet} />
-            
-            {/* CTA */}
-            <SlideCTA
-              leadMagnet={leadMagnet}
-              specialistId={specialistId}
-              specialistSlug={specialistSlug}
-              specialistName={specialistName}
-            />
-          </div>
+      {/* Минималистичный контейнер без лишних рамок */}
+      <div className="space-y-8 md:space-y-12 lg:space-y-16">
+        {/* Mobile: вертикальная стопка */}
+        <div className="block md:hidden space-y-8">
+          {/* Превью */}
+          <SmartPreview leadMagnet={leadMagnet} />
+          
+          {/* Контент */}
+          <SlideContent leadMagnet={leadMagnet} />
+          
+          {/* CTA */}
+          <SlideCTA
+            leadMagnet={leadMagnet}
+            specialistId={specialistId}
+            specialistSlug={specialistSlug}
+            specialistName={specialistName}
+          />
+        </div>
 
-          {/* Tablet: горизонтальная сетка 50/50 */}
-          <div className="hidden md:block lg:hidden space-y-12">
-            {/* Верхняя часть: превью + контент */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Tablet: горизонтальная сетка 50/50 */}
+        <div className="hidden md:block lg:hidden space-y-12">
+          {/* Верхняя часть: превью + контент */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <SmartPreview leadMagnet={leadMagnet} />
+            <SlideContent leadMagnet={leadMagnet} />
+          </div>
+          
+          {/* Нижняя часть: CTA */}
+          <SlideCTA
+            leadMagnet={leadMagnet}
+            specialistId={specialistId}
+            specialistSlug={specialistSlug}
+            specialistName={specialistName}
+          />
+        </div>
+
+        {/* Desktop: широкий макет с превью 40% + контент 60% */}
+        <div className="hidden lg:block">
+          {/* Верхняя часть: превью + контент */}
+          <div className="grid grid-cols-12 gap-12 mb-16">
+            {/* Превью - 5 колонок (40%) */}
+            <div className="col-span-5">
               <SmartPreview leadMagnet={leadMagnet} />
+            </div>
+            
+            {/* Контент - 7 колонок (60%) */}
+            <div className="col-span-7">
               <SlideContent leadMagnet={leadMagnet} />
             </div>
-            
-            {/* Нижняя часть: CTA */}
-            <SlideCTA
-              leadMagnet={leadMagnet}
-              specialistId={specialistId}
-              specialistSlug={specialistSlug}
-              specialistName={specialistName}
-            />
           </div>
-
-          {/* Desktop: широкий макет с превью 40% + контент 60% */}
-          <div className="hidden lg:block">
-            {/* Верхняя часть: превью + контент */}
-            <div className="grid grid-cols-12 gap-12 mb-16">
-              {/* Превью - 5 колонок (40%) */}
-              <div className="col-span-5">
-                <SmartPreview leadMagnet={leadMagnet} />
-              </div>
-              
-              {/* Контент - 7 колонок (60%) */}
-              <div className="col-span-7">
-                <SlideContent leadMagnet={leadMagnet} />
-              </div>
-            </div>
-            
-            {/* Нижняя часть: CTA */}
-            <SlideCTA
-              leadMagnet={leadMagnet}
-              specialistId={specialistId}
-              specialistSlug={specialistSlug}
-              specialistName={specialistName}
-            />
-          </div>
+          
+          {/* Нижняя часть: CTA */}
+          <SlideCTA
+            leadMagnet={leadMagnet}
+            specialistId={specialistId}
+            specialistSlug={specialistSlug}
+            specialistName={specialistName}
+          />
         </div>
       </div>
     </motion.div>
