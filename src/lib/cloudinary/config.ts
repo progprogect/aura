@@ -81,6 +81,7 @@ export async function uploadDocument(
       public_id: publicId,
       resource_type: 'raw', // 🔴 КРИТИЧНО: для PDF и других документов
       type: 'upload', // Публичная загрузка
+      access_mode: 'public', // Явно указываем публичный доступ
       // БЕЗ трансформаций для сохранения оригинального формата
       overwrite: true,
       invalidate: true
@@ -122,6 +123,15 @@ export async function uploadPDF(
       overwrite: true,
       invalidate: true
     })
+
+    // Валидация: проверяем что PDF загружен как raw
+    if (!result.secure_url.includes('/raw/upload/')) {
+      console.error('❌ ВАЛИДАЦИЯ ПРОВАЛЕНА: PDF загружен НЕ как raw resource!')
+      console.error('   URL:', result.secure_url)
+      throw new Error('PDF uploaded with wrong resource_type - expected /raw/upload/ in URL')
+    }
+
+    console.log('✅ Валидация успешна: PDF загружен как raw resource')
 
     return {
       url: result.secure_url,

@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
-import { uploadImage, uploadDocument } from '@/lib/cloudinary/config'
+import { uploadImage, uploadDocument, uploadPDF } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
@@ -80,8 +80,8 @@ export async function PUT(
         
         // Определяем тип файла и используем соответствующую функцию загрузки
         const isImage = file.type.startsWith('image/')
-        const isDocument = file.type === 'application/pdf' || 
-                          file.type.includes('document') || 
+        const isPDF = file.type === 'application/pdf'
+        const isDocument = file.type.includes('document') || 
                           file.type.includes('text/') ||
                           file.type.includes('application/vnd')
         
@@ -89,8 +89,14 @@ export async function PUT(
         if (isImage) {
           // Для изображений используем uploadImage с трансформациями
           uploadResult = await uploadImage(base64, 'lead-magnets')
+        } else if (isPDF) {
+          // 🔴 КРИТИЧНО: PDF требуют специальной загрузки с resource_type: 'raw'
+          uploadResult = await uploadPDF(base64, 'lead-magnets')
+        } else if (isDocument) {
+          // Для других документов используем uploadDocument
+          uploadResult = await uploadDocument(base64, 'lead-magnets')
         } else {
-          // Для документов и других файлов используем uploadDocument без трансформаций
+          // Для всех остальных файлов
           uploadResult = await uploadDocument(base64, 'lead-magnets')
         }
         
