@@ -9,6 +9,7 @@ import { SpecialistHero } from '@/components/specialist/SpecialistHero'
 import { SpecialistProfileWithEdit } from '@/components/specialist/SpecialistProfileWithEdit'
 import { SpecialistNavigation } from '@/components/navigation/SpecialistNavigation'
 import type { Tab } from '@/components/specialist/SpecialistTabs'
+import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 
 interface PageProps {
   params: {
@@ -98,7 +99,7 @@ async function getSpecialist(slug: string) {
     certificates: specialistProfile.certificates,
     gallery: specialistProfile.gallery,
     faqs: specialistProfile.faqs,
-    leadMagnets: specialistProfile.leadMagnets,
+    leadMagnets: specialistProfile.leadMagnets.map(lm => fromPrismaLeadMagnet(lm)),
   }
 }
 
@@ -262,6 +263,7 @@ export default async function SpecialistPage({ params }: PageProps) {
         }}
         data={{
           id: specialist.id,
+          slug: specialist.slug,
           fullName,
           category: specialist.category,
           about: specialist.about,

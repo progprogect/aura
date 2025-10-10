@@ -12,6 +12,7 @@ import { HighlightsList } from '@/components/lead-magnet/HighlightsList'
 import { MetadataRow } from '@/components/lead-magnet/MetadataRow'
 import { CTAButton } from '@/components/lead-magnet/CTAButton'
 import { shouldShowPreview, generateOGTags } from '@/lib/lead-magnets/utils'
+import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 
 interface PageProps {
   params: {
@@ -66,7 +67,7 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
       lastName: specialist.user.lastName,
       avatar: specialist.user.avatar,
     },
-    leadMagnet
+    leadMagnet: fromPrismaLeadMagnet(leadMagnet) // Конвертируем Prisma объект в типизированный
   }
 })
 
@@ -138,7 +139,7 @@ export default async function LeadMagnetPage({ params }: PageProps) {
         </div>
 
         {/* Highlights (if exists) */}
-        <HighlightsList items={leadMagnet.highlights} />
+        <HighlightsList items={leadMagnet.highlights || []} />
 
         {/* Metadata row */}
         <MetadataRow

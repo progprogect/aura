@@ -5,17 +5,18 @@
 'use client'
 
 import { shouldShowSocialProof, formatDownloadCount } from '@/lib/lead-magnets/utils'
+import type { LeadMagnetType } from '@/types/lead-magnet'
 
 interface MetadataRowProps {
   targetAudience?: string | null
-  downloadCount: number
+  downloadCount?: number
   fileSize?: string | null
-  type: string
+  type: LeadMagnetType
 }
 
 export function MetadataRow({ 
   targetAudience, 
-  downloadCount, 
+  downloadCount = 0, 
   fileSize,
   type 
 }: MetadataRowProps) {

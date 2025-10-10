@@ -57,6 +57,7 @@ interface SpecialistProfileWithEditProps {
   }
   data: {
     id: string
+    slug: string
     fullName: string
     category: string
     about: string
@@ -100,6 +101,7 @@ interface SpecialistProfileWithEditProps {
       fileUrl?: string | null
       linkUrl?: string | null
       emoji: string
+      slug?: string | null
     }>
   }
 }

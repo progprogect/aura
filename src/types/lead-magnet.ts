@@ -6,6 +6,29 @@
 // Тип лид-магнита (строгий литеральный тип)
 export type LeadMagnetType = 'file' | 'link' | 'service'
 
+/**
+ * Проверка валидности типа лид-магнита
+ */
+export function isValidLeadMagnetType(type: string): type is LeadMagnetType {
+  return type === 'file' || type === 'link' || type === 'service'
+}
+
+/**
+ * Конвертация Prisma объекта в типизированный LeadMagnet
+ * Безопасно приводит type: string → type: LeadMagnetType
+ */
+export function fromPrismaLeadMagnet(prismaObj: any): LeadMagnet {
+  // Валидация типа на runtime
+  if (!isValidLeadMagnetType(prismaObj.type)) {
+    throw new Error(`Invalid lead magnet type: ${prismaObj.type}`)
+  }
+
+  return {
+    ...prismaObj,
+    type: prismaObj.type as LeadMagnetType,
+  }
+}
+
 // Базовый интерфейс лид-магнита
 export interface LeadMagnet {
   id: string
