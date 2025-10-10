@@ -11,6 +11,8 @@ import { uploadImage, uploadDocument } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
+import { generateUniversalPreview, shouldGeneratePreview } from '@/lib/lead-magnets/preview-generator-universal'
+import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 
 const CreateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -214,6 +216,42 @@ export async function POST(request: NextRequest) {
         ogImage: data.ogImage,
       }
     })
+
+    // Генерируем превью (фоновая задача - не блокируем ответ)
+    const typedLeadMagnet = fromPrismaLeadMagnet(leadMagnet)
+    if (shouldGeneratePreview(typedLeadMagnet)) {
+      // Запускаем генерацию превью асинхронно
+      generateUniversalPreview({
+        type: typedLeadMagnet.type,
+        fileUrl: typedLeadMagnet.fileUrl,
+        linkUrl: typedLeadMagnet.linkUrl,
+        ogImage: typedLeadMagnet.ogImage,
+        title: typedLeadMagnet.title,
+        description: typedLeadMagnet.description,
+        emoji: typedLeadMagnet.emoji,
+        highlights: typedLeadMagnet.highlights
+      }).then(async (result) => {
+        if (result.success && result.previewBuffer) {
+          try {
+            // Конвертируем в base64 data URL (временное решение)
+            const base64 = result.previewBuffer.toString('base64')
+            const dataUrl = `data:image/webp;base64,${base64}`
+            
+            // Обновляем лид-магнит с превью
+            await prisma.leadMagnet.update({
+              where: { id: leadMagnet.id },
+              data: { previewImage: dataUrl }
+            })
+            
+            console.log(`[Lead Magnet] Превью сгенерировано для: ${leadMagnet.title}`)
+          } catch (error) {
+            console.error('[Lead Magnet] Ошибка сохранения превью:', error)
+          }
+        }
+      }).catch((error) => {
+        console.error('[Lead Magnet] Ошибка генерации превью:', error)
+      })
+    }
 
     // Инвалидируем кеш профиля для мгновенного отображения
     const specialistProfile = await prisma.specialistProfile.findUnique({

@@ -6,19 +6,14 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
+import { CardPreview } from './CardPreview'
 import { 
-  getPreviewGradient, 
-  getFileIcon, 
   getFileExtension,
   formatCardMeta,
   getAudienceBadgeColor,
-  isYouTubeUrl,
-  getYouTubeThumbnail,
   getValueBadges
 } from '@/lib/lead-magnets/preview'
 
@@ -31,21 +26,9 @@ interface LeadMagnetCardProps {
 export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnetCardProps) {
   const href = `/specialist/${specialistSlug}/resources/${leadMagnet.slug}`
   const fileExtension = getFileExtension(leadMagnet.fileUrl)
-  const gradient = getPreviewGradient(leadMagnet.type, fileExtension)
-  const FileIcon = getFileIcon(fileExtension)
   const metaText = formatCardMeta(leadMagnet.type, leadMagnet.fileSize, leadMagnet.downloadCount, fileExtension)
   const audienceBadgeColor = getAudienceBadgeColor(leadMagnet.targetAudience)
   const valueBadges = getValueBadges(leadMagnet)
-  
-  // Проверяем является ли это YouTube видео
-  const isYouTube = leadMagnet.type === 'link' && leadMagnet.linkUrl && isYouTubeUrl(leadMagnet.linkUrl)
-  const youtubeThumbnail = isYouTube && leadMagnet.linkUrl ? getYouTubeThumbnail(leadMagnet.linkUrl) : null
-  
-  // Проверяем является ли это PDF файл
-  const isPDF = leadMagnet.type === 'file' && leadMagnet.fileUrl && leadMagnet.fileUrl.toLowerCase().includes('.pdf')
-  
-  // Проверяем является ли это услуга
-  const isService = leadMagnet.type === 'service'
 
   return (
     <motion.div
@@ -65,65 +48,21 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
         )}
       >
         {/* Превью - слева на мобилке */}
-        <div className={cn(
-          "flex-shrink-0 w-20 h-20 md:w-full md:h-40 relative overflow-hidden rounded-lg md:rounded-t-xl md:rounded-b-none",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && "bg-gradient-to-br flex items-center justify-center",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && gradient
-        )}>
-          {/* PDF превью */}
-          {isPDF ? (
-            <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-              <div className="text-center">
-                <FileIcon className="w-8 h-8 text-gray-600 mx-auto mb-1" />
-                <div className="text-xs text-gray-500 font-medium">PDF</div>
-              </div>
-            </div>
-          ) : isService ? (
-            <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-              <div className="text-center text-white">
-                <div className="text-2xl mb-1">{leadMagnet.emoji || '💼'}</div>
-                <div className="text-xs font-medium">Услуга</div>
-              </div>
-            </div>
-          ) : youtubeThumbnail ? (
-            <>
-              <Image
-                src={youtubeThumbnail}
-                alt={leadMagnet.title}
-                fill
-                className="object-cover"
-              />
-              {/* Play button overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                <div className="bg-red-600 rounded-full p-3 group-hover:scale-110 transition-transform">
-                  <Play className="w-6 h-6 text-white fill-white" />
-                </div>
-              </div>
-            </>
-          ) : leadMagnet.ogImage ? (
-            // OG Image для обычных ссылок
-            <Image
-              src={leadMagnet.ogImage}
-              alt={leadMagnet.title}
-              fill
-              className="object-cover"
-            />
-          ) : leadMagnet.emoji ? (
-            // Emoji если задан
-            <div className="text-3xl">{leadMagnet.emoji}</div>
-          ) : (
-            // Иконка файла как fallback
-            <FileIcon className="w-8 h-8 text-white" />
-          )}
+        <div className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden">
+          <CardPreview 
+            leadMagnet={leadMagnet} 
+            size="mobile"
+            className="rounded-lg"
+          />
           
           {/* Value badges в углу превью */}
           {valueBadges.length > 0 && (
-            <div className="absolute top-2 right-2 flex flex-col gap-1">
+            <div className="absolute top-1 right-1 flex flex-col gap-1">
               {valueBadges.map((badge, i) => (
                 <span
                   key={i}
                   className={cn(
-                    "px-2 py-0.5 rounded-full text-xs font-medium shadow-sm",
+                    "px-1.5 py-0.5 rounded-full text-xs font-medium shadow-sm",
                     badge.color
                   )}
                 >
@@ -170,56 +109,11 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
         )}
       >
         {/* Превью - сверху на desktop */}
-        <div className={cn(
-          "w-full h-40 relative overflow-hidden",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && "bg-gradient-to-br flex items-center justify-center",
-          !youtubeThumbnail && !leadMagnet.ogImage && !isPDF && !isService && gradient
-        )}>
-          {/* PDF превью */}
-          {isPDF ? (
-            <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-              <div className="text-center">
-                <FileIcon className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-                <div className="text-sm text-gray-500 font-medium">PDF</div>
-              </div>
-            </div>
-          ) : isService ? (
-            <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-              <div className="text-center text-white">
-                <div className="text-4xl mb-2">{leadMagnet.emoji || '💼'}</div>
-                <div className="text-sm font-medium">Услуга</div>
-              </div>
-            </div>
-          ) : youtubeThumbnail ? (
-            <>
-              <Image
-                src={youtubeThumbnail}
-                alt={leadMagnet.title}
-                fill
-                className="object-cover"
-              />
-              {/* Play button overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                <div className="bg-red-600 rounded-full p-4 group-hover:scale-110 transition-transform">
-                  <Play className="w-8 h-8 text-white fill-white" />
-                </div>
-              </div>
-            </>
-          ) : leadMagnet.ogImage ? (
-            // OG Image для обычных ссылок
-            <Image
-              src={leadMagnet.ogImage}
-              alt={leadMagnet.title}
-              fill
-              className="object-cover"
-            />
-          ) : leadMagnet.emoji ? (
-            // Emoji если задан
-            <div className="text-5xl">{leadMagnet.emoji}</div>
-          ) : (
-            // Иконка файла как fallback
-            <FileIcon className="w-12 h-12 text-white" />
-          )}
+        <div className="relative w-full h-40 overflow-hidden">
+          <CardPreview 
+            leadMagnet={leadMagnet} 
+            size="desktop"
+          />
           
           {/* Value badges в углу превью */}
           {valueBadges.length > 0 && (

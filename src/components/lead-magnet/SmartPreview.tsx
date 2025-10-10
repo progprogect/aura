@@ -13,7 +13,7 @@ import { ServicePreview } from './ServicePreview'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SmartPreviewProps {
-  leadMagnet: Pick<LeadMagnet, 'id' | 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title' | 'description' | 'highlights'>
+  leadMagnet: Pick<LeadMagnet, 'id' | 'type' | 'fileUrl' | 'linkUrl' | 'ogImage' | 'fileSize' | 'emoji' | 'title' | 'description' | 'highlights' | 'previewImage'>
   specialistId?: string
   specialistName?: string
   className?: string
@@ -587,7 +587,22 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
 
   // Логика определения типа превью
   const getPreviewContent = () => {
-    // Для ссылок - умное определение типа контента
+    // ПРИОРИТЕТ 1: Если есть сгенерированное превью - используем его
+    if (leadMagnet.previewImage) {
+      return (
+        <div className="w-full h-full relative">
+          <Image
+            src={leadMagnet.previewImage}
+            alt={leadMagnet.title}
+            fill
+            className="object-contain rounded-lg"
+            priority
+          />
+        </div>
+      )
+    }
+
+    // ПРИОРИТЕТ 2: Для ссылок - умное определение типа контента с embed
     if (leadMagnet.type === 'link' && leadMagnet.linkUrl) {
       const linkPreview = generateLinkPreview(leadMagnet.linkUrl, leadMagnet.ogImage || undefined)
       

@@ -43,6 +43,7 @@ export interface LeadMagnet {
   targetAudience?: string | null
   fileSize?: string | null
   ogImage?: string | null
+  previewImage?: string | null
   viewCount?: number
   downloadCount?: number
 }
@@ -61,6 +62,7 @@ export interface LeadMagnetUI {
   targetAudience?: string | null
   fileSize?: string | null
   ogImage?: string | null
+  previewImage?: string | null
   viewCount?: number
   downloadCount?: number
   createdAt?: Date | string

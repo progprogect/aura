@@ -226,6 +226,7 @@ model LeadMagnet {
   targetAudience String?   // "Для новичков", "Для продвинутых" и т.д.
   fileSize       String?   // "2.5 MB" - для файлов
   ogImage        String?   // Кеш Open Graph изображения (для ссылок)
+  previewImage   String?   // Сгенерированное превью для карточек (PNG/WebP)
 
   // Аналитика
   viewCount     Int @default(0)
