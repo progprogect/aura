@@ -216,14 +216,16 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
         </div>
       )}
 
-      {/* CTA кнопка (интегрированная) */}
-      <div className="pt-2">
-        <CTAButton
-          leadMagnet={leadMagnet}
-          specialistId={specialistId}
-          specialistName={specialistName}
-        />
-      </div>
+      {/* CTA кнопка (только для файлов и ссылок, не для услуг) */}
+      {leadMagnet.type !== 'service' && (
+        <div className="pt-2">
+          <CTAButton
+            leadMagnet={leadMagnet}
+            specialistId={specialistId}
+            specialistName={specialistName}
+          />
+        </div>
+      )}
     </motion.div>
   )
 }

@@ -149,6 +149,7 @@ export default async function LeadMagnetPage({ params }: PageProps) {
             otherLeadMagnets={otherLeadMagnets}
             specialistSlug={specialist.slug}
             specialistName={specialistName}
+            currentLeadMagnetType={leadMagnet.type}
           />
         </div>
       </div>
