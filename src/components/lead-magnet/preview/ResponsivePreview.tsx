@@ -10,9 +10,10 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { PreviewUrls } from '@/types/lead-magnet'
 import { generateSrcSet, generateSizes } from '@/lib/lead-magnets/preview/utils/helpers'
+import { parsePreviewUrls } from '@/lib/lead-magnets/preview/utils/parse-preview-urls'
 
 interface ResponsivePreviewProps {
-  urls: PreviewUrls
+  urls: PreviewUrls | any  // Может быть JSON string
   alt: string
   type?: 'card' | 'detail'
   className?: string
@@ -29,11 +30,22 @@ export function ResponsivePreview({
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
+  // Безопасный парсинг URLs (может быть JSON string из БД)
+  const parsedUrls = parsePreviewUrls(urls)
+
+  if (!parsedUrls) {
+    return (
+      <div className={cn('w-full h-full bg-gray-100 flex items-center justify-center', className)}>
+        <div className="text-gray-400 text-sm">Превью недоступно</div>
+      </div>
+    )
+  }
+
   // Используем соответствующий URL в зависимости от типа
-  const src = type === 'detail' ? urls.detail : urls.card
+  const src = type === 'detail' ? parsedUrls.detail : parsedUrls.card
   
   // Генерируем srcSet для responsive images
-  const srcSet = generateSrcSet(urls)
+  const srcSet = generateSrcSet(parsedUrls)
   
   // Генерируем sizes для браузера
   const sizes = generateSizes(type)

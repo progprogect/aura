@@ -60,3 +60,8 @@ export {
   isVimeoUrl
 } from './utils/helpers'
 
+export {
+  parsePreviewUrls,
+  getPreviewUrl
+} from './utils/parse-preview-urls'
+

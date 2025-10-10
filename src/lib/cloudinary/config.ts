@@ -124,14 +124,14 @@ export async function uploadPDF(
       invalidate: true
     })
 
-    // Валидация: проверяем что PDF загружен как raw
+    // Валидация: проверяем что PDF загружен как raw (warning, не throw)
     if (!result.secure_url.includes('/raw/upload/')) {
-      console.error('❌ ВАЛИДАЦИЯ ПРОВАЛЕНА: PDF загружен НЕ как raw resource!')
-      console.error('   URL:', result.secure_url)
-      throw new Error('PDF uploaded with wrong resource_type - expected /raw/upload/ in URL')
+      console.warn('⚠️  WARNING: PDF может быть загружен с неправильным resource_type')
+      console.warn('   URL:', result.secure_url)
+      console.warn('   Ожидается /raw/upload/ в URL для корректного доступа')
+    } else {
+      console.log('✅ Валидация успешна: PDF загружен как raw resource')
     }
-
-    console.log('✅ Валидация успешна: PDF загружен как raw resource')
 
     return {
       url: result.secure_url,

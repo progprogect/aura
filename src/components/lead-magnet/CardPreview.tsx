@@ -18,6 +18,7 @@ import {
   isYouTubeUrl,
   getYouTubeThumbnail
 } from '@/lib/lead-magnets/preview'
+import { parsePreviewUrls } from '@/lib/lead-magnets/preview/utils/parse-preview-urls'
 
 interface CardPreviewProps {
   leadMagnet: LeadMagnetUI
@@ -33,8 +34,11 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   const gradient = getPreviewGradient(leadMagnet.type, fileExtension)
   const FileIcon = getFileIcon(fileExtension)
 
+  // Безопасный парсинг previewUrls (может быть JSON string из БД)
+  const previewUrls = parsePreviewUrls(leadMagnet.previewUrls)
+  
   // Проверяем наличие responsive превью (новая система)
-  const hasResponsivePreview = !!leadMagnet.previewUrls && !imageError
+  const hasResponsivePreview = !!previewUrls && !imageError
   
   // Проверяем наличие старого превью (обратная совместимость)
   const hasPreviewImage = !!leadMagnet.previewImage && !imageError
@@ -48,7 +52,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   
   // Определяем источник изображения (приоритет: previewUrls > previewImage > YouTube > OG)
   const imageSource = hasResponsivePreview
-    ? leadMagnet.previewUrls!.card  // Используем card размер для карточек
+    ? previewUrls.card  // Используем card размер для карточек
     : hasPreviewImage 
     ? leadMagnet.previewImage 
     : youtubeThumbnail 
@@ -59,7 +63,7 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   
   // srcSet для responsive images (если есть previewUrls)
   const srcSet = hasResponsivePreview 
-    ? `${leadMagnet.previewUrls!.thumbnail} 400w, ${leadMagnet.previewUrls!.card} 800w`
+    ? `${previewUrls.thumbnail} 400w, ${previewUrls.card} 800w`
     : undefined
   
   // sizes для браузера
