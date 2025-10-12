@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
@@ -106,12 +106,6 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
                   {/* Overlay при hover */}
                   <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
 
-                  {/* Индикатор видео */}
-                  {item.type === 'video' && (
-                    <div className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 shadow">
-                      <Play className="h-4 w-4 text-gray-900" />
-                    </div>
-                  )}
                 </motion.div>
               ))}
             </div>

@@ -8,7 +8,6 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 import { 
@@ -137,17 +136,6 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
           sizes={sizes || "(max-width: 768px) 80px, 400px"}
         />
 
-        {/* Play button для YouTube */}
-        {isYouTube && !isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-            <div className="bg-red-600 rounded-full p-2 sm:p-3 md:p-4 group-hover:scale-110 transition-transform">
-              <Play className={cn(
-                'text-white fill-white',
-                size === 'mobile' ? 'w-4 h-4' : size === 'responsive' ? 'w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8' : 'w-6 h-6 md:w-8 md:h-8'
-              )} />
-            </div>
-          </div>
-        )}
       </div>
     )
   }
