@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats'
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
+import { ServicesList } from '@/components/specialist/dashboard/ServicesList'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
@@ -423,8 +424,24 @@ export default async function ProfilePage() {
             <QuickActions 
               slug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
               newRequestsCount={user.newRequestsCount || 0}
+              newOrdersCount={user.newOrdersCount || 0}
               isSpecialist={user.hasSpecialistProfile}
             />
+
+            {/* Услуги (для специалистов) */}
+            {user.hasSpecialistProfile && user.services && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">💼 Мои услуги</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ServicesList 
+                    services={user.services}
+                    onRefresh={() => {}}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Кнопка выхода */}
             <Card>

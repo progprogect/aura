@@ -8,7 +8,6 @@ import {
   getTransactionLabel,
   getTransactionIcon,
   getTransactionColor,
-  TransactionType,
 } from '@/lib/points/format';
 import { TransactionItem } from '@/types/points';
 

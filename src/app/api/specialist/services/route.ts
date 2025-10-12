@@ -91,8 +91,7 @@ export async function POST(request: NextRequest) {
     // Получаем существующие slugs для проверки уникальности
     const existingSlugs = await prisma.service.findMany({
       where: { 
-        specialistProfileId: session.specialistProfile.id,
-        slug: { not: null }
+        specialistProfileId: session.specialistProfile.id
       },
       select: { slug: true }
     })
