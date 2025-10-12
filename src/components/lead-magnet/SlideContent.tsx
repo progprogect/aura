@@ -176,6 +176,7 @@ function CTAButton({
 }
 
 export function SlideContent({ leadMagnet, specialistId, specialistName, className }: SlideContentProps) {
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

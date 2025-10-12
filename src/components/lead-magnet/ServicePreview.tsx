@@ -94,46 +94,6 @@ export function ServicePreview({ leadMagnet, specialistId, specialistName, class
       "w-full bg-white rounded-lg border border-gray-200 p-6",
       className
     )}>
-      {/* Заголовок с иконкой */}
-      <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
-          <span className="text-3xl text-white">{leadMagnet.emoji || '💼'}</span>
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {leadMagnet.title}
-        </h3>
-        {leadMagnet.description && (
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {leadMagnet.description}
-          </p>
-        )}
-      </div>
-
-      {/* Highlights если есть */}
-      {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">
-            Что включает:
-          </h4>
-          <ul className="space-y-2">
-            {leadMagnet.highlights.map((highlight, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="flex items-start space-x-2 text-sm text-gray-700"
-              >
-                <div className="flex-shrink-0 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                </div>
-                <span>{highlight}</span>
-              </motion.li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Форма заявки */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Имя */}

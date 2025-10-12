@@ -218,13 +218,15 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
           )} />
         )}
         
-        {/* Метка типа файла */}
-        <div className={cn(
-          'text-white/90 font-medium',
-          size === 'mobile' ? 'text-xs' : size === 'responsive' ? 'text-sm sm:text-base' : 'text-sm md:text-base'
-        )}>
-          {fileTypeLabel}
-        </div>
+        {/* Метка типа файла - только для файлов без emoji */}
+        {!leadMagnet.emoji && (
+          <div className={cn(
+            'text-white/90 font-medium',
+            size === 'mobile' ? 'text-xs' : size === 'responsive' ? 'text-sm sm:text-base' : 'text-sm md:text-base'
+          )}>
+            {fileTypeLabel}
+          </div>
+        )}
       </div>
     </div>
   )
