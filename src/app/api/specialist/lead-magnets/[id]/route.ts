@@ -133,6 +133,32 @@ export async function PUT(
         // Кастомное превью загружено - нужно обновить
         console.log('[Lead Magnet] Загрузка нового кастомного превью')
         shouldUpdatePreview = true
+        
+        // Удаляем старое кастомное превью из Cloudinary, если оно было
+        const existingLeadMagnet = await prisma.leadMagnet.findUnique({
+          where: { id: params.id },
+          select: { previewUrls: true }
+        })
+        
+        if (existingLeadMagnet?.previewUrls) {
+          const oldPreviewUrls = existingLeadMagnet.previewUrls as any
+          // Проверяем, что это кастомное превью (не fallback SVG)
+          if (oldPreviewUrls.card && !oldPreviewUrls.card.includes('/images/fallback-preview.svg')) {
+            try {
+              // Извлекаем public_id из URL и удаляем из Cloudinary
+              const publicIdMatch = oldPreviewUrls.card.match(/custom-previews\/(.+?)(?:_\d+x\d+)?\./)
+              if (publicIdMatch) {
+                const publicId = `custom-previews/${publicIdMatch[1]}`
+                await deletePreview(publicId)
+                console.log('[Lead Magnet] Старое кастомное превью удалено из Cloudinary')
+              }
+            } catch (error) {
+              console.error('[Lead Magnet] Ошибка удаления старого превью:', error)
+              // Продолжаем, даже если не удалось удалить старое
+            }
+          }
+        }
+        
         try {
           const bytes = await previewFile.arrayBuffer()
           const buffer = Buffer.from(bytes)
@@ -151,6 +177,32 @@ export async function PUT(
         // Пользователь удалил превью - используем fallback
         console.log('[Lead Magnet] Превью удалено, используем fallback')
         shouldUpdatePreview = true
+        
+        // Удаляем старое кастомное превью из Cloudinary
+        const existingLeadMagnet = await prisma.leadMagnet.findUnique({
+          where: { id: params.id },
+          select: { previewUrls: true }
+        })
+        
+        if (existingLeadMagnet?.previewUrls) {
+          const oldPreviewUrls = existingLeadMagnet.previewUrls as any
+          // Проверяем, что это кастомное превью (не fallback SVG)
+          if (oldPreviewUrls.card && !oldPreviewUrls.card.includes('/images/fallback-preview.svg')) {
+            try {
+              // Извлекаем public_id из URL и удаляем из Cloudinary
+              const publicIdMatch = oldPreviewUrls.card.match(/custom-previews\/(.+?)(?:_\d+x\d+)?\./)
+              if (publicIdMatch) {
+                const publicId = `custom-previews/${publicIdMatch[1]}`
+                await deletePreview(publicId)
+                console.log('[Lead Magnet] Старое кастомное превью удалено из Cloudinary')
+              }
+            } catch (error) {
+              console.error('[Lead Magnet] Ошибка удаления старого превью:', error)
+              // Продолжаем
+            }
+          }
+        }
+        
         previewUrls = {
           thumbnail: FALLBACK_PREVIEW_URL,
           card: FALLBACK_PREVIEW_URL,
