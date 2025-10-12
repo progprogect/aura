@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Plus, Trash2, Edit, FileText, Link as LinkIcon, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LeadMagnetModal } from './LeadMagnetModal'
+import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 
 interface LeadMagnetsEditorProps {
@@ -131,7 +132,7 @@ export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorP
       )}
 
       {/* Кнопка добавления */}
-      {leadMagnets.length < 6 && (
+      {leadMagnets.length < LEAD_MAGNET_LIMITS.MAX_COUNT && (
         <Button
           onClick={() => setIsModalOpen(true)}
           variant="outline"
@@ -139,7 +140,7 @@ export function LeadMagnetsEditor({ leadMagnets, onRefresh }: LeadMagnetsEditorP
           size="lg"
         >
           <Plus size={18} className="mr-2" />
-          Добавить лид-магнит ({leadMagnets.length}/6)
+          Добавить лид-магнит ({leadMagnets.length}/{LEAD_MAGNET_LIMITS.MAX_COUNT})
         </Button>
       )}
 

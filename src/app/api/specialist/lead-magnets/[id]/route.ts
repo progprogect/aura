@@ -12,19 +12,20 @@ import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
 import { generateFallbackPreview } from '@/lib/lead-magnets/fallback-preview-generator'
+import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
 import type { PreviewUrls } from '@/types/lead-magnet'
 
 const UpdateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
-  title: z.string().min(5).max(100),
-  description: z.string().min(10).max(200),
+  title: z.string().min(LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH).max(LEAD_MAGNET_LIMITS.TITLE_MAX_LENGTH),
+  description: z.string().min(LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH).max(LEAD_MAGNET_LIMITS.DESCRIPTION_MAX_LENGTH),
   fileUrl: z.string().optional(),
-  linkUrl: z.string().url().optional().or(z.literal('')),  // Разрешаем пустую строку
+  linkUrl: z.string().url().optional().or(z.literal('')),
   emoji: z.string().default('🎁'),
   // Новые опциональные поля
-  highlights: z.array(z.string()).max(5).optional(),
-  targetAudience: z.string().max(50).optional(),
-  ogImage: z.string().url().optional().or(z.literal('')),  // Разрешаем пустую строку
+  highlights: z.array(z.string()).max(LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS).optional(),
+  targetAudience: z.string().max(LEAD_MAGNET_LIMITS.TARGET_AUDIENCE_MAX_LENGTH).optional(),
+  ogImage: z.string().url().optional().or(z.literal('')),
 })
 
 export async function PUT(

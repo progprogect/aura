@@ -3,6 +3,7 @@
  */
 
 import { v2 as cloudinary } from 'cloudinary'
+import { CLOUDINARY_FOLDERS, CLOUDINARY_TRANSFORMATIONS, PREVIEW_SIZES } from '../lead-magnets/constants'
 
 // Настройка Cloudinary
 cloudinary.config({
@@ -252,10 +253,15 @@ export async function uploadCustomPreview(
     const publicId = `preview_${leadMagnetId}_${Date.now()}`
     
     const result = await cloudinary.uploader.upload(base64Image, {
-      folder: 'aura/lead-magnets/custom-previews',
+      folder: CLOUDINARY_FOLDERS.CUSTOM_PREVIEWS,
       public_id: publicId,
       transformation: [
-        { width: 800, height: 800, crop: 'fill', gravity: 'center' }, // Квадрат
+        { 
+          width: PREVIEW_SIZES.DETAIL, 
+          height: PREVIEW_SIZES.DETAIL, 
+          crop: 'fill', 
+          gravity: 'center' 
+        },
         { quality: 'auto:good' },
         { fetch_format: 'auto' }
       ],
@@ -295,7 +301,7 @@ export async function uploadFallbackPreview(
     const publicId = `fallback_${leadMagnetId}_${Date.now()}`
     
     const result = await cloudinary.uploader.upload(base64Image, {
-      folder: 'aura/lead-magnets/fallback-previews',
+      folder: CLOUDINARY_FOLDERS.FALLBACK_PREVIEWS,
       public_id: publicId,
       transformation: [
         { quality: 'auto:good' },
@@ -331,10 +337,12 @@ export function generatePreviewUrlsFromPublicId(publicId: string): {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME
   const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`
 
+  const { THUMBNAIL, CARD, DETAIL } = CLOUDINARY_TRANSFORMATIONS
+
   return {
-    thumbnail: `${baseUrl}/w_200,h_200,c_fill,q_80,f_auto/${publicId}`,
-    card: `${baseUrl}/w_400,h_400,c_fill,q_85,f_auto/${publicId}`,
-    detail: `${baseUrl}/w_800,h_800,c_fill,q_90,f_auto/${publicId}`
+    thumbnail: `${baseUrl}/w_${THUMBNAIL.width},h_${THUMBNAIL.height},c_${THUMBNAIL.crop},q_${THUMBNAIL.quality},f_auto/${publicId}`,
+    card: `${baseUrl}/w_${CARD.width},h_${CARD.height},c_${CARD.crop},q_${CARD.quality},f_auto/${publicId}`,
+    detail: `${baseUrl}/w_${DETAIL.width},h_${DETAIL.height},c_${DETAIL.crop},q_${DETAIL.quality},f_auto/${publicId}`
   }
 }
 

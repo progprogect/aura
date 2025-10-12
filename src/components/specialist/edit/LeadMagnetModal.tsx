@@ -14,6 +14,7 @@ import { PreviewUploader } from './PreviewUploader'
 import { FallbackPreview } from './FallbackPreview'
 import { CropModal } from './CropModal'
 import { isSquareImage, getPreviewUrl } from '@/lib/lead-magnets/preview-utils'
+import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
 import type { EditableLeadMagnet } from '@/types/lead-magnet'
 
 interface LeadMagnetModalProps {
@@ -72,22 +73,22 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const handleSubmit = async () => {
     // Улучшенная валидация с указанием требований
     if (!title.trim()) {
-      alert('Название обязательно (минимум 5 символов)')
+      alert(`Название обязательно (минимум ${LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH} символов)`)
       return
     }
 
-    if (title.trim().length < 5) {
-      alert('Название должно содержать минимум 5 символов')
+    if (title.trim().length < LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH) {
+      alert(`Название должно содержать минимум ${LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH} символов`)
       return
     }
 
     if (!description.trim()) {
-      alert('Описание обязательно (минимум 10 символов)')
+      alert(`Описание обязательно (минимум ${LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH} символов)`)
       return
     }
 
-    if (description.trim().length < 10) {
-      alert('Описание должно содержать минимум 10 символов')
+    if (description.trim().length < LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH) {
+      alert(`Описание должно содержать минимум ${LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH} символов`)
       return
     }
 
@@ -253,7 +254,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   }
   
   const addHighlight = () => {
-    if (highlights.length < 5) {
+    if (highlights.length < LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS) {
       setHighlights([...highlights, ''])
     }
   }
@@ -365,11 +366,11 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Чек-лист: 10 признаков тревоги"
-                maxLength={100}
+                maxLength={LEAD_MAGNET_LIMITS.TITLE_MAX_LENGTH}
               />
               <p className="text-xs text-gray-500">
-                Минимум 5 символов. Сейчас: {title.length}/100
-                {title.length > 0 && title.length < 5 && (
+                Минимум {LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH} символов. Сейчас: {title.length}/{LEAD_MAGNET_LIMITS.TITLE_MAX_LENGTH}
+                {title.length > 0 && title.length < LEAD_MAGNET_LIMITS.TITLE_MIN_LENGTH && (
                   <span className="text-red-500 ml-2">⚠️ Слишком коротко</span>
                 )}
               </p>
@@ -385,11 +386,11 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Узнайте основные признаки тревожного расстройства..."
                 rows={3}
-                maxLength={200}
+                maxLength={LEAD_MAGNET_LIMITS.DESCRIPTION_MAX_LENGTH}
               />
               <p className="text-xs text-gray-500">
-                Минимум 10 символов. Сейчас: {description.length}/200
-                {description.length > 0 && description.length < 10 && (
+                Минимум {LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH} символов. Сейчас: {description.length}/{LEAD_MAGNET_LIMITS.DESCRIPTION_MAX_LENGTH}
+                {description.length > 0 && description.length < LEAD_MAGNET_LIMITS.DESCRIPTION_MIN_LENGTH && (
                   <span className="text-red-500 ml-2">⚠️ Слишком коротко</span>
                 )}
               </p>
@@ -520,7 +521,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                   {/* Что внутри (highlights) */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-900">
-                      Что внутри (по пунктам, максимум 5)
+                      Что внутри (по пунктам, максимум {LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS})
                     </label>
                     {highlights.map((highlight, index) => (
                       <div key={index} className="flex gap-2">
@@ -543,7 +544,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                         )}
                       </div>
                     ))}
-                    {highlights.length < 5 && (
+                    {highlights.length < LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS && (
                       <Button
                         type="button"
                         variant="outline"
@@ -565,7 +566,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                       value={targetAudience}
                       onChange={(e) => setTargetAudience(e.target.value)}
                       placeholder="Для новичков"
-                      maxLength={50}
+                      maxLength={LEAD_MAGNET_LIMITS.TARGET_AUDIENCE_MAX_LENGTH}
                     />
                   </div>
                 </div>

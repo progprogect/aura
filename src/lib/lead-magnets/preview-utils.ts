@@ -3,6 +3,7 @@
  */
 
 import type { LeadMagnetType, PreviewUrls } from '@/types/lead-magnet'
+import { PREVIEW_FILE_LIMITS, FALLBACK_GRADIENTS } from './constants'
 
 export interface ValidationResult {
   valid: boolean
@@ -16,20 +17,20 @@ export interface ValidationResult {
  */
 export function validatePreviewFile(file: File): ValidationResult {
   // Проверка типа файла
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-  if (!validTypes.includes(file.type)) {
+  if (!PREVIEW_FILE_LIMITS.VALID_TYPES.includes(file.type as any)) {
     return {
       valid: false,
       error: 'Неподдерживаемый формат. Используйте JPG, PNG или WebP'
     }
   }
 
-  // Проверка размера (макс 5MB)
-  const maxSize = 5 * 1024 * 1024 // 5MB в байтах
-  if (file.size > maxSize) {
+  // Проверка размера
+  if (file.size > PREVIEW_FILE_LIMITS.MAX_SIZE) {
+    const sizeMB = (file.size / 1024 / 1024).toFixed(1)
+    const maxSizeMB = (PREVIEW_FILE_LIMITS.MAX_SIZE / 1024 / 1024).toFixed(0)
     return {
       valid: false,
-      error: `Файл слишком большой (${(file.size / 1024 / 1024).toFixed(1)}MB). Максимум 5MB`
+      error: `Файл слишком большой (${sizeMB}MB). Максимум ${maxSizeMB}MB`
     }
   }
 
@@ -56,16 +57,8 @@ export function getPreviewUrl(
  * @returns CSS linear-gradient строка
  */
 export function getFallbackGradient(type: LeadMagnetType): string {
-  switch (type) {
-    case 'file':
-      return 'linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)'
-    case 'link':
-      return 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)'
-    case 'service':
-      return 'linear-gradient(135deg, #EC4899 0%, #BE185D 100%)'
-    default:
-      return 'linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)'
-  }
+  const colors = FALLBACK_GRADIENTS[type] || FALLBACK_GRADIENTS.file
+  return `linear-gradient(135deg, ${colors.start} 0%, ${colors.end} 100%)`
 }
 
 /**
