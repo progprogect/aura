@@ -8,15 +8,16 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope } from 'lucide-react'
+import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart } from 'lucide-react'
 
 interface QuickActionsProps {
   slug?: string
   newRequestsCount?: number
+  newOrdersCount?: number
   isSpecialist?: boolean
 }
 
-export function QuickActions({ slug, newRequestsCount = 0, isSpecialist = true }: QuickActionsProps) {
+export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true }: QuickActionsProps) {
   const specialistActions = [
     {
       href: `/specialist/${slug}`,
@@ -28,10 +29,20 @@ export function QuickActions({ slug, newRequestsCount = 0, isSpecialist = true }
       disabled: false
     },
     {
+      href: '/specialist/orders',
+      icon: Package,
+      label: 'Мои заказы',
+      description: newOrdersCount > 0 ? `${newOrdersCount} новых` : 'Заказы услуг',
+      variant: 'outline' as const,
+      badge: newOrdersCount,
+      disabled: false,
+      color: 'green'
+    },
+    {
       href: '/specialist/requests',
       icon: Inbox,
-      label: 'Мои заявки',
-      description: newRequestsCount > 0 ? `${newRequestsCount} новых` : 'Заявки от клиентов',
+      label: 'Бесплатные заявки',
+      description: newRequestsCount > 0 ? `${newRequestsCount} новых` : 'От лид-магнитов',
       variant: 'outline' as const,
       badge: newRequestsCount,
       disabled: false

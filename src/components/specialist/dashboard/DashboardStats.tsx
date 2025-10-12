@@ -11,9 +11,10 @@ interface DashboardStatsProps {
   profileViews: number
   contactViews: number
   consultationRequests: number
+  orders?: number
 }
 
-export function DashboardStats({ profileViews, contactViews, consultationRequests }: DashboardStatsProps) {
+export function DashboardStats({ profileViews, contactViews, consultationRequests, orders = 0 }: DashboardStatsProps) {
   const stats = [
     {
       icon: Eye,
@@ -33,16 +34,24 @@ export function DashboardStats({ profileViews, contactViews, consultationRequest
     },
     {
       icon: TrendingUp,
-      label: 'Новых заявок',
-      value: consultationRequests,
+      label: 'Заказов услуг',
+      value: orders,
       sublabel: 'за неделю',
       color: 'text-green-600',
       bg: 'bg-green-50'
+    },
+    {
+      icon: MessageCircle,
+      label: 'Бесплатных заявок',
+      value: consultationRequests,
+      sublabel: 'за неделю',
+      color: 'text-gray-600',
+      bg: 'bg-gray-50'
     }
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat) => {
         const Icon = stat.icon
         

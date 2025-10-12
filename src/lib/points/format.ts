@@ -1,4 +1,3 @@
-import { Decimal } from '@prisma/client/runtime/library';
 import {
   Coins,
   Gift,
@@ -8,17 +7,14 @@ import {
   Timer,
   Award,
 } from 'lucide-react';
-import { TransactionType } from './points-service';
+import { TransactionType } from '@/types/points';
 
 /**
  * Форматировать баллы для отображения
  */
-export function formatPoints(amount: Decimal | string | number): string {
-  const decimal = typeof amount === 'string' || typeof amount === 'number' 
-    ? new Decimal(amount) 
-    : amount;
-  
-  const formatted = decimal.toFixed(2);
+export function formatPoints(amount: string | number): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const formatted = num.toFixed(2);
   
   // Убрать .00 если целое число
   if (formatted.endsWith('.00')) {
@@ -31,7 +27,7 @@ export function formatPoints(amount: Decimal | string | number): string {
 /**
  * Форматировать баллы с сокращением для компактного отображения
  */
-export function formatPointsShort(amount: Decimal | string | number): string {
+export function formatPointsShort(amount: string | number): string {
   const points = formatPoints(amount);
   return `${points} б.`;
 }

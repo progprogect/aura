@@ -12,8 +12,10 @@ import { SpecialistPricing } from './SpecialistPricing'
 import { SpecialistFAQ } from './SpecialistFAQ'
 import { SpecialistContact } from './SpecialistContact'
 import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
+import { SpecialistServices } from './SpecialistServices'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
+import type { Service } from '@/types/service'
 
 interface SpecialistProfileProps {
   tabs: Tab[]
@@ -57,6 +59,7 @@ interface SpecialistProfileProps {
       answer: string
     }>
     leadMagnets?: LeadMagnetUI[]
+    services?: Service[]
   }
   isEditMode?: boolean
   onSaveField?: (field: string, value: string | number) => Promise<any>
@@ -124,6 +127,14 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
 
         {/* FAQ */}
         {data.faqs.length > 0 && <SpecialistFAQ faqs={data.faqs} />}
+
+        {/* Услуги */}
+        {data.services && data.services.length > 0 && (
+          <SpecialistServices
+            services={data.services}
+            specialistSlug={data.slug}
+          />
+        )}
 
         {/* Лид-магниты */}
         {data.leadMagnets && data.leadMagnets.length > 0 && (

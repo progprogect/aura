@@ -46,6 +46,14 @@ async function getUserData() {
                 leadMagnets: {
                   where: { isActive: true }
                 },
+                services: {
+                  where: { isActive: true },
+                  orderBy: { order: 'asc' }
+                },
+                orders: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 5
+                }
               }
             }
           }
@@ -131,6 +139,26 @@ async function getUserData() {
         where: {
           specialistProfileId: profile.id,
           status: 'new'
+        }
+      })
+
+      // Количество заказов за неделю
+      const ordersCount = await prisma.order.count({
+        where: {
+          specialistProfileId: profile.id,
+          createdAt: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          }
+        }
+      })
+
+      // Количество новых заказов (pending + paid)
+      const newOrdersCount = await prisma.order.count({
+        where: {
+          specialistProfileId: profile.id,
+          status: {
+            in: ['pending', 'paid']
+          }
         }
       })
 
@@ -230,11 +258,15 @@ async function getUserData() {
         profileViews: profile.profileViews,
         contactViews: profile.contactViews,
         consultationRequests: consultationRequestsCount,
+        orders: ordersCount,
         completionPercentage,
       }
 
       userData.tasks = tasks
       userData.newRequestsCount = newRequestsCount
+      userData.newOrdersCount = newOrdersCount
+      userData.services = profile.services
+      userData.recentOrders = profile.orders
     }
 
     return userData
@@ -297,6 +329,7 @@ export default async function ProfilePage() {
               profileViews={user.stats.profileViews}
               contactViews={user.stats.contactViews}
               consultationRequests={user.stats.consultationRequests}
+              orders={user.stats.orders || 0}
             />
           </div>
         )}

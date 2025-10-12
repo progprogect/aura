@@ -1,4 +1,19 @@
-import { TransactionType, BalanceType } from '@/lib/points/points-service';
+/**
+ * Типы транзакций
+ */
+export type TransactionType =
+  | 'bonus_registration'
+  | 'bonus_reward'
+  | 'bonus_expired'
+  | 'purchase'
+  | 'refund'
+  | 'withdrawal'
+  | 'deposit';
+
+/**
+ * Тип баланса
+ */
+export type BalanceType = 'balance' | 'bonusBalance';
 
 /**
  * Баланс пользователя (для API ответов)

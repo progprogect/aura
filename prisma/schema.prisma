@@ -100,6 +100,8 @@ model SpecialistProfile {
   faqs                 FAQ[]
   leadMagnets          LeadMagnet[]
   consultationRequests ConsultationRequest[]
+  services             Service[]
+  orders               Order[]
 
   // Медиа
   videoUrl String? // YouTube/Vimeo URL для видео-презентации
@@ -229,13 +231,13 @@ model LeadMagnet {
   isActive Boolean @default(true)
 
   // SEO и детализация (новые поля для улучшенного UX)
-  slug           String?   // URL-friendly slug для отдельной страницы
-  highlights     String[]  @default([]) // Список "Что внутри" (max 5 пунктов)
-  targetAudience String?   // "Для новичков", "Для продвинутых" и т.д.
-  fileSize       String?   // "2.5 MB" - для файлов
-  ogImage        String?   // Кеш Open Graph изображения (для ссылок)
-  previewImage   String?   // Сгенерированное превью для карточек (PNG/WebP) - DEPRECATED, использовать previewUrls
-  previewUrls    Json?     // Responsive превью URLs { thumbnail, card, detail, original }
+  slug           String? // URL-friendly slug для отдельной страницы
+  highlights     String[] @default([]) // Список "Что внутри" (max 5 пунктов)
+  targetAudience String? // "Для новичков", "Для продвинутых" и т.д.
+  fileSize       String? // "2.5 MB" - для файлов
+  ogImage        String? // Кеш Open Graph изображения (для ссылок)
+  previewImage   String? // Сгенерированное превью для карточек (PNG/WebP) - DEPRECATED, использовать previewUrls
+  previewUrls    Json? // Responsive превью URLs { thumbnail, card, detail, original }
 
   // Аналитика
   viewCount     Int @default(0)
@@ -279,6 +281,97 @@ model ConsultationRequest {
   @@index([specialistProfileId])
   @@index([status])
   @@index([leadMagnetId])
+}
+
+// ========================================
+// ПРОДУКТЫ/УСЛУГИ СПЕЦИАЛИСТОВ
+// ========================================
+
+model Service {
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  // Основная информация
+  title       String // "Индивидуальная консультация", "Программа тренировок"
+  description String @db.Text // Подробное описание
+  slug        String // URL-friendly slug
+
+  // Что входит в услугу
+  highlights String[] @default([]) // ["60 минут консультации", "Персональный план"]
+
+  // Стоимость и сроки
+  price        Int // Цена в баллах (100 баллов = 1 BYN по умолчанию)
+  currency     String @default("BYN")
+  deliveryDays Int? // Срок выполнения (3, 7, 14 дней)
+
+  // Настройки
+  emoji    String  @default("💼")
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  // Связи
+  orders Order[]
+
+  // Аналитика
+  viewCount  Int @default(0)
+  orderCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([specialistProfileId, slug])
+  @@index([specialistProfileId, isActive])
+  @@index([slug])
+}
+
+// ========================================
+// ЗАКАЗЫ УСЛУГ
+// ========================================
+
+model Order {
+  id        String  @id @default(cuid())
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  // Данные клиента
+  clientName    String
+  clientContact String // Телефон (обязательно)
+  clientMessage String? @db.Text // Опциональное сообщение
+
+  // Статус заказа
+  status String @default("pending")
+  // pending - создан, ожидает оплаты
+  // paid - оплачен, средства на эскроу
+  // in_progress - специалист начал работу
+  // completed - завершено, средства переведены
+  // cancelled - отменен (возврат средств)
+  // disputed - спор (эскалация)
+
+  // Платежные данные (пока NULL, будут использоваться после интеграции)
+  amountPaid    Decimal? @db.Decimal(15, 2) // Сумма оплаты
+  paymentMethod String? // "balance" | "bonusBalance"
+  transactionId String? // ID транзакции из Transaction модели
+
+  // Эскроу и выполнение
+  escrowReleased Boolean   @default(false) // Переведены ли средства специалисту
+  deadline       DateTime? // Дедлайн выполнения
+  completedAt    DateTime? // Фактическое завершение
+
+  // Dispute resolution
+  disputeReason String?   @db.Text // Причина спора
+  disputedAt    DateTime? // Когда открыт спор
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([specialistProfileId, status])
+  @@index([serviceId])
+  @@index([status])
+  @@index([deadline])
 }
 
 // ========================================

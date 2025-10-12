@@ -27,6 +27,7 @@ import { GalleryEditor } from './edit/GalleryEditor'
 import { FAQEditor } from './edit/FAQEditor'
 import { LeadMagnetsEditor } from './edit/LeadMagnetsEditor'
 import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
+import { SpecialistServices } from './SpecialistServices'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 
@@ -105,6 +106,17 @@ interface SpecialistProfileWithEditProps {
       linkUrl?: string | null
       emoji: string
       slug?: string | null
+    }>
+    services?: Array<{
+      id: string
+      title: string
+      description: string
+      slug: string
+      price: number
+      currency: string
+      emoji: string
+      highlights: string[]
+      deliveryDays?: number | null
     }>
   }
 }
@@ -457,33 +469,45 @@ export function SpecialistProfileWithEdit({
             )}
           </div>
 
-          {/* Лид-магниты */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                <span className="text-pink-600 text-sm">🎁</span>
-              </span>
-              <span className="text-base sm:text-xl">Лид-магниты</span>
-            </h2>
-            {isEditMode ? (
-              <LeadMagnetsEditor
-                leadMagnets={data.leadMagnets}
-                onRefresh={() => router.refresh()}
+          {/* Услуги */}
+          {data.services && data.services.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <span className="text-green-600 text-sm">💼</span>
+                </span>
+                <span className="text-base sm:text-xl">Услуги</span>
+              </h2>
+              <SpecialistServices
+                services={data.services as any}
+                specialistSlug={data.slug}
               />
-            ) : (
-              data.leadMagnets.length > 0 ? (
+            </div>
+          )}
+
+          {/* Лид-магниты */}
+          {data.leadMagnets && data.leadMagnets.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <span className="text-pink-600 text-sm">🎁</span>
+                </span>
+                <span className="text-base sm:text-xl">Бесплатные материалы</span>
+              </h2>
+              {isEditMode ? (
+                <LeadMagnetsEditor
+                  leadMagnets={data.leadMagnets}
+                  onRefresh={() => router.refresh()}
+                />
+              ) : (
                 <SpecialistLeadMagnets
                   leadMagnets={data.leadMagnets}
                   specialistSlug={data.slug}
                   specialistName={data.fullName}
                 />
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>Лид-магниты не добавлены</p>
-                </div>
-              )
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
         </div>
       ) : (
