@@ -10,6 +10,11 @@ import type { LeadMagnetType } from '@/types/lead-magnet'
 // ========================================
 
 /**
+ * URL стандартного fallback превью
+ */
+export const FALLBACK_PREVIEW_URL = '/images/fallback-preview.svg'
+
+/**
  * Размеры превью (в пикселях)
  */
 export const PREVIEW_SIZES = {

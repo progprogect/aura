@@ -506,9 +506,9 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                   {/* Fallback preview */}
                   <div>
                     <div className="text-xs font-medium text-gray-700 mb-2 text-center">
-                      Или будет создано автоматически:
+                      Или будет использовано стандартное превью:
                     </div>
-                    <FallbackPreview type={type} emoji={emoji} />
+                    <FallbackPreview />
                   </div>
                 </div>
               )}
