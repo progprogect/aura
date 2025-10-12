@@ -26,6 +26,8 @@ export function SmartPreview({ leadMagnet, specialistId, specialistName, classNa
     return (
       <ServicePreview 
         leadMagnet={leadMagnet}
+        specialistId={specialistId}
+        specialistName={specialistName}
       />
     )
   }
