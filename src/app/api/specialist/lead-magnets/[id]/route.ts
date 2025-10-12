@@ -11,8 +11,7 @@ import { uploadImage, uploadDocument, uploadPDF, uploadCustomPreview, uploadFall
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
-import { generateFallbackPreview } from '@/lib/lead-magnets/fallback-preview-generator'
-import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
+import { LEAD_MAGNET_LIMITS, FALLBACK_PREVIEW_URL } from '@/lib/lead-magnets/constants'
 import type { PreviewUrls } from '@/types/lead-magnet'
 
 const UpdateLeadMagnetSchema = z.object({
@@ -78,6 +77,7 @@ export async function PUT(
       const ogImage = formData.get('ogImage') as string || undefined
       const fileUrlForm = formData.get('fileUrl') as string || undefined
       const linkUrl = formData.get('linkUrl') as string || undefined
+      const removePreview = formData.get('removePreview') === 'true'
 
       // Загружаем файл лид-магнита только если он есть
       let fileUrl = fileUrlForm
@@ -146,6 +146,15 @@ export async function PUT(
           console.log('[Lead Magnet] Новое кастомное превью загружено')
         } catch (error) {
           console.error('[Lead Magnet] Ошибка загрузки нового превью:', error)
+        }
+      } else if (removePreview) {
+        // Пользователь удалил превью - используем fallback
+        console.log('[Lead Magnet] Превью удалено, используем fallback')
+        shouldUpdatePreview = true
+        previewUrls = {
+          thumbnail: FALLBACK_PREVIEW_URL,
+          card: FALLBACK_PREVIEW_URL,
+          detail: FALLBACK_PREVIEW_URL
         }
       }
     } else {

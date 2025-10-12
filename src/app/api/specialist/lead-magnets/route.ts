@@ -11,8 +11,7 @@ import { uploadImage, uploadDocument, uploadPDF, uploadCustomPreview, uploadFall
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
-import { generateFallbackPreview } from '@/lib/lead-magnets/fallback-preview-generator'
-import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
+import { LEAD_MAGNET_LIMITS, FALLBACK_PREVIEW_URL } from '@/lib/lead-magnets/constants'
 import type { PreviewUrls } from '@/types/lead-magnet'
 
 const CreateLeadMagnetSchema = z.object({
@@ -231,25 +230,13 @@ export async function POST(request: NextRequest) {
       select: { order: true }
     })
 
-    // Генерируем fallback превью если не было загружено кастомное
+    // Используем fallback превью если не было загружено кастомное
     if (!previewUrls) {
-      console.log('[Lead Magnet] Генерация fallback превью')
-      try {
-        const fallbackResult = await generateFallbackPreview({
-          type: data.type as 'file' | 'link' | 'service',
-          emoji: data.emoji
-        })
-
-        const uploadResult = await uploadFallbackPreview(fallbackResult.buffer, '')
-        previewUrls = {
-          thumbnail: uploadResult.thumbnail,
-          card: uploadResult.card,
-          detail: uploadResult.detail
-        }
-        console.log('[Lead Magnet] Fallback превью создано')
-      } catch (error) {
-        console.error('[Lead Magnet] Ошибка создания fallback превью:', error)
-        // Продолжаем без превью
+      console.log('[Lead Magnet] Используем стандартное fallback превью')
+      previewUrls = {
+        thumbnail: FALLBACK_PREVIEW_URL,
+        card: FALLBACK_PREVIEW_URL,
+        detail: FALLBACK_PREVIEW_URL
       }
     }
 

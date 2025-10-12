@@ -45,6 +45,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const [showCropModal, setShowCropModal] = useState(false)
   const [tempImageForCrop, setTempImageForCrop] = useState<string | null>(null)
   const [existingPreviewUrl, setExistingPreviewUrl] = useState<string | null>(null)
+  const [previewRemoved, setPreviewRemoved] = useState(false)
 
   // Инициализация данных при редактировании
   React.useEffect(() => {
@@ -153,6 +154,9 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
         // Превью файл (только если не пустой)
         if (previewFile && previewFile.size > 0) {
           formData.append('previewFile', previewFile)
+        } else if (previewRemoved) {
+          // Если превью было удалено, отправляем флаг
+          formData.append('removePreview', 'true')
         }
 
         const response = await fetch(url, {
@@ -227,6 +231,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       // Квадратное - сразу устанавливаем
       setPreviewFile(file)
       setPreviewDataUrl(dataUrl)
+      setPreviewRemoved(false) // Сбрасываем флаг удаления
     } else {
       // Не квадратное - показываем crop modal
       setTempImageForCrop(dataUrl)
@@ -242,6 +247,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     
     setPreviewFile(croppedFile)
     setPreviewDataUrl(croppedDataUrl)
+    setPreviewRemoved(false) // Сбрасываем флаг удаления
     setShowCropModal(false)
     setTempImageForCrop(null)
   }
@@ -251,6 +257,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     setPreviewFile(null)
     setPreviewDataUrl(null)
     setExistingPreviewUrl(null)
+    setPreviewRemoved(true) // Отмечаем, что превью было удалено
   }
   
   const addHighlight = () => {
