@@ -38,8 +38,8 @@ export function SpecialistLeadMagnets({
     >
       {/* Заголовок убран - он уже есть в родительском компоненте */}
 
-      {/* Сетка карточек */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Сетка карточек (квадратные карточки с оптимальным gap) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
         {validLeadMagnets.map((magnet, index) => (
           <LeadMagnetCard
             key={magnet.id}

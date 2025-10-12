@@ -7,10 +7,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
-import { uploadImage, uploadDocument, uploadPDF } from '@/lib/cloudinary/config'
+import { uploadImage, uploadDocument, uploadPDF, uploadCustomPreview, uploadFallbackPreview, deletePreview } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
+import { generateFallbackPreview } from '@/lib/lead-magnets/fallback-preview-generator'
+import type { PreviewUrls } from '@/types/lead-magnet'
 
 const UpdateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -58,11 +60,14 @@ export async function PUT(
     const contentType = request.headers.get('content-type')
     let data: any
     let fileSize: string | null = null
+    let previewUrls: PreviewUrls | null = null
+    let shouldUpdatePreview = false
 
-    // Обработка FormData (для файлов) или JSON
+    // Обработка FormData (для файлов или previewFile) или JSON
     if (contentType?.includes('multipart/form-data')) {
       const formData = await request.formData()
-      const file = formData.get('file') as File
+      const file = formData.get('file') as File | null
+      const previewFile = formData.get('previewFile') as File | null
       const type = formData.get('type') as string
       const title = formData.get('title') as string
       const description = formData.get('description') as string
@@ -70,9 +75,11 @@ export async function PUT(
       const highlightsRaw = formData.get('highlights') as string || '[]'
       const targetAudience = formData.get('targetAudience') as string || undefined
       const ogImage = formData.get('ogImage') as string || undefined
+      const fileUrlForm = formData.get('fileUrl') as string || undefined
+      const linkUrl = formData.get('linkUrl') as string || undefined
 
-      // Загружаем файл только если он есть
-      let fileUrl = undefined
+      // Загружаем файл лид-магнита только если он есть
+      let fileUrl = fileUrlForm
       if (file && file.size > 0) {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
@@ -87,16 +94,12 @@ export async function PUT(
         
         let uploadResult
         if (isImage) {
-          // Для изображений используем uploadImage с трансформациями
           uploadResult = await uploadImage(base64, 'lead-magnets')
         } else if (isPDF) {
-          // 🔴 КРИТИЧНО: PDF требуют специальной загрузки с resource_type: 'raw'
           uploadResult = await uploadPDF(base64, 'lead-magnets')
         } else if (isDocument) {
-          // Для других документов используем uploadDocument
           uploadResult = await uploadDocument(base64, 'lead-magnets')
         } else {
-          // Для всех остальных файлов
           uploadResult = await uploadDocument(base64, 'lead-magnets')
         }
         
@@ -117,10 +120,32 @@ export async function PUT(
         title,
         description,
         fileUrl,
+        linkUrl,
         emoji,
         highlights,
         targetAudience,
         ogImage,
+      }
+
+      // Обработка превью
+      if (previewFile && previewFile.size > 0) {
+        // Кастомное превью загружено - нужно обновить
+        console.log('[Lead Magnet] Загрузка нового кастомного превью')
+        shouldUpdatePreview = true
+        try {
+          const bytes = await previewFile.arrayBuffer()
+          const buffer = Buffer.from(bytes)
+          
+          const previewResult = await uploadCustomPreview(buffer, params.id)
+          previewUrls = {
+            thumbnail: previewResult.thumbnail,
+            card: previewResult.card,
+            detail: previewResult.detail
+          }
+          console.log('[Lead Magnet] Новое кастомное превью загружено')
+        } catch (error) {
+          console.error('[Lead Magnet] Ошибка загрузки нового превью:', error)
+        }
       }
     } else {
       const body = await request.json()
@@ -195,6 +220,12 @@ export async function PUT(
     if (data.ogImage !== undefined) updateData.ogImage = data.ogImage
     if (fileSize !== null) updateData.fileSize = fileSize
     if (newSlug !== currentLeadMagnet?.slug) updateData.slug = newSlug
+    
+    // Обновляем превью если было загружено новое
+    if (shouldUpdatePreview && previewUrls) {
+      updateData.previewUrls = previewUrls as any
+      console.log('[Lead Magnet] PreviewUrls обновлены в БД')
+    }
 
     const updatedLeadMagnet = await prisma.leadMagnet.update({
       where: { id: params.id },

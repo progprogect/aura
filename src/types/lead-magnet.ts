@@ -29,11 +29,11 @@ export function fromPrismaLeadMagnet(prismaObj: any): LeadMagnet {
   }
 }
 
-// Responsive preview URLs
+// Responsive preview URLs (все квадратные 1:1)
 export interface PreviewUrls {
-  thumbnail: string
-  card: string
-  detail: string
+  thumbnail: string  // 200x200
+  card: string       // 400x400
+  detail: string     // 800x800
   original?: string
 }
 
@@ -52,7 +52,8 @@ export interface LeadMagnet {
   fileSize?: string | null
   ogImage?: string | null
   previewImage?: string | null  // DEPRECATED: использовать previewUrls
-  previewUrls?: PreviewUrls | null  // Responsive превью URLs
+  previewUrls?: PreviewUrls | null  // Responsive превью URLs (квадратные)
+  customPreview?: boolean  // Флаг: загружено ли кастомное превью (vs fallback)
   viewCount?: number
   downloadCount?: number
 }
@@ -73,6 +74,7 @@ export interface LeadMagnetUI {
   ogImage?: string | null
   previewImage?: string | null  // DEPRECATED: использовать previewUrls
   previewUrls?: PreviewUrls | null
+  customPreview?: boolean  // Флаг: загружено ли кастомное превью
   viewCount?: number
   downloadCount?: number
   createdAt?: Date | string
@@ -89,6 +91,7 @@ export interface LeadMagnetFormData {
   highlights?: string[]
   targetAudience?: string
   ogImage?: string
+  previewFile?: File  // Кастомное превью (опционально)
 }
 
 // Для редактирования существующего лид-магнита
@@ -102,5 +105,7 @@ export interface EditableLeadMagnet {
   emoji: string
   highlights?: string[]
   targetAudience?: string | null
+  previewUrls?: PreviewUrls | null
+  customPreview?: boolean
 }
 

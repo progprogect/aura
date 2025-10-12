@@ -150,3 +150,31 @@ export function isVimeoUrl(url: string): boolean {
   return url.includes('vimeo.com')
 }
 
+/**
+ * Получить цвет badge для типа лид-магнита
+ */
+export function getLeadMagnetBadgeColor(type: string): string {
+  switch (type) {
+    case 'file':
+      return 'bg-blue-100 text-blue-800'
+    case 'link':
+      return 'bg-purple-100 text-purple-800'
+    case 'service':
+      return 'bg-green-100 text-green-800'
+    default:
+      return 'bg-gray-100 text-gray-800'
+  }
+}
+
+/**
+ * Заглушка для обратной совместимости (для старых компонентов)
+ */
+export function getLeadMagnetPreviewData(leadMagnet: any) {
+  // Возвращаем минимальные данные для работы старых компонентов
+  return {
+    type: leadMagnet.type,
+    title: leadMagnet.title,
+    emoji: leadMagnet.emoji || '🎁'
+  }
+}
+

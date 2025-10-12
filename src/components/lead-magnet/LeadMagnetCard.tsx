@@ -47,8 +47,8 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
           "transition-all duration-300 ease-out"
         )}
       >
-        {/* Превью - сверху (адаптивная высота для всех экранов) */}
-        <div className="relative w-full h-32 sm:h-36 md:h-40 overflow-hidden">
+        {/* Превью - сверху (квадратное 1:1 для всех экранов) */}
+        <div className="relative w-full aspect-square overflow-hidden">
           <CardPreview 
             leadMagnet={leadMagnet} 
             size="responsive"

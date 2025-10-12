@@ -7,13 +7,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
-import { uploadImage, uploadDocument, uploadPDF } from '@/lib/cloudinary/config'
+import { uploadImage, uploadDocument, uploadPDF, uploadCustomPreview, uploadFallbackPreview } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { generateSlug, formatFileSize, validateHighlights } from '@/lib/lead-magnets/utils'
 import { revalidateSpecialistProfile } from '@/lib/revalidation'
-import { shouldGeneratePreview } from '@/lib/lead-magnets/preview/core/generator'
-import { addGeneratePreviewJob } from '@/lib/queue/preview-queue'
-import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
+import { generateFallbackPreview } from '@/lib/lead-magnets/fallback-preview-generator'
+import type { PreviewUrls } from '@/types/lead-magnet'
 
 const CreateLeadMagnetSchema = z.object({
   type: z.enum(['file', 'link', 'service']),
@@ -95,47 +94,51 @@ export async function POST(request: NextRequest) {
     const contentType = request.headers.get('content-type')
     let data: any
     let fileSize: string | null = null
+    let previewUrls: PreviewUrls | null = null
 
-    // Обработка FormData (для файлов) или JSON
+    // Обработка FormData (для файлов или previewFile) или JSON
     if (contentType?.includes('multipart/form-data')) {
       const formData = await request.formData()
-      const file = formData.get('file') as File
+      const file = formData.get('file') as File | null
+      const previewFile = formData.get('previewFile') as File | null
       const type = formData.get('type') as string
       const title = formData.get('title') as string
       const description = formData.get('description') as string
       const emoji = formData.get('emoji') as string || '🎁'
       const highlightsRaw = formData.get('highlights') as string || '[]'
       const targetAudience = formData.get('targetAudience') as string || undefined
+      const linkUrl = formData.get('linkUrl') as string || undefined
+      const fileUrl = formData.get('fileUrl') as string || undefined
 
-      // Загружаем файл
-      const bytes = await file.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
-      
-      // Определяем тип файла и используем соответствующую функцию загрузки
-      const isImage = file.type.startsWith('image/')
-      const isPDF = file.type === 'application/pdf'
-      const isDocument = file.type.includes('document') || 
-                        file.type.includes('text/') ||
-                        file.type.includes('application/vnd')
-      
-      let uploadResult
-      if (isImage) {
-        // Для изображений используем uploadImage с трансформациями
-        uploadResult = await uploadImage(base64, 'lead-magnets')
-      } else if (isPDF) {
-        // 🔴 КРИТИЧНО: PDF требуют специальной загрузки с resource_type: 'raw'
-        uploadResult = await uploadPDF(base64, 'lead-magnets')
-      } else if (isDocument) {
-        // Для других документов используем uploadDocument
-        uploadResult = await uploadDocument(base64, 'lead-magnets')
-      } else {
-        // Для всех остальных файлов
-        uploadResult = await uploadDocument(base64, 'lead-magnets')
+      let uploadedFileUrl: string | undefined = fileUrl
+
+      // Загружаем файл лид-магнита (если есть)
+      if (file) {
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
+        
+        // Определяем тип файла и используем соответствующую функцию загрузки
+        const isImage = file.type.startsWith('image/')
+        const isPDF = file.type === 'application/pdf'
+        const isDocument = file.type.includes('document') || 
+                          file.type.includes('text/') ||
+                          file.type.includes('application/vnd')
+        
+        let uploadResult
+        if (isImage) {
+          uploadResult = await uploadImage(base64, 'lead-magnets')
+        } else if (isPDF) {
+          uploadResult = await uploadPDF(base64, 'lead-magnets')
+        } else if (isDocument) {
+          uploadResult = await uploadDocument(base64, 'lead-magnets')
+        } else {
+          uploadResult = await uploadDocument(base64, 'lead-magnets')
+        }
+
+        uploadedFileUrl = uploadResult.url
+        fileSize = formatFileSize(file.size)
       }
-
-      // Вычисляем размер файла
-      fileSize = formatFileSize(file.size)
 
       // Парсим highlights
       let highlights: string[] = []
@@ -149,10 +152,32 @@ export async function POST(request: NextRequest) {
         type,
         title,
         description,
-        fileUrl: uploadResult.url,
+        fileUrl: uploadedFileUrl,
+        linkUrl,
         emoji,
         highlights,
         targetAudience,
+      }
+
+      // Обработка превью
+      if (previewFile) {
+        // Кастомное превью загружено
+        console.log('[Lead Magnet] Загрузка кастомного превью')
+        try {
+          const bytes = await previewFile.arrayBuffer()
+          const buffer = Buffer.from(bytes)
+          
+          const previewResult = await uploadCustomPreview(buffer, '')
+          previewUrls = {
+            thumbnail: previewResult.thumbnail,
+            card: previewResult.card,
+            detail: previewResult.detail
+          }
+          console.log('[Lead Magnet] Кастомное превью загружено')
+        } catch (error) {
+          console.error('[Lead Magnet] Ошибка загрузки кастомного превью:', error)
+          // Продолжаем без превью - fallback будет создан ниже
+        }
       }
     } else {
       const body = await request.json()
@@ -205,6 +230,28 @@ export async function POST(request: NextRequest) {
       select: { order: true }
     })
 
+    // Генерируем fallback превью если не было загружено кастомное
+    if (!previewUrls) {
+      console.log('[Lead Magnet] Генерация fallback превью')
+      try {
+        const fallbackResult = await generateFallbackPreview({
+          type: data.type as 'file' | 'link' | 'service',
+          emoji: data.emoji
+        })
+
+        const uploadResult = await uploadFallbackPreview(fallbackResult.buffer, '')
+        previewUrls = {
+          thumbnail: uploadResult.thumbnail,
+          card: uploadResult.card,
+          detail: uploadResult.detail
+        }
+        console.log('[Lead Magnet] Fallback превью создано')
+      } catch (error) {
+        console.error('[Lead Magnet] Ошибка создания fallback превью:', error)
+        // Продолжаем без превью
+      }
+    }
+
     const leadMagnet = await prisma.leadMagnet.create({
       data: {
         specialistProfileId: session.specialistProfile!.id,
@@ -221,39 +268,10 @@ export async function POST(request: NextRequest) {
         targetAudience: data.targetAudience,
         fileSize: fileSize,
         ogImage: data.ogImage,
+        // Превью
+        previewUrls: previewUrls ? (previewUrls as any) : null,
       }
     })
-
-    // Генерируем превью через queue (фоновая задача)
-    const typedLeadMagnet = fromPrismaLeadMagnet(leadMagnet)
-    if (shouldGeneratePreview({
-      type: typedLeadMagnet.type,
-      fileUrl: typedLeadMagnet.fileUrl,
-      linkUrl: typedLeadMagnet.linkUrl,
-      ogImage: typedLeadMagnet.ogImage,
-      title: typedLeadMagnet.title,
-      description: typedLeadMagnet.description,
-      emoji: typedLeadMagnet.emoji
-    })) {
-      // Добавляем задачу в очередь (не блокирует ответ)
-      addGeneratePreviewJob({
-        leadMagnetId: leadMagnet.id,
-        type: typedLeadMagnet.type,
-        fileUrl: typedLeadMagnet.fileUrl,
-        linkUrl: typedLeadMagnet.linkUrl,
-        ogImage: typedLeadMagnet.ogImage,
-        title: typedLeadMagnet.title,
-        description: typedLeadMagnet.description,
-        emoji: typedLeadMagnet.emoji,
-        highlights: typedLeadMagnet.highlights
-      }).then(jobId => {
-        if (jobId) {
-          console.log(`[Lead Magnet] Задача генерации превью создана (jobId: ${jobId}) для: ${leadMagnet.title}`)
-        }
-      }).catch(error => {
-        console.error('[Lead Magnet] Ошибка создания задачи генерации:', error)
-      })
-    }
 
     // Инвалидируем кеш профиля для мгновенного отображения
     const specialistProfile = await prisma.specialistProfile.findUnique({

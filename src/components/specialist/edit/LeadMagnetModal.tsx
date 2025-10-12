@@ -10,6 +10,10 @@ import { X, Upload, Loader2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { PreviewUploader } from './PreviewUploader'
+import { FallbackPreview } from './FallbackPreview'
+import { CropModal } from './CropModal'
+import { isSquareImage, getPreviewUrl } from '@/lib/lead-magnets/preview-utils'
 import type { EditableLeadMagnet } from '@/types/lead-magnet'
 
 interface LeadMagnetModalProps {
@@ -34,6 +38,13 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const [targetAudience, setTargetAudience] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
 
+  // Превью state
+  const [previewFile, setPreviewFile] = useState<File | null>(null)
+  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null)
+  const [showCropModal, setShowCropModal] = useState(false)
+  const [tempImageForCrop, setTempImageForCrop] = useState<string | null>(null)
+  const [existingPreviewUrl, setExistingPreviewUrl] = useState<string | null>(null)
+
   // Инициализация данных при редактировании
   React.useEffect(() => {
     if (editingMagnet) {
@@ -47,6 +58,12 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       setHighlights(editingMagnet.highlights && editingMagnet.highlights.length > 0 ? editingMagnet.highlights : [''])
       setTargetAudience(editingMagnet.targetAudience || '')
       setShowAdvanced(!!editingMagnet.highlights?.length || !!editingMagnet.targetAudience)
+      
+      // Инициализация превью
+      const previewUrl = getPreviewUrl(editingMagnet.previewUrls, 'card')
+      setExistingPreviewUrl(previewUrl)
+      setPreviewFile(null)
+      setPreviewDataUrl(null)
     } else {
       resetForm()
     }
@@ -104,10 +121,13 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       // Подготовка highlights (убираем пустые)
       const cleanHighlights = highlights.filter(h => h.trim() !== '')
       
-      // Для файла используем FormData
-      if (type === 'file' && file) {
+      // Используем FormData если есть file или previewFile
+      const useFormData = (type === 'file' && file) || previewFile
+      
+      if (useFormData) {
         const formData = new FormData()
-        formData.append('file', file)
+        
+        // Основные поля
         formData.append('type', type)
         formData.append('title', title.trim())
         formData.append('description', description.trim())
@@ -115,6 +135,23 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
         formData.append('highlights', JSON.stringify(cleanHighlights))
         if (targetAudience.trim()) {
           formData.append('targetAudience', targetAudience.trim())
+        }
+
+        // Файл лид-магнита (если есть)
+        if (type === 'file' && file) {
+          formData.append('file', file)
+        } else if (type === 'file' && editingMagnet?.fileUrl) {
+          formData.append('fileUrl', editingMagnet.fileUrl)
+        }
+
+        // Ссылка (если есть)
+        if (type === 'link' && linkUrl.trim()) {
+          formData.append('linkUrl', linkUrl.trim())
+        }
+
+        // Превью файл (если выбран)
+        if (previewFile) {
+          formData.append('previewFile', previewFile)
         }
 
         const response = await fetch(url, {
@@ -132,7 +169,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
         return
       }
 
-      // Для ссылки и услуги используем JSON
+      // Для остальных случаев используем JSON
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -173,6 +210,46 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     setHighlights([''])
     setTargetAudience('')
     setShowAdvanced(false)
+    setPreviewFile(null)
+    setPreviewDataUrl(null)
+    setExistingPreviewUrl(null)
+    setShowCropModal(false)
+    setTempImageForCrop(null)
+  }
+
+  // Обработчик выбора превью
+  const handlePreviewFileSelect = async (file: File, dataUrl: string) => {
+    // Проверяем, квадратное ли изображение
+    const isSquare = await isSquareImage(file)
+    
+    if (isSquare) {
+      // Квадратное - сразу устанавливаем
+      setPreviewFile(file)
+      setPreviewDataUrl(dataUrl)
+    } else {
+      // Не квадратное - показываем crop modal
+      setTempImageForCrop(dataUrl)
+      setShowCropModal(true)
+    }
+  }
+
+  // Обработчик завершения crop
+  const handleCropComplete = (croppedBlob: Blob) => {
+    // Конвертируем Blob в File
+    const croppedFile = new File([croppedBlob], 'preview.jpg', { type: 'image/jpeg' })
+    const croppedDataUrl = URL.createObjectURL(croppedBlob)
+    
+    setPreviewFile(croppedFile)
+    setPreviewDataUrl(croppedDataUrl)
+    setShowCropModal(false)
+    setTempImageForCrop(null)
+  }
+
+  // Обработчик удаления превью
+  const handlePreviewRemove = () => {
+    setPreviewFile(null)
+    setPreviewDataUrl(null)
+    setExistingPreviewUrl(null)
   }
   
   const addHighlight = () => {
@@ -392,6 +469,42 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
               />
             </div>
 
+            {/* Превью */}
+            <div className="space-y-3 border-t border-gray-200 pt-4">
+              <label className="text-sm font-medium text-gray-900">
+                Превью (опционально)
+              </label>
+              
+              {previewDataUrl || existingPreviewUrl ? (
+                <PreviewUploader
+                  onFileSelect={handlePreviewFileSelect}
+                  onFileRemove={handlePreviewRemove}
+                  currentPreview={previewDataUrl || existingPreviewUrl}
+                  disabled={isSaving}
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Загрузка кастомного */}
+                  <div>
+                    <PreviewUploader
+                      onFileSelect={handlePreviewFileSelect}
+                      onFileRemove={handlePreviewRemove}
+                      currentPreview={null}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  
+                  {/* Fallback preview */}
+                  <div>
+                    <div className="text-xs font-medium text-gray-700 mb-2 text-center">
+                      Или будет создано автоматически:
+                    </div>
+                    <FallbackPreview type={type} emoji={emoji} />
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Дополнительно (секция скрыта по умолчанию) */}
             <div className="border-t border-gray-200 pt-4">
               <button
@@ -488,6 +601,19 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
             </div>
           </div>
         </motion.div>
+
+        {/* Crop Modal */}
+        {showCropModal && tempImageForCrop && (
+          <CropModal
+            isOpen={showCropModal}
+            imageUrl={tempImageForCrop}
+            onCropComplete={handleCropComplete}
+            onClose={() => {
+              setShowCropModal(false)
+              setTempImageForCrop(null)
+            }}
+          />
+        )}
       </div>
     </AnimatePresence>
   )

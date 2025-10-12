@@ -1,41 +1,9 @@
 /**
- * Preview System - Центральная точка экспорта
- * Clean Architecture для генерации и управления превью лид-магнитов
+ * Preview System - Утилиты для отображения превью
+ * Экспортируем только утилиты (генераторы удалены)
  */
 
-// Core
-export { 
-  generatePreview, 
-  shouldGeneratePreview, 
-  previewGenerator 
-} from './core/generator'
-export type {
-  PreviewGenerationOptions,
-  PreviewGenerationResult,
-  PreviewProvider,
-  ResponsivePreviewUrls,
-  PreviewMetadata,
-  ContentInfo,
-  ImageOptimizationConfig,
-  OptimizedImageResult,
-  StorageUploadResult
-} from './core/types'
-
-// Providers
-export { PDFPreviewProvider } from './providers/pdf.provider'
-export { ImagePreviewProvider } from './providers/image.provider'
-export { VideoPreviewProvider } from './providers/video.provider'
-export { ServicePreviewProvider } from './providers/service.provider'
-export { BasePreviewProvider } from './providers/base.provider'
-
-// Storage
-export {
-  uploadPreviewToCloudinary,
-  deletePreviewFromCloudinary,
-  isCloudinaryAvailable
-} from './storage/cloudinary.storage'
-
-// Utils
+// Utils - константы и хелперы для отображения
 export {
   CONTENT_GRADIENTS,
   CONTENT_ICONS,
@@ -57,11 +25,12 @@ export {
   extractYouTubeVideoId,
   getYouTubeThumbnail,
   isYouTubeUrl,
-  isVimeoUrl
+  isVimeoUrl,
+  getLeadMagnetBadgeColor,
+  getLeadMagnetPreviewData
 } from './utils/helpers'
 
 export {
   parsePreviewUrls,
   getPreviewUrl
 } from './utils/parse-preview-urls'
-

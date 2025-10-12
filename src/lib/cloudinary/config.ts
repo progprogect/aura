@@ -230,6 +230,133 @@ export function generatePDFPreviewUrls(pdfUrl: string): {
 }
 
 /**
+ * Загрузка кастомного превью для лид-магнита
+ * @param file - Buffer или base64 изображения
+ * @param leadMagnetId - ID лид-магнита
+ * @returns URLs для всех размеров превью
+ */
+export async function uploadCustomPreview(
+  file: Buffer | string,
+  leadMagnetId: string
+): Promise<{ thumbnail: string; card: string; detail: string; publicId: string }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary не настроен. Проверьте переменные окружения.')
+  }
+
+  try {
+    // Конвертируем Buffer в base64 если нужно
+    const base64Image = Buffer.isBuffer(file) 
+      ? `data:image/png;base64,${file.toString('base64')}`
+      : file
+
+    const publicId = `preview_${leadMagnetId}_${Date.now()}`
+    
+    const result = await cloudinary.uploader.upload(base64Image, {
+      folder: 'aura/lead-magnets/custom-previews',
+      public_id: publicId,
+      transformation: [
+        { width: 800, height: 800, crop: 'fill', gravity: 'center' }, // Квадрат
+        { quality: 'auto:good' },
+        { fetch_format: 'auto' }
+      ],
+      overwrite: true,
+      invalidate: true
+    })
+
+    // Генерируем responsive URLs
+    const previewUrls = generatePreviewUrlsFromPublicId(result.public_id)
+
+    return {
+      ...previewUrls,
+      publicId: result.public_id
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки кастомного превью в Cloudinary:', error)
+    throw error
+  }
+}
+
+/**
+ * Загрузка fallback превью (сгенерированного через Canvas)
+ * @param buffer - Buffer PNG изображения
+ * @param leadMagnetId - ID лид-магнита
+ * @returns URLs для всех размеров превью
+ */
+export async function uploadFallbackPreview(
+  buffer: Buffer,
+  leadMagnetId: string
+): Promise<{ thumbnail: string; card: string; detail: string; publicId: string }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary не настроен. Проверьте переменные окружения.')
+  }
+
+  try {
+    const base64Image = `data:image/png;base64,${buffer.toString('base64')}`
+    const publicId = `fallback_${leadMagnetId}_${Date.now()}`
+    
+    const result = await cloudinary.uploader.upload(base64Image, {
+      folder: 'aura/lead-magnets/fallback-previews',
+      public_id: publicId,
+      transformation: [
+        { quality: 'auto:good' },
+        { fetch_format: 'auto' }
+      ],
+      overwrite: true,
+      invalidate: true
+    })
+
+    // Генерируем responsive URLs
+    const previewUrls = generatePreviewUrlsFromPublicId(result.public_id)
+
+    return {
+      ...previewUrls,
+      publicId: result.public_id
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки fallback превью в Cloudinary:', error)
+    throw error
+  }
+}
+
+/**
+ * Генерация responsive URLs из publicId
+ * @param publicId - Public ID изображения в Cloudinary
+ * @returns URLs для разных размеров
+ */
+export function generatePreviewUrlsFromPublicId(publicId: string): {
+  thumbnail: string
+  card: string
+  detail: string
+} {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME
+  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`
+
+  return {
+    thumbnail: `${baseUrl}/w_200,h_200,c_fill,q_80,f_auto/${publicId}`,
+    card: `${baseUrl}/w_400,h_400,c_fill,q_85,f_auto/${publicId}`,
+    detail: `${baseUrl}/w_800,h_800,c_fill,q_90,f_auto/${publicId}`
+  }
+}
+
+/**
+ * Удаление превью из Cloudinary
+ * @param publicId - Public ID изображения
+ */
+export async function deletePreview(publicId: string): Promise<void> {
+  if (!isCloudinaryConfigured()) {
+    return
+  }
+
+  try {
+    await cloudinary.uploader.destroy(publicId)
+    console.log(`[Cloudinary] Превью удалено: ${publicId}`)
+  } catch (error) {
+    console.error('Ошибка удаления превью из Cloudinary:', error)
+    // Не бросаем ошибку - удаление не критично
+  }
+}
+
+/**
  * Удаление изображения из Cloudinary
  */
 export async function deleteImage(publicId: string): Promise<void> {

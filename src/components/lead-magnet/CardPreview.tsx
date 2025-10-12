@@ -100,20 +100,19 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
     ? size === 'mobile' ? '80px' : size === 'responsive' ? '(max-width: 640px) 100vw, 400px' : '400px'
     : undefined
 
-  // Размеры в зависимости от размера карточки
+  // Квадратные размеры (aspect-square) в зависимости от размера карточки
   const dimensions = size === 'mobile' 
-    ? { width: 'w-20', height: 'h-20' }
+    ? 'w-20 h-20 aspect-square'
     : size === 'responsive'
-    ? { width: 'w-full', height: 'h-32 sm:h-36 md:h-40' }
-    : { width: 'w-full', height: 'h-40' }
+    ? 'w-full aspect-square'
+    : 'w-full aspect-square'
 
   // Если есть изображение - показываем его
   if (imageSource) {
     return (
       <div className={cn(
-        'relative overflow-hidden',
-        dimensions.width,
-        dimensions.height,
+        'relative overflow-hidden rounded-lg',
+        dimensions,
         className
       )}>
         {/* Скелетон загрузки */}
@@ -158,9 +157,8 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   if (isPDF) {
     return (
       <div className={cn(
-        'bg-gray-50 flex items-center justify-center',
-        dimensions.width,
-        dimensions.height,
+        'bg-gray-50 flex items-center justify-center rounded-lg',
+        dimensions,
         className
       )}>
         <div className="text-center">
@@ -182,9 +180,8 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
   if (isService) {
     return (
       <div className={cn(
-        'bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center',
-        dimensions.width,
-        dimensions.height,
+        'bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center rounded-lg',
+        dimensions,
         className
       )}>
         <div className="text-center text-white">
@@ -208,10 +205,9 @@ export function CardPreview({ leadMagnet, className, size = 'desktop' }: CardPre
 
   return (
     <div className={cn(
-      'bg-gradient-to-br flex items-center justify-center relative overflow-hidden',
+      'bg-gradient-to-br flex items-center justify-center relative overflow-hidden rounded-lg',
       gradient,
-      dimensions.width,
-      dimensions.height,
+      dimensions,
       className
     )}>
       {/* Декоративные элементы для красоты */}

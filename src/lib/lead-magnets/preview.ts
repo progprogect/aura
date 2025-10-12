@@ -1,312 +1,138 @@
 /**
- * Утилиты для генерации визуальных превью лид-магнитов
- * Современный UX 2025: градиенты, иконки, fallbacks
+ * Preview utilities - экспорт для обратной совместимости
+ * Re-export функций из preview/utils
  */
 
-import { 
-  FileText, 
-  FileSpreadsheet, 
-  FileImage, 
-  FileVideo,
-  File,
-  Link as LinkIcon,
-  Users,
-  Clock,
-  Download
-} from 'lucide-react'
+import { FileText, Image as ImageIcon, Link as LinkIcon, Gift, LucideIcon } from 'lucide-react'
+import type { LeadMagnetType } from '@/types/lead-magnet'
 
-// Градиенты для превью по типу ресурса (СВЕТЛЫЕ ПАСТЕЛЬНЫЕ)
-export const PREVIEW_GRADIENTS = {
-  file: {
-    pdf: 'from-red-300 to-orange-300',
-    doc: 'from-blue-300 to-cyan-300',
-    docx: 'from-blue-300 to-cyan-300',
-    xls: 'from-green-300 to-emerald-300',
-    xlsx: 'from-green-300 to-emerald-300',
-    ppt: 'from-orange-300 to-amber-300',
-    pptx: 'from-orange-300 to-amber-300',
-    jpg: 'from-purple-300 to-pink-300',
-    jpeg: 'from-purple-300 to-pink-300',
-    png: 'from-purple-300 to-pink-300',
-    gif: 'from-purple-300 to-pink-300',
-    mp4: 'from-indigo-300 to-purple-300',
-    avi: 'from-indigo-300 to-purple-300',
-    mov: 'from-indigo-300 to-purple-300',
-    default: 'from-slate-300 to-gray-300'
-  },
-  link: 'from-purple-300 to-pink-300',
-  service: 'from-indigo-300 to-blue-300'
-} as const
+// Re-export основных утилит
+export {
+  getFileExtension,
+  isYouTubeUrl,
+  getYouTubeThumbnail,
+  getLeadMagnetBadgeColor,
+  getLeadMagnetPreviewData,
+  getFileTypeByExtension as getFileType,
+  getContentIcon,
+  getContentGradient
+} from './preview/utils/helpers'
 
-// Иконки файлов по расширению
-export const FILE_ICONS = {
-  'pdf': FileText,
-  'doc': FileText,
-  'docx': FileText,
-  'xls': FileSpreadsheet,
-  'xlsx': FileSpreadsheet,
-  'ppt': FileText,
-  'pptx': FileText,
-  'jpg': FileImage,
-  'jpeg': FileImage,
-  'png': FileImage,
-  'gif': FileImage,
-  'mp4': FileVideo,
-  'avi': FileVideo,
-  'mov': FileVideo,
-  'default': File
-} as const
-
-// Иконки для типов лид-магнитов
-export const TYPE_ICONS = {
-  file: File,
-  link: LinkIcon,
-  service: Users
-} as const
-
-// Получить градиент для превью
-export function getPreviewGradient(type: 'file' | 'link' | 'service', fileExtension?: string): string {
-  if (type === 'file' && fileExtension) {
-    const ext = fileExtension.toLowerCase() as keyof typeof PREVIEW_GRADIENTS.file
-    return PREVIEW_GRADIENTS.file[ext] || PREVIEW_GRADIENTS.file.default
-  }
-  
-  if (type === 'link') return PREVIEW_GRADIENTS.link
-  if (type === 'service') return PREVIEW_GRADIENTS.service
-  
-  return PREVIEW_GRADIENTS.file.default
-}
-
-// Получить иконку для файла
-export function getFileIcon(fileExtension?: string) {
-  if (!fileExtension) return FILE_ICONS.default
-  
-  const ext = fileExtension.toLowerCase() as keyof typeof FILE_ICONS
-  return FILE_ICONS[ext] || FILE_ICONS.default
-}
-
-// Получить расширение файла из URL
-export function getFileExtension(url?: string | null): string | undefined {
-  if (!url) return undefined
-  
-  try {
-    const pathname = new URL(url).pathname
-    const extension = pathname.split('.').pop()
-    return extension?.toLowerCase()
-  } catch {
-    return undefined
+/**
+ * Получить градиент для превью по типу (Tailwind classes)
+ */
+export function getPreviewGradient(type: string, fileExtension?: string): string {
+  // Используем getContentGradient как base, но возвращаем Tailwind классы
+  switch (type) {
+    case 'file':
+      if (fileExtension === 'pdf') {
+        return 'from-red-500 to-orange-500'
+      }
+      return 'from-blue-500 to-indigo-500'
+    case 'link':
+      return 'from-purple-500 to-pink-500'
+    case 'service':
+      return 'from-green-500 to-emerald-500'
+    default:
+      return 'from-gray-500 to-gray-600'
   }
 }
 
-// Получить тип файла по расширению
-export function getFileType(extension?: string): string {
-  if (!extension) return 'Файл'
-  
-  const typeMap: Record<string, string> = {
-    pdf: 'PDF',
-    doc: 'Word',
-    docx: 'Word',
-    xls: 'Excel',
-    xlsx: 'Excel',
-    ppt: 'PowerPoint',
-    pptx: 'PowerPoint',
-    jpg: 'Изображение',
-    jpeg: 'Изображение',
-    png: 'Изображение',
-    gif: 'Изображение',
-    mp4: 'Видео',
-    avi: 'Видео',
-    mov: 'Видео'
+/**
+ * Получить иконку файла по расширению
+ */
+export function getFileIcon(fileExtension?: string): LucideIcon {
+  if (!fileExtension) return FileText
+
+  switch (fileExtension) {
+    case 'pdf':
+      return FileText
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'webp':
+    case 'gif':
+      return ImageIcon
+    default:
+      return FileText
   }
-  
-  return typeMap[extension.toLowerCase()] || 'Файл'
 }
 
-// Форматирование метаинформации для карточки
-export function formatCardMeta(type: 'file' | 'link' | 'service', fileSize?: string | null, downloadCount?: number, fileExtension?: string): string {
+/**
+ * Форматировать мета-информацию для карточки
+ */
+export function formatCardMeta(
+  type: LeadMagnetType,
+  fileSize?: string | null,
+  downloadCount?: number,
+  fileExtension?: string
+): string {
   const parts: string[] = []
-  
+
+  // Тип
   if (type === 'file') {
-    const fileType = getFileType(fileExtension)
-    parts.push(fileType)
-    
-    if (fileSize) {
-      parts.push(fileSize)
+    parts.push('Файл')
+    if (fileExtension) {
+      parts.push(fileExtension.toUpperCase())
     }
   } else if (type === 'link') {
     parts.push('Ссылка')
   } else if (type === 'service') {
     parts.push('Услуга')
   }
-  
-  if (downloadCount && downloadCount > 0) {
-    if (downloadCount === 1) {
-      parts.push('1 скачивание')
-    } else if (downloadCount < 5) {
-      parts.push(`${downloadCount} скачивания`)
-    } else {
-      parts.push(`${downloadCount} скачиваний`)
-    }
+
+  // Размер файла
+  if (fileSize) {
+    parts.push(fileSize)
   }
-  
+
+  // Скачивания
+  if (downloadCount && downloadCount > 0) {
+    parts.push(`${downloadCount} скачиваний`)
+  }
+
   return parts.join(' • ')
 }
 
-// Получить цвет для бейджа аудитории
-export function getAudienceBadgeColor(audience?: string | null): string {
-  if (!audience) return 'bg-gray-100 text-gray-700'
+/**
+ * Получить цвет badge для аудитории
+ */
+export function getAudienceBadgeColor(targetAudience?: string | null): string {
+  if (!targetAudience) return 'bg-gray-100 text-gray-700'
   
-  const lowerAudience = audience.toLowerCase()
+  const lower = targetAudience.toLowerCase()
   
-  if (lowerAudience.includes('нович') || lowerAudience.includes('начина')) {
+  if (lower.includes('новичк') || lower.includes('начинающ')) {
     return 'bg-green-100 text-green-700'
   }
   
-  if (lowerAudience.includes('продвинут') || lowerAudience.includes('эксперт')) {
+  if (lower.includes('продвин') || lower.includes('профи')) {
     return 'bg-purple-100 text-purple-700'
   }
   
-  if (lowerAudience.includes('средн')) {
-    return 'bg-blue-100 text-blue-700'
-  }
-  
-  return 'bg-gray-100 text-gray-700'
+  return 'bg-blue-100 text-blue-700'
 }
 
-// Проверить, нужно ли показывать social proof
-export function shouldShowSocialProof(downloadCount?: number): boolean {
-  return (downloadCount || 0) >= 10
-}
-
-// Форматировать количество скачиваний для социального доказательства
-export function formatSocialProof(downloadCount: number): string {
-  if (downloadCount >= 1000) {
-    return `${Math.floor(downloadCount / 1000)}k+ скачиваний`
-  }
-  
-  if (downloadCount >= 100) {
-    return `${Math.floor(downloadCount / 100) * 100}+ скачиваний`
-  }
-  
-  if (downloadCount >= 10) {
-    return `${downloadCount}+ скачиваний`
-  }
-  
-  return `${downloadCount} скачиваний`
-}
-
-// Получить данные превью для лид-магнита (fallback для случаев когда превью не генерируется)
-export function getLeadMagnetPreviewData(leadMagnet: {
-  type: 'file' | 'link' | 'service'
-  fileUrl?: string | null
-  linkUrl?: string | null
-  ogImage?: string | null
-  emoji?: string | null
-  title?: string
-}) {
-  // Для файлов используем расширение из URL или определяем по сервису
-  let fileExtension = getFileExtension(leadMagnet.fileUrl)
-  
-  // Если нет расширения, но это популярный сервис изображений
-  if (!fileExtension && leadMagnet.fileUrl) {
-    const url = leadMagnet.fileUrl.toLowerCase()
-    if (url.includes('unsplash.com') || url.includes('pixabay.com') || url.includes('pexels.com')) {
-      fileExtension = '.jpg'
-    }
-  }
-  
-  const gradient = getPreviewGradient(leadMagnet.type, fileExtension)
-  const IconComponent = getFileIcon(fileExtension)
-  const typeLabel = getFileType(fileExtension)
-  
-  return {
-    gradient,
-    icon: leadMagnet.emoji || '✨',
-    typeLabel: leadMagnet.type === 'file' ? typeLabel : leadMagnet.type === 'link' ? 'Ссылка' : 'Сервис',
-    fileExtension
-  }
-}
-
-// Получить цвет для бейджа типа лид-магнита
-export function getLeadMagnetBadgeColor(type: 'file' | 'link' | 'service'): string {
-  switch (type) {
-    case 'file':
-      return 'bg-blue-100 text-blue-800'
-    case 'link':
-      return 'bg-purple-100 text-purple-800'
-    case 'service':
-      return 'bg-green-100 text-green-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
-  }
-}
-
-// Извлечь YouTube video ID из URL
-export function extractYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
-    /youtube\.com\/embed\/([^&\n?#]+)/,
-  ]
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match && match[1]) {
-      return match[1]
-    }
-  }
-  
-  return null
-}
-
-// Получить YouTube thumbnail URL
-export function getYouTubeThumbnail(url: string): string | null {
-  const videoId = extractYouTubeVideoId(url)
-  if (!videoId) return null
-  
-  // maxresdefault - лучшее качество (1280x720)
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-}
-
-// Проверить является ли URL YouTube видео
-export function isYouTubeUrl(url: string): boolean {
-  return url.includes('youtube.com') || url.includes('youtu.be')
-}
-
-// Проверить является ли URL Vimeo видео
-export function isVimeoUrl(url: string): boolean {
-  return url.includes('vimeo.com')
-}
-
-// Получить умные бейджи для лид-магнита
+/**
+ * Получить value badges для карточки
+ */
 export function getValueBadges(leadMagnet: {
-  downloadCount?: number
-  createdAt?: Date | string
+  type: LeadMagnetType
   targetAudience?: string | null
+  downloadCount?: number
 }): Array<{ label: string; color: string }> {
   const badges: Array<{ label: string; color: string }> = []
-  
-  // Популярное (>100 скачиваний)
+
+  // Популярный (если много скачиваний)
   if (leadMagnet.downloadCount && leadMagnet.downloadCount > 100) {
-    badges.push({ 
-      label: '🔥 Популярное', 
-      color: 'bg-orange-100 text-orange-800' 
+    badges.push({
+      label: '🔥 Популярно',
+      color: 'bg-orange-500 text-white'
     })
   }
-  
-  // Новое (<7 дней)
-  if (leadMagnet.createdAt) {
-    const createdDate = typeof leadMagnet.createdAt === 'string' 
-      ? new Date(leadMagnet.createdAt) 
-      : leadMagnet.createdAt
-    const daysSinceCreation = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
-    
-    if (daysSinceCreation < 7) {
-      badges.push({ 
-        label: '✨ Новое', 
-        color: 'bg-green-100 text-green-800' 
-      })
-    }
-  }
+
+  // Новое (можно добавить логику по дате создания)
   
   return badges
 }
+
