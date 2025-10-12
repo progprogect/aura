@@ -14,7 +14,7 @@ import { PreviewUploader } from './PreviewUploader'
 import { FallbackPreview } from './FallbackPreview'
 import { CropModal } from './CropModal'
 import { isSquareImage, getPreviewUrl } from '@/lib/lead-magnets/preview-utils'
-import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
+import { LEAD_MAGNET_LIMITS, DEFAULT_EMOJI } from '@/lib/lead-magnets/constants'
 import type { EditableLeadMagnet } from '@/types/lead-magnet'
 
 interface LeadMagnetModalProps {
@@ -29,7 +29,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [linkUrl, setLinkUrl] = useState('')
-  const [emoji, setEmoji] = useState('🎁')
+  const [emoji, setEmoji] = useState<string>(DEFAULT_EMOJI)
   const [file, setFile] = useState<File | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -123,7 +123,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       const cleanHighlights = highlights.filter(h => h.trim() !== '')
       
       // Используем FormData если есть file или previewFile
-      const useFormData = (type === 'file' && file) || previewFile
+      const useFormData = (type === 'file' && file && file.size > 0) || (previewFile && previewFile.size > 0)
       
       if (useFormData) {
         const formData = new FormData()
@@ -138,8 +138,8 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           formData.append('targetAudience', targetAudience.trim())
         }
 
-        // Файл лид-магнита (если есть)
-        if (type === 'file' && file) {
+        // Файл лид-магнита (только если не пустой)
+        if (type === 'file' && file && file.size > 0) {
           formData.append('file', file)
         } else if (type === 'file' && editingMagnet?.fileUrl) {
           formData.append('fileUrl', editingMagnet.fileUrl)
@@ -150,8 +150,8 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           formData.append('linkUrl', linkUrl.trim())
         }
 
-        // Превью файл (если выбран)
-        if (previewFile) {
+        // Превью файл (только если не пустой)
+        if (previewFile && previewFile.size > 0) {
           formData.append('previewFile', previewFile)
         }
 
@@ -206,7 +206,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     setTitle('')
     setDescription('')
     setLinkUrl('')
-    setEmoji('🎁')
+    setEmoji(DEFAULT_EMOJI)
     setFile(null)
     setHighlights([''])
     setTargetAudience('')
@@ -273,8 +273,16 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     const selectedFile = e.target.files?.[0]
     if (!selectedFile) return
 
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      alert('Файл слишком большой (макс 10MB)')
+    // Проверка на пустой файл
+    if (selectedFile.size === 0) {
+      alert('Файл пустой. Выберите корректный файл')
+      return
+    }
+
+    // Проверка размера
+    if (selectedFile.size > LEAD_MAGNET_LIMITS.MAX_FILE_SIZE) {
+      const maxSizeMB = (LEAD_MAGNET_LIMITS.MAX_FILE_SIZE / 1024 / 1024).toFixed(0)
+      alert(`Файл слишком большой (макс ${maxSizeMB}MB)`)
       return
     }
 
@@ -400,7 +408,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
             {type === 'file' && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900">
-                  Файл (PDF, макс 10MB)
+                  Файл (PDF, макс {(LEAD_MAGNET_LIMITS.MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB)
                 </label>
                 <input
                   ref={fileInputRef}

@@ -34,6 +34,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Проверка на пустой файл
+    if (file.size === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Файл пустой' },
+        { status: 400 }
+      )
+    }
+
     if (type !== 'photo' && type !== 'video') {
       return NextResponse.json(
         { success: false, error: 'Неверный тип файла' },

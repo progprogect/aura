@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
 
       let uploadedFileUrl: string | undefined = fileUrl
 
-      // Загружаем файл лид-магнита (если есть)
-      if (file) {
+      // Загружаем файл лид-магнита (если есть и не пустой)
+      if (file && file.size > 0) {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
         const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
@@ -160,8 +160,8 @@ export async function POST(request: NextRequest) {
         targetAudience,
       }
 
-      // Обработка превью
-      if (previewFile) {
+      // Обработка превью (только если файл не пустой)
+      if (previewFile && previewFile.size > 0) {
         // Кастомное превью загружено
         console.log('[Lead Magnet] Загрузка кастомного превью')
         try {
