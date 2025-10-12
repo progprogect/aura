@@ -8,6 +8,7 @@ import { SMSVerificationService } from './business-logic'
 import { generateSlug } from '@/lib/utils/slug'
 import { generateSessionToken } from './utils'
 import { normalizePhoneNumber } from '@/lib/phone/country-codes'
+import { PointsService } from '@/lib/points/points-service'
 
 export type UserRole = 'user' | 'specialist'
 
@@ -175,6 +176,15 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
         phone: normalizedPhone
       }
     })
+    
+    // 3.5. Начисляем бонусные баллы за регистрацию
+    try {
+      await PointsService.grantRegistrationBonus(user.id)
+      console.log(`[unified-auth] Начислено 50 бонусных баллов пользователю ${user.id}`)
+    } catch (error) {
+      console.error('[unified-auth] Ошибка начисления бонусов:', error)
+      // Не прерываем регистрацию из-за ошибки начисления бонусов
+    }
     
     // 4. Если роль specialist - создаём профиль специалиста
     let createdSlug: string | undefined

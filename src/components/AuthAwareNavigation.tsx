@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { LogOut, User } from 'lucide-react'
+import { BalanceChip } from '@/components/points/BalanceChip'
 
 export function AuthAwareNavigation() {
   const pathname = usePathname()
@@ -77,6 +78,7 @@ export function AuthAwareNavigation() {
               <div className="flex items-center space-x-3">
                 {isAuthenticated ? (
                   <>
+                    <BalanceChip />
                     <Link
                       href="/profile"
                       className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"

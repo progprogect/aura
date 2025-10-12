@@ -16,6 +16,7 @@ import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { LogoutButton } from '@/components/profile/LogoutButton'
+import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
 
 async function getUserData() {
@@ -381,6 +382,9 @@ export default async function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Баланс баллов */}
+            <BalanceWidgetWrapper />
 
             {/* Быстрые действия */}
             <QuickActions 

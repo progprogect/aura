@@ -30,6 +30,14 @@ model User {
   authSessions   AuthSession[]
   socialAccounts SocialAccount[]
 
+  // Балансы (система баллов)
+  balance        Decimal   @default(0) @db.Decimal(15, 2)
+  bonusBalance   Decimal   @default(0) @db.Decimal(15, 2)
+  bonusExpiresAt DateTime?
+
+  // Связи
+  transactions Transaction[]
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -473,4 +481,47 @@ model ChatAnalytics {
 
   @@unique([date, hour])
   @@index([date])
+}
+
+// ========================================
+// СИСТЕМА БАЛЛОВ (ВНУТРЕННЯЯ ВАЛЮТА)
+// ========================================
+
+model Transaction {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        String // "bonus_registration", "purchase", "withdrawal", "bonus_expired", "bonus_reward", "deposit", "refund"
+  amount      Decimal @db.Decimal(15, 2)
+  balanceType String // "balance" | "bonusBalance"
+
+  balanceBefore Decimal @db.Decimal(15, 2)
+  balanceAfter  Decimal @db.Decimal(15, 2)
+
+  description String? // Человекочитаемое описание
+  metadata    Json?   @db.JsonB // Доп. данные: { leadMagnetId, productId, etc }
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Currency {
+  id   String @id @default(cuid())
+  code String @unique // "BYN", "RUB", "USD", "EUR"
+  name String // "Белорусский рубль"
+
+  rateToPoints Decimal @db.Decimal(10, 4) // 1 BYN = X баллов (пока 1:1)
+
+  isActive  Boolean @default(true)
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
 }
