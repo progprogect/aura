@@ -23,12 +23,14 @@ export function FallbackPreview({ type, emoji, className = '' }: FallbackPreview
       style={{ background: gradient }}
     >
       {/* Emoji */}
-      <div className="text-center">
+      <div className="flex items-center justify-center w-full h-full">
         <div 
-          className="text-9xl sm:text-[10rem] drop-shadow-lg"
+          className="text-8xl sm:text-9xl"
           style={{ 
-            filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2))',
-            color: 'rgba(255, 255, 255, 0.95)'
+            filter: 'drop-shadow(0 5px 15px rgba(0, 0, 0, 0.15))',
+            color: 'rgba(255, 255, 255, 0.95)',
+            lineHeight: 1,
+            transform: 'translateY(-2px)' // Микро-корректировка для визуального центрирования
           }}
         >
           {emoji}

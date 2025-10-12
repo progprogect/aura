@@ -53,17 +53,21 @@ export async function generateFallbackPreview(
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
 
-  // Рисуем emoji в центре
+  // Рисуем emoji в центре с точным позиционированием
   ctx.font = `${PREVIEW_SIZES.EMOJI_FONT}px ${CANVAS_CONFIG.FONT_FAMILY}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillStyle = `rgba(255, 255, 255, ${CANVAS_CONFIG.EMOJI_OPACITY})`
   
+  // Точные координаты центра (целые числа для четкости)
+  const centerX = Math.round(size / 2)
+  const centerY = Math.round(size / 2)
+  
   // Рисуем emoji с тенью для глубины
   ctx.shadowColor = CANVAS_CONFIG.SHADOW_COLOR
   ctx.shadowBlur = CANVAS_CONFIG.SHADOW_BLUR
   ctx.shadowOffsetY = CANVAS_CONFIG.SHADOW_OFFSET_Y
-  ctx.fillText(emoji, size / 2, size / 2)
+  ctx.fillText(emoji, centerX, centerY)
 
   // Экспортируем в PNG
   const buffer = canvas.toBuffer('image/png')
@@ -101,10 +105,14 @@ export function generateFallbackPreviewSync(
   ctx.textBaseline = 'middle'
   ctx.fillStyle = `rgba(255, 255, 255, ${CANVAS_CONFIG.EMOJI_OPACITY})`
   
+  // Точные координаты центра (целые числа для четкости)
+  const centerX = Math.round(size / 2)
+  const centerY = Math.round(size / 2)
+  
   ctx.shadowColor = CANVAS_CONFIG.SHADOW_COLOR
   ctx.shadowBlur = CANVAS_CONFIG.SHADOW_BLUR
   ctx.shadowOffsetY = CANVAS_CONFIG.SHADOW_OFFSET_Y
-  ctx.fillText(emoji, size / 2, size / 2)
+  ctx.fillText(emoji, centerX, centerY)
 
   const buffer = canvas.toBuffer('image/png')
 

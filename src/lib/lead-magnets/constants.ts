@@ -14,7 +14,7 @@ import type { LeadMagnetType } from '@/types/lead-magnet'
  */
 export const PREVIEW_SIZES = {
   FALLBACK: 800,        // Квадрат для fallback генерации
-  EMOJI_FONT: 240,      // Размер emoji на fallback
+  EMOJI_FONT: 200,      // Размер emoji на fallback (уменьшено для лучшего выравнивания)
   THUMBNAIL: 200,       // Размер thumbnail
   CARD: 400,           // Размер для карточек
   DETAIL: 800          // Размер для детальной страницы
@@ -52,9 +52,9 @@ export const FALLBACK_GRADIENT_CLASSES: Record<LeadMagnetType, string> = {
  * Canvas настройки для fallback
  */
 export const CANVAS_CONFIG = {
-  SHADOW_COLOR: 'rgba(0, 0, 0, 0.2)',
-  SHADOW_BLUR: 20,
-  SHADOW_OFFSET_Y: 10,
+  SHADOW_COLOR: 'rgba(0, 0, 0, 0.15)',
+  SHADOW_BLUR: 15,
+  SHADOW_OFFSET_Y: 5,      // Уменьшено для лучшего центрирования
   EMOJI_OPACITY: 0.95,
   FONT_FAMILY: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif'
 } as const
