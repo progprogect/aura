@@ -55,11 +55,17 @@ export function HeroPreview({ leadMagnet }: HeroPreviewProps) {
         {leadMagnet.type === 'file' && (
           <div className="text-center z-10">
             <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 md:p-8">
-              <FileIcon className="w-20 h-20 md:w-24 md:h-24 text-white mb-4 mx-auto drop-shadow-lg" />
+              {leadMagnet.emoji ? (
+                <div className="text-6xl md:text-7xl mb-4 drop-shadow-lg">
+                  {leadMagnet.emoji}
+                </div>
+              ) : (
+                <FileIcon className="w-20 h-20 md:w-24 md:h-24 text-white mb-4 mx-auto drop-shadow-lg" />
+              )}
               <div className="text-white text-xl md:text-2xl font-semibold drop-shadow">
                 {fileType}
               </div>
-              {fileExtension && (
+              {!leadMagnet.emoji && fileExtension && (
                 <div className="text-white/80 text-sm md:text-base mt-2">
                   {fileExtension.toUpperCase()}
                 </div>
