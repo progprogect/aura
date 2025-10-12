@@ -29,7 +29,7 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
   const fileExtension = getFileExtension(leadMagnet.fileUrl)
   // Для файлов с emoji не показываем техническую информацию
   const metaText = leadMagnet.emoji 
-    ? formatCardMeta(leadMagnet.type, null, leadMagnet.downloadCount, null)
+    ? formatCardMeta(leadMagnet.type, undefined, leadMagnet.downloadCount, undefined)
     : formatCardMeta(leadMagnet.type, leadMagnet.fileSize, leadMagnet.downloadCount, fileExtension)
   const audienceBadgeColor = getAudienceBadgeColor(leadMagnet.targetAudience)
   const valueBadges = getValueBadges(leadMagnet)
