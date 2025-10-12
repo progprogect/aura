@@ -30,6 +30,7 @@ import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import { SpecialistServices } from './SpecialistServices'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
+import type { Service } from '@/types/service'
 
 interface SpecialistProfileWithEditProps {
   isOwner: boolean
@@ -107,17 +108,7 @@ interface SpecialistProfileWithEditProps {
       emoji: string
       slug?: string | null
     }>
-    services?: Array<{
-      id: string
-      title: string
-      description: string
-      slug: string
-      price: number
-      currency: string
-      emoji: string
-      highlights: string[]
-      deliveryDays?: number | null
-    }>
+    services?: Service[]
   }
 }
 
@@ -479,7 +470,7 @@ export function SpecialistProfileWithEdit({
                 <span className="text-base sm:text-xl">Услуги</span>
               </h2>
               <SpecialistServices
-                services={data.services as any}
+                services={data.services}
                 specialistSlug={data.slug}
               />
             </div>
