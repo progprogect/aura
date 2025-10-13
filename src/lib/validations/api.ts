@@ -6,7 +6,7 @@ export const GetSpecialistsQuerySchema = z.object({
   experience: z.enum(['0-2', '2-5', '5+', 'any']).optional(),
   format: z.string().optional(), // Будет парситься как массив
   verified: z.enum(['true', 'false']).optional(),
-  sortBy: z.enum(['relevance', 'rating', 'experience', 'price']).optional(),
+  sortBy: z.enum(['relevance', 'rating', 'experience', 'price', 'newest', 'oldest']).optional(),
   search: z.string().max(100).optional(),
   page: z.coerce.number().min(1).max(100).optional(),
   limit: z.coerce.number().min(1).max(50).optional(),
