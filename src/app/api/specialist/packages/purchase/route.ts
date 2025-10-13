@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Списываем баллы
     const result = await PointsService.deductPoints(
       user.id,
-      pkg.price,
+      new Decimal(pkg.price),
       'package_purchase',
       `Покупка пакета ${pkg.name}`
     )
