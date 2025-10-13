@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверяем баланс
-    const balance = await PointsService.getUserBalance(user.id)
+    const balance = await PointsService.getBalance(user.id)
     if (balance.total < pkg.price) {
       return NextResponse.json({ 
         error: 'Недостаточно баллов',
