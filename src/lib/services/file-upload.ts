@@ -77,11 +77,19 @@ export class FileUploadService {
     // Загружаем через Cloudinary напрямую
     const formData = new FormData()
     formData.append('file', base64)
-    formData.append('upload_preset', 'aura_upload') // Используем unsigned preset
+    formData.append('api_key', apiKey)
+    formData.append('timestamp', Math.round(Date.now() / 1000).toString())
     
     if (options.folder) {
       formData.append('folder', options.folder)
     }
+    
+    // Генерируем подпись для подписанной загрузки
+    const timestamp = Math.round(Date.now() / 1000)
+    const folderParam = options.folder ? `folder=${options.folder}&` : ''
+    const params = `${folderParam}timestamp=${timestamp}${apiSecret}`
+    const signature = require('crypto').createHash('sha1').update(params).digest('hex')
+    formData.append('signature', signature)
 
     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
       method: 'POST',
@@ -131,11 +139,18 @@ export class FileUploadService {
     const buffer = Buffer.from(arrayBuffer)
     const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
 
-    // Загружаем через Cloudinary напрямую
+    // Загружаем через Cloudinary с подписанной загрузкой
     const formData = new FormData()
     formData.append('file', base64)
-    formData.append('upload_preset', 'aura_upload') // Используем unsigned preset
+    formData.append('api_key', apiKey)
+    formData.append('timestamp', Math.round(Date.now() / 1000).toString())
     formData.append('folder', 'aura/order-results')
+    
+    // Генерируем подпись для подписанной загрузки
+    const timestamp = Math.round(Date.now() / 1000)
+    const params = `folder=aura/order-results&timestamp=${timestamp}${apiSecret}`
+    const signature = require('crypto').createHash('sha1').update(params).digest('hex')
+    formData.append('signature', signature)
 
     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
       method: 'POST',
