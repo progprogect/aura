@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clock, CheckCircle, XCircle, AlertTriangle, ShoppingCart } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -223,16 +223,28 @@ export function PurchasesList() {
       </div>
 
       {/* Фильтры */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="all">Все ({stats.total})</TabsTrigger>
-          <TabsTrigger value="paid">В работе ({stats.paid})</TabsTrigger>
-          <TabsTrigger value="completed">Завершено ({stats.completed})</TabsTrigger>
-          <TabsTrigger value="cancelled">Отменено ({stats.cancelled})</TabsTrigger>
-          <TabsTrigger value="disputed">Споры ({stats.disputed})</TabsTrigger>
-        </TabsList>
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: 'all', label: 'Все', count: stats.total },
+            { value: 'paid', label: 'В работе', count: stats.paid },
+            { value: 'completed', label: 'Завершено', count: stats.completed },
+            { value: 'cancelled', label: 'Отменено', count: stats.cancelled },
+            { value: 'disputed', label: 'Споры', count: stats.disputed }
+          ].map(tab => (
+            <Button
+              key={tab.value}
+              variant={activeTab === tab.value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setActiveTab(tab.value)}
+              className="text-xs"
+            >
+              {tab.label} ({tab.count})
+            </Button>
+          ))}
+        </div>
 
-        <TabsContent value={activeTab} className="space-y-4">
+        <div className="space-y-4">
           {orders.map((order) => {
             const statusConfig = STATUS_CONFIG[order.status as keyof typeof STATUS_CONFIG]
             const StatusIcon = statusConfig?.icon || Clock
@@ -329,8 +341,8 @@ export function PurchasesList() {
               </Card>
             )
           })}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }

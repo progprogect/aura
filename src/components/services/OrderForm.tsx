@@ -289,7 +289,7 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
               ? 'bg-green-600 hover:bg-green-700' 
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
-          disabled={isSubmitting || (orderMode === 'paid' && userBalance && userBalance.total < servicePrice)}
+          disabled={isSubmitting || (orderMode === 'paid' && userBalance ? userBalance.total < servicePrice : false)}
         >
           {isSubmitting 
             ? 'Обработка...' 
