@@ -12,6 +12,7 @@ import { WORK_FORMAT_LABELS } from '@/lib/constants'
 import { ContactsModal } from './ContactsModal'
 
 export interface SpecialistHeroProps {
+  specialistId: string
   firstName: string | null
   lastName: string | null
   avatar?: string | null
@@ -35,6 +36,7 @@ export interface SpecialistHeroProps {
 }
 
 export function SpecialistHero({
+  specialistId,
   firstName,
   lastName,
   avatar,
@@ -65,7 +67,23 @@ export function SpecialistHero({
   }
 
   // Показать контакты
-  const handleShowContactsClick = () => {
+  const handleShowContactsClick = async () => {
+    // Отслеживаем просмотр контактов
+    try {
+      await fetch('/api/analytics/contact-view', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          specialistId,
+          contactType: 'modal_open'
+        }),
+      })
+    } catch (error) {
+      console.error('Ошибка отслеживания просмотра контактов:', error)
+    }
+    
     setIsContactsModalOpen(true)
   }
 

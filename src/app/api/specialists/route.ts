@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { GetSpecialistsQuerySchema } from '@/lib/validations/api'
+import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 
 // API routes должны быть динамическими
 export const dynamic = 'force-dynamic'
@@ -149,43 +150,34 @@ export async function GET(request: NextRequest) {
         break
     }
     
-    // Получение специалистов с пагинацией (Unified)
-    const [specialistProfiles, totalCount] = await Promise.all([
-      prisma.specialistProfile.findMany({
-        where,
-        orderBy,
-        skip: (finalPage - 1) * finalLimit,
-        take: finalLimit,
-        select: {
-          id: true,
-          slug: true,
-          category: true,
-          specializations: true,
-          tagline: true,
-          about: true,
-          city: true,
-          country: true,
-          workFormats: true,
-          yearsOfPractice: true,
-          priceFrom: true,
-          priceTo: true,
-          currency: true,
-          priceDescription: true,
-          verified: true,
-          profileViews: true,
-          customFields: true,
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatar: true,
-            }
+    // Получение только видимых специалистов (с баллами > 0)
+    const allVisibleSpecialists = await SpecialistLimitsService.getVisibleSpecialists(where)
+    
+    // Применяем сортировку
+    const sortedSpecialists = allVisibleSpecialists.sort((a, b) => {
+      switch (finalSortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        case 'rating':
+          return (b.profileViews || 0) - (a.profileViews || 0)
+        case 'price':
+          return (a.priceFrom || 0) - (b.priceFrom || 0)
+        case 'relevance':
+        default:
+          // Сначала верифицированные, потом по просмотрам
+          if (a.verified !== b.verified) {
+            return a.verified ? -1 : 1
           }
-        }
-      }),
-      prisma.specialistProfile.count({ where })
-    ])
+          return (b.profileViews || 0) - (a.profileViews || 0)
+      }
+    })
+    
+    // Применяем пагинацию
+    const totalCount = sortedSpecialists.length
+    const startIndex = (finalPage - 1) * finalLimit
+    const specialistProfiles = sortedSpecialists.slice(startIndex, startIndex + finalLimit)
     
     // Подготовка данных для фронтенда (используем трансформер)
     const formattedSpecialists = specialistProfiles.map(profile => ({

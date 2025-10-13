@@ -12,7 +12,10 @@ export type TransactionType =
   | 'service_purchase'
   | 'service_completion'
   | 'auto_completion'
-  | 'dispute_refund';
+  | 'dispute_refund'
+  | 'contact_view'
+  | 'request_received'
+  | 'package_purchase';
 
 /**
  * Тип баланса

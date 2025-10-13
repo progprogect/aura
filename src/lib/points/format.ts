@@ -6,6 +6,8 @@ import {
   ArrowDownCircle,
   Timer,
   Award,
+  Eye,
+  MessageSquare,
 } from 'lucide-react';
 import { TransactionType } from '@/types/points';
 
@@ -48,6 +50,9 @@ export function getTransactionLabel(type: TransactionType): string {
     service_completion: 'Завершение услуги',
     auto_completion: 'Автозавершение услуги',
     dispute_refund: 'Возврат по спору',
+    contact_view: 'Просмотр контакта',
+    request_received: 'Получение заявки',
+    package_purchase: 'Покупка пакета',
   };
   
   return labels[type] || type;
@@ -69,6 +74,9 @@ export function getTransactionIcon(type: TransactionType) {
     service_completion: ArrowUpCircle,
     auto_completion: ArrowUpCircle,
     dispute_refund: ArrowUpCircle,
+    contact_view: Eye,
+    request_received: MessageSquare,
+    package_purchase: ShoppingCart,
   };
   
   return icons[type] || Coins;
@@ -84,7 +92,7 @@ export function getTransactionColor(type: TransactionType): string {
   }
   
   // Отрицательные операции
-  if (['purchase', 'withdrawal', 'bonus_expired', 'service_purchase'].includes(type)) {
+  if (['purchase', 'withdrawal', 'bonus_expired', 'service_purchase', 'contact_view', 'request_received'].includes(type)) {
     return 'text-red-600';
   }
   

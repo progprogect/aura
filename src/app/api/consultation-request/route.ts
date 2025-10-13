@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { ConsultationRequestSchema } from '@/lib/validations/api'
+import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Специалист не найден' }, { status: 404 })
     }
 
+    // Проверяем, может ли специалист получить заявку (списать 10 баллов)
+    const canUse = await SpecialistLimitsService.canUseRequest(specialistId)
+    if (!canUse.allowed) {
+      return NextResponse.json({ 
+        error: 'У специалиста недостаточно баллов для получения заявок',
+        remaining: canUse.remaining,
+        required: 10
+      }, { status: 402 }) // Payment Required
+    }
+
+    // Списываем 10 баллов за получение заявки
+    const used = await SpecialistLimitsService.useRequest(specialistId)
+    if (!used) {
+      return NextResponse.json({ 
+        error: 'Ошибка списания баллов за заявку' 
+      }, { status: 500 })
+    }
+
     // Создаем запрос на консультацию
     const consultationRequest = await prisma.consultationRequest.create({
       data: {
@@ -40,6 +59,8 @@ export async function POST(request: NextRequest) {
         status: 'new',
       },
     })
+
+    console.log(`✅ Специалист ${specialistId} получил заявку ${consultationRequest.id} (списано 10 баллов)`)
 
     // TODO: Отправить уведомление специалисту (email/telegram)
 

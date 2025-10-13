@@ -223,6 +223,7 @@ export function SpecialistProfileWithEdit({
       {/* Hero - показываем всегда, кроме режима редактирования */}
       {(!isOwner || (isOwner && !isEditMode)) && (
         <SpecialistHero
+          specialistId={data.id}
           firstName={heroData.firstName}
           lastName={heroData.lastName}
           avatar={heroData.avatar}

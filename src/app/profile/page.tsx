@@ -16,6 +16,7 @@ import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { ServicesList } from '@/components/specialist/dashboard/ServicesList'
+import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
@@ -263,12 +264,6 @@ async function getUserData() {
         })
       }
 
-      // Получаем актуальную статистику из Redis
-      const [redisProfileViews, redisContactViews] = await Promise.all([
-        getProfileViews(profile.id),
-        getContactViews(profile.id)
-      ])
-
       // Добавляем данные специалиста
       userData.specialistProfile = {
         id: profile.id,
@@ -284,13 +279,13 @@ async function getUserData() {
         priceTo: profile.priceTo,
         yearsOfPractice: profile.yearsOfPractice,
         videoUrl: profile.videoUrl,
-        profileViews: redisProfileViews,
-        contactViews: redisContactViews,
+        profileViews: profile.profileViews,
+        contactViews: profile.contactViews,
       }
 
       userData.stats = {
-        profileViews: redisProfileViews,
-        contactViews: redisContactViews,
+        profileViews: profile.profileViews,
+        contactViews: profile.contactViews,
         consultationRequests: consultationRequestsCount,
         orders: ordersCount,
         completionPercentage,
@@ -409,6 +404,11 @@ export default async function ProfilePage() {
                 completionPercentage={user.stats.completionPercentage}
                 tasks={user.tasks}
               />
+            )}
+
+            {/* Лимиты (для специалистов) */}
+            {user.hasSpecialistProfile && user.specialistProfile && (
+              <LimitsWidget specialistId={user.specialistProfile.id} />
             )}
 
             {/* Услуги (для специалистов) - перенесено в основную колонку */}

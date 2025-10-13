@@ -66,6 +66,14 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false
     },
     {
+      href: '/specialist/packages',
+      icon: Package,
+      label: 'Купить баллы',
+      description: 'Пополнить лимиты',
+      variant: 'outline' as const,
+      disabled: false
+    },
+    {
       href: '#',
       icon: BarChart3,
       label: 'Аналитика',

@@ -8,6 +8,7 @@ import { openai, MODELS, CHAT_CONFIG } from '@/lib/ai/openai'
 import { getSystemPrompt, getExtractionPrompt } from '@/lib/ai/prompts'
 import { searchSpecialistsBySemantic, searchSpecialistsByKeyword } from '@/lib/ai/semantic-search'
 import { generatePersonalQuestions } from '@/lib/ai/personal-questions-generator'
+import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 import { analyzePersonalContext } from '@/lib/ai/contextual-analyzer'
 import { rankSpecialistsByPersonalization, generatePersonalizedSearchExplanation, analyzePersonalizationQuality } from '@/lib/ai/personalized-search'
 import { analyzeDialogContext, analyzeUserType, analyzeComplexity, generateContextualHints, isReadyForSearch } from '@/lib/ai/contextual-dialog-analyzer'
@@ -275,7 +276,8 @@ export async function POST(request: NextRequest) {
       else if (isShowPreviousRequest && session.recommendedIds.length > 0) {
         console.log('[Chat API] 🔄 Loading previously shown specialists:', session.recommendedIds.length)
         
-        const specialistProfiles = await prisma.specialistProfile.findMany({
+        // Получаем всех специалистов с указанными ID
+        const allSpecialists = await prisma.specialistProfile.findMany({
           where: {
             id: { in: session.recommendedIds },
             acceptingClients: true,
@@ -307,6 +309,15 @@ export async function POST(request: NextRequest) {
             }
           },
         })
+
+        // Фильтруем только видимых специалистов (с баллами > 0)
+        const specialistProfiles = []
+        for (const profile of allSpecialists) {
+          const isVisible = await SpecialistLimitsService.isProfileVisible(profile.id)
+          if (isVisible) {
+            specialistProfiles.push(profile)
+          }
+        }
 
         // Преобразуем в формат Specialist
         specialists = specialistProfiles.map(profile => ({

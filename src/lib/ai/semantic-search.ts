@@ -5,6 +5,7 @@
 import { prisma } from '@/lib/db'
 import { generateQueryEmbedding } from './embeddings'
 import { findSimilarEmbeddings } from './mongodb-client'
+import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 import type { SearchOptions, SearchFilters, Specialist, SpecialistWhereInput } from './types'
 
 export type { SearchOptions, SearchFilters }
@@ -89,9 +90,10 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   console.log('[Semantic Search] 🗄️ Querying PostgreSQL...')
   console.log('[Semantic Search] 📋 Where clause:', JSON.stringify(where, null, 2))
   
-  const specialistProfiles = await prisma.specialistProfile.findMany({
+  // Получаем всех специалистов
+  const allSpecialistProfiles = await prisma.specialistProfile.findMany({
     where,
-    take: limit,
+    take: limit * 2, // Берем больше для фильтрации
     select: {
       id: true,
       slug: true,
@@ -118,6 +120,16 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
       customFields: true,
     },
   })
+
+  // Фильтруем только видимых специалистов (с баллами > 0)
+  const specialistProfiles = []
+  for (const profile of allSpecialistProfiles) {
+    const isVisible = await SpecialistLimitsService.isProfileVisible(profile.id)
+    if (isVisible) {
+      specialistProfiles.push(profile)
+      if (specialistProfiles.length >= limit) break // Останавливаемся, когда набрали нужное количество
+    }
+  }
 
   console.log('[Semantic Search] 📊 PostgreSQL returned:', specialistProfiles.length, 'specialists')
   
@@ -208,9 +220,10 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
     ]
   }
 
-  const results = await prisma.specialistProfile.findMany({
+  // Получаем всех специалистов
+  const allResults = await prisma.specialistProfile.findMany({
     where,
-    take: limit,
+    take: limit * 2, // Берем больше для фильтрации
     orderBy: [{ verified: 'desc' }, { profileViews: 'desc' }],
     select: {
       id: true,
@@ -238,6 +251,16 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
       }
     },
   })
+
+  // Фильтруем только видимых специалистов (с баллами > 0)
+  const results = []
+  for (const profile of allResults) {
+    const isVisible = await SpecialistLimitsService.isProfileVisible(profile.id)
+    if (isVisible) {
+      results.push(profile)
+      if (results.length >= limit) break // Останавливаемся, когда набрали нужное количество
+    }
+  }
 
   console.log(`[Keyword Search] Found ${results.length} specialists`)
 
