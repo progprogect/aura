@@ -60,28 +60,44 @@ export class FileUploadService {
       throw new Error(validation.error)
     }
 
+    // Проверяем конфигурацию Cloudinary
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME
+    const apiKey = process.env.CLOUDINARY_API_KEY
+    const apiSecret = process.env.CLOUDINARY_API_SECRET
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new Error('Cloudinary не настроен. Загрузка файлов недоступна.')
+    }
+
+    // Конвертируем File в base64
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
+
+    // Загружаем через Cloudinary напрямую
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', base64)
+    formData.append('upload_preset', 'aura_upload') // Используем unsigned preset
     
     if (options.folder) {
       formData.append('folder', options.folder)
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
       method: 'POST',
       body: formData
     })
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || 'Ошибка загрузки файла')
+      throw new Error(errorData.error?.message || 'Ошибка загрузки файла в Cloudinary')
     }
-    
+
     const result = await response.json()
     
     return {
-      url: result.url,
-      publicId: result.publicId,
+      url: result.secure_url,
+      publicId: result.public_id,
       size: file.size,
       format: file.type
     }
