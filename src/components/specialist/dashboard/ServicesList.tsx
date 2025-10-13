@@ -15,7 +15,7 @@ import type { Service } from '@/types/service'
 
 interface ServicesListProps {
   services: Service[]
-  onRefresh: () => void
+  onRefresh?: () => void
 }
 
 export function ServicesList({ services: initialServices, onRefresh }: ServicesListProps) {
@@ -38,7 +38,7 @@ export function ServicesList({ services: initialServices, onRefresh }: ServicesL
 
       if (response.ok) {
         setServices(prev => prev.filter(s => s.id !== id))
-        onRefresh()
+        onRefresh?.()
       } else {
         alert('Ошибка удаления услуги')
       }
@@ -63,7 +63,7 @@ export function ServicesList({ services: initialServices, onRefresh }: ServicesL
   const handleFormSuccess = () => {
     setIsFormOpen(false)
     setEditingService(null)
-    onRefresh()
+    onRefresh?.()
   }
 
   if (isFormOpen) {

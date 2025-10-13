@@ -437,7 +437,6 @@ export default async function ProfilePage() {
                 <CardContent>
                   <ServicesList 
                     services={user.services}
-                    onRefresh={() => {}}
                   />
                 </CardContent>
               </Card>
