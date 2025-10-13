@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db'
 import { PointsService } from '@/lib/points/points-service'
+import { Decimal } from 'decimal.js'
 
 export class SpecialistLimitsService {
   /**
@@ -71,14 +72,14 @@ export class SpecialistLimitsService {
       }
 
       // Списываем 1 балл за просмотр контакта
-      const result = await PointsService.deductPoints(
-        specialist.userId,
-        1,
-        'contact_view',
-        `Просмотр контакта специалиста ${specialistId}`
-      )
+      try {
+        await PointsService.deductPoints(
+          specialist.userId,
+          new Decimal(1),
+          'contact_view',
+          `Просмотр контакта специалиста ${specialistId}`
+        )
 
-      if (result.success) {
         // Обновляем счетчик просмотров контактов в профиле
         await prisma.specialistProfile.update({
           where: { id: specialistId },
@@ -88,9 +89,10 @@ export class SpecialistLimitsService {
         })
 
         return true
+      } catch (error) {
+        console.error('Ошибка списания баллов за просмотр контакта:', error)
+        return false
       }
-
-      return false
     } catch (error) {
       console.error('Ошибка использования просмотра контакта:', error)
       return false
@@ -127,18 +129,18 @@ export class SpecialistLimitsService {
       }
 
       // Списываем 10 баллов за заявку
-      const result = await PointsService.deductPoints(
-        specialist.userId,
-        10,
-        'request_received',
-        `Получение заявки специалистом ${specialistId}`
-      )
-
-      if (result.success) {
+      try {
+        await PointsService.deductPoints(
+          specialist.userId,
+          new Decimal(10),
+          'request_received',
+          `Получение заявки специалистом ${specialistId}`
+        )
         return true
+      } catch (error) {
+        console.error('Ошибка списания баллов за заявку:', error)
+        return false
       }
-
-      return false
     } catch (error) {
       console.error('Ошибка использования заявки:', error)
       return false
