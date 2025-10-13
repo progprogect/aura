@@ -346,6 +346,21 @@ export default async function ProfilePage() {
               />
             )}
 
+            {/* Услуги (для специалистов) - перенесено в основную колонку */}
+            {user.hasSpecialistProfile && user.services && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">💼 Мои услуги</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ServicesList 
+                    services={user.services}
+                    specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Личная информация */}
             <Card>
               <CardHeader>
@@ -427,21 +442,6 @@ export default async function ProfilePage() {
               newOrdersCount={user.newOrdersCount || 0}
               isSpecialist={user.hasSpecialistProfile}
             />
-
-            {/* Услуги (для специалистов) */}
-            {user.hasSpecialistProfile && user.services && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">💼 Мои услуги</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ServicesList 
-                    services={user.services}
-                    specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
-                  />
-                </CardContent>
-              </Card>
-            )}
 
             {/* Кнопка выхода */}
             <Card>
