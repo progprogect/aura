@@ -247,7 +247,6 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
                       >
                         <ExternalLink className="w-3 h-3" />
                         <span className="hidden xs:inline">Посмотреть</span>
-                        <span className="xs:hidden">→</span>
                       </Button>
                     </Link>
                   )}
@@ -259,7 +258,6 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
                   >
                     <Edit2 className="w-3 h-3" />
                     <span className="hidden xs:inline">Редактировать</span>
-                    <span className="xs:hidden">✏️</span>
                   </Button>
                   <Button
                     onClick={() => handleDelete(service.id)}
@@ -270,7 +268,6 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
                   >
                     <Trash2 className="w-3 h-3" />
                     <span className="hidden xs:inline">Удалить</span>
-                    <span className="xs:hidden">🗑️</span>
                   </Button>
                 </div>
               </div>
