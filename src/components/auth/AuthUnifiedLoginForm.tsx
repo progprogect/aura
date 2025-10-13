@@ -121,10 +121,16 @@ export function AuthUnifiedLoginForm() {
         setUserType(isSpecialist ? 'specialist' : 'user')
         setStep('success')
         
-        // Редирект в личный кабинет (единый для всех)
+        // Редирект в личный кабинет или на сохраненную страницу заказа
         // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          window.location.href = '/profile'
+          const orderRedirectUrl = sessionStorage.getItem('orderRedirectUrl')
+          if (orderRedirectUrl) {
+            sessionStorage.removeItem('orderRedirectUrl')
+            window.location.href = orderRedirectUrl
+          } else {
+            window.location.href = '/profile'
+          }
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при входе')

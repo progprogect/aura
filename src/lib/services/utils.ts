@@ -70,22 +70,11 @@ export function canTransitionStatus(from: OrderStatus, to: OrderStatus): boolean
 }
 
 /**
- * Форматирует цену для отображения
+ * Форматирует цену для отображения в баллах
  */
 export function formatServicePrice(price: number, currency: string = 'BYN'): string {
-  // В MVP: баллы = рубли 1:1
-  const displayPrice = price
-  
-  const currencySymbols: Record<string, string> = {
-    BYN: 'BYN',
-    RUB: '₽',
-    USD: '$',
-    EUR: '€',
-  }
-  
-  const symbol = currencySymbols[currency] || currency
-  
-  return `${displayPrice} ${symbol}`
+  // Все услуги отображаются в баллах
+  return `${price} баллов`
 }
 
 /**

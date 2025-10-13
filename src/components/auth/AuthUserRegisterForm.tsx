@@ -127,10 +127,16 @@ export function AuthUserRegisterForm() {
       if (data.success) {
         setStep('success')
         
-        // Редирект в личный кабинет через 2 секунды
+        // Редирект в личный кабинет или на сохраненную страницу заказа
         // Используем window.location для полной перезагрузки (чтобы useAuth обновился)
         setTimeout(() => {
-          window.location.href = '/profile'
+          const orderRedirectUrl = sessionStorage.getItem('orderRedirectUrl')
+          if (orderRedirectUrl) {
+            sessionStorage.removeItem('orderRedirectUrl')
+            window.location.href = orderRedirectUrl
+          } else {
+            window.location.href = '/profile'
+          }
         }, 2000)
       } else {
         setError(data.error || 'Ошибка при регистрации')

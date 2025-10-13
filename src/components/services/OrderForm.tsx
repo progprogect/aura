@@ -31,7 +31,7 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [userBalance, setUserBalance] = useState<{ total: number; balance: number; bonusBalance: number } | null>(null)
-  const [orderMode, setOrderMode] = useState<'free' | 'paid'>('free')
+  const [orderMode, setOrderMode] = useState<'free' | 'paid'>('paid')
 
   // Загружаем баланс пользователя
   useEffect(() => {
@@ -56,6 +56,16 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
     e.preventDefault()
     setError('')
 
+    // Проверяем авторизацию для оплаты баллами
+    if (orderMode === 'paid' && !user) {
+      // Сохраняем URL текущей страницы для redirect после авторизации
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('orderRedirectUrl', window.location.pathname)
+      }
+      setError('Для заказа услуги необходимо войти в систему. У вас будут бонусные баллы для первой покупки!')
+      return
+    }
+
     if (!formData.clientName.trim()) {
       setError('Укажите ваше имя')
       return
@@ -63,6 +73,12 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
 
     if (!formData.clientContact.trim()) {
       setError('Укажите телефон для связи')
+      return
+    }
+
+    // Проверяем баланс для оплаты баллами
+    if (orderMode === 'paid' && userBalance && userBalance.total < servicePrice) {
+      setError(`Недостаточно баллов. Нужно: ${servicePrice}, доступно: ${userBalance.total}`)
       return
     }
 
@@ -165,53 +181,87 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
         📋 Оформить заказ
       </h3>
 
-      {/* Переключатель режимов */}
-      {user && userBalance && (
-        <div className="mb-6">
-          <div className="flex gap-2 mb-3">
-            <button
-              type="button"
-              onClick={() => setOrderMode('free')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                orderMode === 'free'
-                  ? 'bg-blue-100 text-blue-700 border-2 border-blue-200'
-                  : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
-              }`}
-            >
-              Бесплатный запрос
-            </button>
-            <button
-              type="button"
-              onClick={() => setOrderMode('paid')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                orderMode === 'paid'
-                  ? 'bg-green-100 text-green-700 border-2 border-green-200'
-                  : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
-              }`}
-            >
-              Оплатить баллами
-            </button>
-          </div>
-
-          {orderMode === 'paid' && (
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-green-700">Стоимость:</span>
-                <span className="font-semibold text-green-800">{servicePrice} баллов</span>
-              </div>
-              <div className="flex items-center justify-between text-sm mt-1">
-                <span className="text-green-700">Ваш баланс:</span>
-                <span className="font-semibold text-green-800">{userBalance.total} баллов</span>
-              </div>
-              {userBalance.total < servicePrice && (
-                <p className="text-xs text-red-600 mt-2">
-                  ⚠️ Недостаточно баллов. <a href="/points" className="underline">Купить баллы</a>
-                </p>
-              )}
+      {/* Информация о заказе */}
+      <div className="mb-6">
+        {user && userBalance ? (
+          <>
+            {/* Переключатель режимов для авторизованных */}
+            <div className="flex gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setOrderMode('free')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  orderMode === 'free'
+                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-200'
+                    : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
+                }`}
+              >
+                Бесплатный запрос
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrderMode('paid')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  orderMode === 'paid'
+                    ? 'bg-green-100 text-green-700 border-2 border-green-200'
+                    : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
+                }`}
+              >
+                Оплатить баллами
+              </button>
             </div>
-          )}
-        </div>
-      )}
+
+            {orderMode === 'paid' && (
+              <div className="p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-700">Стоимость:</span>
+                  <span className="font-semibold text-green-800">{servicePrice} баллов</span>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-1">
+                  <span className="text-green-700">Ваш баланс:</span>
+                  <span className="font-semibold text-green-800">{userBalance.total} баллов</span>
+                </div>
+                {userBalance.total < servicePrice && (
+                  <p className="text-xs text-red-600 mt-2">
+                    ⚠️ Недостаточно баллов. <a href="/points" className="underline">Купить баллы</a>
+                  </p>
+                )}
+                {userBalance.total >= servicePrice && (
+                  <p className="text-xs text-green-600 mt-2">
+                    💰 Баллы будут заморожены на 7 дней до выполнения услуги
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Информация для неавторизованных */
+          <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2">💎 Заказ за баллы</h4>
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-blue-700">Стоимость:</span>
+              <span className="font-semibold text-blue-800">{servicePrice} баллов</span>
+            </div>
+            <p className="text-xs text-blue-600 mb-3">
+              🎁 После регистрации вы получите бонусные баллы для первой покупки!
+            </p>
+            <div className="flex gap-2">
+              <a 
+                href="/auth/login"
+                className="flex-1 text-center px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+              >
+                Войти
+              </a>
+              <a 
+                href="/auth/register"
+                className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Регистрация
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Error message */}
