@@ -111,9 +111,8 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Мои услуги</h3>
           <p className="text-sm text-gray-600">
             {services.length} из 10 услуг
           </p>
@@ -121,7 +120,7 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
         <Button
           onClick={() => setIsFormOpen(true)}
           disabled={services.length >= 10}
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           Добавить услугу
@@ -233,45 +232,47 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
               </div>
 
               {/* Actions */}
-              <div className="flex gap-1.5">
-                {specialistSlug && (
-                  <Link
-                    href={`/specialist/${specialistSlug}/services/${service.slug}`}
-                    target="_blank"
-                    className="flex-1"
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full gap-1 text-xs lg:text-sm xl:text-base px-2 lg:px-3 xl:px-4"
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-1.5">
+                  {specialistSlug && (
+                    <Link
+                      href={`/specialist/${specialistSlug}/services/${service.slug}`}
+                      target="_blank"
+                      className="flex-1"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      <span className="hidden sm:inline">Посмотреть</span>
-                      <span className="sm:hidden">→</span>
-                    </Button>
-                  </Link>
-                )}
-                <Button
-                  onClick={() => handleEdit(service)}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 gap-1 text-xs lg:text-sm xl:text-base px-2 lg:px-3 xl:px-4"
-                >
-                  <Edit2 className="w-3 h-3" />
-                  <span className="hidden sm:inline">Редактировать</span>
-                  <span className="sm:hidden">Изменить</span>
-                </Button>
-                <Button
-                  onClick={() => handleDelete(service.id)}
-                  disabled={deletingId === service.id}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-red-600 hover:text-red-700 hover:border-red-300 text-xs lg:text-sm xl:text-base px-2 lg:px-3 xl:px-4"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  <span className="hidden sm:inline">Удалить</span>
-                  <span className="sm:hidden">×</span>
-                </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-1 text-xs px-2 sm:px-3"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span className="hidden xs:inline">Посмотреть</span>
+                        <span className="xs:hidden">→</span>
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    onClick={() => handleEdit(service)}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-1 text-xs px-2 sm:px-3"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    <span className="hidden xs:inline">Редактировать</span>
+                    <span className="xs:hidden">✏️</span>
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(service.id)}
+                    disabled={deletingId === service.id}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 text-red-600 hover:text-red-700 hover:border-red-300 text-xs px-2 sm:px-3"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span className="hidden xs:inline">Удалить</span>
+                    <span className="xs:hidden">🗑️</span>
+                  </Button>
+                </div>
               </div>
             </motion.div>
           ))}
