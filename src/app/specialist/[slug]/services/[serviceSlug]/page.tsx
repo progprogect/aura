@@ -11,6 +11,18 @@ import { OrderForm } from '@/components/services/OrderForm'
 import { formatServicePrice } from '@/lib/services/utils'
 import { categoryConfigService } from '@/lib/category-config'
 
+// Маппинг английских ключей категорий на русские названия
+const CATEGORY_NAMES: Record<string, string> = {
+  psychology: 'Психология и терапия',
+  fitness: 'Фитнес и спорт',
+  nutrition: 'Питание и диетология',
+  massage: 'Массаж и телесные практики',
+  wellness: 'Велнес и холистические практики',
+  coaching: 'Коучинг и наставничество',
+  medicine: 'Медицинские специалисты',
+  other: 'Другие специалисты',
+}
+
 interface PageProps {
   params: {
     slug: string
@@ -99,6 +111,7 @@ export default async function ServicePage({ params }: PageProps) {
 
   // Получаем конфигурацию категории для отображения русского названия
   const categoryConfig = await categoryConfigService.getCategoryConfigSafe(specialist.category)
+  const categoryName = categoryConfig?.name || CATEGORY_NAMES[specialist.category] || specialist.category
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -187,7 +200,7 @@ export default async function ServicePage({ params }: PageProps) {
                   )}
                   <div>
                     <h3 className="font-semibold text-gray-900">{fullName}</h3>
-                    <p className="text-sm text-gray-600">{categoryConfig?.name || specialist.category}</p>
+                    <p className="text-sm text-gray-600">{categoryName}</p>
                   </div>
                 </div>
                 <Link
