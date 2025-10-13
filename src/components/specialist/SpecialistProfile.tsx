@@ -73,7 +73,13 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
   return (
     <>
       {/* Табы */}
-      <SpecialistTabs tabs={tabs} activeTab={activeTab} />
+      <SpecialistTabs 
+        tabs={tabs} 
+        activeTab={activeTab} 
+        onTabChange={(tabId) => {
+          // Табы автоматически скроллят к секции через scrollToSection
+        }}
+      />
 
       {/* Основной контент */}
       <div className="container mx-auto max-w-5xl space-y-6 px-4 py-8">

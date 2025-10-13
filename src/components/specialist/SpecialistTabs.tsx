@@ -21,6 +21,8 @@ export const ICON_MAP = {
   'paper-airplane': '/icons/paper-airplane.svg',
   'currency-dollar': '/icons/currency-dollar.svg',
   'clock': '/icons/clock.svg',
+  'shopping-cart': '/icons/shopping-cart.svg',
+  'gift': '/icons/gift.svg',
 } as const
 
 export type IconName = keyof typeof ICON_MAP
@@ -73,7 +75,7 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
       )}
     >
       <div className="container mx-auto max-w-5xl px-4">
-        <div className="scrollbar-hide flex space-x-4 sm:space-x-6 overflow-x-auto md:space-x-8">
+        <div className="scrollbar-hide flex space-x-2 sm:space-x-4 md:space-x-6 overflow-x-auto pb-1">
           {tabs.map(tab => {
             const iconPath = tab.icon ? ICON_MAP[tab.icon as IconName] || tab.icon : null
             return (
@@ -81,8 +83,8 @@ export function SpecialistTabs({ tabs, activeTab, onTabChange }: SpecialistTabsP
                 key={tab.id}
                 onClick={() => scrollToSection(tab.id)}
                 className={cn(
-                  'relative flex items-center gap-2 whitespace-nowrap py-4 text-sm font-medium transition-colors',
-                  'hover:text-gray-900',
+                  'relative flex items-center gap-1.5 sm:gap-2 whitespace-nowrap py-3 sm:py-4 px-1 sm:px-2 text-xs sm:text-sm font-medium transition-colors',
+                  'hover:text-gray-900 touch-manipulation',
                   activeTab === tab.id
                     ? 'text-gray-900'
                     : 'text-gray-500'

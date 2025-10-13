@@ -225,7 +225,7 @@ export default async function SpecialistPage({ params }: PageProps) {
       : null,
     specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
     specialist.services.length > 0 ? { id: 'services', label: 'Услуги', icon: 'shopping-cart' } : null,
-    specialist.leadMagnets.length > 0 ? { id: 'lead-magnets', label: 'Бесплатно', icon: 'gift' } : null,
+    specialist.leadMagnets.length > 0 ? { id: 'lead-magnets', label: 'Материалы', icon: 'gift' } : null,
     specialist.faqs.length > 0 ? { id: 'faq', label: 'Вопросы', icon: 'question-mark-circle' } : null,
     { id: 'contact', label: 'Связаться', icon: 'paper-airplane' },
   ].filter(Boolean) as Tab[]
