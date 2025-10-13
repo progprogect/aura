@@ -59,12 +59,21 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
 
   const userActions = [
     {
+      href: '/purchases',
+      icon: ShoppingCart,
+      label: 'Мои покупки',
+      description: 'История заказов и статусы',
+      variant: 'default' as const,
+      isMain: true,
+      disabled: false
+    },
+    {
       href: '/auth/user/become-specialist',
       icon: Stethoscope,
       label: 'Стать специалистом',
       description: 'Создать профиль специалиста',
-      variant: 'default' as const,
-      isMain: true,
+      variant: 'outline' as const,
+      isMain: false,
       disabled: false
     }
   ]

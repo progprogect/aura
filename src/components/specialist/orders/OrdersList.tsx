@@ -19,6 +19,11 @@ interface OrdersListProps {
 export function OrdersList({ orders: initialOrders }: OrdersListProps) {
   const [orders, setOrders] = useState(initialOrders)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [completingOrderId, setCompletingOrderId] = useState<string | null>(null)
+  const [completeForm, setCompleteForm] = useState({
+    screenshot: null as File | null,
+    description: ''
+  })
 
   const handleUpdateStatus = async (id: string, status: string) => {
     setUpdatingId(id)
@@ -42,6 +47,52 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
     } catch (error) {
       console.error('Ошибка:', error)
       alert('Ошибка обновления статуса')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const handleCompleteOrder = async (orderId: string) => {
+    if (!completeForm.screenshot || !completeForm.description.trim()) {
+      alert('Нужно загрузить скриншот и описание')
+      return
+    }
+
+    setUpdatingId(orderId)
+
+    try {
+      const formData = new FormData()
+      formData.append('screenshot', completeForm.screenshot)
+      formData.append('description', completeForm.description)
+
+      const response = await fetch(`/api/orders/${orderId}/complete`, {
+        method: 'PATCH',
+        body: formData
+      })
+
+      if (response.ok) {
+        // Обновляем локальное состояние
+        setOrders(prev => 
+          prev.map(o => o.id === orderId ? { 
+            ...o, 
+            status: 'completed' as any,
+            completedAt: new Date(),
+            resultScreenshot: 'uploaded',
+            resultDescription: completeForm.description
+          } : o)
+        )
+        
+        // Сбрасываем форму
+        setCompleteForm({ screenshot: null, description: '' })
+        setCompletingOrderId(null)
+        alert('Заказ успешно завершен! Баллы переведены.')
+      } else {
+        const data = await response.json()
+        alert(data.error || 'Ошибка завершения заказа')
+      }
+    } catch (error) {
+      console.error('Ошибка:', error)
+      alert('Ошибка завершения заказа')
     } finally {
       setUpdatingId(null)
     }
@@ -243,7 +294,7 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
                   )}
                   {inProgress && (
                     <Button
-                      onClick={() => handleUpdateStatus(order.id, 'completed')}
+                      onClick={() => setCompletingOrderId(order.id)}
                       disabled={updatingId === order.id}
                       size="sm"
                       className="gap-2 bg-green-600 hover:bg-green-700"
@@ -266,6 +317,72 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
           </motion.div>
         )
       })}
+
+      {/* Модальное окно завершения заказа */}
+      {completingOrderId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Завершить заказ
+            </h3>
+            
+            <div className="space-y-4">
+              {/* Загрузка скриншота */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Скриншот результата *
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCompleteForm(prev => ({ 
+                    ...prev, 
+                    screenshot: e.target.files?.[0] || null 
+                  }))}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+
+              {/* Описание */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Описание выполненной работы *
+                </label>
+                <textarea
+                  value={completeForm.description}
+                  onChange={(e) => setCompleteForm(prev => ({ 
+                    ...prev, 
+                    description: e.target.value 
+                  }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  placeholder="Опишите что было сделано..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <Button
+                onClick={() => {
+                  setCompletingOrderId(null)
+                  setCompleteForm({ screenshot: null, description: '' })
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Отмена
+              </Button>
+              <Button
+                onClick={() => handleCompleteOrder(completingOrderId)}
+                disabled={updatingId === completingOrderId || !completeForm.screenshot || !completeForm.description.trim()}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {updatingId === completingOrderId ? 'Завершение...' : 'Завершить заказ'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

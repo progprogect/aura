@@ -356,10 +356,20 @@ model Order {
   paymentMethod String? // "balance" | "bonusBalance"
   transactionId String? // ID транзакции из Transaction модели
 
+  // Система баллов
+  pointsUsed          Int      @default(0) // Сколько баллов потрачено
+  pointsFrozen        Boolean  @default(false) // Заморожены ли баллы
+  autoConfirmAt       DateTime? // Когда автоматически подтвердить (через 7 дней)
+
   // Эскроу и выполнение
   escrowReleased Boolean   @default(false) // Переведены ли средства специалисту
   deadline       DateTime? // Дедлайн выполнения
   completedAt    DateTime? // Фактическое завершение
+
+  // Доказательства выполнения
+  resultScreenshot  String? // URL скриншота результата
+  resultDescription String? @db.Text // Описание выполненной работы
+  verifiedAt        DateTime? // Когда проверил админ
 
   // Dispute resolution
   disputeReason String?   @db.Text // Причина спора

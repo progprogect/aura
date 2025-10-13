@@ -199,6 +199,8 @@ export default async function ServicePage({ params }: PageProps) {
                 serviceId={service.id}
                 serviceName={service.title}
                 specialistName={fullName}
+                servicePrice={service.price}
+                serviceCurrency={service.currency}
               />
             </div>
           </div>
