@@ -437,6 +437,7 @@ export default async function ProfilePage() {
                 <CardContent>
                   <ServicesList 
                     services={user.services}
+                    specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
                   />
                 </CardContent>
               </Card>
