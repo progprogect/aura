@@ -648,25 +648,31 @@ export function normalizePhoneNumber(input: string): string {
   const digits = input.replace(/\D/g, '')
   if (!digits) return ''
   
-  // УНИФИЦИРОВАНО С normalizePhone для совместимости
+  // Если номер уже начинается с +, возвращаем как есть
+  if (input.startsWith('+')) {
+    return input
+  }
   
-  // Если номер начинается с 8, заменяем на +7 (как в старой функции)
+  // Определяем страну по цифрам
+  const country = detectCountryCode(digits)
+  
+  if (country) {
+    // Если найдена страна, возвращаем в международном формате
+    return '+' + digits
+  }
+  
+  // Если номер начинается с 8, заменяем на +7 (российский формат)
   if (digits.startsWith('8')) {
     return '+7' + digits.slice(1)
   }
   
-  // Если номер начинается с 7, добавляем +
+  // Если номер начинается с 7, добавляем + (российский формат)
   if (digits.startsWith('7')) {
     return '+' + digits
   }
   
-  // Если номер уже в формате +7, возвращаем как есть
-  if (input.startsWith('+7')) {
-    return input
-  }
-  
-  // В остальных случаях добавляем +7 (для российских номеров)
-  return '+7' + digits
+  // Для неизвестных номеров добавляем + в начало
+  return '+' + digits
 }
 
 /**
@@ -691,18 +697,33 @@ export function validatePhoneNumber(input: string): { isValid: boolean; error?: 
     return { isValid: true } // Считаем валидным пока пользователь вводит
   }
   
+  // Минимальная длина международного номера (код страны + минимум 4 цифры)
+  if (digits.length < 5) {
+    return { isValid: false, error: 'Номер слишком короткий' }
+  }
+  
+  // Максимальная длина международного номера (обычно не более 15 цифр)
+  if (digits.length > 15) {
+    return { isValid: false, error: 'Номер слишком длинный' }
+  }
+  
   const country = detectCountryCode(digits)
-  if (!country) {
-    return { isValid: false, error: 'Неверный формат номера телефона' }
-  }
   
-  // Проверяем длину только если номер достаточно длинный
-  if (digits.length >= country.length - 2 && digits.length < country.length - 1) {
-    return { isValid: false, error: `Номер слишком короткий для ${country.name}` }
-  }
-  
-  if (digits.length > country.length) {
-    return { isValid: false, error: `Номер слишком длинный для ${country.name}` }
+  if (country) {
+    // Если найдена известная страна, проверяем длину
+    if (digits.length < country.length - 1) {
+      return { isValid: false, error: `Номер слишком короткий для ${country.name}` }
+    }
+    
+    if (digits.length > country.length + 1) {
+      return { isValid: false, error: `Номер слишком длинный для ${country.name}` }
+    }
+  } else {
+    // Для неизвестных стран проверяем только общие ограничения
+    // Это позволяет вводить номера из стран, которых нет в нашем списке
+    if (digits.length < 7) {
+      return { isValid: false, error: 'Номер слишком короткий' }
+    }
   }
   
   return { isValid: true }
