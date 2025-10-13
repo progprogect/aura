@@ -76,7 +76,7 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
             clientName: formData.clientName,
             clientContact: formData.clientContact,
             clientMessage: formData.clientMessage || null,
-            pointsUsed: servicePrice
+            pointsUsed: Math.round(servicePrice) // Убеждаемся что передаем целое число
           }
         : {
             serviceId,

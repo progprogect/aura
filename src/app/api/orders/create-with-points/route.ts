@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
           clientName,
           clientContact,
           clientMessage,
+          clientUserId: user.id, // Связываем заказ с пользователем
           status: 'paid',
           pointsUsed,
           pointsFrozen: true,

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
+import { FileUploadService } from '@/lib/services/file-upload'
 import { Decimal } from 'decimal.js'
 
 export async function PATCH(
@@ -54,7 +55,7 @@ export async function PATCH(
     }
 
     // Проверяем статус заказа
-    if (order.status !== 'paid') {
+    if (!['paid', 'in_progress'].includes(order.status)) {
       return NextResponse.json({ error: 'Заказ нельзя завершить' }, { status: 400 })
     }
 
@@ -71,8 +72,16 @@ export async function PATCH(
       )
     }
 
-    // Загружаем скриншот в Cloudinary (используем существующую логику)
-    const screenshotUrl = await uploadToCloudinary(screenshot)
+    // Валидируем и загружаем скриншот
+    let screenshotUrl: string
+    try {
+      screenshotUrl = await FileUploadService.uploadResultScreenshot(screenshot)
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Ошибка загрузки файла' }, 
+        { status: 400 }
+      )
+    }
 
     // Завершаем заказ в транзакции
     await prisma.$transaction(async (tx) => {
@@ -120,20 +129,3 @@ export async function PATCH(
   }
 }
 
-// Функция загрузки в Cloudinary (используем существующую логику)
-async function uploadToCloudinary(file: File): Promise<string> {
-  const formData = new FormData()
-  formData.append('file', file)
-  
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/upload`, {
-    method: 'POST',
-    body: formData
-  })
-  
-  if (!response.ok) {
-    throw new Error('Ошибка загрузки файла')
-  }
-  
-  const result = await response.json()
-  return result.url
-}

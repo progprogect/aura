@@ -90,6 +90,14 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         errorCount++
         console.error(`❌ Ошибка автоподтверждения заказа ${order.id}:`, error)
+        
+        // Логируем детали ошибки для отладки
+        if (error instanceof Error) {
+          console.error(`Детали ошибки: ${error.message}`)
+          if (error.stack) {
+            console.error(`Stack trace: ${error.stack}`)
+          }
+        }
       }
     }
 

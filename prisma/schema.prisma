@@ -341,6 +341,7 @@ model Order {
   clientName    String
   clientContact String // Телефон (обязательно)
   clientMessage String? @db.Text // Опциональное сообщение
+  clientUserId  String? // ID пользователя (если авторизован)
 
   // Статус заказа
   status String @default("pending")
@@ -380,6 +381,8 @@ model Order {
 
   @@index([specialistProfileId, status])
   @@index([serviceId])
+  @@index([clientUserId])
+  @@index([clientContact])
   @@index([status])
   @@index([deadline])
 }

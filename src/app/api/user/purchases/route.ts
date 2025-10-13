@@ -22,9 +22,11 @@ export async function GET(request: NextRequest) {
 
     // Строим условия фильтрации
     const where: any = {
-      // Находим заказы где клиент - это текущий пользователь
-      // Для этого нужно найти заказы по номеру телефона клиента
-      clientContact: user.phone
+      // Ищем заказы по ID пользователя (приоритет) или по номеру телефона (fallback)
+      OR: [
+        { clientUserId: user.id },
+        { clientContact: user.phone }
+      ]
     }
 
     if (status && status !== 'all') {
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest) {
     // Подсчитываем статистику
     const stats = await prisma.order.groupBy({
       by: ['status'],
-      where: { clientContact: user.phone },
+      where,
       _count: true
     })
 

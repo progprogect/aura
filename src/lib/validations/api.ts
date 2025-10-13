@@ -49,7 +49,7 @@ export const CreateOrderSchema = z.object({
   clientName: z.string().min(2, 'Минимум 2 символа').max(100, 'Максимум 100 символов'),
   clientContact: z.string().min(5, 'Минимум 5 символов').max(100, 'Максимум 100 символов'),
   clientMessage: z.string().max(500, 'Максимум 500 символов').optional().nullable(),
-  pointsUsed: z.number().min(1, 'Минимум 1 балл').max(999999, 'Максимум 999999 баллов'),
+  pointsUsed: z.number().int().min(1, 'Минимум 1 балл').max(999999, 'Максимум 999999 баллов'),
 })
 
 export const UpdateOrderStatusSchema = z.object({
