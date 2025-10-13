@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Списываем балл
-    const used = await SpecialistLimitsService.useContactView(user.id)
+    const used = await SpecialistLimitsService.consumeContactView(user.id)
     if (!used) {
       return NextResponse.json({ 
         error: 'Ошибка списания баллов' 

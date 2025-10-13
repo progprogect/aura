@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Списываем 10 баллов за получение заявки
-    const used = await SpecialistLimitsService.useRequest(specialistId)
+    const used = await SpecialistLimitsService.consumeRequest(specialistId)
     if (!used) {
       return NextResponse.json({ 
         error: 'Ошибка списания баллов за заявку' 

@@ -59,7 +59,7 @@ export class SpecialistLimitsService {
   /**
    * Использовать просмотр контакта (списать 1 балл)
    */
-  static async useContactView(specialistId: string): Promise<boolean> {
+  static async consumeContactView(specialistId: string): Promise<boolean> {
     try {
       const specialist = await prisma.specialistProfile.findUnique({
         where: { id: specialistId },
@@ -115,7 +115,7 @@ export class SpecialistLimitsService {
   /**
    * Использовать заявку (списать 10 баллов)
    */
-  static async useRequest(specialistId: string): Promise<boolean> {
+  static async consumeRequest(specialistId: string): Promise<boolean> {
     try {
       const specialist = await prisma.specialistProfile.findUnique({
         where: { id: specialistId },
