@@ -362,8 +362,8 @@ export default async function ProfilePage() {
           </div>
         )}
 
-        {/* Если обычный пользователь с покупками - показываем статистику покупок */}
-        {!user.hasSpecialistProfile && user.purchasesStats && user.purchasesStats.total > 0 && (
+        {/* Если есть покупки - показываем статистику покупок для всех пользователей */}
+        {user.purchasesStats && user.purchasesStats.total > 0 && (
           <div className="mb-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
@@ -416,6 +416,41 @@ export default async function ProfilePage() {
                     services={user.services}
                     specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
                   />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Покупки для специалистов */}
+            {user.hasSpecialistProfile && user.purchasesStats && user.purchasesStats.total > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    <span>Мои покупки</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Отслеживайте статус ваших заказов как клиента
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-lg font-bold text-blue-600">{user.purchasesStats.paid}</div>
+                        <div className="text-sm text-blue-800">В работе</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-lg font-bold text-green-600">{user.purchasesStats.completed}</div>
+                        <div className="text-sm text-green-800">Завершено</div>
+                      </div>
+                    </div>
+                    <Button asChild className="w-full">
+                      <Link href="/purchases">
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Посмотреть все покупки
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}

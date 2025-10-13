@@ -55,6 +55,17 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false
     },
     {
+      href: '/purchases',
+      icon: ShoppingCart,
+      label: 'Мои покупки',
+      description: purchasesStats && purchasesStats.total > 0 
+        ? `${purchasesStats.paid + purchasesStats.completed} заказов` 
+        : 'Покупки как клиент',
+      variant: 'outline' as const,
+      badge: purchasesStats ? purchasesStats.paid + purchasesStats.completed : 0,
+      disabled: false
+    },
+    {
       href: '#',
       icon: BarChart3,
       label: 'Аналитика',

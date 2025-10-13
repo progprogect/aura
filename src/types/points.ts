@@ -8,7 +8,11 @@ export type TransactionType =
   | 'purchase'
   | 'refund'
   | 'withdrawal'
-  | 'deposit';
+  | 'deposit'
+  | 'service_purchase'
+  | 'service_completion'
+  | 'auto_completion'
+  | 'dispute_refund';
 
 /**
  * Тип баланса

@@ -44,6 +44,10 @@ export function getTransactionLabel(type: TransactionType): string {
     refund: 'Возврат',
     withdrawal: 'Вывод средств',
     deposit: 'Пополнение',
+    service_purchase: 'Покупка услуги',
+    service_completion: 'Завершение услуги',
+    auto_completion: 'Автозавершение услуги',
+    dispute_refund: 'Возврат по спору',
   };
   
   return labels[type] || type;
@@ -61,6 +65,10 @@ export function getTransactionIcon(type: TransactionType) {
     refund: ArrowUpCircle,
     withdrawal: ArrowDownCircle,
     deposit: ArrowUpCircle,
+    service_purchase: ShoppingCart,
+    service_completion: ArrowUpCircle,
+    auto_completion: ArrowUpCircle,
+    dispute_refund: ArrowUpCircle,
   };
   
   return icons[type] || Coins;
@@ -71,12 +79,12 @@ export function getTransactionIcon(type: TransactionType) {
  */
 export function getTransactionColor(type: TransactionType): string {
   // Положительные операции
-  if (['bonus_registration', 'bonus_reward', 'deposit', 'refund'].includes(type)) {
+  if (['bonus_registration', 'bonus_reward', 'deposit', 'refund', 'service_completion', 'auto_completion', 'dispute_refund'].includes(type)) {
     return 'text-green-600';
   }
   
   // Отрицательные операции
-  if (['purchase', 'withdrawal', 'bonus_expired'].includes(type)) {
+  if (['purchase', 'withdrawal', 'bonus_expired', 'service_purchase'].includes(type)) {
     return 'text-red-600';
   }
   
