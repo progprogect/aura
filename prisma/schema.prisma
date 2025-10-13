@@ -122,6 +122,9 @@ model SpecialistProfile {
   profileViews Int @default(0)
   contactViews Int @default(0)
 
+  // История покупок пакетов
+  packagePurchases PackagePurchase[]
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -630,4 +633,23 @@ model Currency {
 
   @@index([code])
   @@index([isActive])
+}
+
+// ========================================
+// ПОКУПКИ ПАКЕТОВ СПЕЦИАЛИСТАМИ
+// ========================================
+
+model PackagePurchase {
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  packageId String // 'basic', 'standard', 'premium'
+  pointsSpent Int  // Сколько баллов потрачено
+
+  createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
+  @@index([createdAt])
+  @@index([packageId])
 }

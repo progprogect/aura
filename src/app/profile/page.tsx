@@ -263,6 +263,12 @@ async function getUserData() {
         })
       }
 
+      // Получаем актуальную статистику из Redis
+      const [redisProfileViews, redisContactViews] = await Promise.all([
+        getProfileViews(profile.id),
+        getContactViews(profile.id)
+      ])
+
       // Добавляем данные специалиста
       userData.specialistProfile = {
         id: profile.id,
@@ -278,13 +284,13 @@ async function getUserData() {
         priceTo: profile.priceTo,
         yearsOfPractice: profile.yearsOfPractice,
         videoUrl: profile.videoUrl,
-        profileViews: profile.profileViews,
-        contactViews: profile.contactViews,
+        profileViews: redisProfileViews,
+        contactViews: redisContactViews,
       }
 
       userData.stats = {
-        profileViews: profile.profileViews,
-        contactViews: profile.contactViews,
+        profileViews: redisProfileViews,
+        contactViews: redisContactViews,
         consultationRequests: consultationRequestsCount,
         orders: ordersCount,
         completionPercentage,

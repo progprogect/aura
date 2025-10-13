@@ -50,8 +50,15 @@ export async function incrementProfileView(specialistId: string): Promise<boolea
   if (!redis) return false
 
   try {
+    // Увеличиваем в Redis для быстрого доступа
     await redis.incr(`profile:views:${specialistId}`)
     await redis.zadd('profile:views:leaderboard', Date.now(), specialistId)
+    
+    // Синхронизируем с БД (неблокирующий вызов)
+    syncProfileViewsToDB(specialistId).catch((error) => {
+      console.error('Failed to sync profile views to DB:', error)
+    })
+    
     return true
   } catch (error) {
     console.error('Redis error (incrementProfileView):', error)
@@ -69,8 +76,15 @@ export async function incrementContactView(
   if (!redis) return false
 
   try {
+    // Увеличиваем в Redis для быстрого доступа
     await redis.incr(`contact:views:${specialistId}`)
     await redis.incr(`contact:views:${specialistId}:${contactType}`)
+    
+    // Синхронизируем с БД (неблокирующий вызов)
+    syncContactViewsToDB(specialistId).catch((error) => {
+      console.error('Failed to sync contact views to DB:', error)
+    })
+    
     return true
   } catch (error) {
     console.error('Redis error (incrementContactView):', error)
@@ -105,5 +119,47 @@ export async function getContactViews(specialistId: string): Promise<number> {
   } catch (error) {
     console.error('Redis error (getContactViews):', error)
     return 0
+  }
+}
+
+// ========================================
+// СИНХРОНИЗАЦИЯ С БД
+// ========================================
+
+/**
+ * Синхронизировать просмотры профиля с БД
+ */
+async function syncProfileViewsToDB(specialistId: string): Promise<void> {
+  try {
+    const { prisma } = await import('@/lib/db')
+    const redisViews = await getProfileViews(specialistId)
+    
+    await prisma.specialistProfile.update({
+      where: { id: specialistId },
+      data: { profileViews: redisViews }
+    })
+    
+    console.log(`✅ Синхронизированы просмотры профиля для ${specialistId}: ${redisViews}`)
+  } catch (error) {
+    console.error(`❌ Ошибка синхронизации просмотров профиля для ${specialistId}:`, error)
+  }
+}
+
+/**
+ * Синхронизировать просмотры контактов с БД
+ */
+async function syncContactViewsToDB(specialistId: string): Promise<void> {
+  try {
+    const { prisma } = await import('@/lib/db')
+    const redisViews = await getContactViews(specialistId)
+    
+    await prisma.specialistProfile.update({
+      where: { id: specialistId },
+      data: { contactViews: redisViews }
+    })
+    
+    console.log(`✅ Синхронизированы просмотры контактов для ${specialistId}: ${redisViews}`)
+  } catch (error) {
+    console.error(`❌ Ошибка синхронизации просмотров контактов для ${specialistId}:`, error)
   }
 }
