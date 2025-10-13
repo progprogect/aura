@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
 import { getPackage } from '@/lib/packages/specialist-packages'
 import { prisma } from '@/lib/db'
+import { Decimal } from 'decimal.js'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,11 +31,11 @@ export async function POST(request: NextRequest) {
 
     // Проверяем баланс
     const balance = await PointsService.getBalance(user.id)
-    if (balance.total < pkg.price) {
+    if (balance.total.lt(pkg.price)) {
       return NextResponse.json({ 
         error: 'Недостаточно баллов',
         required: pkg.price,
-        available: balance.total 
+        available: balance.total.toNumber()
       }, { status: 400 })
     }
 

@@ -25,7 +25,7 @@ export class SpecialistLimitsService {
 
       // Получаем баланс баллов пользователя
       const balance = await PointsService.getBalance(specialist.userId)
-      const totalBalance = balance.total
+      const totalBalance = balance.total.toNumber()
 
       return {
         specialistId,
