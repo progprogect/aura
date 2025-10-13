@@ -31,7 +31,8 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [userBalance, setUserBalance] = useState<{ total: number; balance: number; bonusBalance: number } | null>(null)
-  const [orderMode, setOrderMode] = useState<'free' | 'paid'>('paid')
+  // Услуги всегда оплачиваются баллами
+  const orderMode = 'paid' as const
 
   // Загружаем баланс пользователя
   useEffect(() => {
@@ -85,21 +86,15 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
     setIsSubmitting(true)
 
     try {
-      const endpoint = orderMode === 'paid' ? '/api/orders/create-with-points' : '/api/orders/create'
-      const body = orderMode === 'paid' 
-        ? {
-            serviceId,
-            clientName: formData.clientName,
-            clientContact: formData.clientContact,
-            clientMessage: formData.clientMessage || null,
-            pointsUsed: Math.round(servicePrice) // Убеждаемся что передаем целое число
-          }
-        : {
-            serviceId,
-            clientName: formData.clientName,
-            clientContact: formData.clientContact,
-            clientMessage: formData.clientMessage || null,
-          }
+      // Услуги всегда оплачиваются баллами
+      const endpoint = '/api/orders/create-with-points'
+      const body = {
+        serviceId,
+        clientName: formData.clientName,
+        clientContact: formData.clientContact,
+        clientMessage: formData.clientMessage || null,
+        pointsUsed: Math.round(servicePrice) // Убеждаемся что передаем целое число
+      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -117,21 +112,19 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
           clientMessage: '',
         })
         
-        // Обновляем баланс если покупка за баллы
-        if (orderMode === 'paid') {
-          const fetchBalance = async () => {
-            try {
-              const balanceResponse = await fetch('/api/user/balance')
-              if (balanceResponse.ok) {
-                const balanceData = await balanceResponse.json()
-                setUserBalance(balanceData)
-              }
-            } catch (error) {
-              console.error('Ошибка обновления баланса:', error)
+        // Обновляем баланс после покупки
+        const fetchBalance = async () => {
+          try {
+            const balanceResponse = await fetch('/api/user/balance')
+            if (balanceResponse.ok) {
+              const balanceData = await balanceResponse.json()
+              setUserBalance(balanceData)
             }
+          } catch (error) {
+            console.error('Ошибка обновления баланса:', error)
           }
-          fetchBalance()
         }
+        fetchBalance()
       } else {
         if (data.code === 'INSUFFICIENT_POINTS') {
           setError(`Недостаточно баллов. Нужно: ${data.required}, доступно: ${data.available}`)
@@ -155,13 +148,10 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
             <span className="text-3xl">✅</span>
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">
-            {orderMode === 'paid' ? 'Заказ оплачен!' : 'Заказ отправлен!'}
+            Заказ оплачен!
           </h3>
           <p className="text-gray-600 mb-6">
-            {orderMode === 'paid' 
-              ? `Заказ оплачен за ${servicePrice} баллов! Баллы заморожены на 7 дней.`
-              : `${specialistName} получит ваш заказ и свяжется с вами в течение 24 часов.`
-            }
+            Заказ оплачен за {servicePrice} баллов! Баллы заморожены на 7 дней.
           </p>
           <Button
             onClick={() => setSuccess(false)}
@@ -184,56 +174,27 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
       {/* Информация о заказе */}
       <div className="mb-6">
         {user && userBalance ? (
-          <>
-            {/* Переключатель режимов для авторизованных */}
-            <div className="flex gap-2 mb-3">
-              <button
-                type="button"
-                onClick={() => setOrderMode('free')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  orderMode === 'free'
-                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-200'
-                    : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
-                }`}
-              >
-                Бесплатный запрос
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrderMode('paid')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  orderMode === 'paid'
-                    ? 'bg-green-100 text-green-700 border-2 border-green-200'
-                    : 'bg-gray-100 text-gray-600 border-2 border-gray-200'
-                }`}
-              >
-                Оплатить баллами
-              </button>
+          /* Информация для авторизованных пользователей */
+          <div className="p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-green-700">Стоимость:</span>
+              <span className="font-semibold text-green-800">{servicePrice} баллов</span>
             </div>
-
-            {orderMode === 'paid' && (
-              <div className="p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-green-700">Стоимость:</span>
-                  <span className="font-semibold text-green-800">{servicePrice} баллов</span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-1">
-                  <span className="text-green-700">Ваш баланс:</span>
-                  <span className="font-semibold text-green-800">{userBalance.total} баллов</span>
-                </div>
-                {userBalance.total < servicePrice && (
-                  <p className="text-xs text-red-600 mt-2">
-                    ⚠️ Недостаточно баллов. <a href="/points" className="underline">Купить баллы</a>
-                  </p>
-                )}
-                {userBalance.total >= servicePrice && (
-                  <p className="text-xs text-green-600 mt-2">
-                    💰 Баллы будут заморожены на 7 дней до выполнения услуги
-                  </p>
-                )}
-              </div>
+            <div className="flex items-center justify-between text-sm mt-1">
+              <span className="text-green-700">Ваш баланс:</span>
+              <span className="font-semibold text-green-800">{userBalance.total} баллов</span>
+            </div>
+            {userBalance.total < servicePrice && (
+              <p className="text-xs text-red-600 mt-2">
+                ⚠️ Недостаточно баллов. <a href="/points" className="underline">Купить баллы</a>
+              </p>
             )}
-          </>
+            {userBalance.total >= servicePrice && (
+              <p className="text-xs text-green-600 mt-2">
+                💰 Баллы будут заморожены на 7 дней до выполнения услуги
+              </p>
+            )}
+          </div>
         ) : (
           /* Информация для неавторизованных */
           <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
@@ -317,36 +278,20 @@ export function OrderForm({ serviceId, serviceName, specialistName, servicePrice
         </div>
 
         {/* Info */}
-        <div className={`p-3 rounded-lg text-sm ${
-          orderMode === 'paid' ? 'bg-green-50 text-green-800' : 'bg-blue-50 text-blue-800'
-        }`}>
-          <p className="font-medium mb-1">
-            {orderMode === 'paid' ? '💰 Оплаченный заказ' : 'ℹ️ Бесплатный запрос'}
-          </p>
+        <div className="p-3 rounded-lg text-sm bg-green-50 text-green-800">
+          <p className="font-medium mb-1">💰 Оплаченный заказ</p>
           <p className="text-xs">
-            {orderMode === 'paid' 
-              ? 'Баллы заморожены на 7 дней. После выполнения услуги специалист получит оплату.'
-              : 'Специалист свяжется с вами для уточнения деталей и подтверждения.'
-            }
+            Баллы заморожены на 7 дней. После выполнения услуги специалист получит оплату.
           </p>
         </div>
 
         {/* Submit */}
         <Button
           type="submit"
-          className={`w-full ${
-            orderMode === 'paid' 
-              ? 'bg-green-600 hover:bg-green-700' 
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-          disabled={isSubmitting || (orderMode === 'paid' && userBalance ? userBalance.total < servicePrice : false)}
+          className="w-full bg-green-600 hover:bg-green-700"
+          disabled={isSubmitting || (userBalance ? userBalance.total < servicePrice : false)}
         >
-          {isSubmitting 
-            ? 'Обработка...' 
-            : orderMode === 'paid' 
-              ? `Оплатить ${servicePrice} баллов`
-              : 'Оставить заказ'
-          }
+          {isSubmitting ? 'Обработка...' : `Оплатить ${servicePrice} баллов`}
         </Button>
       </form>
     </div>
