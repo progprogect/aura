@@ -40,18 +40,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Списываем баллы
-    const result = await PointsService.deductPoints(
-      user.id,
-      new Decimal(pkg.price),
-      'package_purchase',
-      `Покупка пакета ${pkg.name}`
-    )
-
-    if (!result.success) {
+    try {
+      await PointsService.deductPoints(
+        user.id,
+        new Decimal(pkg.price),
+        'package_purchase',
+        `Покупка пакета ${pkg.name}`
+      )
+    } catch (error) {
       return NextResponse.json({ 
         error: 'Ошибка списания баллов',
-        details: result.error 
-      }, { status: 500 })
+        details: error instanceof Error ? error.message : 'Неизвестная ошибка'
+      }, { status: 400 })
     }
 
     // Записываем покупку пакета
@@ -63,12 +63,15 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Получаем новый баланс
+    const newBalance = await PointsService.getBalance(user.id)
+
     console.log(`✅ Специалист ${user.specialistProfile.id} купил пакет ${pkg.name} за ${pkg.price} баллов`)
 
     return NextResponse.json({ 
       success: true,
       package: pkg,
-      newBalance: result.balance
+      newBalance: newBalance.total.toNumber()
     })
 
   } catch (error) {
