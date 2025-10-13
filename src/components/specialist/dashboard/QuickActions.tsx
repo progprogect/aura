@@ -15,9 +15,16 @@ interface QuickActionsProps {
   newRequestsCount?: number
   newOrdersCount?: number
   isSpecialist?: boolean
+  purchasesStats?: {
+    total: number
+    paid: number
+    completed: number
+    cancelled: number
+    disputed: number
+  }
 }
 
-export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true }: QuickActionsProps) {
+export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats }: QuickActionsProps) {
   const specialistActions = [
     {
       href: `/specialist/${slug}`,
@@ -62,10 +69,13 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       href: '/purchases',
       icon: ShoppingCart,
       label: 'Мои покупки',
-      description: 'История заказов и статусы',
+      description: purchasesStats && purchasesStats.total > 0 
+        ? `${purchasesStats.paid + purchasesStats.completed} заказов` 
+        : 'История заказов и статусы',
       variant: 'default' as const,
       isMain: true,
-      disabled: false
+      disabled: false,
+      badge: purchasesStats ? purchasesStats.paid + purchasesStats.completed : 0
     },
     {
       href: '/auth/user/become-specialist',
