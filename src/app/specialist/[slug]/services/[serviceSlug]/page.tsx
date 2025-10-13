@@ -9,6 +9,7 @@ import { cache } from 'react'
 import { prisma } from '@/lib/db'
 import { OrderForm } from '@/components/services/OrderForm'
 import { formatServicePrice } from '@/lib/services/utils'
+import { categoryConfigService } from '@/lib/category-config'
 
 interface PageProps {
   params: {
@@ -95,6 +96,9 @@ export default async function ServicePage({ params }: PageProps) {
 
   const { specialist, service } = data
   const fullName = `${specialist.firstName} ${specialist.lastName}`
+
+  // Получаем конфигурацию категории для отображения русского названия
+  const categoryConfig = await categoryConfigService.getCategoryConfigSafe(specialist.category)
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -183,7 +187,7 @@ export default async function ServicePage({ params }: PageProps) {
                   )}
                   <div>
                     <h3 className="font-semibold text-gray-900">{fullName}</h3>
-                    <p className="text-sm text-gray-600">{specialist.category}</p>
+                    <p className="text-sm text-gray-600">{categoryConfig?.name || specialist.category}</p>
                   </div>
                 </div>
                 <Link
