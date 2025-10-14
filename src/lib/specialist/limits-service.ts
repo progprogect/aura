@@ -157,12 +157,7 @@ export class SpecialistLimitsService {
    */
   static async isProfileVisible(specialistId: string): Promise<boolean> {
     const limits = await this.getSpecialistLimits(specialistId)
-    const isVisible = limits ? limits.isVisible : false
-    
-    // Логируем для отладки
-    console.log(`[Visibility Check] Specialist ${specialistId}: ${limits?.totalPoints || 0} баллов, видим: ${isVisible}`)
-    
-    return isVisible
+    return limits ? limits.isVisible : false
   }
 
   /**
