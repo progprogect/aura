@@ -28,7 +28,7 @@ export class SpecialistLimitsService {
       const balance = await PointsService.getBalance(specialist.userId)
       const totalBalance = balance.total.toNumber()
 
-      return {
+      const result = {
         specialistId,
         userId: specialist.userId,
         totalBalance,
@@ -36,6 +36,11 @@ export class SpecialistLimitsService {
         requestsAvailable: Math.floor(totalBalance / 10), // 10 баллов = 1 заявка
         isVisible: totalBalance > 0 // Профиль видим, если есть баллы
       }
+
+      // Логируем для отладки
+      console.log(`[Limits] Specialist ${specialistId}: ${totalBalance} баллов, видим: ${result.isVisible}`)
+
+      return result
     } catch (error) {
       console.error('Ошибка получения лимитов специалиста:', error)
       return null
@@ -152,19 +157,23 @@ export class SpecialistLimitsService {
    */
   static async isProfileVisible(specialistId: string): Promise<boolean> {
     const limits = await this.getSpecialistLimits(specialistId)
-    return limits ? limits.isVisible : false
+    const isVisible = limits ? limits.isVisible : false
+    
+    // Логируем для отладки
+    console.log(`[Visibility Check] Specialist ${specialistId}: ${limits?.totalPoints || 0} баллов, видим: ${isVisible}`)
+    
+    return isVisible
   }
 
   /**
    * Получить только видимых специалистов
    */
-  static async getVisibleSpecialists(filters?: any) {
+  static async getVisibleSpecialists(filters: any = {}) {
     try {
       const specialists = await prisma.specialistProfile.findMany({
         where: {
           acceptingClients: true,
-          verified: true,
-          ...filters
+          ...filters // Используем переданные фильтры вместо жестко заданных
         },
         include: {
           user: true
