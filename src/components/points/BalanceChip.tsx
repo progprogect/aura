@@ -43,11 +43,16 @@ export function BalanceChip() {
   }
 
   const total = parseFloat(balance.total);
+  const isNegative = total < 0;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 hover:from-amber-100 hover:to-amber-200 transition-colors cursor-pointer">
-      <Coins className="w-4 h-4 text-amber-600" />
-      <span className="font-medium text-sm text-amber-900">
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
+      isNegative
+        ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 hover:from-red-100 hover:to-red-200'
+        : 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:from-amber-100 hover:to-amber-200'
+    }`}>
+      <Coins className={`w-4 h-4 ${isNegative ? 'text-red-600' : 'text-amber-600'}`} />
+      <span className={`font-medium text-sm ${isNegative ? 'text-red-900' : 'text-amber-900'}`}>
         {formatPointsShort(total)}
       </span>
     </div>

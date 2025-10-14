@@ -281,6 +281,7 @@ export async function POST(request: NextRequest) {
           where: {
             id: { in: session.recommendedIds },
             acceptingClients: true,
+            verified: true, // Всегда требуем верификацию
           },
           take: 10,
           select: {

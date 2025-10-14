@@ -32,9 +32,9 @@ export class SpecialistLimitsService {
         specialistId,
         userId: specialist.userId,
         totalBalance,
-        contactViewsAvailable: totalBalance, // 1 балл = 1 просмотр контакта
-        requestsAvailable: Math.floor(totalBalance / 10), // 10 баллов = 1 заявка
-        isVisible: totalBalance > 0 // Профиль видим, если есть баллы
+        contactViewsAvailable: totalBalance, // 1 балл = 1 просмотр контакта (может быть отрицательным)
+        requestsAvailable: Math.floor(totalBalance / 10), // 10 баллов = 1 заявка (может быть отрицательным)
+        isVisible: totalBalance > 0 // Профиль видим только при положительном балансе
       }
 
       // Логируем для отладки
@@ -49,6 +49,7 @@ export class SpecialistLimitsService {
 
   /**
    * Проверить, может ли специалист получить просмотр контакта
+   * Для входящих операций всегда разрешаем (может быть отрицательный баланс)
    */
   static async canUseContactView(specialistId: string): Promise<{ allowed: boolean; remaining: number }> {
     const limits = await this.getSpecialistLimits(specialistId)
@@ -57,13 +58,14 @@ export class SpecialistLimitsService {
     }
 
     return {
-      allowed: limits.contactViewsAvailable > 0,
+      allowed: true, // Всегда разрешаем для входящих операций
       remaining: limits.contactViewsAvailable
     }
   }
 
   /**
    * Использовать просмотр контакта (списать 1 балл)
+   * Разрешает отрицательный баланс для входящих операций
    */
   static async consumeContactView(specialistId: string): Promise<boolean> {
     try {
@@ -76,9 +78,9 @@ export class SpecialistLimitsService {
         return false
       }
 
-      // Списываем 1 балл за просмотр контакта
+      // Списываем 1 балл за просмотр контакта (разрешаем отрицательный баланс)
       try {
-        await PointsService.deductPoints(
+        await PointsService.deductPointsForIncoming(
           specialist.userId,
           new Decimal(1),
           'contact_view',
@@ -106,6 +108,7 @@ export class SpecialistLimitsService {
 
   /**
    * Проверить, может ли специалист получить заявку
+   * Для входящих операций всегда разрешаем (может быть отрицательный баланс)
    */
   static async canUseRequest(specialistId: string): Promise<{ allowed: boolean; remaining: number }> {
     const limits = await this.getSpecialistLimits(specialistId)
@@ -114,13 +117,14 @@ export class SpecialistLimitsService {
     }
 
     return {
-      allowed: limits.requestsAvailable > 0,
+      allowed: true, // Всегда разрешаем для входящих операций
       remaining: limits.requestsAvailable
     }
   }
 
   /**
    * Использовать заявку (списать 10 баллов)
+   * Разрешает отрицательный баланс для входящих операций
    */
   static async consumeRequest(specialistId: string): Promise<boolean> {
     try {
@@ -133,9 +137,9 @@ export class SpecialistLimitsService {
         return false
       }
 
-      // Списываем 10 баллов за заявку
+      // Списываем 10 баллов за заявку (разрешаем отрицательный баланс)
       try {
-        await PointsService.deductPoints(
+        await PointsService.deductPointsForIncoming(
           specialist.userId,
           new Decimal(10),
           'request_received',
@@ -153,29 +157,59 @@ export class SpecialistLimitsService {
   }
 
   /**
-   * Проверить видимость профиля (есть ли баллы)
+   * Проверить видимость профиля
+   * Профиль видим только если специалист:
+   * 1. Принимает клиентов
+   * 2. Верифицирован
+   * 3. Имеет положительный баланс
    */
   static async isProfileVisible(specialistId: string): Promise<boolean> {
-    const limits = await this.getSpecialistLimits(specialistId)
-    return limits ? limits.isVisible : false
+    try {
+      const specialist = await prisma.specialistProfile.findUnique({
+        where: { id: specialistId },
+        include: { user: true }
+      })
+
+      if (!specialist?.acceptingClients) {
+        return false
+      }
+
+      if (!specialist.verified) {
+        console.log(`[Visibility] Specialist ${specialistId}: не верифицирован, скрыт`)
+        return false
+      }
+
+      // Проверяем баланс баллов
+      const balance = await PointsService.getBalance(specialist.userId)
+      const hasPositiveBalance = balance.total.gt(0)
+      
+      console.log(`[Visibility] Specialist ${specialistId}: баланс ${balance.total.toNumber()}, верифицирован: ${specialist.verified}, видим: ${hasPositiveBalance}`)
+      
+      return hasPositiveBalance
+    } catch (error) {
+      console.error('Ошибка проверки видимости профиля:', error)
+      return false
+    }
   }
 
   /**
    * Получить только видимых специалистов
+   * Фильтрует по: acceptingClients, verified, положительный баланс
    */
   static async getVisibleSpecialists(filters: any = {}) {
     try {
       const specialists = await prisma.specialistProfile.findMany({
         where: {
-          acceptingClients: true,
-          ...filters // Используем переданные фильтры вместо жестко заданных
+          ...filters, // Сначала применяем переданные фильтры
+          acceptingClients: true, // Затем добавляем обязательные фильтры
+          verified: true, // Всегда требуем верификацию
         },
         include: {
           user: true
         }
       })
 
-      // Фильтруем по видимости
+      // Фильтруем по видимости (включая проверку баланса)
       const visibleSpecialists = []
       for (const specialist of specialists) {
         if (await this.isProfileVisible(specialist.id)) {

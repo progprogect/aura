@@ -47,6 +47,7 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   const where: SpecialistWhereInput = {
     id: { in: specialistIds },
     acceptingClients: true,
+    verified: true, // Добавляем фильтр по верификации
   }
 
   console.log('[Semantic Search] 🔍 Prisma where (before optional filters):', { ids: specialistIds.length, acceptingClients: true })
@@ -200,13 +201,13 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
 
   const where: SpecialistWhereInput = {
     acceptingClients: true,
+    verified: true, // Всегда требуем верификацию
     id: excludeIds.length > 0 ? { notIn: excludeIds } : undefined,
     category: filters.category,
     workFormats: filters.workFormats ? { hasSome: filters.workFormats as any } : undefined,
     city: filters.city,
     yearsOfPractice: filters.minExperience ? { gte: filters.minExperience } : undefined,
     priceFrom: filters.maxPrice ? { lte: filters.maxPrice } : undefined,
-    verified: filters.verified,
   }
 
   // Поиск по тексту (расширяем тип для поиска)

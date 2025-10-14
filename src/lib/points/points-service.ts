@@ -176,6 +176,7 @@ export class PointsService {
 
   /**
    * Списать баллы (приоритет: bonus -> balance)
+   * Запрещает отрицательный баланс - используется для исходящих операций (покупки)
    */
   static async deductPoints(
     userId: string,
@@ -203,69 +204,114 @@ export class PointsService {
         throw new Error('Insufficient balance');
       }
 
-      const transactions: Transaction[] = [];
-      let remaining = amount;
-
-      // 1. Сначала списываем бонусные баллы
-      if (user.bonusBalance.gt(0) && remaining.gt(0)) {
-        const deductFromBonus = Decimal.min(user.bonusBalance, remaining);
-        const bonusBalanceBefore = user.bonusBalance;
-        const bonusBalanceAfter = bonusBalanceBefore.sub(deductFromBonus);
-
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            bonusBalance: bonusBalanceAfter,
-            // Если бонусный баланс стал 0, убираем дату истечения
-            ...(bonusBalanceAfter.eq(0) ? { bonusExpiresAt: null } : {}),
-          },
-        });
-
-        const transaction = await tx.transaction.create({
-          data: {
-            userId,
-            type,
-            amount: deductFromBonus.neg(), // Отрицательное значение для списания
-            balanceType: 'bonusBalance',
-            balanceBefore: bonusBalanceBefore,
-            balanceAfter: bonusBalanceAfter,
-            description: description || `Списание ${deductFromBonus} бонусных баллов`,
-            metadata,
-          },
-        });
-
-        transactions.push(transaction);
-        remaining = remaining.sub(deductFromBonus);
-      }
-
-      // 2. Затем списываем обычные баллы
-      if (remaining.gt(0)) {
-        const balanceBefore = user.balance;
-        const balanceAfter = balanceBefore.sub(remaining);
-
-        await tx.user.update({
-          where: { id: userId },
-          data: { balance: balanceAfter },
-        });
-
-        const transaction = await tx.transaction.create({
-          data: {
-            userId,
-            type,
-            amount: remaining.neg(), // Отрицательное значение для списания
-            balanceType: 'balance',
-            balanceBefore,
-            balanceAfter,
-            description: description || `Списание ${remaining} баллов`,
-            metadata,
-          },
-        });
-
-        transactions.push(transaction);
-      }
-
-      return transactions;
+      return this.performDeduction(tx, user, amount, type, description, metadata, userId);
     });
+  }
+
+  /**
+   * Списать баллы для входящих операций (разрешает отрицательный баланс)
+   * Используется для: заявок от клиентов, просмотров контактов
+   */
+  static async deductPointsForIncoming(
+    userId: string,
+    amount: Decimal,
+    type: TransactionType,
+    description?: string,
+    metadata?: any
+  ): Promise<Transaction[]> {
+    if (amount.lte(0)) {
+      throw new Error('Amount must be positive');
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { balance: true, bonusBalance: true },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Для входящих операций НЕ проверяем достаточность баланса
+      return this.performDeduction(tx, user, amount, type, description, metadata, userId);
+    });
+  }
+
+  /**
+   * Выполнить списание баллов (общая логика)
+   */
+  private static async performDeduction(
+    tx: any,
+    user: any,
+    amount: Decimal,
+    type: TransactionType,
+    description?: string,
+    metadata?: any,
+    userId?: string
+  ): Promise<Transaction[]> {
+    const transactions: Transaction[] = [];
+    let remaining = amount;
+
+    // 1. Сначала списываем бонусные баллы
+    if (user.bonusBalance.gt(0) && remaining.gt(0)) {
+      const deductFromBonus = Decimal.min(user.bonusBalance, remaining);
+      const bonusBalanceBefore = user.bonusBalance;
+      const bonusBalanceAfter = bonusBalanceBefore.sub(deductFromBonus);
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          bonusBalance: bonusBalanceAfter,
+          // Если бонусный баланс стал 0, убираем дату истечения
+          ...(bonusBalanceAfter.eq(0) ? { bonusExpiresAt: null } : {}),
+        },
+      });
+
+      const transaction = await tx.transaction.create({
+        data: {
+          userId: userId,
+          type,
+          amount: deductFromBonus.neg(), // Отрицательное значение для списания
+          balanceType: 'bonusBalance',
+          balanceBefore: bonusBalanceBefore,
+          balanceAfter: bonusBalanceAfter,
+          description: description || `Списание ${deductFromBonus} бонусных баллов`,
+          metadata,
+        },
+      });
+
+      transactions.push(transaction);
+      remaining = remaining.sub(deductFromBonus);
+    }
+
+    // 2. Затем списываем обычные баллы
+    if (remaining.gt(0)) {
+      const balanceBefore = user.balance;
+      const balanceAfter = balanceBefore.sub(remaining);
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { balance: balanceAfter },
+      });
+
+      const transaction = await tx.transaction.create({
+        data: {
+          userId: userId,
+          type,
+          amount: remaining.neg(), // Отрицательное значение для списания
+          balanceType: 'balance',
+          balanceBefore,
+          balanceAfter,
+          description: description || `Списание ${remaining} баллов`,
+          metadata,
+        },
+      });
+
+      transactions.push(transaction);
+    }
+
+    return transactions;
   }
 
   /**

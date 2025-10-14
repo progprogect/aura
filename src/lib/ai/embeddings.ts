@@ -147,7 +147,10 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
  */
 export async function generateAllEmbeddings() {
   const specialistProfiles = await prisma.specialistProfile.findMany({
-    where: { acceptingClients: true },
+    where: { 
+      acceptingClients: true,
+      verified: true, // Всегда требуем верификацию
+    },
     select: { 
       id: true,
       user: {

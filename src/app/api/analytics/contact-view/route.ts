@@ -23,13 +23,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Проверяем, может ли пользователь просмотреть контакты
+    // Для входящих операций всегда разрешаем (может быть отрицательный баланс)
     const canUse = await SpecialistLimitsService.canUseContactView(user.id)
     if (!canUse.allowed) {
       return NextResponse.json({ 
-        error: 'Недостаточно баллов для просмотра контактов',
-        remaining: canUse.remaining,
-        required: 1
-      }, { status: 402 }) // Payment Required
+        error: 'Пользователь не может просматривать контакты'
+      }, { status: 400 })
     }
 
     // Списываем балл

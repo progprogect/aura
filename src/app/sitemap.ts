@@ -7,7 +7,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Получаем всех специалистов для генерации URL (Unified)
     const specialistProfiles = await prisma.specialistProfile.findMany({
-      where: { acceptingClients: true },
+      where: { 
+        acceptingClients: true,
+        verified: true, // Всегда требуем верификацию
+      },
       select: { slug: true, updatedAt: true },
     })
 

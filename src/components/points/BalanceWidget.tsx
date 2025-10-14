@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Coins, Gift, Clock, History, Loader2 } from 'lucide-react';
+import { Coins, Gift, Clock, History, Loader2, AlertTriangle } from 'lucide-react';
 import { formatPoints, formatTimeUntilExpiry } from '@/lib/points/format';
 import { UserBalance } from '@/types/points';
 
@@ -53,22 +53,35 @@ export function BalanceWidget({ onOpenHistory }: BalanceWidgetProps) {
   const bonus = parseFloat(balance.bonusBalance);
   const hasBonus = bonus > 0;
   const bonusExpiring = balance.bonusExpiresAt && new Date(balance.bonusExpiresAt) > new Date();
+  const isNegative = total < 0;
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-200 shadow-sm">
+    <div className={`rounded-2xl p-6 border shadow-sm ${
+      isNegative 
+        ? 'bg-gradient-to-br from-red-50 to-orange-50 border-red-200' 
+        : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
+    }`}>
       {/* Заголовок */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <div className="bg-amber-600 rounded-full p-2">
+          <div className={`rounded-full p-2 ${
+            isNegative ? 'bg-red-600' : 'bg-amber-600'
+          }`}>
             <Coins className="w-5 h-5 text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Мои баллы</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {isNegative ? 'Долг по баллам' : 'Мои баллы'}
+          </h3>
         </div>
         
         {onOpenHistory && (
           <button
             onClick={onOpenHistory}
-            className="flex items-center gap-1.5 text-sm text-amber-700 hover:text-amber-800 font-medium transition-colors"
+            className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
+              isNegative 
+                ? 'text-red-700 hover:text-red-800' 
+                : 'text-amber-700 hover:text-amber-800'
+            }`}
           >
             <History className="w-4 h-4" />
             История
@@ -78,8 +91,12 @@ export function BalanceWidget({ onOpenHistory }: BalanceWidgetProps) {
 
       {/* Общий баланс */}
       <div className="mb-6">
-        <div className="text-sm text-gray-600 mb-1">Всего баллов</div>
-        <div className="text-4xl font-bold text-gray-900">
+        <div className="text-sm text-gray-600 mb-1">
+          {isNegative ? 'Долг по баллам' : 'Всего баллов'}
+        </div>
+        <div className={`text-4xl font-bold ${
+          isNegative ? 'text-red-600' : 'text-gray-900'
+        }`}>
           {formatPoints(total)}
         </div>
       </div>
@@ -108,6 +125,17 @@ export function BalanceWidget({ onOpenHistory }: BalanceWidgetProps) {
           </div>
         </div>
       </div>
+
+      {/* Предупреждение об отрицательном балансе */}
+      {isNegative && (
+        <div className="mt-4 bg-red-100 border border-red-300 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-700 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-red-900">
+            <span className="font-medium">У вас долг по баллам. </span>
+            <span>Пополните баланс для продолжения работы с платформой.</span>
+          </div>
+        </div>
+      )}
 
       {/* Предупреждение о сгорании бонусов */}
       {hasBonus && bonusExpiring && (

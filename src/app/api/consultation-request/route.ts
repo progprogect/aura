@@ -31,14 +31,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Специалист не найден' }, { status: 404 })
     }
 
-    // Проверяем, может ли специалист получить заявку (списать 10 баллов)
+    // Проверяем, может ли специалист получить заявку
+    // Для входящих операций всегда разрешаем (может быть отрицательный баланс)
     const canUse = await SpecialistLimitsService.canUseRequest(specialistId)
     if (!canUse.allowed) {
       return NextResponse.json({ 
-        error: 'У специалиста недостаточно баллов для получения заявок',
-        remaining: canUse.remaining,
-        required: 10
-      }, { status: 402 }) // Payment Required
+        error: 'Специалист не может получать заявки'
+      }, { status: 400 })
     }
 
     // Списываем 10 баллов за получение заявки

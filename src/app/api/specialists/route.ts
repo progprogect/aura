@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
     // Построение фильтров для Prisma
     const where: any = {
       acceptingClients: true,
+      verified: true, // Всегда требуем верификацию
     }
     
     // Фильтр по категории
@@ -106,10 +107,7 @@ export async function GET(request: NextRequest) {
       where.workFormats = { hasSome: format }
     }
     
-    // Фильтр по верификации
-    if (isVerified) {
-      where.verified = true
-    }
+    // Фильтр по верификации уже установлен выше (всегда true)
     
     // Поиск по тексту (с защитой от SQL injection через Prisma)
     if (finalSearch) {
