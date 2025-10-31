@@ -89,7 +89,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy migration script
-COPY --chown=nextjs:nodejs scripts/start-with-migrations.sh ./scripts/
+COPY --chown=nextjs:nodejs prisma/scripts/start-with-migrations.sh ./scripts/
 RUN chmod +x ./scripts/start-with-migrations.sh
 
 # Copy Prisma schema and migrations for runtime migrations
