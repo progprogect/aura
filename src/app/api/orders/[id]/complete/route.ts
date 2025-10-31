@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
 import { FileUploadService } from '@/lib/services/file-upload'
 import { Decimal } from 'decimal.js'
+import { notifyUserAboutCompletedWork } from '@/lib/notifications/sms-notifications'
 
 export async function PATCH(
   request: NextRequest,
@@ -40,6 +41,12 @@ export async function PATCH(
                 lastName: true
               }
             }
+          }
+        },
+        request: {
+          select: {
+            id: true,
+            status: true
           }
         }
       }
@@ -83,41 +90,43 @@ export async function PATCH(
       )
     }
 
-    // Завершаем заказ в транзакции
+    // Обновляем заказ - переводим в статус pending_completion (ожидает подтверждения пользователя)
     await prisma.$transaction(async (tx) => {
-      // Переводим баллы специалисту
-      if (order.pointsUsed > 0) {
-        await PointsService.addPoints(
-          order.specialistProfile.userId,
-          new Decimal(order.pointsUsed),
-          'service_completion',
-          'balance',
-          `Выполнение услуги: ${order.service.title}`,
-          {
-            orderId: order.id,
-            serviceTitle: order.service.title,
-            clientName: order.clientName
-          }
-        )
-      }
-
-      // Обновляем заказ
+      // Обновляем заказ - ожидает подтверждения
       await tx.order.update({
         where: { id: orderId },
         data: {
-          status: 'completed',
-          pointsFrozen: false,
+          status: 'pending_completion',
           resultScreenshot: screenshotUrl,
-          resultDescription: description.trim(),
-          completedAt: new Date(),
-          verifiedAt: new Date()
+          resultDescription: description.trim()
         }
       })
+
+      // Если заказ связан с заявкой, обновляем её статус
+      if (order.requestId) {
+        await tx.userRequest.update({
+          where: { id: order.requestId },
+          data: {
+            status: 'in_progress' // Остаётся in_progress, т.к. ждёт подтверждения
+          }
+        })
+      }
     })
+
+    // Отправляем SMS уведомление пользователю (асинхронно)
+    if (order.clientUserId) {
+      notifyUserAboutCompletedWork(
+        order.clientUserId,
+        `${order.specialistProfile.user.firstName} ${order.specialistProfile.user.lastName}`,
+        order.service.title
+      ).catch(err => {
+        console.error('[API/orders/complete] Ошибка отправки уведомления:', err)
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Заказ успешно завершен! Баллы переведены.'
+      message: 'Работа завершена! Ожидайте подтверждения от пользователя.'
     })
 
   } catch (error) {

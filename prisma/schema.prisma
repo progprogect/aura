@@ -37,6 +37,8 @@ model User {
 
   // Связи
   transactions Transaction[]
+  requests     UserRequest[]
+  reviews      Review[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -102,6 +104,9 @@ model SpecialistProfile {
   consultationRequests ConsultationRequest[]
   services             Service[]
   orders               Order[]
+  proposals            Proposal[]
+  reviews              Review[]
+  selectedRequests     UserRequest[]         @relation("SelectedSpecialistRequests")
 
   // Медиа
   videoUrl String? // YouTube/Vimeo URL для видео-презентации
@@ -340,6 +345,13 @@ model Order {
   specialistProfileId String
   specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
 
+  // Связь с заявкой (если заказ создан из заявки)
+  requestId String?      @unique
+  request   UserRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  // Связь с отзывом
+  review Review?
+
   // Данные клиента
   clientName    String
   clientContact String // Телефон (обязательно)
@@ -351,6 +363,7 @@ model Order {
   // pending - создан, ожидает оплаты
   // paid - оплачен, средства на эскроу
   // in_progress - специалист начал работу
+  // pending_completion - специалист завершил, ожидает подтверждения пользователя
   // completed - завершено, средства переведены
   // cancelled - отменен (возврат средств)
   // disputed - спор (эскалация)
@@ -361,9 +374,9 @@ model Order {
   transactionId String? // ID транзакции из Transaction модели
 
   // Система баллов
-  pointsUsed          Int      @default(0) // Сколько баллов потрачено
-  pointsFrozen        Boolean  @default(false) // Заморожены ли баллы
-  autoConfirmAt       DateTime? // Когда автоматически подтвердить (через 7 дней)
+  pointsUsed    Int       @default(0) // Сколько баллов потрачено
+  pointsFrozen  Boolean   @default(false) // Заморожены ли баллы
+  autoConfirmAt DateTime? // Когда автоматически подтвердить (через 7 дней)
 
   // Эскроу и выполнение
   escrowReleased Boolean   @default(false) // Переведены ли средства специалисту
@@ -372,7 +385,7 @@ model Order {
 
   // Доказательства выполнения
   resultScreenshot  String? // URL скриншота результата
-  resultDescription String? @db.Text // Описание выполненной работы
+  resultDescription String?   @db.Text // Описание выполненной работы
   verifiedAt        DateTime? // Когда проверил админ
 
   // Dispute resolution
@@ -388,6 +401,7 @@ model Order {
   @@index([clientContact])
   @@index([status])
   @@index([deadline])
+  @@index([requestId])
 }
 
 // ========================================
@@ -644,12 +658,115 @@ model PackagePurchase {
   specialistProfileId String
   specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
 
-  packageId String // 'basic', 'standard', 'premium'
-  pointsSpent Int  // Сколько баллов потрачено
+  packageId   String // 'basic', 'standard', 'premium'
+  pointsSpent Int // Сколько баллов потрачено
 
   createdAt DateTime @default(now())
 
   @@index([specialistProfileId])
   @@index([createdAt])
   @@index([packageId])
+}
+
+// ========================================
+// СИСТЕМА ЗАЯВОК ПОЛЬЗОВАТЕЛЕЙ
+// ========================================
+
+model UserRequest {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Основная информация
+  title       String // "Нужен психолог для работы с тревогой"
+  description String @db.Text // Подробное описание задачи
+  category    String // Категория заявки (key из Category)
+
+  // Бюджет (опционально)
+  budget Int? // Бюджет в баллах (опционально, min 50, max 2000)
+
+  // Статус
+  status String @default("open")
+  // "open" | "in_progress" | "completed" | "cancelled"
+
+  // Выбранный специалист (если выбран)
+  selectedSpecialistId String?
+  selectedSpecialist   SpecialistProfile? @relation("SelectedSpecialistRequests", fields: [selectedSpecialistId], references: [id], onDelete: SetNull)
+
+  // Связи
+  proposals Proposal[] // Отклики специалистов
+
+  // Заказ (создаётся при принятии отклика)
+  orderId String? @unique
+  order   Order?
+
+  // Метаданные
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime? // Когда закрыт/отменён
+
+  @@index([userId])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ========================================
+// ОТКЛИКИ СПЕЦИАЛИСТОВ (Proposals)
+// ========================================
+
+model Proposal {
+  id        String      @id @default(cuid())
+  requestId String
+  request   UserRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  specialistId String
+  specialist   SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  // Предложение специалиста
+  message       String @db.Text // Почему подхожу (min 50, max 1000)
+  proposedPrice Int // Предложенная цена в баллах (min 50, max 2000)
+
+  // Статус
+  status String @default("pending")
+  // "pending" | "accepted" | "rejected" | "withdrawn" | "expired"
+
+  // Метаданные
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  acceptedAt  DateTime? // Когда принят
+  rejectedAt  DateTime? // Когда отклонён
+  withdrawnAt DateTime? // Когда отозван
+
+  @@unique([requestId, specialistId]) // Один отклик на заявку от специалиста
+  @@index([specialistId])
+  @@index([requestId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ========================================
+// ОТЗЫВЫ (Reviews)
+// ========================================
+
+model Review {
+  id      String @id @default(cuid())
+  orderId String @unique // Один отзыв на заказ
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  specialistId String
+  specialist   SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating  Int // 0-5 звёзд
+  comment String? @db.Text // Отзыв (опционально)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([specialistId])
+  @@index([userId])
+  @@index([rating])
 }

@@ -70,6 +70,27 @@
     overflow-x: hidden;
     width: 100%;
     position: relative;
+    /* Предотвращаем масштабирование при фокусе на input (iOS Safari) */
+    -webkit-text-size-adjust: 100%;
+    /* Оптимизация для мобильных */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Улучшения для мобильных устройств */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Safe area для iOS */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top, 0);
   }
 }
 

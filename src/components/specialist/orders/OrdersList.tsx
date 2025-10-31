@@ -9,6 +9,8 @@ import { motion } from 'framer-motion'
 import { User, Phone, MessageSquare, Clock, Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Dialog } from '@/components/ui/dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { getOrderStatusLabel, getOrderStatusColor, isOrderOverdue } from '@/lib/services/utils'
 import type { OrderUI } from '@/types/service'
 
@@ -24,6 +26,8 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
     screenshot: null as File | null,
     description: ''
   })
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleUpdateStatus = async (id: string, status: string) => {
     setUpdatingId(id)
@@ -42,11 +46,11 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
         )
       } else {
         const data = await response.json()
-        alert(data.error || 'Ошибка обновления статуса')
+        setErrorMessage(data.error || 'Ошибка обновления статуса')
       }
     } catch (error) {
       console.error('Ошибка:', error)
-      alert('Ошибка обновления статуса')
+      setErrorMessage('Ошибка обновления статуса')
     } finally {
       setUpdatingId(null)
     }
@@ -54,7 +58,7 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
 
   const handleCompleteOrder = async (orderId: string) => {
     if (!completeForm.screenshot || !completeForm.description.trim()) {
-      alert('Нужно загрузить скриншот и описание')
+      setErrorMessage('Нужно загрузить скриншот и описание')
       return
     }
 
@@ -85,14 +89,14 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
         // Сбрасываем форму
         setCompleteForm({ screenshot: null, description: '' })
         setCompletingOrderId(null)
-        alert('Заказ успешно завершен! Баллы переведены.')
+        setSuccessMessage('Работа завершена! Ожидайте подтверждения от пользователя.')
       } else {
         const data = await response.json()
-        alert(data.error || 'Ошибка завершения заказа')
+        setErrorMessage(data.error || 'Ошибка завершения заказа')
       }
     } catch (error) {
       console.error('Ошибка:', error)
-      alert('Ошибка завершения заказа')
+      setErrorMessage('Ошибка завершения заказа')
     } finally {
       setUpdatingId(null)
     }
@@ -382,6 +386,44 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Модальное окно ошибки */}
+      {errorMessage && (
+        <Dialog
+          isOpen={!!errorMessage}
+          onClose={() => setErrorMessage(null)}
+          title="Ошибка"
+          footer={
+            <Button onClick={() => setErrorMessage(null)}>
+              Закрыть
+            </Button>
+          }
+        >
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </Dialog>
+      )}
+
+      {/* Модальное окно успеха */}
+      {successMessage && (
+        <Dialog
+          isOpen={!!successMessage}
+          onClose={() => setSuccessMessage(null)}
+          title="Успешно"
+          footer={
+            <Button onClick={() => setSuccessMessage(null)}>
+              Закрыть
+            </Button>
+          }
+        >
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        </Dialog>
       )}
     </div>
   )

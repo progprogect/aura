@@ -54,12 +54,16 @@ export async function unifiedLogin(data: UnifiedLoginData): Promise<UnifiedAuthR
   try {
     console.log(`[unified-auth] Вход: ${phone}, роль: ${role || 'auto'}`)
     
-    // 1. Проверяем SMS-код
-    const verification = await SMSVerificationService.verifyCode(phone, code, 'login')
+    // 1. Проверяем SMS-код (пробуем сначала 'login', потом 'registration')
+    let verification = await SMSVerificationService.verifyCode(phone, code, 'login')
     if (!verification.success) {
-      return {
-        success: false,
-        error: verification.error
+      // Если код для 'login' не найден, пробуем 'registration' (для универсальности)
+      verification = await SMSVerificationService.verifyCode(phone, code, 'registration')
+      if (!verification.success) {
+        return {
+          success: false,
+          error: verification.error || 'Неверный код'
+        }
       }
     }
     

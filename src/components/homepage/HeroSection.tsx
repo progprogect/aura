@@ -11,11 +11,15 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HeroNavigation } from './HeroNavigation'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Grid3X3 } from 'lucide-react'
+import { Sparkles, Grid3X3, X } from 'lucide-react'
+import { RequestQuiz } from '@/components/requests/RequestQuiz'
 
 export function HeroSection() {
   const [demoStep, setDemoStep] = useState(0)
   const [isTyping, setIsTyping] = useState(false)
+  const [showRequestQuiz, setShowRequestQuiz] = useState(false)
+  const [quizInitialCategory, setQuizInitialCategory] = useState<string | undefined>()
+  const [quizInitialTitle, setQuizInitialTitle] = useState<string | undefined>()
 
   // Демо-диалог
   const demoMessages = [
@@ -183,29 +187,40 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch max-w-lg mx-auto"
+            className="flex flex-col gap-3 justify-center items-stretch max-w-lg mx-auto"
           >
             <Button 
-              size="lg" 
-              asChild 
-              className="flex-1 h-16 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all py-4"
+              size="lg"
+              onClick={() => setShowRequestQuiz(true)}
+              className="w-full h-16 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all py-4"
             >
-              <Link href="/chat" className="flex items-center justify-center">
-                <Sparkles className="w-5 h-5 mr-2" />
-                Попробовать AI-помощника
-              </Link>
+              <Sparkles className="w-5 h-5 mr-2" />
+              Создать заявку
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              asChild 
-              className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
-            >
-              <Link href="/catalog" className="flex items-center justify-center">
-                <Grid3X3 className="w-5 h-5 mr-2" />
-                Смотреть каталог
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Button 
+                size="lg" 
+                asChild 
+                variant="outline"
+                className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
+              >
+                <Link href="/chat" className="flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Попробовать AI-помощника
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                asChild 
+                className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
+              >
+                <Link href="/catalog" className="flex items-center justify-center">
+                  <Grid3X3 className="w-5 h-5 mr-2" />
+                  Смотреть каталог
+                </Link>
+              </Button>
+            </div>
           </motion.div>
 
           {/* Дополнительная информация */}
@@ -219,6 +234,49 @@ export function HeroSection() {
           </motion.div>
         </div>
       </div>
+
+      {/* Модальное окно Quiz */}
+      <AnimatePresence>
+        {showRequestQuiz && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              onClick={() => setShowRequestQuiz(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{
+                type: 'spring',
+                damping: 30,
+                stiffness: 300,
+              }}
+              className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center pointer-events-none"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative w-full md:w-auto md:max-w-3xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl pointer-events-auto safe-area-inset-bottom md:safe-area-inset-bottom-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 z-10 bg-background/80 backdrop-blur-sm touch-manipulation min-h-[44px] min-w-[44px]"
+                  onClick={() => setShowRequestQuiz(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <RequestQuiz
+                  defaultCategory={quizInitialCategory}
+                  defaultTitle={quizInitialTitle}
+                  onClose={() => setShowRequestQuiz(false)}
+                />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </section>
   )
 }

@@ -57,6 +57,29 @@ export const UpdateOrderStatusSchema = z.object({
   disputeReason: z.string().optional().nullable(),
 })
 
+// Схемы для системы заявок (User Requests)
+export const CreateRequestSchema = z.object({
+  title: z.string().min(5, 'Минимум 5 символов').max(100, 'Максимум 100 символов'),
+  description: z.string().min(50, 'Минимум 50 символов').max(2000, 'Максимум 2000 символов'),
+  category: z.string().min(1, 'Выберите категорию'),
+  budget: z.number().int().min(50, 'Минимум 50 баллов').max(2000, 'Максимум 2000 баллов').optional().nullable(),
+})
+
+export const CreateProposalSchema = z.object({
+  message: z.string().min(50, 'Минимум 50 символов').max(1000, 'Максимум 1000 символов'),
+  proposedPrice: z.number().int().min(50, 'Минимум 50 баллов').max(2000, 'Максимум 2000 баллов'),
+})
+
+export const AcceptProposalSchema = z.object({
+  proposalId: z.string().cuid('Некорректный ID отклика'),
+})
+
+export const CreateReviewSchema = z.object({
+  orderId: z.string().cuid('Некорректный ID заказа'),
+  rating: z.number().int().min(0, 'Рейтинг от 0').max(5, 'Рейтинг до 5'),
+  comment: z.string().max(1000, 'Максимум 1000 символов').optional().nullable(),
+})
+
 // Типы для использования в коде
 export type GetSpecialistsQuery = z.infer<typeof GetSpecialistsQuerySchema>
 export type ConsultationRequest = z.infer<typeof ConsultationRequestSchema>
@@ -65,3 +88,7 @@ export type CreateServiceInput = z.infer<typeof CreateServiceSchema>
 export type UpdateServiceInput = z.infer<typeof UpdateServiceSchema>
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>
 export type UpdateOrderStatusInput = z.infer<typeof UpdateOrderStatusSchema>
+export type CreateRequestInput = z.infer<typeof CreateRequestSchema>
+export type CreateProposalInput = z.infer<typeof CreateProposalSchema>
+export type AcceptProposalInput = z.infer<typeof AcceptProposalSchema>
+export type CreateReviewInput = z.infer<typeof CreateReviewSchema>

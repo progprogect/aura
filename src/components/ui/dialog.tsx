@@ -73,6 +73,7 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
                 max-h-[90vh] md:max-h-[85vh]
                 overflow-hidden
                 pointer-events-auto
+                safe-area-inset-bottom
               "
             >
               {/* Header */}
@@ -95,7 +96,7 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
 
               {/* Footer */}
               {footer && (
-                <div className="p-4 md:p-6 border-t bg-gray-50">
+                <div className="p-4 md:p-6 border-t bg-gray-50 safe-area-inset-bottom">
                   {footer}
                 </div>
               )}

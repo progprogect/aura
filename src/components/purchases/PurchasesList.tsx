@@ -8,8 +8,12 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Dialog } from '@/components/ui/dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Textarea } from '@/components/ui/textarea'
+import { ReviewModal } from '@/components/reviews/ReviewModal'
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, CheckCircle, XCircle, AlertTriangle, ShoppingCart } from 'lucide-react'
+import { Clock, CheckCircle, XCircle, AlertTriangle, ShoppingCart, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -69,6 +73,16 @@ const STATUS_CONFIG = {
     color: 'bg-blue-100 text-blue-800',
     icon: Clock,
   },
+  in_progress: {
+    label: 'В работе',
+    color: 'bg-blue-100 text-blue-800',
+    icon: Clock,
+  },
+  pending_completion: {
+    label: 'Ожидает подтверждения',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: AlertCircle,
+  },
   completed: {
     label: 'Завершен',
     color: 'bg-green-100 text-green-800',
@@ -92,6 +106,13 @@ export function PurchasesList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('all')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  const [disputeOrderId, setDisputeOrderId] = useState<string | null>(null)
+  const [disputeReason, setDisputeReason] = useState('')
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [reviewOrderId, setReviewOrderId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPurchases()
@@ -121,25 +142,67 @@ export function PurchasesList() {
     }
   }
 
-  const handleDispute = async (orderId: string, reason: string) => {
+  const handleDisputeClick = (orderId: string) => {
+    setDisputeOrderId(orderId)
+    setShowDisputeDialog(true)
+  }
+
+  const handleDispute = async () => {
+    if (!disputeOrderId || !disputeReason.trim()) {
+      setErrorMessage('Укажите причину спора')
+      return
+    }
+
     try {
-      const response = await fetch(`/api/orders/${orderId}/dispute`, {
+      const response = await fetch(`/api/orders/${disputeOrderId}/dispute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason })
+        body: JSON.stringify({ reason: disputeReason.trim() })
       })
 
       if (response.ok) {
         // Обновляем список
         fetchPurchases()
-        alert('Спор создан. Администратор рассмотрит в течение 24 часов.')
+        setShowDisputeDialog(false)
+        setDisputeOrderId(null)
+        setDisputeReason('')
       } else {
         const data = await response.json()
-        alert(data.error || 'Ошибка создания спора')
+        setErrorMessage(data.error || 'Ошибка создания спора')
       }
     } catch (error) {
       console.error('Ошибка:', error)
-      alert('Произошла ошибка при создании спора')
+      setErrorMessage('Произошла ошибка при создании спора')
+    }
+  }
+
+  const handleConfirmOrder = async (orderId: string) => {
+    setConfirmingOrderId(orderId)
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}/confirm`, {
+        method: 'PATCH'
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Обновляем список
+        fetchPurchases()
+        
+        // Если требуется отзыв, показываем модальное окно
+        if (data.requiresReview) {
+          setReviewOrderId(orderId)
+          setShowReviewModal(true)
+        }
+      } else {
+        setErrorMessage(data.error || 'Ошибка подтверждения заказа')
+      }
+    } catch (error) {
+      console.error('Ошибка:', error)
+      setErrorMessage('Произошла ошибка при подтверждении заказа')
+    } finally {
+      setConfirmingOrderId(null)
     }
   }
 
@@ -314,17 +377,23 @@ export function PurchasesList() {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
-                    {(order.status === 'paid' || order.status === 'completed') && (
+                  <div className="flex gap-2 flex-wrap">
+                    {order.status === 'pending_completion' && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleConfirmOrder(order.id)}
+                        disabled={confirmingOrderId === order.id}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {confirmingOrderId === order.id ? 'Подтверждаем...' : 'Подтвердить выполнение'}
+                      </Button>
+                    )}
+                    
+                    {(order.status === 'paid' || order.status === 'completed' || order.status === 'in_progress') && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const reason = prompt('Опишите проблему:')
-                          if (reason?.trim()) {
-                            handleDispute(order.id, reason.trim())
-                          }
-                        }}
+                        onClick={() => handleDisputeClick(order.id)}
                         className="text-red-600 hover:text-red-700 hover:border-red-300"
                       >
                         Оспорить
@@ -343,6 +412,86 @@ export function PurchasesList() {
           })}
         </div>
       </div>
+
+      {/* Модальное окно спора */}
+      <Dialog
+        isOpen={showDisputeDialog}
+        onClose={() => {
+          setShowDisputeDialog(false)
+          setDisputeOrderId(null)
+          setDisputeReason('')
+        }}
+        title="Открыть спор"
+        footer={
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDisputeDialog(false)
+                setDisputeOrderId(null)
+                setDisputeReason('')
+              }}
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleDispute}
+              disabled={!disputeReason.trim()}
+              variant="destructive"
+            >
+              Открыть спор
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Опишите проблему с заказом. Администратор рассмотрит спор в течение 24 часов.
+          </p>
+          <Textarea
+            placeholder="Опишите проблему..."
+            value={disputeReason}
+            onChange={(e) => setDisputeReason(e.target.value)}
+            rows={4}
+          />
+        </div>
+      </Dialog>
+
+      {/* Модальное окно ошибки */}
+      {errorMessage && (
+        <Dialog
+          isOpen={!!errorMessage}
+          onClose={() => setErrorMessage(null)}
+          title="Ошибка"
+          footer={
+            <Button onClick={() => setErrorMessage(null)}>
+              Закрыть
+            </Button>
+          }
+        >
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </Dialog>
+      )}
+
+      {/* Модальное окно отзыва */}
+      {reviewOrderId && (
+        <ReviewModal
+          orderId={reviewOrderId}
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false)
+            setReviewOrderId(null)
+          }}
+          onSuccess={() => {
+            setShowReviewModal(false)
+            setReviewOrderId(null)
+            fetchPurchases()
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -179,10 +179,11 @@ export function PhoneInput({
         placeholder={dynamicPlaceholder}
         disabled={disabled}
         className={cn(
-          "text-base h-12",
+          "text-base h-12 touch-manipulation",
           validation.shouldShowError && "border-red-500 focus:ring-red-500",
           className
         )}
+        style={{ fontSize: '16px' }}
         autoComplete="tel"
         inputMode="numeric"
         {...props}

@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart } from 'lucide-react'
+import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search } from 'lucide-react'
 
 interface QuickActionsProps {
   slug?: string
@@ -55,6 +55,22 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false
     },
     {
+      href: '/find-work',
+      icon: Search,
+      label: 'Найти клиента',
+      description: 'Просмотреть все заявки',
+      variant: 'outline' as const,
+      disabled: false
+    },
+    {
+      href: '/specialist/proposals',
+      icon: FileText,
+      label: 'Мои отклики',
+      description: 'Управление откликами',
+      variant: 'outline' as const,
+      disabled: false
+    },
+    {
       href: '/purchases',
       icon: ShoppingCart,
       label: 'Мои покупки',
@@ -95,6 +111,15 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       isMain: true,
       disabled: false,
       badge: purchasesStats ? purchasesStats.paid + purchasesStats.completed : 0
+    },
+    {
+      href: '/requests',
+      icon: FileText,
+      label: 'Мои заявки',
+      description: 'Созданные заявки',
+      variant: 'outline' as const,
+      isMain: false,
+      disabled: false
     },
     {
       href: '/auth/user/become-specialist',
