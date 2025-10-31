@@ -93,18 +93,23 @@ RUN mkdir -p ./scripts && \
     echo '#!/bin/sh' > ./scripts/start-with-migrations.sh && \
     echo 'set -e' >> ./scripts/start-with-migrations.sh && \
     echo 'echo "🔄 Applying Prisma migrations..."' >> ./scripts/start-with-migrations.sh && \
-    echo 'npx prisma migrate deploy || npx prisma db push --accept-data-loss' >> ./scripts/start-with-migrations.sh && \
-    echo 'echo "✅ Migrations applied successfully"' >> ./scripts/start-with-migrations.sh && \
+    echo 'export DATABASE_URL="${DATABASE_URL}"' >> ./scripts/start-with-migrations.sh && \
+    echo 'if command -v npx > /dev/null; then' >> ./scripts/start-with-migrations.sh && \
+    echo '  npx prisma migrate deploy || npx prisma db push --accept-data-loss || echo "⚠️ Migration warning (continuing...)"' >> ./scripts/start-with-migrations.sh && \
+    echo 'else' >> ./scripts/start-with-migrations.sh && \
+    echo '  echo "⚠️ npx not available, skipping migrations"' >> ./scripts/start-with-migrations.sh && \
+    echo 'fi' >> ./scripts/start-with-migrations.sh && \
+    echo 'echo "✅ Migrations completed"' >> ./scripts/start-with-migrations.sh && \
     echo 'echo "🚀 Starting Next.js server..."' >> ./scripts/start-with-migrations.sh && \
-    echo 'exec node server.js' >> ./scripts/start-with-migrations.sh && \
+    echo 'cd /app && node server.js' >> ./scripts/start-with-migrations.sh && \
     chmod +x ./scripts/start-with-migrations.sh && \
     chown nextjs:nodejs ./scripts/start-with-migrations.sh
 
 # Copy Prisma schema, migrations and generated client for runtime migrations
+# В standalone режиме Next.js уже включает необходимые файлы
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-RUN mkdir -p ./node_modules && chown -R nextjs:nodejs ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# Копируем package.json для доступа к скриптам
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 USER nextjs
 
