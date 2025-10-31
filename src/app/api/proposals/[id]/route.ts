@@ -28,6 +28,9 @@ export async function DELETE(
       )
     }
 
+    // Гарантируем, что specialistProfile существует
+    const specialistProfileId = session.specialistProfile.id
+
     const proposalId = params.id
 
     // Получаем отклик
@@ -46,7 +49,7 @@ export async function DELETE(
     }
 
     // Проверяем, что отклик принадлежит текущему специалисту
-    if (proposal.specialistId !== session.specialistProfile.id) {
+    if (proposal.specialistId !== specialistProfileId) {
       return NextResponse.json(
         { success: false, error: 'Нет прав для отзыва этого отклика' },
         { status: 403 }

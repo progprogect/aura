@@ -53,8 +53,12 @@ export async function POST(
       )
     }
 
+    // Гарантируем, что specialistProfile существует (уже проверено выше)
+    const specialistProfileId = session.specialistProfile.id
+    const specialistCategory = session.specialistProfile.category
+
     // Проверяем категорию специалиста
-    if (userRequest.category !== session.specialistProfile.category) {
+    if (userRequest.category !== specialistCategory) {
       return NextResponse.json(
         { success: false, error: 'Вы можете откликаться только на заявки в вашей категории' },
         { status: 403 }
@@ -66,7 +70,7 @@ export async function POST(
       where: {
         requestId_specialistId: {
           requestId,
-          specialistId: session.specialistProfile.id
+          specialistId: specialistProfileId
         }
       }
     })
@@ -90,6 +94,9 @@ export async function POST(
     }
 
     // Списываем 1 балл и создаём отклик в транзакции
+    // Гарантируем, что specialistProfile существует (уже проверено выше)
+    const specialistProfileId = session.specialistProfile.id
+
     const result = await prisma.$transaction(async (tx) => {
       // Списываем 1 балл
       await PointsService.deductPoints(
@@ -107,7 +114,7 @@ export async function POST(
       const proposal = await tx.proposal.create({
         data: {
           requestId,
-          specialistId: session.specialistProfile.id,
+          specialistId: specialistProfileId,
           message: data.message,
           proposedPrice: data.proposedPrice,
           status: 'pending'

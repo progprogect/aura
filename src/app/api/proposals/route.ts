@@ -22,12 +22,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Гарантируем, что specialistProfile существует
+    const specialistProfileId = session.specialistProfile.id
+
     // Получаем query параметры
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
 
     const where: any = {
-      specialistId: session.specialistProfile.id
+      specialistId: specialistProfileId
     }
 
     if (status) {
