@@ -89,16 +89,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Create migration script inline (before USER switch)
-RUN mkdir -p /tmp/scripts && \
-    echo '#!/bin/sh' > /tmp/scripts/start-with-migrations.sh && \
-    echo 'set -e' >> /tmp/scripts/start-with-migrations.sh && \
-    echo 'echo "🔄 Applying Prisma migrations..."' >> /tmp/scripts/start-with-migrations.sh && \
-    echo 'npx prisma migrate deploy || npx prisma db push --accept-data-loss' >> /tmp/scripts/start-with-migrations.sh && \
-    echo 'echo "✅ Migrations applied successfully"' >> /tmp/scripts/start-with-migrations.sh && \
-    echo 'echo "🚀 Starting Next.js server..."' >> /tmp/scripts/start-with-migrations.sh && \
-    echo 'exec node server.js' >> /tmp/scripts/start-with-migrations.sh && \
-    chmod +x /tmp/scripts/start-with-migrations.sh && \
-    mv /tmp/scripts/start-with-migrations.sh ./scripts/
+RUN mkdir -p ./scripts && \
+    echo '#!/bin/sh' > ./scripts/start-with-migrations.sh && \
+    echo 'set -e' >> ./scripts/start-with-migrations.sh && \
+    echo 'echo "🔄 Applying Prisma migrations..."' >> ./scripts/start-with-migrations.sh && \
+    echo 'npx prisma migrate deploy || npx prisma db push --accept-data-loss' >> ./scripts/start-with-migrations.sh && \
+    echo 'echo "✅ Migrations applied successfully"' >> ./scripts/start-with-migrations.sh && \
+    echo 'echo "🚀 Starting Next.js server..."' >> ./scripts/start-with-migrations.sh && \
+    echo 'exec node server.js' >> ./scripts/start-with-migrations.sh && \
+    chmod +x ./scripts/start-with-migrations.sh && \
+    chown nextjs:nodejs ./scripts/start-with-migrations.sh
 
 # Copy Prisma schema and migrations for runtime migrations
 COPY --chown=nextjs:nodejs prisma ./prisma
