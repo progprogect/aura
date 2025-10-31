@@ -151,7 +151,7 @@ export async function PATCH(
     await PointsService.deductPoints(
       session.userId,
       new Decimal(proposal.proposedPrice),
-      'order_payment',
+      'service_purchase',
       `Принятие отклика: ${proposal.request.title}`,
       {
         requestId: proposal.request.id,
