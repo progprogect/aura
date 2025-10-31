@@ -88,36 +88,9 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy Prisma schema, migrations and generated client for runtime migrations
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+# Copy Prisma schema and generated client for runtime (без миграций)
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-
-# Create migration script inline (before USER switch)
-RUN mkdir -p ./scripts && \
-    echo '#!/bin/sh' > ./scripts/start-with-migrations.sh && \
-    echo 'set -e' >> ./scripts/start-with-migrations.sh && \
-    echo 'echo "🔄 Applying Prisma migrations..."' >> ./scripts/start-with-migrations.sh && \
-    echo 'if [ -n "$DATABASE_URL" ] && command -v npx > /dev/null; then' >> ./scripts/start-with-migrations.sh && \
-    echo '  cd /app' >> ./scripts/start-with-migrations.sh && \
-    echo '  npx prisma migrate deploy || npx prisma db push --accept-data-loss || echo "⚠️ Migration warning (continuing...)"' >> ./scripts/start-with-migrations.sh && \
-    echo 'else' >> ./scripts/start-with-migrations.sh && \
-    echo '  echo "⚠️ Skipping migrations (DATABASE_URL not set or npx not available)"' >> ./scripts/start-with-migrations.sh && \
-    echo 'fi' >> ./scripts/start-with-migrations.sh && \
-    echo 'echo "✅ Migrations completed"' >> ./scripts/start-with-migrations.sh && \
-    echo 'echo "🚀 Starting Next.js server..."' >> ./scripts/start-with-migrations.sh && \
-    echo 'cd /app' >> ./scripts/start-with-migrations.sh && \
-    echo 'if [ -f "./server.js" ]; then' >> ./scripts/start-with-migrations.sh && \
-    echo '  exec node server.js' >> ./scripts/start-with-migrations.sh && \
-    echo 'elif [ -f "./.next/standalone/server.js" ]; then' >> ./scripts/start-with-migrations.sh && \
-    echo '  exec node ./.next/standalone/server.js' >> ./scripts/start-with-migrations.sh && \
-    echo 'else' >> ./scripts/start-with-migrations.sh && \
-    echo '  echo "⚠️ server.js not found, using npm start"' >> ./scripts/start-with-migrations.sh && \
-    echo '  exec npm start' >> ./scripts/start-with-migrations.sh && \
-    echo 'fi' >> ./scripts/start-with-migrations.sh && \
-    chmod +x ./scripts/start-with-migrations.sh && \
-    chown nextjs:nodejs ./scripts/start-with-migrations.sh
 
 USER nextjs
 
@@ -126,4 +99,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["./scripts/start-with-migrations.sh"]
+CMD ["node", "server.js"]
