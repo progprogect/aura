@@ -102,6 +102,7 @@ RUN mkdir -p ./scripts && \
 
 # Copy Prisma schema, migrations and generated client for runtime migrations
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+RUN mkdir -p ./node_modules && chown -R nextjs:nodejs ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
