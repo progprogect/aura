@@ -67,7 +67,7 @@ export async function PATCH(
     }
 
     // Проверяем, нет ли открытого спора
-    if (order.status === 'disputed' || order.disputeReason) {
+    if (order.disputeReason) {
       return NextResponse.json(
         { error: 'Нельзя подтвердить заказ со спором. Дождитесь решения администратора.' },
         { status: 400 }
@@ -77,7 +77,7 @@ export async function PATCH(
     // Подтверждаем заказ в транзакции
     await prisma.$transaction(async (tx) => {
       // Переводим баллы специалисту (только если нет спора)
-      if (order.pointsUsed > 0 && order.status !== 'disputed') {
+      if (order.pointsUsed > 0 && !order.disputeReason) {
         await PointsService.addPoints(
           order.specialistProfile.userId,
           new Decimal(order.pointsUsed),
