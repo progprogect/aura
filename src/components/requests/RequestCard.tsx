@@ -59,7 +59,7 @@ export function RequestCard({
             <CardTitle className="text-lg font-semibold line-clamp-2 flex-1 min-w-0">
               {title}
             </CardTitle>
-            <Badge className={STATUS_COLORS[status] || STATUS_COLORS.open} variant="outline" className="flex-shrink-0">
+            <Badge className={`${STATUS_COLORS[status] || STATUS_COLORS.open} flex-shrink-0`} variant="outline">
               {STATUS_LABELS[status] || status}
             </Badge>
           </div>
