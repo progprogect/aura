@@ -1,6 +1,6 @@
 /**
- * Навигация интегрированная с hero секцией
- * Без разделительной линии, с прозрачным фоном
+ * Унифицированная навигация для всех страниц
+ * Поддерживает варианты: hero (прозрачный фон) и standard (белый фон с тенью)
  */
 
 'use client'
@@ -10,8 +10,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { LogOut, User } from 'lucide-react'
+import { BalanceChip } from '@/components/points/BalanceChip'
 
-export function HeroNavigation() {
+interface UnifiedNavigationProps {
+  variant?: 'hero' | 'standard'
+}
+
+export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationProps) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user, isAuthenticated, logout, loading } = useAuth()
@@ -27,17 +32,44 @@ export function HeroNavigation() {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
+
+  // Унифицированные стили
+  const navClassName = variant === 'hero'
+    ? 'absolute top-0 left-0 right-0 z-10 bg-transparent'
+    : 'bg-white shadow-sm border-b border-gray-200'
+  
+  const containerClassName = variant === 'hero'
+    ? 'max-w-7xl mx-auto px-6 lg:px-8'
+    : 'container mx-auto px-4'
+  
+  const heightClassName = variant === 'hero' ? 'h-20' : 'h-16'
+  
+  const logoSize = variant === 'hero' 
+    ? 'w-7 h-7' 
+    : 'w-8 h-8'
+  
+  const logoTextSize = variant === 'hero'
+    ? 'text-xs'
+    : 'text-sm'
+  
+  const brandTextSize = variant === 'hero'
+    ? 'text-lg'
+    : 'text-xl'
+  
+  const activeColor = 'text-blue-600'
+  const inactiveColor = 'text-gray-700'
+  const hoverColor = 'hover:text-blue-600'
   
   return (
-    <nav className="absolute top-0 left-0 right-0 z-10 bg-transparent">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Логотип - уменьшенный */}
+    <nav className={navClassName}>
+      <div className={containerClassName}>
+        <div className={`flex items-center justify-between ${heightClassName}`}>
+          {/* Логотип */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">A</span>
+            <div className={`${logoSize} bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center`}>
+              <span className={`text-white font-bold ${logoTextSize}`}>A</span>
             </div>
-            <span className="text-lg font-bold text-gray-900">Aura</span>
+            <span className={`${brandTextSize} font-bold text-gray-900`}>Aura</span>
           </Link>
           
           {/* Навигационные ссылки */}
@@ -46,39 +78,54 @@ export function HeroNavigation() {
               href="/"
               className={`text-sm font-medium transition-colors ${
                 isActive('/') 
-                  ? 'text-primary' 
-                  : 'text-gray-700 hover:text-primary'
+                  ? activeColor 
+                  : `${inactiveColor} ${hoverColor}`
               }`}
             >
               Главная
             </Link>
-            <Link
-              href="/chat"
-              className={`text-sm font-medium transition-colors ${
+            <span className="relative group">
+              <span className={`text-sm font-medium transition-colors opacity-60 cursor-not-allowed ${
                 isActive('/chat') 
-                  ? 'text-primary' 
-                  : 'text-gray-700 hover:text-primary'
-              }`}
-            >
-              AI-Помощник
-            </Link>
+                  ? activeColor 
+                  : inactiveColor
+              }`}>
+                AI-Помощник
+              </span>
+              <span className="absolute -top-2 -right-6 bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                Скоро
+              </span>
+            </span>
             <Link
               href="/catalog"
               className={`text-sm font-medium transition-colors ${
                 isActive('/catalog') 
-                  ? 'text-primary' 
-                  : 'text-gray-700 hover:text-primary'
+                  ? activeColor 
+                  : `${inactiveColor} ${hoverColor}`
               }`}
             >
-              Специалисты
+              Каталог специалистов
             </Link>
+            <Link
+              href="/find-work"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/find-work') 
+                  ? activeColor 
+                  : `${inactiveColor} ${hoverColor}`
+              }`}
+            >
+              Найти клиентов
+            </Link>
+            
+            {/* Показываем разные кнопки в зависимости от авторизации */}
             {!loading && (
               <div className="flex items-center space-x-3">
                 {isAuthenticated ? (
                   <>
+                    {variant === 'standard' && <BalanceChip />}
                     <Link
                       href="/profile"
-                      className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      className={`flex items-center space-x-2 text-sm font-medium transition-colors ${inactiveColor} ${hoverColor}`}
                     >
                       {user?.avatar ? (
                         <img
@@ -93,7 +140,7 @@ export function HeroNavigation() {
                     </Link>
                     <button
                       onClick={logout}
-                      className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
+                      className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors ${inactiveColor} hover:text-red-600`}
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Выйти</span>
@@ -135,11 +182,11 @@ export function HeroNavigation() {
               aria-label="Открыть меню"
             >
               {isMobileMenuOpen ? (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={variant === 'hero' ? 'h-5 w-5' : 'h-6 w-6'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={variant === 'hero' ? 'h-5 w-5' : 'h-6 w-6'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
@@ -150,66 +197,83 @@ export function HeroNavigation() {
         {/* Мобильное меню - выпадающий список */}
         {isMobileMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-sm border-t border-gray-200 rounded-b-lg shadow-lg">
+            <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200 ${
+              variant === 'hero' 
+                ? 'bg-white/95 backdrop-blur-sm rounded-b-lg shadow-lg'
+                : 'bg-white'
+            }`}>
               <Link
                 href="/"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive('/') 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                    ? `${activeColor} bg-blue-50` 
+                    : `${inactiveColor} ${hoverColor} hover:bg-gray-50`
                 }`}
                 onClick={closeMobileMenu}
               >
                 Главная
               </Link>
-              <Link
-                href="/chat"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              <div className="relative group">
+                <span className={`block px-3 py-2 rounded-md text-base font-medium opacity-60 cursor-not-allowed ${
                   isActive('/chat') 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                AI-Помощник
-              </Link>
+                    ? `${activeColor} bg-blue-50` 
+                    : inactiveColor
+                }`}>
+                  AI-Помощник
+                  <span className="ml-2 bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    Скоро
+                  </span>
+                </span>
+              </div>
               <Link
                 href="/catalog"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive('/catalog') 
-                    ? 'text-primary bg-primary/10' 
-                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                    ? `${activeColor} bg-blue-50` 
+                    : `${inactiveColor} ${hoverColor} hover:bg-gray-50`
                 }`}
                 onClick={closeMobileMenu}
               >
-                Специалисты
+                Каталог специалистов
               </Link>
+              <Link
+                href="/find-work"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/find-work') 
+                    ? `${activeColor} bg-blue-50` 
+                    : `${inactiveColor} ${hoverColor} hover:bg-gray-50`
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Найти клиентов
+              </Link>
+              
               {!loading && (
                 <>
                   {isAuthenticated ? (
                     <>
                       <Link
                         href="/profile"
-                        className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${inactiveColor} ${hoverColor} hover:bg-gray-50`}
                         onClick={closeMobileMenu}
                       >
                         {user?.avatar ? (
                           <img
                             src={user.avatar}
                             alt={`${user.firstName} ${user.lastName}`}
-                            className="w-6 h-6 rounded-full object-cover"
+                            className="w-4 h-4 rounded-full object-cover inline mr-2"
                           />
                         ) : (
-                          <User className="w-4 h-4" />
+                          <User className="w-4 h-4 inline mr-2" />
                         )}
-                        <span>{user?.firstName} {user?.lastName}</span>
+                        {user?.firstName} {user?.lastName}
                       </Link>
                       <button
                         onClick={() => {
                           logout()
                           closeMobileMenu()
                         }}
-                        className="flex items-center space-x-2 w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className={`flex items-center space-x-2 w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${inactiveColor} hover:text-red-600 hover:bg-red-50`}
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Выйти</span>
@@ -250,3 +314,4 @@ export function HeroNavigation() {
     </nav>
   )
 }
+

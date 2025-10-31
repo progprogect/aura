@@ -34,7 +34,9 @@ type QuizStep = 'title' | 'category' | 'description' | 'budget' | 'auth' | 'load
 
 export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQuizProps) {
   const router = useRouter()
-  const [step, setStep] = useState<QuizStep>(defaultTitle || defaultCategory ? 'category' : 'title')
+  // Если defaultTitle задан, начинаем с category (пропускаем title)
+  const initialStep: QuizStep = defaultTitle ? 'category' : (defaultCategory ? 'category' : 'title')
+  const [step, setStep] = useState<QuizStep>(initialStep)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   
@@ -127,6 +129,20 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
       setStep(steps[currentIndex + 1])
     }
   }
+
+  // Если defaultTitle задан, используем его и переходим к следующему шагу
+  useEffect(() => {
+    if (defaultTitle && !formData.title) {
+      setFormData(prev => ({ ...prev, title: defaultTitle }))
+      // Если мы на шаге title и defaultTitle задан, автоматически переходим к category
+      if (step === 'title') {
+        const timer = setTimeout(() => {
+          setStep('category')
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [defaultTitle])
 
   const handleBack = () => {
     setError('')

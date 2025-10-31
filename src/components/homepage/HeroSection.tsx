@@ -6,46 +6,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HeroNavigation } from './HeroNavigation'
+import { UnifiedNavigation } from '../UnifiedNavigation'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Grid3X3, X } from 'lucide-react'
+import { Grid3X3, X, ChevronRight } from 'lucide-react'
 import { RequestQuiz } from '@/components/requests/RequestQuiz'
 
 export function HeroSection() {
-  const [demoStep, setDemoStep] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
   const [showRequestQuiz, setShowRequestQuiz] = useState(false)
   const [quizInitialCategory, setQuizInitialCategory] = useState<string | undefined>()
   const [quizInitialTitle, setQuizInitialTitle] = useState<string | undefined>()
-
-  // Демо-диалог
-  const demoMessages = [
-    { text: "У меня тревога, помогите", isUser: true },
-    { text: "Понимаю, что вы переживаете. У нас есть 3 психолога, специализирующихся на работе с тревожностью:", isUser: false },
-  ]
-
-  // Автоматическое проигрывание демо
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (demoStep < demoMessages.length) {
-        setIsTyping(true)
-        setTimeout(() => {
-          setIsTyping(false)
-          setDemoStep(prev => prev + 1)
-        }, 1500)
-      }
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [demoStep, demoMessages.length])
+  
+  // Состояние первого шага квиза на главной странице
+  const [heroQuizTitle, setHeroQuizTitle] = useState('')
 
   return (
     <section className="relative overflow-hidden">
       {/* Интегрированная навигация */}
-      <HeroNavigation />
+      <UnifiedNavigation variant="hero" />
       
       {/* Фоновый градиент */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
@@ -70,150 +49,79 @@ export function HeroSection() {
             </p>
           </motion.div>
 
-          {/* Чат-демо */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="max-w-4xl mx-auto shadow-xl border-0 bg-gradient-to-br from-white/90 to-white/80 backdrop-blur-sm rounded-xl">
-              <div className="p-8 md:p-12">
-                <div className="space-y-6">
-                  {/* Заголовок чата */}
-                  <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center animate-pulse">
-                      <Image 
-                        src="/icons/chat-bubble.svg" 
-                        alt="Чат-помощник" 
-                        width={20} 
-                        height={20} 
-                        className="text-white"
-                        priority
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">AI-Помощник</h3>
-                      <p className="text-sm text-muted-foreground">Готов помочь найти специалиста</p>
-                    </div>
-                  </div>
-
-                  {/* Сообщения */}
-                  <div className="space-y-6 min-h-[160px] md:min-h-[200px]">
-                    <AnimatePresence>
-                      {demoMessages.slice(0, demoStep).map((message, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4 }}
-                          className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[80%] px-6 py-4 rounded-2xl ${
-                              message.isUser
-                                ? 'bg-primary text-white'
-                                : 'bg-gray-100 text-foreground'
-                            }`}
-                          >
-                            <p className="text-sm md:text-base">{message.text}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-
-                    {/* Индикатор печати */}
-                    {isTyping && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex justify-start"
-                      >
-                        <div className="bg-gray-100 px-4 py-3 rounded-2xl">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Результаты поиска (показываем после второго сообщения) */}
-                  {demoStep >= 2 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.5 }}
-                      className="bg-gradient-to-r from-primary/10 to-primary-600/10 rounded-xl p-4 border border-primary/20"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                          <Image 
-                            src="/icons/chat-bubble.svg" 
-                            alt="Результаты поиска" 
-                            width={16} 
-                            height={16} 
-                            className="text-primary"
-                          />
-                        </div>
-                        <p className="text-sm font-medium text-foreground">Найдено 3 специалиста</p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="bg-white rounded-lg p-3 border border-gray-100">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-600 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-semibold">{i}</span>
-                              </div>
-                              <div>
-                                <p className="text-xs font-medium text-foreground">Психолог #{i}</p>
-                                <p className="text-xs text-muted-foreground">КПТ-терапия</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Кнопки действий - отдельно от чата */}
+          {/* Встроенный первый шаг квиза */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-col gap-3 justify-center items-stretch max-w-lg mx-auto"
+            className="flex flex-col gap-4 justify-center items-stretch max-w-2xl mx-auto"
           >
-            <Button 
-              size="lg"
-              onClick={() => setShowRequestQuiz(true)}
-              className="w-full h-16 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all py-4"
-            >
-              <Sparkles className="w-5 h-5 mr-2" />
-              Создать заявку
-            </Button>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6 sm:p-8">
+              <div className="space-y-4">
+                <div className="text-center space-y-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+                    Создайте заявку за 30 секунд
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Опишите, что вам нужно, и специалисты предложат свои услуги
+                  </p>
+                </div>
+                
+                <div>
+                  <label htmlFor="hero-quiz-title" className="block text-sm font-medium text-foreground mb-2">
+                    Что вам нужно?
+                  </label>
+                  <input
+                    id="hero-quiz-title"
+                    type="text"
+                    value={heroQuizTitle}
+                    onChange={(e) => setHeroQuizTitle(e.target.value)}
+                    placeholder="Например: Нужен психолог для работы с тревогой"
+                    maxLength={100}
+                    className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-base touch-manipulation transition-all"
+                    style={{ fontSize: '16px' }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && heroQuizTitle.trim().length >= 5) {
+                        setQuizInitialTitle(heroQuizTitle.trim())
+                        setShowRequestQuiz(true)
+                      }
+                    }}
+                  />
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {heroQuizTitle.length}/100 символов
+                    </p>
+                    {heroQuizTitle.trim().length >= 5 && (
+                      <p className="text-xs text-primary font-medium">
+                        Нажмите Enter или кнопку ниже
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    if (heroQuizTitle.trim().length >= 5) {
+                      setQuizInitialTitle(heroQuizTitle.trim())
+                      setShowRequestQuiz(true)
+                    }
+                  }}
+                  disabled={heroQuizTitle.trim().length < 5}
+                  className="w-full h-12 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all touch-manipulation min-h-[44px]"
+                >
+                  Продолжить
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button 
-                size="lg" 
-                asChild 
-                variant="outline"
-                className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
-              >
-                <Link href="/chat" className="flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Попробовать AI-помощника
-                </Link>
-              </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 asChild 
-                className="flex-1 h-16 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all py-4"
+                className="flex-1 h-12 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all touch-manipulation min-h-[44px]"
               >
                 <Link href="/catalog" className="flex items-center justify-center">
                   <Grid3X3 className="w-5 h-5 mr-2" />
@@ -269,8 +177,14 @@ export function HeroSection() {
                 </Button>
                 <RequestQuiz
                   defaultCategory={quizInitialCategory}
-                  defaultTitle={quizInitialTitle}
-                  onClose={() => setShowRequestQuiz(false)}
+                  defaultTitle={quizInitialTitle || heroQuizTitle.trim()}
+                  onClose={() => {
+                    setShowRequestQuiz(false)
+                    // Очищаем данные только если пользователь закрыл модальное окно
+                    if (!quizInitialTitle) {
+                      setHeroQuizTitle('')
+                    }
+                  }}
                 />
               </div>
             </motion.div>
