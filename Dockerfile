@@ -88,6 +88,14 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy migration script
+COPY --chown=nextjs:nodejs scripts/start-with-migrations.sh ./scripts/
+RUN chmod +x ./scripts/start-with-migrations.sh
+
+# Copy Prisma schema and migrations for runtime migrations
+COPY --chown=nextjs:nodejs prisma ./prisma
+COPY --chown=nextjs:nodejs node_modules/.prisma ./node_modules/.prisma
+
 USER nextjs
 
 EXPOSE 3000
@@ -95,4 +103,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["./scripts/start-with-migrations.sh"]
