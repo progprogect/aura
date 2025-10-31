@@ -61,7 +61,8 @@ export default function FindWorkPage() {
       .then(res => res.json())
       .then(data => {
         if (data.categories) {
-          setCategories(data.categories.filter((c: Category) => c.isActive))
+          // API возвращает только активные категории, фильтр не нужен
+          setCategories(data.categories)
         }
       })
   }, [])

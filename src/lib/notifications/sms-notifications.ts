@@ -3,7 +3,8 @@
  */
 
 import { prisma } from '@/lib/db'
-// TODO: Интегрировать реальную отправку SMS уведомлений
+import { sendSMS } from '@/lib/auth/sms-service'
+// TODO: Интегрировать реальную отправку SMS уведомлений с текстовыми сообщениями
 // Пока используем console.log для логирования
 
 interface NotificationOptions {
