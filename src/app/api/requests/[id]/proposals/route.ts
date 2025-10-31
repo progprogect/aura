@@ -94,9 +94,6 @@ export async function POST(
     }
 
     // Списываем 1 балл и создаём отклик в транзакции
-    // Гарантируем, что specialistProfile существует (уже проверено выше)
-    const specialistProfileId = session.specialistProfile.id
-
     const result = await prisma.$transaction(async (tx) => {
       // Списываем 1 балл
       await PointsService.deductPoints(
