@@ -88,7 +88,6 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Create migration script inline
 # Create migration script inline (before USER switch)
 RUN mkdir -p /tmp/scripts && \
     echo '#!/bin/sh' > /tmp/scripts/start-with-migrations.sh && \
