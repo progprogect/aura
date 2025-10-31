@@ -100,9 +100,10 @@ RUN mkdir -p ./scripts && \
     chmod +x ./scripts/start-with-migrations.sh && \
     chown nextjs:nodejs ./scripts/start-with-migrations.sh
 
-# Copy Prisma schema and migrations for runtime migrations
-COPY --chown=nextjs:nodejs prisma ./prisma
-COPY --chown=nextjs:nodejs node_modules/.prisma ./node_modules/.prisma
+# Copy Prisma schema, migrations and generated client for runtime migrations
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 
