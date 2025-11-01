@@ -57,7 +57,7 @@ export function SpecialistServices({ services, specialistSlug }: SpecialistServi
                     <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">
                       {service.title}
                     </h3>
-                    {service.deliveryDays && (
+                    {service.deliveryDays !== null && service.deliveryDays !== undefined && service.deliveryDays > 0 && (
                       <p className="text-xs text-gray-500 mt-1">
                         ⏱️ {service.deliveryDays} {service.deliveryDays === 1 ? 'день' : 'дней'}
                       </p>

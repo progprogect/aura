@@ -140,7 +140,7 @@ export default async function ServicePage({ params }: PageProps) {
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     {service.title}
                   </h1>
-                  {service.deliveryDays && (
+                  {service.deliveryDays !== null && service.deliveryDays !== undefined && service.deliveryDays > 0 && (
                     <p className="text-gray-600">
                       ⏱️ Срок выполнения: {service.deliveryDays} {service.deliveryDays === 1 ? 'день' : 'дней'}
                     </p>

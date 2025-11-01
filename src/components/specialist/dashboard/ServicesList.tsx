@@ -165,7 +165,7 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
                     <h4 className="font-semibold text-gray-900 text-sm lg:text-base xl:text-lg line-clamp-2">
                       {service.title}
                     </h4>
-                    {service.deliveryDays && (
+                    {service.deliveryDays !== null && service.deliveryDays !== undefined && service.deliveryDays > 0 && (
                       <p className="text-xs text-gray-500">
                         ⏱️ {service.deliveryDays} {service.deliveryDays === 1 ? 'день' : 'дней'}
                       </p>
