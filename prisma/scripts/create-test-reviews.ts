@@ -32,7 +32,7 @@ async function createTestReviews() {
   try {
     // Получаем специалистов
     const specialists = await prisma.specialistProfile.findMany({
-      take: 5,
+      take: 10,
       include: {
         user: true,
         services: {
