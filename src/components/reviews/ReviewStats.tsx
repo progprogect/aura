@@ -23,6 +23,11 @@ export function ReviewStats({ averageRating, totalReviews, distribution }: Revie
     return Math.round((count / totalReviews) * 100)
   }
 
+  // Если нет отзывов - не показываем статистику
+  if (totalReviews === 0 || averageRating === 0) {
+    return null
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
       {/* Средний рейтинг (большими цифрами) */}
