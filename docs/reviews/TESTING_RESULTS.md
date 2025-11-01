@@ -211,9 +211,9 @@
 **Файл:** `src/components/reviews/RatingDisplay.tsx`
 
 ### 12. Отображение "0" при отсутствии отзывов ✅
-**Проблема:** Отображался "0" для специалистов без отзывов из-за неправильной проверки `averageRating && totalReviews` (0 не проходит проверку как falsy)  
-**Решение:** Исправлены условия рендеринга в `SpecialistHero` и добавлена валидация rating (1-5) в `RatingDisplay`  
-**Файлы:** `src/components/specialist/SpecialistHero.tsx`, `src/components/reviews/RatingDisplay.tsx`
+**Проблема:** Отображался "0" для специалистов без отзывов в компоненте `ReviewStats`  
+**Решение:** Добавлена проверка на отсутствие отзывов в `ReviewStats` (возвращает null), исправлены условия рендеринга в `SpecialistHero` и валидация в `RatingDisplay`  
+**Файлы:** `src/components/reviews/ReviewStats.tsx`, `src/components/specialist/SpecialistHero.tsx`, `src/components/reviews/RatingDisplay.tsx`
 
 ---
 
