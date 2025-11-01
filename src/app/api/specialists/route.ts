@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     // Сортировка
     let orderBy: any = {}
     switch (finalSortBy) {
-        case 'rating':
+      case 'rating':
         // Сортировка по рейтингу (сначала по среднему рейтингу, потом по количеству отзывов)
         orderBy = [
           { averageRating: 'desc' },

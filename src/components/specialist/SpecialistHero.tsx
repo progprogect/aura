@@ -137,7 +137,7 @@ export function SpecialistHero({
             </motion.h1>
             
             {/* Рейтинг (мобилка) */}
-            {totalReviews > 0 && averageRating !== undefined && (
+            {(totalReviews ?? 0) > 0 && averageRating !== undefined && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -146,7 +146,7 @@ export function SpecialistHero({
               >
                 <RatingDisplay 
                   rating={averageRating} 
-                  totalReviews={totalReviews} 
+                  totalReviews={totalReviews!} 
                   size="sm"
                   className="text-white drop-shadow-lg [&>span]:text-white"
                 />
@@ -297,7 +297,7 @@ export function SpecialistHero({
               </motion.h1>
 
               {/* Рейтинг (десктоп) */}
-              {totalReviews > 0 && averageRating !== undefined && (
+              {(totalReviews ?? 0) > 0 && averageRating !== undefined && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -306,7 +306,7 @@ export function SpecialistHero({
                 >
                   <RatingDisplay 
                     rating={averageRating} 
-                    totalReviews={totalReviews} 
+                    totalReviews={totalReviews!} 
                     size="md"
                   />
                 </motion.div>
