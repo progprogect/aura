@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
+import { SMSCodeModal } from '@/components/auth/SMSCodeModal'
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -26,6 +27,8 @@ export function AuthRegisterForm() {
   const [error, setError] = useState('')
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [showCodeModal, setShowCodeModal] = useState(false)
+  const [smsCode, setSmsCode] = useState('')
   const router = useRouter()
 
   // Таймер обратного отсчёта
@@ -76,9 +79,10 @@ export function AuthRegisterForm() {
         setCodeExpiry(new Date(Date.now() + 5 * 60 * 1000)) // 5 минут
         setTimeLeft(300)
         
-        // Показываем код в alert (временное решение до настройки SMS провайдера)
+        // Показываем код в модальном окне
         if (data.code) {
-          alert(`🔐 Ваш код для регистрации: ${data.code}\n\n(Код также выведен в консоль браузера)`)
+          setSmsCode(data.code)
+          setShowCodeModal(true)
           console.log(`🔐 SMS КОД: ${data.code}`)
         }
       } else {
@@ -306,6 +310,15 @@ export function AuthRegisterForm() {
         </a>
       </p>
     </div>
+
+    {/* Модальное окно с SMS кодом */}
+    <SMSCodeModal
+      isOpen={showCodeModal}
+      onClose={() => setShowCodeModal(false)}
+      code={smsCode}
+      phone={phone}
+      purpose="registration"
+    />
   </div>
   )
 }

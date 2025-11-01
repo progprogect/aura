@@ -94,42 +94,6 @@ export async function notifyUserAboutNewProposal(
 }
 
 /**
- * Уведомление специалисту о принятии отклика
- */
-export async function notifySpecialistAboutAcceptedProposal(
-  specialistUserId: string,
-  userName: string,
-  requestTitle: string,
-  price: number
-) {
-  try {
-    const specialist = await prisma.user.findUnique({
-      where: { id: specialistUserId },
-      select: { phone: true, firstName: true }
-    })
-
-    if (!specialist || !specialist.phone) {
-      return { success: false, error: 'Телефон специалиста не найден' }
-    }
-
-    const message = `Ваш отклик на заявку "${requestTitle}" принят пользователем ${userName}. Сумма: ${price} баллов.`
-    
-    await sendSMS({
-      phone: specialist.phone,
-      purpose: 'notification' as any
-    })
-    
-    // TODO: Реальная отправка SMS с сообщением
-    console.log(`[SMS] Отправка специалисту ${specialist.phone}: ${message}`)
-
-    return { success: true }
-  } catch (error) {
-    console.error('[notifications] Ошибка уведомления специалиста:', error)
-    return { success: false, error: String(error) }
-  }
-}
-
-/**
  * Уведомление пользователю о завершении работы специалистом
  */
 export async function notifyUserAboutCompletedWork(

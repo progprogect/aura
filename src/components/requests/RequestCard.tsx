@@ -6,7 +6,7 @@
 
 import Link from 'next/link'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { RequestStatusBadge } from './RequestStatusBadge'
 import { Calendar, MessageSquare, Wallet } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -23,19 +23,6 @@ interface RequestCardProps {
   categoryName?: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-green-100 text-green-700 border-green-300',
-  in_progress: 'bg-blue-100 text-blue-700 border-blue-300',
-  completed: 'bg-gray-100 text-gray-700 border-gray-300',
-  cancelled: 'bg-red-100 text-red-700 border-red-300'
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  open: 'Открыта',
-  in_progress: 'В работе',
-  completed: 'Завершена',
-  cancelled: 'Отменена'
-}
 
 export function RequestCard({
   id,
@@ -59,9 +46,7 @@ export function RequestCard({
             <CardTitle className="text-lg font-semibold line-clamp-2 flex-1 min-w-0">
               {title}
             </CardTitle>
-            <Badge className={`${STATUS_COLORS[status] || STATUS_COLORS.open} flex-shrink-0`} variant="outline">
-              {STATUS_LABELS[status] || status}
-            </Badge>
+            <RequestStatusBadge status={status} className="flex-shrink-0" />
           </div>
         </CardHeader>
         

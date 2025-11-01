@@ -39,9 +39,11 @@ export function useHomepageSpecialists(): UseHomepageSpecialistsReturn {
         setError(null)
 
         // Запрашиваем 8 верифицированных популярных специалистов
+        // Фильтры: acceptingClients=true и verified=true применяются автоматически в API
+        // Дополнительно фильтруются только видимые (с положительным балансом) через getVisibleSpecialists
         const params = new URLSearchParams({
           limit: '8',
-          verified: 'true',
+          verified: 'true', // Явно указываем для ясности, хотя API всегда требует verified: true
           sortBy: 'rating', // По популярности (profileViews)
         })
 

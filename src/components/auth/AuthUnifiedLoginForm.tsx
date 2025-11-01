@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
+import { SMSCodeModal } from '@/components/auth/SMSCodeModal'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, User, Stethoscope } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -25,6 +26,8 @@ export function AuthUnifiedLoginForm() {
   const [error, setError] = useState('')
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [showCodeModal, setShowCodeModal] = useState(false)
+  const [smsCode, setSmsCode] = useState('')
   const router = useRouter()
 
   // Таймер обратного отсчёта
@@ -77,9 +80,10 @@ export function AuthUnifiedLoginForm() {
         setCodeExpiry(new Date(Date.now() + 5 * 60 * 1000)) // 5 минут
         setTimeLeft(300)
         
-        // Показываем код в alert (тестовый режим)
+        // Показываем код в модальном окне
         if (data.code) {
-          alert(`🔐 Ваш код для входа: ${data.code}\n\n(Код также выведен в консоль браузера)`)
+          setSmsCode(data.code)
+          setShowCodeModal(true)
           console.log(`🔐 SMS КОД: ${data.code}`)
         }
       } else {
@@ -346,6 +350,15 @@ export function AuthUnifiedLoginForm() {
           </Link>
         </p>
       </div>
+
+      {/* Модальное окно с SMS кодом */}
+      <SMSCodeModal
+        isOpen={showCodeModal}
+        onClose={() => setShowCodeModal(false)}
+        code={smsCode}
+        phone={phone}
+        purpose="login"
+      />
     </div>
   )
 }

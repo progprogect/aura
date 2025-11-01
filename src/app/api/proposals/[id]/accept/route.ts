@@ -9,7 +9,7 @@ import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { PointsService } from '@/lib/points/points-service'
 import { Decimal } from 'decimal.js'
 import { createTemporaryServiceForRequest } from '@/lib/services/service-creator'
-import { notifySpecialistAboutAcceptedProposal } from '@/lib/notifications/sms-notifications'
+import { notifySpecialistAboutNewOrder } from '@/lib/notifications/order-notifications'
 
 export async function PATCH(
   request: NextRequest,
@@ -140,6 +140,20 @@ export async function PATCH(
         }
       })
 
+      // Списываем баллы по цене специалиста (замораживание) - ВНУТРИ транзакции для атомарности
+      await PointsService.deductPoints(
+        session.userId,
+        new Decimal(proposal.proposedPrice),
+        'service_purchase',
+        `Принятие отклика: ${proposal.request.title}`,
+        {
+          requestId: proposal.request.id,
+          requestTitle: proposal.request.title,
+          specialistId: proposal.specialist.userId,
+          orderId: order.id
+        }
+      )
+
       return {
         order,
         service,
@@ -147,24 +161,10 @@ export async function PATCH(
       }
     })
 
-    // Списываем баллы по цене специалиста (замораживание) - ПОСЛЕ создания заказа
-    await PointsService.deductPoints(
-      session.userId,
-      new Decimal(proposal.proposedPrice),
-      'service_purchase',
-      `Принятие отклика: ${proposal.request.title}`,
-      {
-        requestId: proposal.request.id,
-        requestTitle: proposal.request.title,
-        specialistId: proposal.specialist.userId,
-        orderId: result.order.id
-      }
-    )
-
     // Отправляем SMS уведомление специалисту (асинхронно)
-    notifySpecialistAboutAcceptedProposal(
+    notifySpecialistAboutNewOrder(
       proposal.specialist.userId,
-      proposal.request.user.firstName,
+      `${proposal.request.user.firstName} ${proposal.request.user.lastName}`,
       proposal.request.title,
       proposal.proposedPrice
     ).catch(err => {

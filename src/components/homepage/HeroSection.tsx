@@ -120,8 +120,8 @@ export function HeroSection() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                asChild 
                 className="flex-1 h-12 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all touch-manipulation min-h-[44px]"
+                asChild
               >
                 <Link href="/catalog" className="flex items-center justify-center">
                   <Grid3X3 className="w-5 h-5 mr-2" />
@@ -166,7 +166,7 @@ export function HeroSection() {
               className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center pointer-events-none"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative w-full md:w-auto md:max-w-3xl max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl pointer-events-auto safe-area-inset-bottom md:safe-area-inset-bottom-0">
+              <div className="relative w-full md:w-auto md:max-w-5xl lg:max-w-6xl xl:max-w-7xl max-h-[90vh] md:max-h-[90vh] overflow-y-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl pointer-events-auto safe-area-inset-bottom md:safe-area-inset-bottom-0">
                 <Button
                   variant="ghost"
                   size="icon"

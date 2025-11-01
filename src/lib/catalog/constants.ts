@@ -57,7 +57,7 @@ export const FILTER_DEFAULTS = {
   CATEGORY: 'all',
   EXPERIENCE: 'any',
   FORMAT: [] as string[],
-  VERIFIED: false,
+  VERIFIED: false, // По умолчанию показываем всех верифицированных (фильтрация происходит в API)
   SORT_BY: 'relevance',
   SEARCH: '',
 } as const

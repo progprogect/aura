@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
 import { CreateOrderSchema } from '@/lib/validations/api'
 import { Decimal } from 'decimal.js'
+import { notifySpecialistAboutNewOrder } from '@/lib/notifications/order-notifications'
 
 export async function POST(request: NextRequest) {
   try {
@@ -95,6 +96,7 @@ export async function POST(request: NextRequest) {
           status: 'paid',
           pointsUsed,
           pointsFrozen: true,
+          escrowReleased: false, // Средства на эскроу до подтверждения выполнения
           autoConfirmAt,
           deadline: service.deliveryDays ? new Date(Date.now() + service.deliveryDays * 24 * 60 * 60 * 1000) : null
         },
@@ -121,6 +123,16 @@ export async function POST(request: NextRequest) {
       })
 
       return order
+    })
+
+    // Отправляем SMS уведомление специалисту (асинхронно)
+    notifySpecialistAboutNewOrder(
+      service.specialistProfile.user.id,
+      clientName,
+      service.title,
+      pointsUsed
+    ).catch(err => {
+      console.error('[API/orders/create-with-points] Ошибка отправки уведомления:', err)
     })
 
     return NextResponse.json({

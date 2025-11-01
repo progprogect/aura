@@ -7,18 +7,20 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ProposalCard } from '@/components/requests/ProposalCard'
 import { ProposalForm } from '@/components/requests/ProposalForm'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { Loader2, AlertCircle, ArrowLeft, Wallet, Calendar } from 'lucide-react'
+import { Loader2, AlertCircle, Wallet, Calendar } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import Link from 'next/link'
 import { ReviewModal } from '@/components/reviews/ReviewModal'
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs'
+import { BreadcrumbItem } from '@/lib/navigation/types'
+import { RequestStatusBadge } from '@/components/requests/RequestStatusBadge'
+import Link from 'next/link'
 
 interface RequestDetail {
   id: string
@@ -58,19 +60,6 @@ interface RequestDetail {
   } | null
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-green-100 text-green-700 border-green-300',
-  in_progress: 'bg-blue-100 text-blue-700 border-blue-300',
-  completed: 'bg-gray-100 text-gray-700 border-gray-300',
-  cancelled: 'bg-red-100 text-red-700 border-red-300',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  open: 'Открыта',
-  in_progress: 'В работе',
-  completed: 'Завершена',
-  cancelled: 'Отменена',
-}
 
 export default function RequestDetailPage() {
   const params = useParams()
@@ -210,15 +199,21 @@ export default function RequestDetailPage() {
 
   if (error || !request) {
     return (
-      <div className="min-h-screen bg-background py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error || 'Заявка не найдена'}</AlertDescription>
-          </Alert>
-          <Button asChild className="mt-4">
-            <Link href="/requests">Вернуться к списку</Link>
-          </Button>
+      <div className="min-h-screen bg-background">
+        <Breadcrumbs items={[
+          { label: 'Главная', href: '/' },
+          { label: 'Мои заявки', href: '/requests' },
+        ]} />
+        <div className="py-12 px-4">
+          <div className="max-w-4xl mx-auto">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error || 'Заявка не найдена'}</AlertDescription>
+            </Alert>
+            <Button asChild className="mt-4">
+              <Link href="/requests">Вернуться к списку</Link>
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -228,30 +223,32 @@ export default function RequestDetailPage() {
   const date = new Date(request.createdAt)
   const formattedDate = format(date, 'd MMMM yyyy, HH:mm', { locale: ru })
 
+  // Breadcrumbs для навигации
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Главная', href: '/' },
+    { label: 'Мои заявки', href: '/requests' },
+    { label: request.title, isActive: true },
+  ]
+
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-        {/* Назад */}
-        <Button variant="ghost" asChild>
-          <Link href="/requests">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Назад к списку
-          </Link>
-        </Button>
+    <div className="min-h-screen bg-background">
+      {/* Breadcrumbs */}
+      <Breadcrumbs items={breadcrumbs} />
+
+      <div className="py-6 sm:py-8 px-4">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
 
         {/* Детали заявки */}
         <Card>
           <CardHeader className="space-y-4">
             <div className="flex items-start justify-between gap-4">
               <CardTitle className="text-2xl flex-1">{request.title}</CardTitle>
-              <Badge className={STATUS_COLORS[request.status] || STATUS_COLORS.open}>
-                {STATUS_LABELS[request.status] || request.status}
-              </Badge>
+              <RequestStatusBadge status={request.status} />
             </div>
             {request.status === 'open' && (
               <div className="flex justify-end">
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
                   onClick={handleCancelRequestClick}
                   disabled={cancelling}
@@ -339,6 +336,7 @@ export default function RequestDetailPage() {
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
 

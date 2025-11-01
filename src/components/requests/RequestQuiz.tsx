@@ -15,6 +15,8 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
+import { SMSCodeModal } from '@/components/auth/SMSCodeModal'
+import { useAuth } from '@/hooks/useAuth'
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react'
 
 interface Category {
@@ -34,7 +36,10 @@ type QuizStep = 'title' | 'category' | 'description' | 'budget' | 'auth' | 'load
 
 export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQuizProps) {
   const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  
   // Если defaultTitle задан, начинаем с category (пропускаем title)
+  // Если пользователь авторизован, пропускаем шаг auth
   const initialStep: QuizStep = defaultTitle ? 'category' : (defaultCategory ? 'category' : 'title')
   const [step, setStep] = useState<QuizStep>(initialStep)
   const [loading, setLoading] = useState(false)
@@ -54,6 +59,8 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
   const [codeSent, setCodeSent] = useState(false)
   const [codeExpiry, setCodeExpiry] = useState<Date | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [showCodeModal, setShowCodeModal] = useState(false)
+  const [smsCodeToShow, setSmsCodeToShow] = useState('')
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
@@ -109,6 +116,13 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
       setError('Выберите категорию')
       return
     }
+    
+    // Если пользователь уже авторизован, пропускаем шаг auth
+    if (step === 'budget' && isAuthenticated) {
+      // Сразу создаём заявку
+      handleCreateRequest()
+      return
+    }
 
     if (step === 'description' && formData.description.trim().length < 50) {
       setError('Описание должно быть минимум 50 символов')
@@ -125,8 +139,16 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
     // Переход на следующий шаг
     const steps: QuizStep[] = ['title', 'category', 'description', 'budget', 'auth']
     const currentIndex = steps.indexOf(step)
+    
     if (currentIndex < steps.length - 1) {
-      setStep(steps[currentIndex + 1])
+      const nextStep = steps[currentIndex + 1]
+      // Если следующий шаг auth и пользователь уже авторизован, пропускаем и создаём заявку
+      if (nextStep === 'auth' && isAuthenticated) {
+        // Создаём заявку сразу
+        handleCreateRequest()
+        return
+      }
+      setStep(nextStep)
     }
   }
 
@@ -179,7 +201,9 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
         setTimeLeft(300)
         
         if (data.code) {
-          // Код показывается только в консоли для разработки
+          // Показываем код в модальном окне
+          setSmsCodeToShow(data.code)
+          setShowCodeModal(true)
           console.log(`🔐 SMS КОД для ${phone}: ${data.code}`)
         }
       } else {
@@ -188,6 +212,58 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
     } catch (error) {
       setError('Произошла ошибка. Попробуйте еще раз.')
     } finally {
+      setLoading(false)
+    }
+  }
+
+  // Создание заявки (используется когда пользователь уже авторизован)
+  const handleCreateRequest = async () => {
+    // Проверяем, что пользователь авторизован
+    if (!isAuthenticated) {
+      setError('Требуется авторизация для создания заявки')
+      setStep('auth')
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setStep('loading')
+
+    try {
+      const requestResponse = await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Важно: отправляем cookies с session_token
+        body: JSON.stringify({
+          title: formData.title,
+          category: formData.category,
+          description: formData.description,
+          budget: formData.budget
+        }),
+      })
+
+      const requestData = await requestResponse.json()
+
+      if (requestResponse.status === 401) {
+        // Сессия недействительна или отсутствует
+        setError('Сессия истекла. Пожалуйста, авторизуйтесь снова.')
+        setStep('auth')
+        setLoading(false)
+        return
+      }
+
+      if (requestData.success) {
+        // Всегда редиректим на страницу созданной заявки
+        router.push(`/requests/${requestData.request.id}`)
+      } else {
+        setError(requestData.error || 'Ошибка при создании заявки')
+        setStep('budget')
+        setLoading(false)
+      }
+    } catch (error) {
+      setError('Произошла ошибка. Попробуйте еще раз.')
+      setStep('budget')
       setLoading(false)
     }
   }
@@ -254,6 +330,7 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
       const requestResponse = await fetch('/api/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Важно: отправляем cookies с session_token
         body: JSON.stringify({
           title: formData.title,
           category: formData.category,
@@ -265,7 +342,7 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
       const requestData = await requestResponse.json()
 
       if (requestData.success) {
-        // Редирект на страницу заявки
+        // Всегда редиректим на страницу созданной заявки
         router.push(`/requests/${requestData.request.id}`)
       } else {
         setError(requestData.error || 'Ошибка при создании заявки')
@@ -283,8 +360,18 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
   const totalSteps = 5
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mx-0 sm:mx-auto">
+    <>
+      {/* Модальное окно SMS кода */}
+      <SMSCodeModal
+        isOpen={showCodeModal}
+        onClose={() => setShowCodeModal(false)}
+        code={smsCodeToShow}
+        phone={phone}
+        purpose="registration"
+      />
+
+      <div className="w-full max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 mx-0 sm:mx-auto">
         {/* Прогресс */}
         {step !== 'loading' && (
           <div className="mb-6">
@@ -556,7 +643,8 @@ export function RequestQuiz({ defaultCategory, defaultTitle, onClose }: RequestQ
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

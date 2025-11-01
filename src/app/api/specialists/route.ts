@@ -77,8 +77,12 @@ export async function GET(request: NextRequest) {
     const finalLimit = limit || 12
     
     // Построение фильтров для Prisma
+    // ВАЖНО: Все специалисты должны быть:
+    // 1. acceptingClients: true - принимают клиентов
+    // 2. verified: true - верифицированы
+    // 3. Положительный баланс баллов (проверяется через getVisibleSpecialists)
     const where: any = {
-      acceptingClients: true,
+      acceptingClients: true, // Принимают клиентов
       verified: true, // Всегда требуем верификацию
     }
     
