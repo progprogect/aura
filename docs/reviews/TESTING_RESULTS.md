@@ -210,13 +210,17 @@
 **Решение:** Сделаны опциональными с проверкой на существование  
 **Файл:** `src/components/reviews/RatingDisplay.tsx`
 
-### 12. Отображение "0" при отсутствии отзывов ✅
-**Проблема:** Отображался "0" для специалистов без отзывов в компоненте `ReviewStats` и в условном рендеринге Hero/Profile  
+### 12. Отображение "0" при отсутствии отзывов и deliveryDays === 0 ✅
+**Проблема:** Отображался "0" для:
+1. Специалистов без отзывов в `ReviewStats` и в условном рендеринге Hero/Profile
+2. Услуг с `deliveryDays === 0` в карточках и на страницах детального просмотра
+
 **Решение:** 
 1. Добавлена проверка на отсутствие отзывов в `ReviewStats` (возвращает null)
 2. Исправлены условия рендеринга в `SpecialistHero` и `SpecialistProfile`: заменено `totalReviews && totalReviews > 0` на `(totalReviews ?? 0) > 0` для предотвращения рендера "0" при falsy значении
-3. Исправлена валидация в `RatingDisplay`  
-**Файлы:** `src/components/reviews/ReviewStats.tsx`, `src/components/specialist/SpecialistHero.tsx`, `src/components/specialist/SpecialistProfile.tsx`, `src/components/reviews/RatingDisplay.tsx`
+3. Исправлена валидация в `RatingDisplay`
+4. Исправлены все места использования `deliveryDays &&`: заменено на `deliveryDays !== null && deliveryDays !== undefined && deliveryDays > 0`  
+**Файлы:** `src/components/reviews/ReviewStats.tsx`, `src/components/specialist/SpecialistHero.tsx`, `src/components/specialist/SpecialistProfile.tsx`, `src/components/reviews/RatingDisplay.tsx`, `src/components/specialist/SpecialistServices.tsx`, `src/components/specialist/dashboard/ServicesList.tsx`, `src/app/specialist/[slug]/services/[serviceSlug]/page.tsx`
 
 ---
 
