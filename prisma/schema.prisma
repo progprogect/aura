@@ -134,6 +134,9 @@ model SpecialistProfile {
   // История покупок пакетов
   packagePurchases PackagePurchase[]
 
+  // Аналитика (агрегированные данные по дням)
+  analyticsDaily SpecialistAnalyticsDaily[]
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -609,6 +612,40 @@ model ChatAnalytics {
   updatedAt DateTime @updatedAt
 
   @@unique([date, hour])
+  @@index([date])
+}
+
+// ========================================
+// АНАЛИТИКА СПЕЦИАЛИСТОВ (агрегированные данные по дням)
+// ========================================
+
+model SpecialistAnalyticsDaily {
+  id           String   @id @default(cuid())
+  specialistId String
+  specialistProfile SpecialistProfile @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  
+  date         DateTime @db.Date
+  
+  // Метрики за день
+  profileViews      Int @default(0)
+  contactViews      Int @default(0)
+  consultationRequests Int @default(0)
+  orders            Int @default(0)
+  reviews           Int @default(0)
+  
+  // Источники (JSON) - { catalog: 60, search: 30, direct: 10 }
+  sources Json? @db.JsonB
+  
+  // Конверсии
+  conversionRateProfileToContact Float @default(0) // %
+  conversionRateContactToRequest Float @default(0) // %
+  conversionRateRequestToOrder   Float @default(0) // %
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([specialistId, date])
+  @@index([specialistId, date])
   @@index([date])
 }
 

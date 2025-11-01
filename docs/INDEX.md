@@ -66,6 +66,12 @@
 
 ---
 
+## 👨‍⚕️ Specialist (Кабинет специалиста)
+
+- [specialist/ANALYTICS_REQUIREMENTS.md](specialist/ANALYTICS_REQUIREMENTS.md) - Требования к системе аналитики для специалистов
+
+---
+
 ## 🚂 Deployment (Railway)
 
 - [deployment/RAILWAY_SETUP.md](deployment/RAILWAY_SETUP.md) - Первоначальная настройка
@@ -137,6 +143,7 @@
 - Auth → `docs/auth/`
 - Catalog → `docs/catalog/`
 - Reviews → `docs/reviews/`
+- Specialist → `docs/specialist/`
 
 **По типу:**
 - Архитектура → `docs/architecture/`
@@ -147,6 +154,6 @@
 
 ---
 
-**Обновлено:** 2025-01-26  
-**Всего документов:** 82+
+**Обновлено:** 2025-01-27  
+**Всего документов:** 83+
 

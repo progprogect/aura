@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 // Убираем импорт иконок - теперь используем строковые идентификаторы
 import { prisma } from '@/lib/db'
 import { incrementProfileView } from '@/lib/redis'
@@ -11,11 +12,13 @@ import { SpecialistNavigation } from '@/components/navigation/SpecialistNavigati
 import type { Tab } from '@/components/specialist/SpecialistTabs'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 import { getReviewDistribution } from '@/lib/reviews/stats-service'
+import { detectTrafficSource } from '@/lib/analytics/source-detection'
 
 interface PageProps {
   params: {
     slug: string
   }
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 // Получение данных специалиста (Unified)
@@ -237,7 +240,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function SpecialistPage({ params }: PageProps) {
+export default async function SpecialistPage({ params, searchParams }: PageProps) {
   const specialist = await getSpecialist(params.slug)
 
   if (!specialist) {
@@ -266,9 +269,15 @@ export default async function SpecialistPage({ params }: PageProps) {
   
   console.log('[Specialist Page] isOwner:', isOwner, '| currentUser.id:', currentUser?.id, '| specialist.id:', specialist.id)
 
+  // Определяем источник трафика
+  const headersList = await headers()
+  const referer = headersList.get('referer')
+  const resolvedSearchParams = await searchParams
+  const source = detectTrafficSource(resolvedSearchParams || {}, referer)
+
   // Инкремент просмотров (не блокирующий, но не для владельца)
   if (!isOwner) {
-    incrementProfileView(specialist.id).catch((error) => {
+    incrementProfileView(specialist.id, source).catch((error) => {
       console.error('Failed to increment profile view:', error)
     })
   }

@@ -90,12 +90,12 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false
     },
     {
-      href: '#',
+      href: '/profile/analytics',
       icon: BarChart3,
       label: 'Аналитика',
-      description: 'Скоро',
+      description: 'Статистика и метрики',
       variant: 'outline' as const,
-      disabled: true
+      disabled: false
     }
   ]
 

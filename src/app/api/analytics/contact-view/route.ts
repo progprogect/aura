@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth/server'
 import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 import { incrementContactView } from '@/lib/redis'
+import { detectTrafficSource } from '@/lib/analytics/source-detection'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,10 +40,15 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Увеличиваем счетчик просмотров контактов в Redis
-    await incrementContactView(specialistId, contactType || 'modal_open')
+    // Определяем источник трафика
+    const referer = request.headers.get('referer')
+    const url = new URL(request.url)
+    const source = detectTrafficSource(url.searchParams, referer)
 
-    console.log(`✅ Пользователь ${user.id} просмотрел контакты специалиста ${specialistId}`)
+    // Увеличиваем счетчик просмотров контактов в Redis с источником
+    await incrementContactView(specialistId, contactType || 'modal_open', source)
+
+    console.log(`✅ Пользователь ${user.id} просмотрел контакты специалиста ${specialistId} (источник: ${source})`)
 
     return NextResponse.json({ 
       success: true,

@@ -45,14 +45,25 @@ export const redis = getRedisClient()
 
 /**
  * Увеличить счетчик просмотров профиля специалиста
+ * @param specialistId ID специалиста
+ * @param source Источник просмотра: 'catalog' | 'search' | 'direct'
  */
-export async function incrementProfileView(specialistId: string): Promise<boolean> {
+export async function incrementProfileView(
+  specialistId: string,
+  source?: string
+): Promise<boolean> {
   if (!redis) return false
 
   try {
-    // Увеличиваем в Redis для быстрого доступа
+    const normalizedSource = source || 'direct'
+    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    
+    // Увеличиваем общий счетчик
     await redis.incr(`profile:views:${specialistId}`)
     await redis.zadd('profile:views:leaderboard', Date.now(), specialistId)
+    
+    // Увеличиваем счетчик по источнику для ежедневной агрегации
+    await redis.incr(`profile:view:${specialistId}:${normalizedSource}:${today}`)
     
     // Синхронизируем с БД (неблокирующий вызов)
     syncProfileViewsToDB(specialistId).catch((error) => {
@@ -68,17 +79,27 @@ export async function incrementProfileView(specialistId: string): Promise<boolea
 
 /**
  * Увеличить счетчик просмотров контактов специалиста
+ * @param specialistId ID специалиста
+ * @param contactType Тип контакта (для обратной совместимости)
+ * @param source Источник просмотра: 'catalog' | 'search' | 'direct'
  */
 export async function incrementContactView(
   specialistId: string,
-  contactType: string
+  contactType: string,
+  source?: string
 ): Promise<boolean> {
   if (!redis) return false
 
   try {
-    // Увеличиваем в Redis для быстрого доступа
+    const normalizedSource = source || 'direct'
+    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    
+    // Увеличиваем общий счетчик
     await redis.incr(`contact:views:${specialistId}`)
     await redis.incr(`contact:views:${specialistId}:${contactType}`)
+    
+    // Увеличиваем счетчик по источнику для ежедневной агрегации
+    await redis.incr(`contact:view:${specialistId}:${normalizedSource}:${today}`)
     
     // Синхронизируем с БД (неблокирующий вызов)
     syncContactViewsToDB(specialistId).catch((error) => {
@@ -119,6 +140,58 @@ export async function getContactViews(specialistId: string): Promise<number> {
   } catch (error) {
     console.error('Redis error (getContactViews):', error)
     return 0
+  }
+}
+
+/**
+ * Получить просмотры профиля по источникам за конкретную дату
+ */
+export async function getProfileViewsBySource(
+  specialistId: string,
+  date: string
+): Promise<Record<string, number>> {
+  if (!redis) return { catalog: 0, search: 0, direct: 0 }
+
+  try {
+    const sources: string[] = ['catalog', 'search', 'direct']
+    const result: Record<string, number> = {}
+
+    for (const source of sources) {
+      const key = `profile:view:${specialistId}:${source}:${date}`
+      const count = await redis.get(key)
+      result[source] = count ? parseInt(count, 10) : 0
+    }
+
+    return result
+  } catch (error) {
+    console.error('Redis error (getProfileViewsBySource):', error)
+    return { catalog: 0, search: 0, direct: 0 }
+  }
+}
+
+/**
+ * Получить просмотры контактов по источникам за конкретную дату
+ */
+export async function getContactViewsBySource(
+  specialistId: string,
+  date: string
+): Promise<Record<string, number>> {
+  if (!redis) return { catalog: 0, search: 0, direct: 0 }
+
+  try {
+    const sources: string[] = ['catalog', 'search', 'direct']
+    const result: Record<string, number> = {}
+
+    for (const source of sources) {
+      const key = `contact:view:${specialistId}:${source}:${date}`
+      const count = await redis.get(key)
+      result[source] = count ? parseInt(count, 10) : 0
+    }
+
+    return result
+  } catch (error) {
+    console.error('Redis error (getContactViewsBySource):', error)
+    return { catalog: 0, search: 0, direct: 0 }
   }
 }
 
