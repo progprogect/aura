@@ -137,7 +137,7 @@ export function SpecialistHero({
             </motion.h1>
             
             {/* Рейтинг (мобилка) */}
-            {averageRating && totalReviews && totalReviews > 0 && (
+            {totalReviews && totalReviews > 0 && averageRating !== undefined && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -297,7 +297,7 @@ export function SpecialistHero({
               </motion.h1>
 
               {/* Рейтинг (десктоп) */}
-              {averageRating && totalReviews && totalReviews > 0 && (
+              {totalReviews && totalReviews > 0 && averageRating !== undefined && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

@@ -43,7 +43,7 @@ export function RatingDisplay({
   const config = sizeConfig[size]
   
   // Если нет данных - не показываем
-  if (!rating || !totalReviews || totalReviews === 0) {
+  if (!totalReviews || totalReviews === 0 || !rating || rating <= 0) {
     return null
   }
   
