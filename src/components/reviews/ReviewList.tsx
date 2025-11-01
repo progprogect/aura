@@ -8,7 +8,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, Star } from 'lucide-react'
 import { ReviewCard } from './ReviewCard'
-import { ReviewStats } from './ReviewStats'
 import type { ReviewsResponse } from '@/types/review'
 
 interface ReviewListProps {
@@ -32,7 +31,7 @@ export function ReviewList({ specialistId, initialReviews, className = '' }: Rev
       }
 
       const response = await fetch(
-        `/api/reviews?specialistId=${specialistId}&page=${pageNum}&limit=10`
+        `/api/reviews?specialistId=${specialistId}&page=${pageNum}&limit=3`
       )
 
       if (response.ok) {
@@ -102,16 +101,9 @@ export function ReviewList({ specialistId, initialReviews, className = '' }: Rev
   const hasMore = page < data.pagination.pages
 
   return (
-    <div className={className}>
-      {/* Статистика */}
-      <ReviewStats
-        averageRating={data.stats.averageRating}
-        totalReviews={data.stats.totalReviews}
-        distribution={data.stats.distribution}
-      />
-
+    <section id="reviews" className={className}>
       {/* Список отзывов */}
-      <div className="mt-6 space-y-4">
+      <div className="space-y-4">
         {data.reviews.map((review) => (
           <ReviewCard key={review.id} review={review} />
         ))}
@@ -137,7 +129,7 @@ export function ReviewList({ specialistId, initialReviews, className = '' }: Rev
           </Button>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 

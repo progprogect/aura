@@ -14,6 +14,7 @@ import { SpecialistContact } from './SpecialistContact'
 import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import { SpecialistServices } from './SpecialistServices'
 import { ReviewList } from '@/components/reviews/ReviewList'
+import { ReviewStats } from '@/components/reviews/ReviewStats'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 import type { Service } from '@/types/service'
@@ -158,10 +159,17 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
 
         {/* Отзывы */}
         {(data.totalReviews ?? 0) > 0 && !isEditMode && (
-          <ReviewList
-            specialistId={data.id}
-            initialReviews={data.initialReviews}
-          />
+          <>
+            <ReviewStats
+              averageRating={data.averageRating || 0}
+              totalReviews={data.totalReviews || 0}
+              distribution={data.initialReviews?.stats.distribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }}
+            />
+            <ReviewList
+              specialistId={data.id}
+              initialReviews={data.initialReviews}
+            />
+          </>
         )}
 
         {/* Форма связи */}

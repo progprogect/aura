@@ -68,7 +68,7 @@ async function getSpecialist(slug: string) {
   const [initialReviews, totalReviewsCount, reviewDistribution] = await Promise.all([
     prisma.review.findMany({
       where: { specialistId: specialistProfile.id },
-      take: 10,
+      take: 3,
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
@@ -161,9 +161,9 @@ async function getSpecialist(slug: string) {
       })),
       pagination: {
         page: 1,
-        limit: 10,
+        limit: 3,
         total: totalReviewsCount,
-        pages: Math.ceil(totalReviewsCount / 10)
+        pages: Math.ceil(totalReviewsCount / 3)
       },
       stats: {
         averageRating: specialistProfile.averageRating,
