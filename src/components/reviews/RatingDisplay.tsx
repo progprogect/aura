@@ -42,8 +42,13 @@ export function RatingDisplay({
 }: RatingDisplayProps) {
   const config = sizeConfig[size]
   
-  // Если нет данных - не показываем
-  if (!totalReviews || totalReviews === 0 || !rating || rating <= 0) {
+  // Если нет отзывов - не показываем
+  if (!totalReviews || totalReviews === 0) {
+    return null
+  }
+  
+  // Проверяем что rating валиден (должен быть от 1 до 5)
+  if (!rating || rating < 1 || rating > 5) {
     return null
   }
   
