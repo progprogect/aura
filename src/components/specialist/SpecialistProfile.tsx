@@ -157,7 +157,7 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
         )}
 
         {/* Отзывы */}
-        {data.totalReviews && data.totalReviews > 0 && !isEditMode && (
+        {data.totalReviews > 0 && !isEditMode && (
           <ReviewList
             specialistId={data.id}
             initialReviews={data.initialReviews}
