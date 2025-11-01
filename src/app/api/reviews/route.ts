@@ -1,12 +1,124 @@
 /**
- * API для создания отзывов
+ * API для создания и получения отзывов
  * POST /api/reviews - создать отзыв
+ * GET /api/reviews - получить список отзывов
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { CreateReviewSchema } from '@/lib/validations/api'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { updateSpecialistReviewStats, getReviewDistribution } from '@/lib/reviews/stats-service'
+import type { ReviewsResponse } from '@/types/review'
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const specialistId = searchParams.get('specialistId')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+
+    if (!specialistId) {
+      return NextResponse.json(
+        { success: false, error: 'Параметр specialistId обязателен' },
+        { status: 400 }
+      )
+    }
+
+    // Валидация пагинации
+    if (page < 1 || limit < 1 || limit > 50) {
+      return NextResponse.json(
+        { success: false, error: 'Некорректные параметры пагинации' },
+        { status: 400 }
+      )
+    }
+
+    const skip = (page - 1) * limit
+
+    // Получаем отзывы и статистику параллельно для оптимизации
+    const [reviews, total, specialist, distribution] = await Promise.all([
+      prisma.review.findMany({
+        where: { specialistId },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              avatar: true
+            }
+          },
+          order: {
+            include: {
+              service: {
+                select: {
+                  title: true,
+                  emoji: true
+                }
+              }
+            }
+          }
+        }
+      }),
+      prisma.review.count({
+        where: { specialistId }
+      }),
+      prisma.specialistProfile.findUnique({
+        where: { id: specialistId },
+        select: {
+          averageRating: true,
+          totalReviews: true
+        }
+      }),
+      getReviewDistribution(specialistId)
+    ])
+
+    // Формируем ответ
+    const response: ReviewsResponse = {
+      success: true,
+      reviews: reviews.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+        user: {
+          firstName: review.user.firstName,
+          lastName: review.user.lastName,
+          avatar: review.user.avatar
+        },
+        order: {
+          service: {
+            title: review.order.service.title,
+            emoji: review.order.service.emoji
+          }
+        }
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      },
+      stats: {
+        averageRating: specialist?.averageRating || 0,
+        totalReviews: specialist?.totalReviews || 0,
+        distribution
+      }
+    }
+
+    return NextResponse.json(response)
+
+  } catch (error) {
+    console.error('[API/reviews/GET] Ошибка:', error)
+    return NextResponse.json(
+      { success: false, error: 'Произошла ошибка при получении отзывов' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,6 +204,11 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Обновляем статистику специалиста (real-time) - вне транзакции
+    updateSpecialistReviewStats(order.specialistProfile.id).catch(err => {
+      console.error('[API/reviews/POST] Ошибка обновления статистики:', err)
+    })
+
     return NextResponse.json({
       success: true,
       review
@@ -100,15 +217,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[API/reviews/POST] Ошибка:', error)
     
-    if (error instanceof Error && 'issues' in error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Ошибка валидации', details: (error as any).issues },
+        { success: false, error: 'Ошибка валидации', details: error.issues },
         { status: 400 }
       )
     }
 
     return NextResponse.json(
-      { success: false, error: 'Произошла ошибка при создании отзыва' },
+      { success: false, error: 'Внутренняя ошибка сервера' },
       { status: 500 }
     )
   }

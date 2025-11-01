@@ -31,6 +31,7 @@ import { SpecialistServices } from './SpecialistServices'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { Service } from '@/types/service'
+import type { ReviewsResponse } from '@/types/review'
 
 interface SpecialistProfileWithEditProps {
   isOwner: boolean
@@ -52,6 +53,8 @@ interface SpecialistProfileWithEditProps {
     acceptingClients: boolean
     profileViews: number
     specializations: string[]
+    averageRating?: number
+    totalReviews?: number
   }
   contactsData: {
     email: string | null
@@ -109,6 +112,9 @@ interface SpecialistProfileWithEditProps {
       slug?: string | null
     }>
     services?: Service[]
+    averageRating?: number
+    totalReviews?: number
+    initialReviews?: ReviewsResponse
   }
 }
 
@@ -238,6 +244,8 @@ export function SpecialistProfileWithEdit({
           yearsOfPractice={heroData.yearsOfPractice}
           verified={heroData.verified}
           profileViews={heroData.profileViews}
+          averageRating={heroData.averageRating}
+          totalReviews={heroData.totalReviews}
           email={contactsData.email}
           telegram={contactsData.telegram}
           whatsapp={contactsData.whatsapp}

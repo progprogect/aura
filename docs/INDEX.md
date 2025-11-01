@@ -59,6 +59,13 @@
 
 ---
 
+## ⭐ Reviews (Система отзывов и рейтинга)
+
+- [reviews/REVIEWS_SYSTEM_DESIGN.md](reviews/REVIEWS_SYSTEM_DESIGN.md) - Проектирование системы отзывов
+- [reviews/TESTING_RESULTS.md](reviews/TESTING_RESULTS.md) - Результаты тестирования
+
+---
+
 ## 🚂 Deployment (Railway)
 
 - [deployment/RAILWAY_SETUP.md](deployment/RAILWAY_SETUP.md) - Первоначальная настройка
@@ -129,6 +136,7 @@
 - AI Chat → `docs/ai-chat/`
 - Auth → `docs/auth/`
 - Catalog → `docs/catalog/`
+- Reviews → `docs/reviews/`
 
 **По типу:**
 - Архитектура → `docs/architecture/`
@@ -139,6 +147,6 @@
 
 ---
 
-**Обновлено:** 2025-10-10  
-**Всего документов:** 80+
+**Обновлено:** 2025-01-26  
+**Всего документов:** 82+
 

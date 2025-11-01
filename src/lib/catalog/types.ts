@@ -86,6 +86,8 @@ export interface SpecialistDTO {
   priceDescription: string | null
   verified: boolean
   profileViews: number
+  averageRating: number
+  totalReviews: number
   customFields: Record<string, any> | null
 }
 

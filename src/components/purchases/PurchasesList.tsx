@@ -48,6 +48,9 @@ interface Order {
       avatar?: string
     }
   }
+  review?: {
+    id: string
+  }
 }
 
 interface PurchasesResponse {
@@ -386,6 +389,19 @@ export function PurchasesList() {
                         className="bg-green-600 hover:bg-green-700"
                       >
                         {confirmingOrderId === order.id ? 'Подтверждаем...' : 'Подтвердить выполнение'}
+                      </Button>
+                    )}
+                    
+                    {order.status === 'completed' && !order.review && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setReviewOrderId(order.id)
+                          setShowReviewModal(true)
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        Оставить отзыв
                       </Button>
                     )}
                     

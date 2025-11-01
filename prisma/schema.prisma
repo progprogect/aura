@@ -127,6 +127,10 @@ model SpecialistProfile {
   profileViews Int @default(0)
   contactViews Int @default(0)
 
+  // Статистика отзывов (кеш)
+  averageRating Float @default(0)
+  totalReviews  Int   @default(0)
+
   // История покупок пакетов
   packagePurchases PackagePurchase[]
 
@@ -138,6 +142,8 @@ model SpecialistProfile {
   @@index([slug])
   @@index([category])
   @@index([verified])
+  @@index([averageRating])
+  @@index([totalReviews])
 }
 
 // ========================================
@@ -760,7 +766,7 @@ model Review {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  rating  Int // 0-5 звёзд
+  rating  Int // 1-5 звёзд
   comment String? @db.Text // Отзыв (опционально)
 
   createdAt DateTime @default(now())

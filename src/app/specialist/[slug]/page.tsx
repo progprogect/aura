@@ -10,6 +10,7 @@ import { SpecialistProfileWithEdit } from '@/components/specialist/SpecialistPro
 import { SpecialistNavigation } from '@/components/navigation/SpecialistNavigation'
 import type { Tab } from '@/components/specialist/SpecialistTabs'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
+import { getReviewDistribution } from '@/lib/reviews/stats-service'
 
 interface PageProps {
   params: {
@@ -63,6 +64,38 @@ async function getSpecialist(slug: string) {
   
   console.log('[Specialist Page] ✅ Профиль найден:', specialistProfile.id)
 
+  // Получаем отзывы и статистику параллельно для оптимизации
+  const [initialReviews, totalReviewsCount, reviewDistribution] = await Promise.all([
+    prisma.review.findMany({
+      where: { specialistId: specialistProfile.id },
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        },
+        order: {
+          include: {
+            service: {
+              select: {
+                title: true,
+                emoji: true
+              }
+            }
+          }
+        }
+      }
+    }),
+    prisma.review.count({
+      where: { specialistId: specialistProfile.id }
+    }),
+    getReviewDistribution(specialistProfile.id)
+  ])
+
   // Преобразуем в формат, совместимый с существующими компонентами
   return {
     id: specialistProfile.id,
@@ -97,6 +130,8 @@ async function getSpecialist(slug: string) {
     subscriptionTier: specialistProfile.subscriptionTier,
     profileViews: specialistProfile.profileViews,
     contactViews: specialistProfile.contactViews,
+    averageRating: specialistProfile.averageRating,
+    totalReviews: specialistProfile.totalReviews,
     createdAt: specialistProfile.createdAt,
     updatedAt: specialistProfile.updatedAt,
     education: specialistProfile.education,
@@ -105,6 +140,37 @@ async function getSpecialist(slug: string) {
     faqs: specialistProfile.faqs,
     leadMagnets: specialistProfile.leadMagnets.map(lm => fromPrismaLeadMagnet(lm)),
     services: specialistProfile.services,
+    initialReviews: {
+      success: true,
+      reviews: initialReviews.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+        user: {
+          firstName: review.user.firstName,
+          lastName: review.user.lastName,
+          avatar: review.user.avatar
+        },
+        order: {
+          service: {
+            title: review.order.service.title,
+            emoji: review.order.service.emoji
+          }
+        }
+      })),
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: totalReviewsCount,
+        pages: Math.ceil(totalReviewsCount / 10)
+      },
+      stats: {
+        averageRating: specialistProfile.averageRating,
+        totalReviews: specialistProfile.totalReviews,
+        distribution: reviewDistribution
+      }
+    }
   }
 }
 
@@ -226,6 +292,7 @@ export default async function SpecialistPage({ params }: PageProps) {
     specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
     specialist.services.length > 0 ? { id: 'services', label: 'Услуги', icon: 'shopping-cart' } : null,
     specialist.leadMagnets.length > 0 ? { id: 'lead-magnets', label: 'Материалы', icon: 'gift' } : null,
+    specialist.totalReviews && specialist.totalReviews > 0 ? { id: 'reviews', label: 'Отзывы', icon: 'star' } : null,
     specialist.faqs.length > 0 ? { id: 'faq', label: 'Вопросы', icon: 'question-mark-circle' } : null,
     { id: 'contact', label: 'Связаться', icon: 'paper-airplane' },
   ].filter(Boolean) as Tab[]
@@ -261,6 +328,8 @@ export default async function SpecialistPage({ params }: PageProps) {
           acceptingClients: specialist.acceptingClients,
           profileViews: specialist.profileViews,
           specializations: specialist.specializations,
+          averageRating: specialist.averageRating,
+          totalReviews: specialist.totalReviews,
         }}
         contactsData={{
           email: specialist.email,
@@ -309,6 +378,9 @@ export default async function SpecialistPage({ params }: PageProps) {
           })),
           leadMagnets: specialist.leadMagnets, // Уже преобразовано fromPrismaLeadMagnet() на строке 102
           services: specialist.services,
+          averageRating: specialist.averageRating,
+          totalReviews: specialist.totalReviews,
+          initialReviews: specialist.initialReviews,
         }}
       />
     </div>

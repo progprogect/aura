@@ -59,6 +59,11 @@ export async function GET(request: NextRequest) {
                 }
               }
             }
+          },
+          review: {
+            select: {
+              id: true
+            }
           }
         },
         orderBy: {

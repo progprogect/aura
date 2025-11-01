@@ -76,7 +76,7 @@ export const AcceptProposalSchema = z.object({
 
 export const CreateReviewSchema = z.object({
   orderId: z.string().cuid('Некорректный ID заказа'),
-  rating: z.number().int().min(0, 'Рейтинг от 0').max(5, 'Рейтинг до 5'),
+  rating: z.number().int().min(1, 'Рейтинг от 1').max(5, 'Рейтинг до 5'),
   comment: z.string().max(1000, 'Максимум 1000 символов').optional().nullable(),
 })
 

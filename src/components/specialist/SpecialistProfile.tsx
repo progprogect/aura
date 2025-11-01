@@ -13,9 +13,11 @@ import { SpecialistFAQ } from './SpecialistFAQ'
 import { SpecialistContact } from './SpecialistContact'
 import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import { SpecialistServices } from './SpecialistServices'
+import { ReviewList } from '@/components/reviews/ReviewList'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 import type { Service } from '@/types/service'
+import type { ReviewsResponse } from '@/types/review'
 
 interface SpecialistProfileProps {
   tabs: Tab[]
@@ -60,6 +62,9 @@ interface SpecialistProfileProps {
     }>
     leadMagnets?: LeadMagnetUI[]
     services?: Service[]
+    averageRating?: number
+    totalReviews?: number
+    initialReviews?: ReviewsResponse
   }
   isEditMode?: boolean
   onSaveField?: (field: string, value: string | number) => Promise<any>
@@ -148,6 +153,14 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
             leadMagnets={data.leadMagnets}
             specialistSlug={data.slug}
             specialistName={data.fullName}
+          />
+        )}
+
+        {/* Отзывы */}
+        {data.totalReviews && data.totalReviews > 0 && !isEditMode && (
+          <ReviewList
+            specialistId={data.id}
+            initialReviews={data.initialReviews}
           />
         )}
 

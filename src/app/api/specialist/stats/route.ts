@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { getReviewDistribution } from '@/lib/reviews/stats-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -113,6 +114,9 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Получаем статистику отзывов
+    const reviewDistribution = await getReviewDistribution(specialistProfile.id)
+
     // Формируем задания для дозаполнения
     const tasks = []
     
@@ -194,6 +198,11 @@ export async function GET(request: NextRequest) {
         contactViews: specialist.contactViews,
         consultationRequests: consultationRequestsCount,
         completionPercentage,
+        averageRating: specialistProfile.averageRating,
+        totalReviews: specialistProfile.totalReviews,
+        reviews: {
+          distribution: reviewDistribution
+        }
       },
       tasks
     })

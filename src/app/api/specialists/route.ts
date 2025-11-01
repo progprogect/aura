@@ -129,11 +129,11 @@ export async function GET(request: NextRequest) {
     // Сортировка
     let orderBy: any = {}
     switch (finalSortBy) {
-      case 'rating':
-        // Пока нет рейтинга, сортируем по верификации и просмотрам
+        case 'rating':
+        // Сортировка по рейтингу (сначала по среднему рейтингу, потом по количеству отзывов)
         orderBy = [
-          { verified: 'desc' },
-          { profileViews: 'desc' }
+          { averageRating: 'desc' },
+          { totalReviews: 'desc' }
         ]
         break
       case 'experience':
@@ -163,7 +163,10 @@ export async function GET(request: NextRequest) {
         case 'oldest':
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         case 'rating':
-          return (b.profileViews || 0) - (a.profileViews || 0)
+          // Сначала по среднему рейтингу, потом по количеству отзывов
+          const ratingDiff = (b.averageRating || 0) - (a.averageRating || 0)
+          if (ratingDiff !== 0) return ratingDiff
+          return (b.totalReviews || 0) - (a.totalReviews || 0)
         case 'price':
           return (a.priceFrom || 0) - (b.priceFrom || 0)
         case 'relevance':
@@ -202,6 +205,8 @@ export async function GET(request: NextRequest) {
       priceDescription: profile.priceDescription,
       verified: profile.verified,
       profileViews: profile.profileViews,
+      averageRating: profile.averageRating,
+      totalReviews: profile.totalReviews,
       customFields: profile.customFields,
       fullName: `${profile.user.firstName} ${profile.user.lastName}`,
       // Обрезаем описание до 150 символов для карточек

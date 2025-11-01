@@ -23,6 +23,7 @@ export const ICON_MAP = {
   'clock': '/icons/clock.svg',
   'shopping-cart': '/icons/shopping-cart.svg',
   'gift': '/icons/gift.svg',
+  'star': '/icons/star.svg',
 } as const
 
 export type IconName = keyof typeof ICON_MAP

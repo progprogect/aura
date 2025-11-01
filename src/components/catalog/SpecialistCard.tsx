@@ -23,6 +23,7 @@ import { Icon } from '@/components/ui/icons/Icon'
 import { CheckCircle2, Clock, MapPin } from '@/components/ui/icons/catalog-icons'
 import { saveCatalogState } from '@/lib/navigation/scroll-restoration'
 import { getCatalogLabel } from '@/lib/navigation/utils'
+import { RatingDisplay } from '@/components/reviews/RatingDisplay'
 
 interface SpecialistCardProps {
   specialist: SpecialistViewModel
@@ -124,6 +125,17 @@ export function SpecialistCard({ specialist }: SpecialistCardProps) {
             <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors mb-1">
               {specialist.fullName}
             </h3>
+
+            {/* Рейтинг */}
+            {specialist.totalReviews > 0 && (
+              <div className="mb-2">
+                <RatingDisplay 
+                  rating={specialist.averageRating} 
+                  totalReviews={specialist.totalReviews} 
+                  size="sm"
+                />
+              </div>
+            )}
 
             {/* Категория компактная */}
             <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">

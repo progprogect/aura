@@ -16,7 +16,9 @@
     "test:duplication": "tsx scripts/test-duplication-fix.ts",
     "test:personalized-chat": "tsx scripts/test-personalized-chat.ts",
     "chat": "tsx scripts/interactive-chat.ts",
-    "migrate:previews": "tsx scripts/migrate-lead-magnet-previews.ts"
+    "migrate:previews": "tsx scripts/migrate-lead-magnet-previews.ts",
+    "reviews:init-stats": "tsx prisma/scripts/initialize-review-stats.ts",
+    "reviews:create-test": "tsx prisma/scripts/create-test-reviews.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

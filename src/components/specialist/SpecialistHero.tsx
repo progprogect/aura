@@ -10,6 +10,7 @@ import { Tag } from '@/components/ui/tag'
 import { cn, formatNumber } from '@/lib/utils'
 import { WORK_FORMAT_LABELS } from '@/lib/constants'
 import { ContactsModal } from './ContactsModal'
+import { RatingDisplay } from '@/components/reviews/RatingDisplay'
 
 export interface SpecialistHeroProps {
   specialistId: string
@@ -27,6 +28,8 @@ export interface SpecialistHeroProps {
   yearsOfPractice?: number | null
   verified: boolean
   profileViews: number
+  averageRating?: number
+  totalReviews?: number
   // Контакты для модального окна
   email?: string | null
   telegram?: string | null
@@ -51,6 +54,8 @@ export function SpecialistHero({
   yearsOfPractice,
   verified,
   profileViews,
+  averageRating,
+  totalReviews,
   email,
   telegram,
   whatsapp,
@@ -130,6 +135,23 @@ export function SpecialistHero({
                 </motion.div>
               )}
             </motion.h1>
+            
+            {/* Рейтинг (мобилка) */}
+            {averageRating && totalReviews && totalReviews > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="mt-2"
+              >
+                <RatingDisplay 
+                  rating={averageRating} 
+                  totalReviews={totalReviews} 
+                  size="sm"
+                  className="text-white drop-shadow-lg [&>span]:text-white"
+                />
+              </motion.div>
+            )}
             
             {/* Специализация, опыт, локация */}
             <motion.div
@@ -273,6 +295,22 @@ export function SpecialistHero({
                   </motion.div>
                 )}
               </motion.h1>
+
+              {/* Рейтинг (десктоп) */}
+              {averageRating && totalReviews && totalReviews > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="mt-2 flex justify-center md:justify-start"
+                >
+                  <RatingDisplay 
+                    rating={averageRating} 
+                    totalReviews={totalReviews} 
+                    size="md"
+                  />
+                </motion.div>
+              )}
 
               {/* Специализации и локация */}
               <motion.div
