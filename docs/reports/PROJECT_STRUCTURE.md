@@ -3,7 +3,7 @@
 ## 📂 Корень проекта
 
 ```
-Аура/
+Эколюция 360/
 ├── 📄 README.md                      # Главная документация
 ├── 📄 README_UNIFIED_AUTH.md         # Документация unified auth
 ├── 📄 package.json                   # Зависимости

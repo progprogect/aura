@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 export function Navigation() {
   const pathname = usePathname()
@@ -26,10 +27,14 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Логотип */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">Aura</span>
+            <Image
+              src="/icons/logo-ecolyutsiya.svg"
+              alt="Эколюция 360"
+              width={32}
+              height={32}
+              className="rounded-full shadow-sm"
+            />
+            <span className="text-xl font-bold text-gray-900">Эколюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}

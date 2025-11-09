@@ -167,7 +167,7 @@ export function AuthUserRegisterForm() {
       {/* Заголовок */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Добро пожаловать в Aura
+          Добро пожаловать в Эколюцию&nbsp;360
         </h1>
         <p className="text-muted-foreground">
           Зарегистрируйтесь, чтобы сохранять избранных специалистов

@@ -7,6 +7,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 
 interface AuthNavigationProps {
   showBackButton?: boolean
@@ -25,10 +26,15 @@ export function AuthNavigation({
           href="/" 
           className="flex items-center gap-2 text-lg font-bold text-foreground hover:text-primary transition-colors"
         >
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">А</span>
-          </div>
-          Аура
+          <Image
+            src="/icons/logo-ecolyutsiya.svg"
+            alt="Эколюция 360"
+            width={32}
+            height={32}
+            className="rounded-full shadow"
+            priority
+          />
+          Эколюция&nbsp;360
         </Link>
         
         {/* Кнопка "Назад" */}

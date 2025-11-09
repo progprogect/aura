@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db'
 import { OnboardingWizard } from '@/components/specialist/onboarding/OnboardingWizard'
 
 export const metadata = {
-  title: 'Создание профиля | Аура',
+  title: 'Создание профиля | Эколюция 360',
   description: 'Создайте свой профиль специалиста',
   robots: 'noindex, nofollow',
 }

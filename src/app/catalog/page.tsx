@@ -6,8 +6,8 @@ import { LoadingSpinner } from '@/components/catalog/LoadingSpinner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export const metadata: Metadata = {
-  title: 'Каталог специалистов | Aura — Найдите своего эксперта',
-  description: 'Каталог проверенных специалистов: психологи, коучи, тренеры, нутрициологи. Онлайн и очные консультации. Верифицированные эксперты с опытом работы.',
+  title: 'Каталог специалистов | Эколюция 360 — Найдите своего эксперта',
+  description: 'Каталог проверенных специалистов для вашего развития: психологи, коучи, тренеры, нутрициологи. Онлайн и очные консультации от верифицированных экспертов.',
   keywords: [
     'специалисты',
     'психологи', 
@@ -21,16 +21,16 @@ export const metadata: Metadata = {
     'консультанты по здоровью'
   ].join(', '),
   openGraph: {
-    title: 'Каталог специалистов | Aura',
+    title: 'Каталог специалистов | Эколюция 360',
     description: 'Найдите проверенного специалиста для решения ваших задач. Психологи, коучи, тренеры и другие эксперты.',
     type: 'website',
     locale: 'ru_RU',
     url: 'https://aura.ru/catalog',
-    siteName: 'Aura',
+    siteName: 'Эколюция 360',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Каталог специалистов | Aura',
+    title: 'Каталог специалистов | Эколюция 360',
     description: 'Найдите проверенного специалиста для решения ваших задач.',
   },
   robots: {
@@ -53,7 +53,7 @@ export default function CatalogPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": "Каталог специалистов Aura",
+    "name": "Каталог специалистов Эколюция 360",
     "description": "Каталог проверенных специалистов: психологи, коучи, тренеры, нутрициологи",
     "url": "https://aura.ru/catalog",
     "numberOfItems": "множество",
@@ -66,7 +66,7 @@ export default function CatalogPage() {
         "description": "Онлайн и очные консультации с верифицированными экспертами",
         "provider": {
           "@type": "Organization",
-          "name": "Aura",
+          "name": "Эколюция 360",
           "url": "https://aura.ru"
         }
       }

@@ -7,7 +7,7 @@ import { AuthRegisterForm } from '@/components/auth/AuthRegisterForm'
 import { AuthNavigation } from '@/components/auth/AuthNavigation'
 
 export const metadata: Metadata = {
-  title: 'Регистрация специалиста | Аура',
+  title: 'Регистрация специалиста | Эколюция 360',
   description: 'Зарегистрируйтесь как специалист и начните принимать заявки от клиентов',
   robots: {
     index: false, // Не индексируем страницы авторизации

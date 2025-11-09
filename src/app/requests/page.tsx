@@ -6,7 +6,7 @@ import { Metadata } from 'next'
 import { RequestsList } from '@/components/requests/RequestsList'
 
 export const metadata: Metadata = {
-  title: 'Мои заявки | Аура',
+  title: 'Мои заявки | Эколюция 360',
   description: 'Просмотр и управление вашими заявками',
 }
 

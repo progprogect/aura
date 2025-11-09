@@ -8,7 +8,7 @@ import { prisma } from '@/lib/db'
 import { OrdersList } from '@/components/specialist/orders/OrdersList'
 
 export const metadata = {
-  title: 'Мои заказы - Аура',
+  title: 'Мои заказы — Эколюция 360',
   robots: 'noindex, nofollow',
 }
 

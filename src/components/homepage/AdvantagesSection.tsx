@@ -1,5 +1,5 @@
 /**
- * Секция преимуществ Aura
+ * Секция преимуществ Эколюции 360
  * Красивое оформление без банальных цифр
  */
 
@@ -46,7 +46,7 @@ export function AdvantagesSection() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Почему Aura
+              Почему Эколюция&nbsp;360
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Мы не просто каталог специалистов — мы помогаем найти именно того, кто решит вашу задачу

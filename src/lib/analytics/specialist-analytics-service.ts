@@ -123,7 +123,14 @@ async function hasAggregatedData(
     })
     
     return count > 0
-  } catch (error) {
+  } catch (error: unknown) {
+    // Обрабатываем ошибки подключения к БД
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2037') {
+      // Too many database connections - возвращаем false, чтобы не создавать новые запросы
+      console.error('[Analytics] Too many database connections. Assuming no aggregated data.')
+      return false
+    }
+    
     // Таблица может не существовать, если миграция не применена
     console.warn('[Analytics] Table SpecialistAnalyticsDaily may not exist yet:', error)
     return false
@@ -159,9 +166,13 @@ async function lazyAggregateIfNeeded(
   })
 }
 
+// Глобальный Set для отслеживания текущих агрегаций (дедупликация)
+const ongoingAggregations = new Set<string>()
+
 /**
  * Агрегировать данные за период (если нужно)
  * Проверяет каждый день периода и агрегирует недостающие данные
+ * Обрабатывает дни батчами для предотвращения перегрузки БД
  */
 async function ensurePeriodAggregated(
   specialistId: string,
@@ -182,10 +193,36 @@ async function ensurePeriodAggregated(
     currentDate.setDate(currentDate.getDate() + 1)
   }
   
-  // Проверяем и агрегируем каждую дату (параллельно)
-  await Promise.allSettled(
-    dates.map(date => lazyAggregateIfNeeded(specialistId, date))
-  )
+  // Ограничиваем параллелизм: обрабатываем батчами по 10 дней за раз
+  // Это предотвращает создание слишком большого количества соединений с БД
+  const BATCH_SIZE = 10
+  
+  for (let i = 0; i < dates.length; i += BATCH_SIZE) {
+    const batch = dates.slice(i, i + BATCH_SIZE)
+    
+    // Обрабатываем батч параллельно
+    await Promise.allSettled(
+      batch.map(date => {
+        const dateKey = `${specialistId}:${date.toISOString().split('T')[0]}`
+        
+        // Дедупликация: пропускаем, если агрегация уже идет
+        if (ongoingAggregations.has(dateKey)) {
+          return Promise.resolve()
+        }
+        
+        ongoingAggregations.add(dateKey)
+        
+        return lazyAggregateIfNeeded(specialistId, date).finally(() => {
+          ongoingAggregations.delete(dateKey)
+        })
+      })
+    )
+    
+    // Небольшая задержка между батчами для снижения нагрузки на БД
+    if (i + BATCH_SIZE < dates.length) {
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+  }
 }
 
 // ========================================
@@ -585,41 +622,39 @@ export async function aggregateDailyData(
   const profileViews = todayData.profileViews
   const contactViews = todayData.contactViews
 
-  // Получаем заявки за этот день
+  // Получаем заявки, заказы и отзывы за этот день параллельно
   const startOfDay = getStartOfDay(dateOnly)
   const endOfDay = getEndOfDay(dateOnly)
 
-  const consultationRequests = await prisma.consultationRequest.count({
-    where: {
-      specialistProfileId: specialistId,
-      createdAt: {
-        gte: startOfDay,
-        lte: endOfDay
+  const [consultationRequests, orders, reviews] = await Promise.all([
+    prisma.consultationRequest.count({
+      where: {
+        specialistProfileId: specialistId,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
       }
-    }
-  })
-
-  // Получаем заказы за этот день
-  const orders = await prisma.order.count({
-    where: {
-      specialistProfileId: specialistId,
-      createdAt: {
-        gte: startOfDay,
-        lte: endOfDay
+    }),
+    prisma.order.count({
+      where: {
+        specialistProfileId: specialistId,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
       }
-    }
-  })
-
-  // Получаем отзывы за этот день
-  const reviews = await prisma.review.count({
-    where: {
-      specialistId,
-      createdAt: {
-        gte: startOfDay,
-        lte: endOfDay
+    }),
+    prisma.review.count({
+      where: {
+        specialistId,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay
+        }
       }
-    }
-  })
+    })
+  ])
 
   // Вычисляем конверсии
   const conversionProfileToContact = calculateConversionRate(profileViews, contactViews)
@@ -669,9 +704,24 @@ export async function aggregateDailyData(
       conversionRateRequestToOrder: conversionRequestToOrder
     }
     })
-  } catch (error) {
+  } catch (error: unknown) {
+    // Обрабатываем ошибки подключения к БД
+    if (error && typeof error === 'object' && 'code' in error) {
+      // P2037 = Too many database connections
+      if (error.code === 'P2037') {
+        console.error('[Analytics] Too many database connections. Skipping aggregation for', specialistId, dateOnly.toISOString())
+        // Не пробрасываем ошибку - агрегация может произойти позже
+        return
+      }
+      // P2025 = Record not found (не критично для upsert)
+      if (error.code === 'P2025') {
+        console.warn('[Analytics] Record not found during upsert:', error)
+        return
+      }
+    }
+    
     // Таблица может не существовать, если миграция не применена
-    console.warn('[Analytics] Table SpecialistAnalyticsDaily may not exist yet:', error)
+    console.warn('[Analytics] Table SpecialistAnalyticsDaily may not exist yet or error:', error)
     // Не пробрасываем ошибку дальше - агрегация может произойти позже
   }
 }

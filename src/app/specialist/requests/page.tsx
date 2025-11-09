@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
-  title: 'Мои заявки | Аура',
+  title: 'Мои заявки | Эколюция 360',
   description: 'Заявки на консультацию',
   robots: 'noindex, nofollow',
 }

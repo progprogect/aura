@@ -127,7 +127,7 @@ async function sendSMSViaSMSRu(phone: string, code: string): Promise<{ success: 
       throw new Error('SMS.ru API ID не настроен')
     }
     
-    const message = `Ваш код для входа в Аура: ${code}. Код действителен 5 минут.`
+    const message = `Ваш код для входа в Эколюция 360: ${code}. Код действителен 5 минут.`
     
     // Здесь должен быть реальный запрос к SMS.ru API
     // const response = await fetch(`https://sms.ru/sms/send?api_id=${apiId}&to=${phone}&msg=${encodeURIComponent(message)}`)
