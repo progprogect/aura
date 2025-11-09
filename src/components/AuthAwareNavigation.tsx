@@ -36,7 +36,7 @@ export function AuthAwareNavigation() {
           {/* Логотип */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
             <Image
-              src="/icons/logo-evolyutsiya.svg"
+              src="/icons/logo-evolutsia360.svg"
               alt="Эволюция 360"
               width={32}
               height={32}

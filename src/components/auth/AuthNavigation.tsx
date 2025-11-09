@@ -27,7 +27,7 @@ export function AuthNavigation({
           className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
         >
           <Image
-            src="/icons/logo-evolyutsiya.svg"
+            src="/icons/logo-evolutsia360.svg"
             alt="Эволюция 360"
             width={32}
             height={32}
