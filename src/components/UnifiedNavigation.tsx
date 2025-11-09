@@ -45,7 +45,7 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
   
   const heightClassName = variant === 'hero' ? 'h-20' : 'h-16'
   
-  const logoDimension = variant === 'hero' ? 28 : 32
+  const logoDimension = variant === 'hero' ? 34 : 38
   const logoTextSize = variant === 'hero' ? 'text-xs' : 'text-sm'
   
   const brandTextSize = variant === 'hero'

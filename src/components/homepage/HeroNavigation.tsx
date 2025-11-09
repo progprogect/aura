@@ -38,8 +38,8 @@ export function HeroNavigation() {
             <Image
               src="/icons/logo-evolutsia360.svg"
               alt="Эволюция 360"
-              width={28}
-              height={28}
+              width={34}
+              height={34}
               className="rounded-full shadow-sm"
               priority
             />
