@@ -43,7 +43,7 @@ export function HeroNavigation() {
               className="rounded-full shadow-sm"
               priority
             />
-            <span className="text-lg font-bold text-gray-900">Эволюция&nbsp;360</span>
+            <span className="text-lg font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}

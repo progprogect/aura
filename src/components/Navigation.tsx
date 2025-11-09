@@ -34,7 +34,7 @@ export function Navigation() {
               height={32}
               className="rounded-full shadow-sm"
             />
-            <span className="text-xl font-bold text-gray-900">Эволюция&nbsp;360</span>
+            <span className="text-xl font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}

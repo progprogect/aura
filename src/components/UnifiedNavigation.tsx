@@ -70,7 +70,7 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
               priority={variant === 'hero'}
               className="rounded-full shadow-sm"
             />
-            <span className={`${brandTextSize} font-bold text-gray-900`}>Эволюция&nbsp;360</span>
+            <span className={`${brandTextSize} font-semibold tracking-tight text-slate-900`}>Эволюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}

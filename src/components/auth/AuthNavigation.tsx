@@ -24,7 +24,7 @@ export function AuthNavigation({
         {/* Логотип */}
         <Link 
           href="/" 
-          className="flex items-center gap-2 text-lg font-bold text-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
         >
           <Image
             src="/icons/logo-evolyutsiya.svg"

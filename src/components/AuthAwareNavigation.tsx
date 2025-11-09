@@ -43,7 +43,7 @@ export function AuthAwareNavigation() {
               className="rounded-full shadow-sm"
               priority
             />
-            <span className="text-xl font-bold text-gray-900">Эволюция&nbsp;360</span>
+            <span className="text-xl font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}
