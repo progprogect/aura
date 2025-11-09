@@ -31,10 +31,10 @@
 
 [32m👤 User:[0m Помоги найти психолога
 [31m❌ Ошибка:[0m Error: API error: 404
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:163:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:163:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:241:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:369:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:241:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:369:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [34m📋 Сценарий:[0m Быстрый поиск фитнес-тренера
@@ -45,10 +45,10 @@
 
 [32m👤 User:[0m Найди фитнес тренера онлайн для похудения до 4000 рублей
 [31m❌ Ошибка:[0m Error: API error: 404
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:163:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:163:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:241:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:369:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:241:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:369:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [34m📋 Сценарий:[0m Уточнение после первой выдачи
@@ -59,10 +59,10 @@
 
 [32m👤 User:[0m Нужен нутрициолог онлайн
 [31m❌ Ошибка:[0m Error: API error: 404
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:163:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:163:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:241:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:369:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:241:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:369:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [34m📋 Сценарий:[0m Расширение критериев при плохих результатах
@@ -73,10 +73,10 @@
 
 [32m👤 User:[0m Нужен массажист в Минске офлайн с опытом 10 лет до 1000 рублей
 [31m❌ Ошибка:[0m Error: API error: 404
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:163:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:163:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:241:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:369:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:241:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:369:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [34m📋 Сценарий:[0m Диалог без кнопки поиска
@@ -87,10 +87,10 @@
 
 [32m👤 User:[0m Помоги с выбором коуча
 [31m❌ Ошибка:[0m Error: API error: 404
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:163:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:163:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:241:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:369:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:241:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:369:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [36m📊 ИТОГОВЫЙ ОТЧЕТ[0m

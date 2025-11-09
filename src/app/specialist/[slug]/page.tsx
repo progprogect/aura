@@ -199,12 +199,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!specialist) {
     return {
-      title: 'Специалист не найден | Эколюция 360',
+      title: 'Специалист не найден | Эволюция 360',
     }
   }
 
   const fullName = `${specialist.firstName} ${specialist.lastName}`
-  const title = specialist.metaTitle || `${fullName} — ${specialist.specializations[0]} | Эколюция 360`
+  const title = specialist.metaTitle || `${fullName} — ${specialist.specializations[0]} | Эволюция 360`
   const description =
     specialist.metaDescription ||
     specialist.tagline ||

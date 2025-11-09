@@ -27,14 +27,14 @@ export function AuthNavigation({
           className="flex items-center gap-2 text-lg font-bold text-foreground hover:text-primary transition-colors"
         >
           <Image
-            src="/icons/logo-ecolyutsiya.svg"
-            alt="Эколюция 360"
+            src="/icons/logo-evolyutsiya.svg"
+            alt="Эволюция 360"
             width={32}
             height={32}
             className="rounded-full shadow"
             priority
           />
-          Эколюция&nbsp;360
+          Эволюция&nbsp;360
         </Link>
         
         {/* Кнопка "Назад" */}

@@ -63,14 +63,14 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
           {/* Логотип */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
             <Image
-              src="/icons/logo-ecolyutsiya.svg"
-              alt="Эколюция 360"
+              src="/icons/logo-evolyutsiya.svg"
+              alt="Эволюция 360"
               width={logoDimension}
               height={logoDimension}
               priority={variant === 'hero'}
               className="rounded-full shadow-sm"
             />
-            <span className={`${brandTextSize} font-bold text-gray-900`}>Эколюция&nbsp;360</span>
+            <span className={`${brandTextSize} font-bold text-gray-900`}>Эволюция&nbsp;360</span>
           </Link>
           
           {/* Навигационные ссылки */}

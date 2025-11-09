@@ -32,6 +32,6 @@ export default async function PurchasesPage() {
 }
 
 export const metadata = {
-  title: 'Мои покупки | Эколюция 360',
+  title: 'Мои покупки | Эволюция 360',
   description: 'Отслеживайте статус ваших заказов и покупок',
 }

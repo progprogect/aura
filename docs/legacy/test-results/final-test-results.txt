@@ -179,10 +179,10 @@ __BUTTONS__["Расширить критерии", "Изменить парам�
 
 [32m👤 User:[0m Помоги с выбором коуча
 [31m❌ Ошибка:[0m Error: API error: 500
-    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:164:11)
+    at sendMessage (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:164:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:242:22)
-    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360/scripts/test-chat.ts:370:20)
+    at async runScenario (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:242:22)
+    at async main (/Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360/scripts/test-chat.ts:370:20)
 
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [36m📊 ИТОГОВЫЙ ОТЧЕТ[0m

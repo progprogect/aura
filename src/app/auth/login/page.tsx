@@ -6,8 +6,8 @@ import { Metadata } from 'next'
 import { AuthUnifiedLoginForm } from '@/components/auth/AuthUnifiedLoginForm'
 
 export const metadata: Metadata = {
-  title: 'Вход | Эколюция 360',
-  description: 'Войдите в свой аккаунт Эколюция 360',
+  title: 'Вход | Эволюция 360',
+  description: 'Войдите в свой аккаунт Эволюция 360',
   robots: {
     index: false,
     follow: false,

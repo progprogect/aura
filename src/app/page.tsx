@@ -7,11 +7,11 @@ import { FeaturedSpecialists } from '@/components/homepage/FeaturedSpecialists'
 import { ErrorBoundary, HomepageErrorFallback } from '@/components/ui/error-boundary'
 
 export const metadata: Metadata = {
-  title: 'Эколюция 360 — Всё для полноценного развития',
+  title: 'Эволюция 360 — Всё для полноценного развития',
   description: 'Сервис, где вы найдёте специалистов и программы для гармоничного развития: психологи, нутрициологи, тренеры, коучи и другие эксперты.',
   keywords: ['развитие', 'здоровье', 'комплексный подход', 'нутрициолог', 'тренер', 'психолог', 'эксперт', 'консультант'],
   openGraph: {
-    title: 'Эколюция 360 — Всё для полноценного развития',
+    title: 'Эволюция 360 — Всё для полноценного развития',
     description: 'Выберите специалистов и решения для гармоничного роста и баланса жизни',
     type: 'website',
     locale: 'ru_RU',
@@ -26,7 +26,7 @@ export default function Home() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Эколюция 360',
+    name: 'Эволюция 360',
     description: 'Сервис, где можно найти специалистов и решения для полноценного развития',
     url: 'https://aura-health.ru',
     potentialAction: {

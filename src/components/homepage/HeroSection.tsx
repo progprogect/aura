@@ -39,13 +39,13 @@ export function HeroSection() {
             className="space-y-6"
           >
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-              Ваш путь к{' '}
+              Эволюция 360 — пространство для{' '}
               <span className="bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                здоровому образу жизни
+                гармоничного развития
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Найдите проверенных специалистов для поддержания здоровья и саморазвития
+              Подберите специалистов и программы, которые помогут сбалансировать здоровье, карьеру и личный рост
             </p>
           </motion.div>
 

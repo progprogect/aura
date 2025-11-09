@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const fullName = `${specialist.firstName} ${specialist.lastName}`
 
   return {
-    title: `${service.title} — ${fullName} | Эколюция 360`,
+    title: `${service.title} — ${fullName} | Эволюция 360`,
     description: service.description.substring(0, 160),
   }
 }

@@ -8,7 +8,7 @@ export const APP_CONFIG = {
    * Информация о приложении
    */
   app: {
-    name: 'Эколюция 360',
+    name: 'Эволюция 360',
     description: 'Сервис, где можно найти всё для полноценного развития и здоровья',
     url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   },

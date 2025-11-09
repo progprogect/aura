@@ -6,8 +6,8 @@ import type { Metadata } from 'next'
 import { AuthUserRegisterForm } from '@/components/auth/AuthUserRegisterForm'
 
 export const metadata: Metadata = {
-  title: 'Регистрация | Эколюция 360',
-  description: 'Создайте аккаунт в Эколюция 360',
+  title: 'Регистрация | Эволюция 360',
+  description: 'Создайте аккаунт в Эволюция 360',
   robots: {
     index: false,
     follow: false,

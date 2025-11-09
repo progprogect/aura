@@ -7,7 +7,7 @@ import { Metadata } from 'next'
 import { RequestQuiz } from '@/components/requests/RequestQuiz'
 
 export const metadata: Metadata = {
-  title: 'Создать заявку | Эколюция 360',
+  title: 'Создать заявку | Эволюция 360',
   description: 'Создайте заявку на поиск специалиста',
 }
 

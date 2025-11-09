@@ -6,7 +6,7 @@
 import { redirect } from 'next/navigation'
 
 export const metadata = {
-  title: 'Личный кабинет | Эколюция 360',
+  title: 'Личный кабинет | Эволюция 360',
   description: 'Управление профилем специалиста',
   robots: 'noindex, nofollow',
 }

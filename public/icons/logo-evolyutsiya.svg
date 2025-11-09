@@ -1,0 +1,21 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="evol-outer" x1="30" y1="20" x2="140" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#34D399"/>
+      <stop offset="0.45" stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <radialGradient id="evol-inner" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(80 80) scale(48)">
+      <stop offset="0" stop-color="#F0FDFA" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#DBEAFE" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+  <circle cx="80" cy="80" r="68" fill="url(#evol-outer)"/>
+  <circle cx="80" cy="80" r="48" fill="url(#evol-inner)"/>
+  <path d="M52 52C60.5 44 70.6 40 80 40C98.6731 40 114 55.3269 114 74C114 92.6731 98.6731 108 80 108H56" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M52 74H104" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <path d="M52 96C60.5 104 70.6 108 80 108" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <text x="80" y="132" text-anchor="middle" font-family="Inter, 'Manrope', 'Segoe UI', sans-serif" font-size="22" font-weight="700" fill="#0F172A">Эволюция</text>
+  <text x="80" y="148" text-anchor="middle" font-family="Inter, 'Manrope', 'Segoe UI', sans-serif" font-size="16" font-weight="600" letter-spacing="0.12em" fill="#1E293B">360</text>
+</svg>
+

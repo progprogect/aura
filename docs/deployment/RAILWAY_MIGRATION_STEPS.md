@@ -29,7 +29,7 @@ railway login
 
 #### 2. Подключиться к проекту
 ```bash
-cd /Users/mikitavalkunovich/Desktop/Cursor/Эколюция 360
+cd /Users/mikitavalkunovich/Desktop/Cursor/Эволюция 360
 railway link
 ```
 
@@ -49,7 +49,7 @@ railway run npx tsx prisma/scripts/migrate-preview-to-cdn.ts
 #### 1. Зайти в Railway Dashboard
 https://railway.app/
 
-#### 2. Открыть ваш проект Эколюция 360
+#### 2. Открыть ваш проект Эволюция 360
 
 #### 3. Создать Deployment для миграции
 
