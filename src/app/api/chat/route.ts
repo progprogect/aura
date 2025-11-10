@@ -280,6 +280,7 @@ export async function POST(request: NextRequest) {
         const allSpecialists = await prisma.specialistProfile.findMany({
           where: {
             id: { in: session.recommendedIds },
+            blocked: false, // Профиль не заблокирован
             acceptingClients: true,
             verified: true, // Всегда требуем верификацию
           },

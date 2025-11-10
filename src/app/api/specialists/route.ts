@@ -78,10 +78,12 @@ export async function GET(request: NextRequest) {
     
     // Построение фильтров для Prisma
     // ВАЖНО: Все специалисты должны быть:
-    // 1. acceptingClients: true - принимают клиентов
-    // 2. verified: true - верифицированы
-    // 3. Положительный баланс баллов (проверяется через getVisibleSpecialists)
+    // 1. blocked: false - профиль не заблокирован
+    // 2. acceptingClients: true - принимают клиентов
+    // 3. verified: true - верифицированы
+    // 4. Положительный баланс баллов (проверяется через getVisibleSpecialists)
     const where: any = {
+      blocked: false, // Профиль не заблокирован
       acceptingClients: true, // Принимают клиентов
       verified: true, // Всегда требуем верификацию
     }

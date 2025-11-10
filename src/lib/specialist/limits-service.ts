@@ -159,9 +159,10 @@ export class SpecialistLimitsService {
   /**
    * Проверить видимость профиля
    * Профиль видим только если специалист:
-   * 1. Принимает клиентов
-   * 2. Верифицирован
-   * 3. Имеет положительный баланс
+   * 1. Не заблокирован
+   * 2. Принимает клиентов
+   * 3. Верифицирован
+   * 4. Имеет положительный баланс
    */
   static async isProfileVisible(specialistId: string): Promise<boolean> {
     try {
@@ -170,7 +171,17 @@ export class SpecialistLimitsService {
         include: { user: true }
       })
 
-      if (!specialist?.acceptingClients) {
+      if (!specialist) {
+        return false
+      }
+
+      // Проверяем блокировку профиля специалиста
+      if (specialist.blocked) {
+        console.log(`[Visibility] Specialist ${specialistId}: профиль заблокирован, скрыт`)
+        return false
+      }
+
+      if (!specialist.acceptingClients) {
         return false
       }
 
@@ -183,7 +194,7 @@ export class SpecialistLimitsService {
       const balance = await PointsService.getBalance(specialist.userId)
       const hasPositiveBalance = balance.total.gt(0)
       
-      console.log(`[Visibility] Specialist ${specialistId}: баланс ${balance.total.toNumber()}, верифицирован: ${specialist.verified}, видим: ${hasPositiveBalance}`)
+      console.log(`[Visibility] Specialist ${specialistId}: баланс ${balance.total.toNumber()}, верифицирован: ${specialist.verified}, заблокирован: ${specialist.blocked}, видим: ${hasPositiveBalance}`)
       
       return hasPositiveBalance
     } catch (error) {
@@ -194,13 +205,14 @@ export class SpecialistLimitsService {
 
   /**
    * Получить только видимых специалистов
-   * Фильтрует по: acceptingClients, verified, положительный баланс
+   * Фильтрует по: не заблокирован, acceptingClients, verified, положительный баланс
    */
   static async getVisibleSpecialists(filters: any = {}) {
     try {
       const specialists = await prisma.specialistProfile.findMany({
         where: {
           ...filters, // Сначала применяем переданные фильтры
+          blocked: false, // Профиль не заблокирован
           acceptingClients: true, // Затем добавляем обязательные фильтры
           verified: true, // Всегда требуем верификацию
         },

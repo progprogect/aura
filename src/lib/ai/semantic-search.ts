@@ -46,6 +46,7 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   // 3. Строим фильтры для Prisma
   const where: SpecialistWhereInput = {
     id: { in: specialistIds },
+    blocked: false, // Профиль не заблокирован
     acceptingClients: true,
     verified: true, // Добавляем фильтр по верификации
   }
@@ -200,6 +201,7 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
   console.log('[Keyword Search] Query:', query)
 
   const where: SpecialistWhereInput = {
+    blocked: false, // Профиль не заблокирован
     acceptingClients: true,
     verified: true, // Всегда требуем верификацию
     id: excludeIds.length > 0 ? { notIn: excludeIds } : undefined,
