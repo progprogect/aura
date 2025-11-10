@@ -22,6 +22,7 @@ export interface SpecialistGalleryProps {
 export function SpecialistGallery({ items }: SpecialistGalleryProps) {
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
+  const [imageErrors, setImageErrors] = React.useState<Set<string>>(new Set())
 
   const openLightbox = React.useCallback((index: number) => {
     setSelectedIndex(index)
@@ -84,30 +85,46 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
           <CardContent>
             {/* Адаптивная сетка: 2 колонки на мобилке, 3 на десктопе */}
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-1">
-              {items.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group relative aspect-square cursor-pointer overflow-hidden"
-                  onClick={() => openLightbox(index)}
-                >
-                  {/* Изображение */}
-                  <Image
-                    src={item.thumbnailUrl || item.url}
-                    alt={item.caption || `Фото ${index + 1}`}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-
-                  {/* Overlay при hover */}
-                  <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
-
-                </motion.div>
-              ))}
+              {items.map((item, index) => {
+                const imageUrl = item.thumbnailUrl || item.url
+                const hasError = imageErrors.has(item.id)
+                
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group relative aspect-square cursor-pointer overflow-hidden bg-gray-100 rounded-lg"
+                    onClick={() => openLightbox(index)}
+                  >
+                    {!hasError && imageUrl ? (
+                      <>
+                        {/* Изображение */}
+                        <Image
+                          src={imageUrl}
+                          alt={item.caption || `Фото ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          onError={() => {
+                            setImageErrors(prev => new Set(prev).add(item.id))
+                          }}
+                          unoptimized={imageUrl.startsWith('http') && !imageUrl.includes('cloudinary')}
+                        />
+                        {/* Overlay при hover */}
+                        <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
+                      </>
+                    ) : (
+                      /* Fallback при ошибке загрузки */
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <span className="text-4xl">🖼️</span>
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>
