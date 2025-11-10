@@ -12,9 +12,10 @@ import type { Service } from '@/types/service'
 interface SpecialistServicesProps {
   services: Service[]
   specialistSlug: string
+  showTitle?: boolean
 }
 
-export function SpecialistServices({ services, specialistSlug }: SpecialistServicesProps) {
+export function SpecialistServices({ services, specialistSlug, showTitle = true }: SpecialistServicesProps) {
   if (services.length === 0) {
     return null
   }
@@ -29,12 +30,14 @@ export function SpecialistServices({ services, specialistSlug }: SpecialistServi
       className="space-y-4"
     >
       {/* Заголовок секции */}
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-          <span className="text-green-600 text-sm">💼</span>
-        </span>
-        <h2 className="text-xl font-semibold text-gray-900">Услуги</h2>
-      </div>
+      {showTitle && (
+        <div className="flex items-center gap-3 mb-4">
+          <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <span className="text-green-600 text-sm">💼</span>
+          </span>
+          <h2 className="text-xl font-semibold text-gray-900">Услуги</h2>
+        </div>
+      )}
 
       {/* Сетка карточек */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">

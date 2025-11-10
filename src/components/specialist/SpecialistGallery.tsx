@@ -17,9 +17,10 @@ export interface GalleryItem {
 
 export interface SpecialistGalleryProps {
   items: GalleryItem[]
+  showTitle?: boolean
 }
 
-export function SpecialistGallery({ items }: SpecialistGalleryProps) {
+export function SpecialistGallery({ items, showTitle = true }: SpecialistGalleryProps) {
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
   const [imageErrors, setImageErrors] = React.useState<Set<string>>(new Set())
@@ -77,11 +78,13 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <Card className="border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              🖼 Галерея
-            </CardTitle>
-          </CardHeader>
+          {showTitle && (
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                🖼 Галерея
+              </CardTitle>
+            </CardHeader>
+          )}
           <CardContent>
             {/* Адаптивная сетка: 2 колонки на мобилке, 3 на десктопе */}
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-1">

@@ -401,7 +401,7 @@ export function SpecialistProfileWithEdit({
               />
             ) : (
               data.gallery.length > 0 ? (
-                <SpecialistGallery items={data.gallery} />
+                <SpecialistGallery items={data.gallery} showTitle={false} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>Галерея пуста</p>
@@ -481,6 +481,7 @@ export function SpecialistProfileWithEdit({
               <SpecialistServices
                 services={data.services}
                 specialistSlug={data.slug}
+                showTitle={false}
               />
             </div>
           )}
