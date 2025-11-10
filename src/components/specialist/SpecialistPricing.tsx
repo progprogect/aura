@@ -15,6 +15,7 @@ export interface SpecialistPricingProps {
   priceLabel?: string // Передаем из server component
   isEditMode?: boolean
   onSave?: (field: string, value: string | number) => Promise<any>
+  showTitle?: boolean
 }
 
 export function SpecialistPricing({
@@ -26,6 +27,7 @@ export function SpecialistPricing({
   priceLabel = 'за услугу',
   isEditMode = false,
   onSave,
+  showTitle = true,
 }: SpecialistPricingProps) {
   if (!priceFrom && !priceTo && !isEditMode) {
     return null
@@ -54,11 +56,13 @@ export function SpecialistPricing({
       transition={{ duration: 0.5, delay: 0.3 }}
     >
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            💰 Стоимость
-          </CardTitle>
-        </CardHeader>
+        {showTitle && (
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              💰 Стоимость
+            </CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="space-y-4">
           {isEditMode && onSave ? (
             <>

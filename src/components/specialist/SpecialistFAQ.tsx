@@ -14,9 +14,10 @@ export interface FAQ {
 
 export interface SpecialistFAQProps {
   faqs: FAQ[]
+  showTitle?: boolean
 }
 
-export function SpecialistFAQ({ faqs }: SpecialistFAQProps) {
+export function SpecialistFAQ({ faqs, showTitle = true }: SpecialistFAQProps) {
   const [openId, setOpenId] = React.useState<string | null>(null)
 
   if (!faqs || faqs.length === 0) {
@@ -36,11 +37,13 @@ export function SpecialistFAQ({ faqs }: SpecialistFAQProps) {
       transition={{ duration: 0.5, delay: 0.35 }}
     >
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            ❓ Частые вопросы
-          </CardTitle>
-        </CardHeader>
+        {showTitle && (
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              ❓ Частые вопросы
+            </CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="space-y-2">
           {faqs.map((faq, index) => (
             <motion.div

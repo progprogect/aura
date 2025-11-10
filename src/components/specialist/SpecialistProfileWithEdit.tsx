@@ -423,6 +423,7 @@ export function SpecialistProfileWithEdit({
               certificates={data.certificates}
               isEditMode={isEditMode}
               onRefresh={() => router.refresh()}
+              showTitle={false}
             />
           </div>
 
@@ -442,6 +443,7 @@ export function SpecialistProfileWithEdit({
               priceDescription={data.priceDescription}
               isEditMode={isEditMode}
               onSave={handleSaveField}
+              showTitle={false}
             />
           </div>
 
@@ -460,7 +462,7 @@ export function SpecialistProfileWithEdit({
               />
             ) : (
               data.faqs.length > 0 ? (
-                <SpecialistFAQ faqs={data.faqs} />
+                <SpecialistFAQ faqs={data.faqs} showTitle={false} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>FAQ не добавлены</p>

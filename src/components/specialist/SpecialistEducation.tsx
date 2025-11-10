@@ -30,13 +30,15 @@ export interface SpecialistEducationProps {
   certificates: Certificate[]
   isEditMode?: boolean
   onRefresh?: () => void
+  showTitle?: boolean
 }
 
 export function SpecialistEducation({ 
   education, 
   certificates, 
   isEditMode = false,
-  onRefresh 
+  onRefresh,
+  showTitle = true
 }: SpecialistEducationProps) {
   const [isEducationModalOpen, setIsEducationModalOpen] = useState(false)
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false)
@@ -107,11 +109,13 @@ export function SpecialistEducation({
       transition={{ duration: 0.5, delay: 0.25 }}
     >
       <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            🎓 Образование и квалификации
-          </CardTitle>
-        </CardHeader>
+        {showTitle && (
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              🎓 Образование и квалификации
+            </CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="space-y-8">
           {/* Образование */}
           {(education.length > 0 || isEditMode) && (
