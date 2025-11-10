@@ -317,7 +317,7 @@ export function ExpertOnboardingFlow({
           </div>
         }
       >
-        <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl md:w-1/2 md:max-w-md">
             <Image
               src={stepData.illustration}
@@ -329,7 +329,7 @@ export function ExpertOnboardingFlow({
               priority
             />
           </div>
-          <div className="flex w-full flex-col justify-between md:w-1/2">
+          <div className="flex w-full flex-col justify-end md:w-1/2">
             <div className="space-y-4">
               <StepContent />
               {stepData.footnote && (
