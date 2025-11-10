@@ -141,32 +141,32 @@ export async function GET(request: NextRequest) {
     // Регистрации по дням (для графика) - используем raw query для группировки по дате
     const registrationsQuery = periodStart
       ? await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-        SELECT DATE(created_at) as date, COUNT(*)::int as count
+        SELECT DATE("createdAt") as date, COUNT(*)::int as count
         FROM "User"
-        WHERE created_at >= ${periodStart}
-        GROUP BY DATE(created_at)
+        WHERE "createdAt" >= ${periodStart}
+        GROUP BY DATE("createdAt")
         ORDER BY date ASC
       `
       : await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-        SELECT DATE(created_at) as date, COUNT(*)::int as count
+        SELECT DATE("createdAt") as date, COUNT(*)::int as count
         FROM "User"
-        GROUP BY DATE(created_at)
+        GROUP BY DATE("createdAt")
         ORDER BY date ASC
       `
 
     // Заказы по дням (для графика)
     const ordersQuery = periodStart
       ? await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-        SELECT DATE(created_at) as date, COUNT(*)::int as count
+        SELECT DATE("createdAt") as date, COUNT(*)::int as count
         FROM "Order"
-        WHERE created_at >= ${periodStart}
-        GROUP BY DATE(created_at)
+        WHERE "createdAt" >= ${periodStart}
+        GROUP BY DATE("createdAt")
         ORDER BY date ASC
       `
       : await prisma.$queryRaw<Array<{ date: Date; count: bigint }>>`
-        SELECT DATE(created_at) as date, COUNT(*)::int as count
+        SELECT DATE("createdAt") as date, COUNT(*)::int as count
         FROM "Order"
-        GROUP BY DATE(created_at)
+        GROUP BY DATE("createdAt")
         ORDER BY date ASC
       `
 
