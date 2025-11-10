@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { uploadImage } from '@/lib/cloudinary/config'
+import { uploadImage, uploadVideo } from '@/lib/cloudinary/config'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
 export async function POST(request: NextRequest) {
@@ -83,9 +83,33 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(bytes)
       const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
 
-      // Загружаем через Cloudinary
-      const uploadResult = await uploadImage(base64, 'gallery')
-      url = uploadResult.url
+      // Загружаем через Cloudinary в зависимости от типа
+      if (type === 'video') {
+        const uploadResult = await uploadVideo(base64, 'gallery')
+        url = uploadResult.url
+        // Для видео также сохраняем thumbnailUrl
+        const maxOrder = await prisma.galleryItem.findFirst({
+          where: { specialistProfileId: session.specialistProfile!.id },
+          orderBy: { order: 'desc' },
+          select: { order: true }
+        })
+
+        const galleryItem = await prisma.galleryItem.create({
+          data: {
+            specialistProfileId: session.specialistProfile!.id,
+            type: type,
+            url: url,
+            thumbnailUrl: uploadResult.thumbnailUrl || null,
+            caption: null,
+            order: (maxOrder?.order || 0) + 1,
+          }
+        })
+
+        return NextResponse.json({ success: true, item: galleryItem })
+      } else {
+        const uploadResult = await uploadImage(base64, 'gallery')
+        url = uploadResult.url
+      }
     } else {
       // Fallback: возвращаем ошибку
       return NextResponse.json(
@@ -94,20 +118,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Получаем максимальный order
+    // Получаем максимальный order (только для фото, для видео уже создано выше)
     const maxOrder = await prisma.galleryItem.findFirst({
       where: { specialistProfileId: session.specialistProfile!.id },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
 
-    // Создаём элемент галереи
+    // Создаём элемент галереи (только для фото)
     const galleryItem = await prisma.galleryItem.create({
       data: {
         specialistProfileId: session.specialistProfile!.id,
         type: type,
         url: url,
-        thumbnailUrl: type === 'video' ? url : null,
+        thumbnailUrl: null,
         caption: null,
         order: (maxOrder?.order || 0) + 1,
       }

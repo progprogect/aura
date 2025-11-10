@@ -145,6 +145,48 @@ export async function uploadPDF(
 }
 
 /**
+ * Загрузка видео в Cloudinary
+ * @param base64Video - видео в формате base64 или buffer
+ * @param folder - папка в Cloudinary (например: 'gallery', 'videos')
+ * @param publicId - уникальный идентификатор (опционально)
+ */
+export async function uploadVideo(
+  base64Video: string,
+  folder: string,
+  publicId?: string
+): Promise<{ url: string; publicId: string; thumbnailUrl?: string }> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary не настроен. Проверьте переменные окружения.')
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(base64Video, {
+      folder: `aura/${folder}`,
+      public_id: publicId,
+      resource_type: 'video', // КРИТИЧНО для видео
+      transformation: [
+        { quality: 'auto:good' },
+        { fetch_format: 'auto' }
+      ],
+      overwrite: true,
+      invalidate: true
+    })
+
+    // Генерируем thumbnail для видео (первый кадр)
+    const thumbnailUrl = result.secure_url.replace('/upload/', '/upload/so_0/').replace(/\.[^.]+$/, '.jpg')
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      thumbnailUrl
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки видео в Cloudinary:', error)
+    throw error
+  }
+}
+
+/**
  * Загрузка аватара с оптимизацией
  * Автоматически обрезает до квадрата и ресайзит до 400x400
  */
