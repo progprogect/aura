@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AdminStatsCards } from './AdminStatsCards'
 import { AdminStatsCharts } from './AdminStatsCharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -65,7 +65,7 @@ export function AdminDashboardContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -84,11 +84,11 @@ export function AdminDashboardContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [period])
 
   useEffect(() => {
     fetchStats()
-  }, [period])
+  }, [fetchStats])
 
   if (loading && !stats) {
     return (

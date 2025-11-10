@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ import {
   ShieldOff,
   Ban,
   Unlock,
+  Eye,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useToast, ToastContainer } from '@/components/ui/toast'
@@ -124,11 +125,7 @@ export function SpecialistDetailContent({
   const [blockReason, setBlockReason] = useState('')
   const [blockType, setBlockType] = useState<'specialist' | 'user'>('specialist')
 
-  useEffect(() => {
-    fetchSpecialist()
-  }, [specialistId])
-
-  const fetchSpecialist = async () => {
+  const fetchSpecialist = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -147,7 +144,11 @@ export function SpecialistDetailContent({
     } finally {
       setLoading(false)
     }
-  }
+  }, [specialistId])
+
+  useEffect(() => {
+    fetchSpecialist()
+  }, [fetchSpecialist])
 
   const handleVerify = async (verified: boolean) => {
     setActionLoading('verify')

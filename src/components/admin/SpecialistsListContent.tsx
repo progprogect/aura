@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,7 @@ export function SpecialistsListContent() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  const fetchSpecialists = async () => {
+  const fetchSpecialists = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -89,11 +89,11 @@ export function SpecialistsListContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, search, verifiedFilter, blockedFilter, categoryFilter])
 
   useEffect(() => {
     fetchSpecialists()
-  }, [page, search, verifiedFilter, blockedFilter, categoryFilter])
+  }, [fetchSpecialists])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
