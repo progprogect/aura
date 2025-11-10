@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
+import { useOnboarding } from './OnboardingContext'
 
 export interface QuickActionsProps {
   slug?: string
@@ -25,7 +26,10 @@ export interface QuickActionsProps {
   onOpenOnboarding?: () => void
 }
 
-export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats, onOpenOnboarding }: QuickActionsProps) {
+export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats, onOpenOnboarding: onOpenOnboardingProp }: QuickActionsProps) {
+  // Используем контекст напрямую с fallback на проп
+  const onboardingContext = useOnboarding()
+  const onOpenOnboarding = onboardingContext?.openOnboarding || onOpenOnboardingProp
   const specialistActions = [
     {
       href: `/specialist/${slug}`,

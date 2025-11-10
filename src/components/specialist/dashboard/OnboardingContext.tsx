@@ -31,9 +31,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
 export function useOnboarding() {
   const context = useContext(OnboardingContext)
-  if (!context) {
-    throw new Error('useOnboarding must be used within OnboardingProvider')
-  }
-  return context
+  return context // Возвращает null, если контекст недоступен (для опционального использования)
 }
 

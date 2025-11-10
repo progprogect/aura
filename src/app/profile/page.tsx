@@ -14,7 +14,7 @@ import { User, Phone, Mail, Stethoscope, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats'
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
-import { QuickActionsWrapper } from '@/components/specialist/dashboard/QuickActionsWrapper'
+import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { ServicesList } from '@/components/specialist/dashboard/ServicesList'
 import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
@@ -486,7 +486,7 @@ export default async function ProfilePage() {
 
             {/* Быстрые действия */}
             {user.hasSpecialistProfile && user.specialistProfile ? (
-              <QuickActionsWrapper 
+              <QuickActions 
                 slug={user.specialistProfile.slug}
                 newRequestsCount={user.newRequestsCount || 0}
                 newOrdersCount={user.newOrdersCount || 0}
@@ -494,7 +494,7 @@ export default async function ProfilePage() {
                 purchasesStats={user.purchasesStats}
               />
             ) : (
-              <QuickActionsWrapper 
+              <QuickActions 
                 slug={undefined}
                 newRequestsCount={user.newRequestsCount || 0}
                 newOrdersCount={user.newOrdersCount || 0}
