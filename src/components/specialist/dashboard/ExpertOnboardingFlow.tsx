@@ -215,6 +215,12 @@ export function ExpertOnboardingFlow({
     await updateProgress({ step: nextStep })
   }
 
+  async function handlePrevious() {
+    const prevStep = Math.max(currentStep - 1, 0)
+    setCurrentStep(prevStep)
+    await updateProgress({ step: prevStep })
+  }
+
   async function handleSkip() {
     await updateProgress({ step: currentStep })
     setIsOpen(false)
@@ -272,20 +278,32 @@ export function ExpertOnboardingFlow({
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              {stepData.allowSkip ? (
-                <Button
-                  variant="ghost"
-                  onClick={handleSkip}
-                  disabled={isSaving}
-                  className="order-2 text-sm text-gray-500 md:order-1 md:text-base"
-                >
-                  Вернуться позже
-                </Button>
-              ) : (
-                <div className="order-2 text-sm text-gray-400 md:order-1 md:text-base">
-                  Почти готово — завершите онбординг
-                </div>
-              )}
+              <div className="flex items-center gap-3 order-1">
+                {currentStep > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={isSaving}
+                    className="text-sm md:text-base"
+                  >
+                    Назад
+                  </Button>
+                )}
+                {stepData.allowSkip ? (
+                  <Button
+                    variant="ghost"
+                    onClick={handleSkip}
+                    disabled={isSaving}
+                    className="text-sm text-gray-500 md:text-base"
+                  >
+                    Вернуться позже
+                  </Button>
+                ) : (
+                  <div className="text-sm text-gray-400 md:text-base">
+                    Почти готово — завершите онбординг
+                  </div>
+                )}
+              </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:order-2 md:justify-end">
                 <Button
@@ -299,14 +317,14 @@ export function ExpertOnboardingFlow({
           </div>
         }
       >
-        <div className="flex flex-col gap-6 md:flex-row">
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 md:w-1/2">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 md:w-1/2 md:max-w-md">
             <Image
               src={stepData.illustration}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover object-center"
+              className="object-contain object-center"
               priority
             />
           </div>
