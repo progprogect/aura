@@ -67,7 +67,7 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
                 stiffness: 300,
               }}
               className="
-                w-full md:w-auto md:min-w-[500px] md:max-w-2xl
+                w-full md:w-[800px]
                 bg-white rounded-t-2xl md:rounded-2xl
                 shadow-2xl
                 max-h-[90vh] md:max-h-[85vh]

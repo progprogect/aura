@@ -8,7 +8,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search } from 'lucide-react'
+import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
+import { useOnboarding } from './OnboardingContext'
 
 interface QuickActionsProps {
   slug?: string
@@ -22,9 +23,24 @@ interface QuickActionsProps {
     cancelled: number
     disputed: number
   }
+  onOpenOnboarding?: () => void
 }
 
-export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats }: QuickActionsProps) {
+export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats, onOpenOnboarding }: QuickActionsProps) {
+  let onboardingContext: { openOnboarding: () => void } | null = null
+  try {
+    onboardingContext = useOnboarding()
+  } catch {
+    // Контекст не доступен, используем пропс
+  }
+
+  const handleOpenOnboarding = () => {
+    if (onboardingContext) {
+      onboardingContext.openOnboarding()
+    } else if (onOpenOnboarding) {
+      onOpenOnboarding()
+    }
+  }
   const specialistActions = [
     {
       href: `/specialist/${slug}`,
@@ -96,7 +112,19 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       description: 'Статистика и метрики',
       variant: 'outline' as const,
       disabled: false
-    }
+    },
+    ...((onboardingContext || onOpenOnboarding) ? [{
+      href: '#',
+      icon: BookOpen,
+      label: 'Как работает платформа',
+      description: 'Просмотреть онбординг',
+      variant: 'outline' as const,
+      disabled: false,
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault()
+        handleOpenOnboarding()
+      }
+    }] : [])
   ]
 
   const userActions = [
@@ -171,6 +199,64 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                       </div>
                     </div>
                   </div>
+                ) : (action as any).onClick ? (
+                  <button
+                    onClick={(action as any).onClick}
+                    className="flex items-center gap-3 w-full text-left"
+                  >
+                    <div className={`
+                      p-2 rounded-lg relative
+                      ${isMain 
+                        ? 'bg-white/20' 
+                        : action.variant === 'default' 
+                          ? 'bg-white/20' 
+                          : 'bg-blue-50'
+                      }
+                    `}>
+                      <Icon className={`
+                        w-5 h-5
+                        ${isMain 
+                          ? 'text-white' 
+                          : action.variant === 'default' 
+                            ? 'text-white' 
+                            : 'text-blue-600'
+                        }
+                      `} />
+                      {/* Бейдж для заявок */}
+                      {(action as any).badge > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {(action as any).badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`
+                        font-medium text-sm flex items-center gap-2
+                        ${isMain ? 'text-white' : ''}
+                      `}>
+                        {action.label}
+                        {/* Текстовый бейдж для заявок */}
+                        {(action as any).badge > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {(action as any).badge}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className={`
+                        text-xs
+                        ${isMain ? 'text-white/80' : 'opacity-80'}
+                      `}>
+                        {action.description}
+                      </div>
+                    </div>
+                    {isMain && (
+                      <div className="text-white/60">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
                 ) : (
                   <Link href={action.href} className="flex items-center gap-3 w-full">
                     <div className={`

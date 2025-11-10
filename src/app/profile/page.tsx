@@ -20,7 +20,8 @@ import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
-import { ExpertOnboardingFlow } from '@/components/specialist/dashboard/ExpertOnboardingFlow'
+import { ProfileContentWrapper } from '@/components/specialist/dashboard/ProfileContentWrapper'
+import { ProfileSectionWrapper } from '@/components/specialist/dashboard/ProfileSectionWrapper'
 
 async function getUserData() {
   try {
@@ -353,14 +354,22 @@ export default async function ProfilePage() {
       </div>
 
       {/* Контент */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {user.hasSpecialistProfile && user.specialistProfile && (
-          <ExpertOnboardingFlow
-            initialStep={user.specialistProfile.onboardingStep ?? 0}
-            initialCompleted={Boolean(user.specialistProfile.onboardingCompletedAt)}
-            guideHref="/profile?section=guide"
-          />
-        )}
+      <ProfileSectionWrapper>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {user.hasSpecialistProfile && user.specialistProfile && (
+            <ProfileContentWrapper
+              initialStep={user.specialistProfile.onboardingStep ?? 0}
+              initialCompleted={Boolean(user.specialistProfile.onboardingCompletedAt)}
+              guideHref="/profile?section=guide"
+              quickActionsProps={{
+                slug: user.specialistProfile.slug,
+                newRequestsCount: user.newRequestsCount || 0,
+                newOrdersCount: user.newOrdersCount || 0,
+                isSpecialist: user.hasSpecialistProfile,
+                purchasesStats: user.purchasesStats,
+              }}
+            />
+          )}
 
         {/* Если специалист - показываем статистику */}
         {user.hasSpecialistProfile && user.stats && (
@@ -483,13 +492,23 @@ export default async function ProfilePage() {
             <BalanceWidgetWrapper />
 
             {/* Быстрые действия */}
-            <QuickActions 
-              slug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
-              newRequestsCount={user.newRequestsCount || 0}
-              newOrdersCount={user.newOrdersCount || 0}
-              isSpecialist={user.hasSpecialistProfile}
-              purchasesStats={user.purchasesStats}
-            />
+            {user.hasSpecialistProfile && user.specialistProfile ? (
+              <QuickActions 
+                slug={user.specialistProfile.slug}
+                newRequestsCount={user.newRequestsCount || 0}
+                newOrdersCount={user.newOrdersCount || 0}
+                isSpecialist={true}
+                purchasesStats={user.purchasesStats}
+              />
+            ) : (
+              <QuickActions 
+                slug={undefined}
+                newRequestsCount={user.newRequestsCount || 0}
+                newOrdersCount={user.newOrdersCount || 0}
+                isSpecialist={false}
+                purchasesStats={user.purchasesStats}
+              />
+            )}
 
             {/* Кнопка выхода */}
             <Card>
@@ -499,7 +518,8 @@ export default async function ProfilePage() {
             </Card>
           </div>
         </div>
-      </div>
+        </div>
+      </ProfileSectionWrapper>
     </div>
   )
 }
