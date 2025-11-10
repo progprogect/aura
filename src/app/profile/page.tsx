@@ -381,10 +381,11 @@ export default async function ProfilePage() {
           {/* Основная информация + Дополнительные секции для специалиста */}
           <div className="lg:col-span-2 space-y-6">
             {/* Если специалист - показываем прогресс профиля */}
-            {user.hasSpecialistProfile && user.stats && user.tasks && (
+            {user.hasSpecialistProfile && user.stats && user.tasks && user.specialistProfile && (
               <ProfileCompletionCard
                 completionPercentage={user.stats.completionPercentage}
                 tasks={user.tasks}
+                specialistSlug={user.specialistProfile.slug}
               />
             )}
 

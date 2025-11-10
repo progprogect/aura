@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
+import { Suspense } from 'react'
 // Убираем импорт иконок - теперь используем строковые идентификаторы
 import { prisma } from '@/lib/db'
 import { incrementProfileView } from '@/lib/redis'
@@ -317,81 +318,83 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
       )}
 
       {/* Профиль с табами и контентом */}
-      <SpecialistProfileWithEdit
-        isOwner={isOwner}
-        tabs={tabs}
-        categoryConfig={categoryConfig}
-        heroData={{
-          firstName: specialist.firstName,
-          lastName: specialist.lastName,
-          avatar: specialist.avatar,
-          category: specialist.category,
-          categoryEmoji: categoryConfig?.emoji,
-          categoryName: categoryConfig?.name,
-          tagline: specialist.tagline,
-          city: specialist.city,
-          country: specialist.country,
-          workFormats: specialist.workFormats,
-          yearsOfPractice: specialist.yearsOfPractice,
-          verified: specialist.verified,
-          acceptingClients: specialist.acceptingClients,
-          profileViews: specialist.profileViews,
-          specializations: specialist.specializations,
-          averageRating: specialist.averageRating,
-          totalReviews: specialist.totalReviews,
-        }}
-        contactsData={{
-          email: specialist.email,
-          telegram: specialist.telegram,
-          whatsapp: specialist.whatsapp,
-          instagram: specialist.instagram,
-          website: specialist.website,
-        }}
-        data={{
-          id: specialist.id,
-          slug: specialist.slug,
-          fullName,
-          category: specialist.category,
-          about: specialist.about,
-          customFields: specialist.customFields as any,
-          videoUrl: specialist.videoUrl,
-          gallery: specialist.gallery.map(item => ({
-            id: item.id,
-            type: item.type as 'photo' | 'video',
-            url: item.url,
-            thumbnailUrl: item.thumbnailUrl,
-            caption: item.caption,
-          })),
-          education: specialist.education.map(edu => ({
-            id: edu.id,
-            institution: edu.institution,
-            degree: edu.degree,
-            year: edu.year,
-            description: edu.description,
-          })),
-          certificates: specialist.certificates.map(cert => ({
-            id: cert.id,
-            title: cert.title,
-            organization: cert.organization,
-            year: cert.year,
-            fileUrl: cert.fileUrl,
-          })),
-          priceFrom: specialist.priceFrom,
-          priceTo: specialist.priceTo,
-          currency: specialist.currency,
-          priceDescription: specialist.priceDescription,
-          faqs: specialist.faqs.map(faq => ({
-            id: faq.id,
-            question: faq.question,
-            answer: faq.answer,
-          })),
-          leadMagnets: specialist.leadMagnets, // Уже преобразовано fromPrismaLeadMagnet() на строке 102
-          services: specialist.services,
-          averageRating: specialist.averageRating,
-          totalReviews: specialist.totalReviews,
-          initialReviews: specialist.initialReviews,
-        }}
-      />
+      <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+        <SpecialistProfileWithEdit
+          isOwner={isOwner}
+          tabs={tabs}
+          categoryConfig={categoryConfig}
+          heroData={{
+            firstName: specialist.firstName,
+            lastName: specialist.lastName,
+            avatar: specialist.avatar,
+            category: specialist.category,
+            categoryEmoji: categoryConfig?.emoji,
+            categoryName: categoryConfig?.name,
+            tagline: specialist.tagline,
+            city: specialist.city,
+            country: specialist.country,
+            workFormats: specialist.workFormats,
+            yearsOfPractice: specialist.yearsOfPractice,
+            verified: specialist.verified,
+            acceptingClients: specialist.acceptingClients,
+            profileViews: specialist.profileViews,
+            specializations: specialist.specializations,
+            averageRating: specialist.averageRating,
+            totalReviews: specialist.totalReviews,
+          }}
+          contactsData={{
+            email: specialist.email,
+            telegram: specialist.telegram,
+            whatsapp: specialist.whatsapp,
+            instagram: specialist.instagram,
+            website: specialist.website,
+          }}
+          data={{
+            id: specialist.id,
+            slug: specialist.slug,
+            fullName,
+            category: specialist.category,
+            about: specialist.about,
+            customFields: specialist.customFields as any,
+            videoUrl: specialist.videoUrl,
+            gallery: specialist.gallery.map(item => ({
+              id: item.id,
+              type: item.type as 'photo' | 'video',
+              url: item.url,
+              thumbnailUrl: item.thumbnailUrl,
+              caption: item.caption,
+            })),
+            education: specialist.education.map(edu => ({
+              id: edu.id,
+              institution: edu.institution,
+              degree: edu.degree,
+              year: edu.year,
+              description: edu.description,
+            })),
+            certificates: specialist.certificates.map(cert => ({
+              id: cert.id,
+              title: cert.title,
+              organization: cert.organization,
+              year: cert.year,
+              fileUrl: cert.fileUrl,
+            })),
+            priceFrom: specialist.priceFrom,
+            priceTo: specialist.priceTo,
+            currency: specialist.currency,
+            priceDescription: specialist.priceDescription,
+            faqs: specialist.faqs.map(faq => ({
+              id: faq.id,
+              question: faq.question,
+              answer: faq.answer,
+            })),
+            leadMagnets: specialist.leadMagnets, // Уже преобразовано fromPrismaLeadMagnet() на строке 102
+            services: specialist.services,
+            averageRating: specialist.averageRating,
+            totalReviews: specialist.totalReviews,
+            initialReviews: specialist.initialReviews,
+          }}
+        />
+      </Suspense>
     </div>
   )
 }

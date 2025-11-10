@@ -5,8 +5,8 @@
 
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useCallback, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
 import { SpecialistHero } from './SpecialistHero'
@@ -128,8 +128,52 @@ export function SpecialistProfileWithEdit({
   data 
 }: SpecialistProfileWithEditProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isEditMode, setIsEditMode] = useState(false)
   const [acceptingClients, setAcceptingClients] = useState(heroData.acceptingClients)
+
+  // Обработка URL параметров для автоматического включения режима редактирования
+  useEffect(() => {
+    if (!isOwner) return
+
+    const editParam = searchParams.get('edit')
+    
+    // Автоматически включаем режим редактирования если ?edit=true
+    if (editParam === 'true' && !isEditMode) {
+      setIsEditMode(true)
+    }
+  }, [searchParams, isOwner, isEditMode])
+
+  // Скролл к секции после включения режима редактирования
+  useEffect(() => {
+    if (!isOwner || !isEditMode) return
+
+    const sectionParam = searchParams.get('section')
+    
+    if (sectionParam) {
+      // Функция для скролла с несколькими попытками
+      const scrollToSection = (attempts = 0) => {
+        const sectionElement = document.getElementById(`section-${sectionParam}`)
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          // Небольшой отступ сверху для лучшей видимости
+          setTimeout(() => {
+            window.scrollBy(0, -20)
+          }, 100)
+        } else if (attempts < 5) {
+          // Повторяем попытку с задержкой, если элемент еще не отрендерился
+          setTimeout(() => scrollToSection(attempts + 1), 200)
+        }
+      }
+
+      // Задержка для рендеринга секций в режиме редактирования
+      const timeoutId = setTimeout(() => {
+        scrollToSection()
+      }, 600)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [isEditMode, searchParams, isOwner])
 
   const handleToggleEditMode = useCallback(() => {
     setIsEditMode(prev => !prev)
@@ -263,7 +307,7 @@ export function SpecialistProfileWithEdit({
           {/* Hero Edit секция (в режиме редактирования) */}
           {isEditMode && (
             <>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div id="section-hero" className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
                     <span className="text-purple-600 text-sm">✏️</span>
@@ -361,7 +405,7 @@ export function SpecialistProfileWithEdit({
           )}
 
           {/* Видео-презентация */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div id="section-video" className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <span className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                 <span className="text-red-600 text-sm">🎥</span>
@@ -388,7 +432,7 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Галерея */}
-          <Section title="Галерея" icon="📸" iconBgColor="bg-green-100" iconTextColor="text-green-600">
+          <Section id="section-gallery" title="Галерея" icon="📸" iconBgColor="bg-green-100" iconTextColor="text-green-600">
             {isEditMode ? (
               <GalleryEditor
                 items={data.gallery}
@@ -406,7 +450,7 @@ export function SpecialistProfileWithEdit({
           </Section>
 
           {/* Образование и сертификаты */}
-          <Section title="Образование и сертификаты" icon="🎓" iconBgColor="bg-yellow-100" iconTextColor="text-yellow-600">
+          <Section id="section-education" title="Образование и сертификаты" icon="🎓" iconBgColor="bg-yellow-100" iconTextColor="text-yellow-600">
             <SpecialistEducationContent
               education={data.education}
               certificates={data.certificates}
@@ -416,7 +460,7 @@ export function SpecialistProfileWithEdit({
           </Section>
 
           {/* Стоимость */}
-          <Section title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
+          <Section id="section-pricing" title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
             <SpecialistPricingContent
               category={data.category}
               priceFrom={data.priceFrom}
@@ -457,22 +501,24 @@ export function SpecialistProfileWithEdit({
           )}
 
           {/* Лид-магниты */}
-          {data.leadMagnets && data.leadMagnets.length > 0 && (
-            <Section title="Бесплатные материалы" icon="🎁" iconBgColor="bg-pink-100" iconTextColor="text-pink-600">
-              {isEditMode ? (
-                <LeadMagnetsEditor
-                  leadMagnets={data.leadMagnets}
-                  onRefresh={() => router.refresh()}
-                />
-              ) : (
-                <SpecialistLeadMagnetsContent
-                  leadMagnets={data.leadMagnets}
-                  specialistSlug={data.slug}
-                  specialistName={data.fullName}
-                />
-              )}
-            </Section>
-          )}
+          <Section id="section-lead-magnets" title="Бесплатные материалы" icon="🎁" iconBgColor="bg-pink-100" iconTextColor="text-pink-600">
+            {isEditMode ? (
+              <LeadMagnetsEditor
+                leadMagnets={data.leadMagnets || []}
+                onRefresh={() => router.refresh()}
+              />
+            ) : data.leadMagnets && data.leadMagnets.length > 0 ? (
+              <SpecialistLeadMagnetsContent
+                leadMagnets={data.leadMagnets}
+                specialistSlug={data.slug}
+                specialistName={data.fullName}
+              />
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Лид-магниты не добавлены</p>
+              </div>
+            )}
+          </Section>
 
         </div>
       ) : (

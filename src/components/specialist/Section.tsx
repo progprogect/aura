@@ -12,6 +12,7 @@ interface SectionProps {
   iconTextColor?: string
   children: ReactNode
   className?: string
+  id?: string
 }
 
 export function Section({
@@ -21,9 +22,10 @@ export function Section({
   iconTextColor = 'text-green-600',
   children,
   className = '',
+  id,
 }: SectionProps) {
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 ${className}`}>
+    <div id={id} className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 ${className}`}>
       <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <span className={`w-8 h-8 ${iconBgColor} rounded-lg flex items-center justify-center`}>
           <span className={`${iconTextColor} text-sm`}>{icon}</span>

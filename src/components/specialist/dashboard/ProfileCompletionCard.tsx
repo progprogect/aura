@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Circle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface Task {
   id: string
@@ -20,10 +21,33 @@ interface Task {
 interface ProfileCompletionCardProps {
   completionPercentage: number
   tasks: Task[]
+  specialistSlug: string
 }
 
-export function ProfileCompletionCard({ completionPercentage, tasks }: ProfileCompletionCardProps) {
+// Маппинг ID задач на ID секций в профиле
+const taskToSectionMap: Record<string, string> = {
+  avatar: 'hero',
+  certificates: 'education',
+  education: 'education',
+  gallery: 'gallery',
+  pricing: 'pricing',
+  video: 'video',
+  leadMagnets: 'lead-magnets',
+}
+
+export function ProfileCompletionCard({ completionPercentage, tasks, specialistSlug }: ProfileCompletionCardProps) {
+  const router = useRouter()
   const isComplete = completionPercentage === 100
+
+  const handleTaskClick = (task: Task) => {
+    if (task.completed) return
+    
+    const sectionId = taskToSectionMap[task.id]
+    if (sectionId) {
+      // Переход на страницу профиля с параметрами редактирования
+      router.push(`/specialist/${specialistSlug}?edit=true&section=${sectionId}`)
+    }
+  }
 
   return (
     <Card className="border-blue-200 shadow-sm">
@@ -66,11 +90,12 @@ export function ProfileCompletionCard({ completionPercentage, tasks }: ProfileCo
                   key={task.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
+                  onClick={() => handleTaskClick(task)}
                   className={`
                     flex items-start gap-3 p-3 rounded-lg border transition-colors
                     ${task.completed 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-white border-gray-200 hover:border-blue-300 cursor-pointer'
+                      ? 'bg-green-50 border-green-200 cursor-default' 
+                      : 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer active:scale-[0.98]'
                     }
                   `}
                 >
