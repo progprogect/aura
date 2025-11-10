@@ -137,6 +137,10 @@ model SpecialistProfile {
   // Аналитика (агрегированные данные по дням)
   analyticsDaily SpecialistAnalyticsDaily[]
 
+  // Онбординг
+  onboardingStep        Int?      @default(0)
+  onboardingCompletedAt DateTime?
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

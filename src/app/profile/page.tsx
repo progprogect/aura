@@ -20,6 +20,7 @@ import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
+import { ExpertOnboardingFlow } from '@/components/specialist/dashboard/ExpertOnboardingFlow'
 
 async function getUserData() {
   try {
@@ -281,6 +282,8 @@ async function getUserData() {
         videoUrl: profile.videoUrl,
         profileViews: profile.profileViews,
         contactViews: profile.contactViews,
+        onboardingStep: profile.onboardingStep,
+        onboardingCompletedAt: profile.onboardingCompletedAt,
       }
 
       userData.stats = {
@@ -351,6 +354,14 @@ export default async function ProfilePage() {
 
       {/* Контент */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {user.hasSpecialistProfile && user.specialistProfile && (
+          <ExpertOnboardingFlow
+            initialStep={user.specialistProfile.onboardingStep ?? 0}
+            initialCompleted={Boolean(user.specialistProfile.onboardingCompletedAt)}
+            guideHref="/profile?section=guide"
+          />
+        )}
+
         {/* Если специалист - показываем статистику */}
         {user.hasSpecialistProfile && user.stats && (
           <div className="mb-6">
