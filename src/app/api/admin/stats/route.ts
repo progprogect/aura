@@ -222,14 +222,8 @@ export async function GET(request: NextRequest) {
           newReviews,
         },
         charts: {
-          registrationsByDay: registrationsByDay.map((item) => ({
-            date: item.createdAt.toISOString().split('T')[0],
-            count: item._count.id,
-          })),
-          ordersByDay: ordersByDay.map((item) => ({
-            date: item.createdAt.toISOString().split('T')[0],
-            count: item._count.id,
-          })),
+          registrationsByDay,
+          ordersByDay,
         },
         period: {
           type: period,
