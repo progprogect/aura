@@ -49,10 +49,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Проверка размера (макс 10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Проверка размера (макс 10MB для фото, 100MB для видео)
+    const maxSize = type === 'video' ? 100 * 1024 * 1024 : 10 * 1024 * 1024
+    const maxSizeMB = type === 'video' ? 100 : 10
+    if (file.size > maxSize) {
       return NextResponse.json(
-        { success: false, error: 'Файл слишком большой. Максимум 10MB' },
+        { success: false, error: `Файл слишком большой. Максимум ${maxSizeMB}MB` },
         { status: 400 }
       )
     }
