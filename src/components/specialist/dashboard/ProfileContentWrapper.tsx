@@ -27,10 +27,12 @@ export function ProfileContentWrapper({
   initialCompleted,
   guideHref,
 }: Omit<ProfileContentWrapperProps, 'quickActionsProps'>) {
-  const { setOpenOnboarding } = useOnboarding()
+  const onboardingContext = useOnboarding()
 
   const handleOpenRequest = (open: () => void) => {
-    setOpenOnboarding(open)
+    if (onboardingContext) {
+      onboardingContext.setOpenOnboarding(open)
+    }
   }
 
   return (
