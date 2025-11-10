@@ -355,7 +355,7 @@ export default async function ProfilePage() {
 
       {/* Контент */}
       <ProfileSectionWrapper>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {user.hasSpecialistProfile && user.specialistProfile && (
             <ProfileContentWrapper
               initialStep={user.specialistProfile.onboardingStep ?? 0}
@@ -494,13 +494,13 @@ export default async function ProfilePage() {
                 purchasesStats={user.purchasesStats}
               />
             ) : (
-              <QuickActions 
+            <QuickActions 
                 slug={undefined}
-                newRequestsCount={user.newRequestsCount || 0}
-                newOrdersCount={user.newOrdersCount || 0}
+              newRequestsCount={user.newRequestsCount || 0}
+              newOrdersCount={user.newOrdersCount || 0}
                 isSpecialist={false}
-                purchasesStats={user.purchasesStats}
-              />
+              purchasesStats={user.purchasesStats}
+            />
             )}
 
             {/* Кнопка выхода */}
@@ -511,7 +511,7 @@ export default async function ProfilePage() {
             </Card>
           </div>
         </div>
-        </div>
+      </div>
       </ProfileSectionWrapper>
     </div>
   )

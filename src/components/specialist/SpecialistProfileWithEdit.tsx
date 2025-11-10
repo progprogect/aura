@@ -18,16 +18,17 @@ import { AcceptingClientsToggle } from './edit/AcceptingClientsToggle'
 import { SpecialistAbout } from './SpecialistAbout'
 import { SpecialistSpecialization } from './SpecialistSpecialization'
 import { SpecialistVideo } from './SpecialistVideo'
-import { SpecialistGallery } from './SpecialistGallery'
-import { SpecialistEducation } from './SpecialistEducation'
-import { SpecialistPricing } from './SpecialistPricing'
-import { SpecialistFAQ } from './SpecialistFAQ'
+import { SpecialistGalleryContent } from './SpecialistGalleryContent'
+import { SpecialistEducationContent } from './SpecialistEducationContent'
+import { SpecialistPricingContent } from './SpecialistPricingContent'
+import { SpecialistFAQContent } from './SpecialistFAQContent'
+import { SpecialistServicesContent } from './SpecialistServicesContent'
+import { SpecialistLeadMagnetsContent } from './SpecialistLeadMagnetsContent'
+import { Section } from './Section'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import { GalleryEditor } from './edit/GalleryEditor'
 import { FAQEditor } from './edit/FAQEditor'
 import { LeadMagnetsEditor } from './edit/LeadMagnetsEditor'
-import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
-import { SpecialistServices } from './SpecialistServices'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { Service } from '@/types/service'
@@ -387,13 +388,7 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Галерея */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-green-600 text-sm">📸</span>
-              </span>
-              <span className="text-base sm:text-xl">Галерея</span>
-            </h2>
+          <Section title="Галерея" icon="📸" iconBgColor="bg-green-100" iconTextColor="text-green-600">
             {isEditMode ? (
               <GalleryEditor
                 items={data.gallery}
@@ -401,41 +396,28 @@ export function SpecialistProfileWithEdit({
               />
             ) : (
               data.gallery.length > 0 ? (
-                <SpecialistGallery items={data.gallery} showTitle={false} />
+                <SpecialistGalleryContent items={data.gallery} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>Галерея пуста</p>
                 </div>
               )
             )}
-          </div>
+          </Section>
 
           {/* Образование и сертификаты */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <span className="text-yellow-600 text-sm">🎓</span>
-              </span>
-              <span className="text-base sm:text-xl">Образование и сертификаты</span>
-            </h2>
-            <SpecialistEducation
+          <Section title="Образование и сертификаты" icon="🎓" iconBgColor="bg-yellow-100" iconTextColor="text-yellow-600">
+            <SpecialistEducationContent
               education={data.education}
               certificates={data.certificates}
               isEditMode={isEditMode}
               onRefresh={() => router.refresh()}
-              showTitle={false}
             />
-          </div>
+          </Section>
 
           {/* Стоимость */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <span className="text-emerald-600 text-sm">💰</span>
-              </span>
-              <span className="text-base sm:text-xl">Стоимость услуг</span>
-            </h2>
-            <SpecialistPricing
+          <Section title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
+            <SpecialistPricingContent
               category={data.category}
               priceFrom={data.priceFrom}
               priceTo={data.priceTo}
@@ -443,18 +425,11 @@ export function SpecialistProfileWithEdit({
               priceDescription={data.priceDescription}
               isEditMode={isEditMode}
               onSave={handleSaveField}
-              showTitle={false}
             />
-          </div>
+          </Section>
 
           {/* FAQ */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <span className="text-indigo-600 text-sm">❓</span>
-              </span>
-              <span className="text-base sm:text-xl">Часто задаваемые вопросы</span>
-            </h2>
+          <Section title="Часто задаваемые вопросы" icon="❓" iconBgColor="bg-indigo-100" iconTextColor="text-indigo-600">
             {isEditMode ? (
               <FAQEditor
                 faqs={data.faqs}
@@ -462,54 +437,41 @@ export function SpecialistProfileWithEdit({
               />
             ) : (
               data.faqs.length > 0 ? (
-                <SpecialistFAQ faqs={data.faqs} showTitle={false} />
+                <SpecialistFAQContent faqs={data.faqs} />
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>FAQ не добавлены</p>
                 </div>
               )
             )}
-          </div>
+          </Section>
 
           {/* Услуги */}
           {data.services && data.services.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <span className="text-green-600 text-sm">💼</span>
-                </span>
-                <span className="text-base sm:text-xl">Услуги</span>
-              </h2>
-              <SpecialistServices
+            <Section title="Услуги" icon="💼" iconBgColor="bg-green-100" iconTextColor="text-green-600">
+              <SpecialistServicesContent
                 services={data.services}
                 specialistSlug={data.slug}
-                showTitle={false}
               />
-            </div>
+            </Section>
           )}
 
           {/* Лид-магниты */}
           {data.leadMagnets && data.leadMagnets.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <span className="text-pink-600 text-sm">🎁</span>
-                </span>
-                <span className="text-base sm:text-xl">Бесплатные материалы</span>
-              </h2>
+            <Section title="Бесплатные материалы" icon="🎁" iconBgColor="bg-pink-100" iconTextColor="text-pink-600">
               {isEditMode ? (
                 <LeadMagnetsEditor
                   leadMagnets={data.leadMagnets}
                   onRefresh={() => router.refresh()}
                 />
               ) : (
-                <SpecialistLeadMagnets
+                <SpecialistLeadMagnetsContent
                   leadMagnets={data.leadMagnets}
                   specialistSlug={data.slug}
                   specialistName={data.fullName}
                 />
               )}
-            </div>
+            </Section>
           )}
 
         </div>
