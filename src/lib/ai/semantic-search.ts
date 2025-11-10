@@ -44,7 +44,7 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   console.log('[Semantic Search] 🔑 Specialist IDs from MongoDB:', specialistIds.slice(0, 5).map(id => id.substring(0, 10)))
 
   // 3. Строим фильтры для Prisma
-  const where: SpecialistWhereInput = {
+  const where: any = {
     id: { in: specialistIds },
     blocked: false, // Профиль не заблокирован
     acceptingClients: true,
@@ -200,7 +200,7 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
 
   console.log('[Keyword Search] Query:', query)
 
-  const where: SpecialistWhereInput = {
+  const where: any = {
     blocked: false, // Профиль не заблокирован
     acceptingClients: true,
     verified: true, // Всегда требуем верификацию
