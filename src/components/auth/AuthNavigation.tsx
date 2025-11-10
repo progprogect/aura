@@ -29,9 +29,8 @@ export function AuthNavigation({
           <Image
             src="/icons/logo-evolutsia360.png"
             alt="Эволюция 360"
-            width={38}
-            height={38}
-            className="rounded-full shadow"
+            width={114}
+            height={114}
             priority
           />
           Эволюция&nbsp;360

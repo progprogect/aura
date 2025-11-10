@@ -30,9 +30,8 @@ export function Navigation() {
             <Image
               src="/icons/logo-evolutsia360.png"
               alt="Эволюция 360"
-              width={38}
-              height={38}
-              className="rounded-full shadow-sm"
+              width={114}
+              height={114}
             />
             <span className="text-xl font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>
           </Link>

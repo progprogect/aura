@@ -38,9 +38,8 @@ export function HeroNavigation() {
             <Image
               src="/icons/logo-evolutsia360.png"
               alt="Эволюция 360"
-              width={34}
-              height={34}
-              className="rounded-full shadow-sm"
+              width={102}
+              height={102}
               priority
             />
             <span className="text-lg font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>
