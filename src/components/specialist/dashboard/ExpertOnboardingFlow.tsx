@@ -38,7 +38,7 @@ export function ExpertOnboardingFlow({
         id: 'intro',
         title: 'Эволюция 360 помогает находить клиентов',
         ctaLabel: 'Дальше',
-        illustration: '/onboarding/expert-onboarding-step-1.svg',
+        illustration: '/onboarding/expert-onboarding-step-1.webp',
         allowSkip: true,
         content: () => (
           <div className="space-y-3 text-sm md:text-base text-gray-700">
@@ -57,7 +57,7 @@ export function ExpertOnboardingFlow({
         id: 'requests',
         title: 'Два способа получать заказы',
         ctaLabel: 'Понятно, дальше',
-        illustration: '/onboarding/expert-onboarding-step-2.svg',
+        illustration: '/onboarding/expert-onboarding-step-2.webp',
         allowSkip: true,
         content: () => (
           <div className="space-y-3 text-sm md:text-base text-gray-700">
@@ -80,7 +80,7 @@ export function ExpertOnboardingFlow({
         id: 'points',
         title: 'Баллы — ваш внутренний бюджет',
         ctaLabel: 'Понял, идём дальше',
-        illustration: '/onboarding/expert-onboarding-step-3.svg',
+        illustration: '/onboarding/expert-onboarding-step-3.webp',
         allowSkip: true,
         content: () => (
           <div className="space-y-3 text-sm md:text-base text-gray-700">
@@ -115,7 +115,7 @@ export function ExpertOnboardingFlow({
         id: 'payments',
         title: 'Как вы получаете деньги',
         ctaLabel: 'Последний шаг',
-        illustration: '/onboarding/expert-onboarding-step-4.svg',
+        illustration: '/onboarding/expert-onboarding-step-4.webp',
         allowSkip: true,
         content: () => (
           <div className="space-y-3 text-sm md:text-base text-gray-700">
@@ -135,7 +135,7 @@ export function ExpertOnboardingFlow({
         id: 'next',
         title: 'Что делать дальше',
         ctaLabel: 'Перейти в кабинет',
-        illustration: '/onboarding/expert-onboarding-step-5.svg',
+        illustration: '/onboarding/expert-onboarding-step-5.webp',
         allowSkip: false,
         isFinal: true,
         secondaryLinkLabel: 'Открыть гайд сразу',
