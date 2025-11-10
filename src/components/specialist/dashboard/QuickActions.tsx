@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
 
-interface QuickActionsProps {
+export interface QuickActionsProps {
   slug?: string
   newRequestsCount?: number
   newOrdersCount?: number
