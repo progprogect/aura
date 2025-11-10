@@ -173,7 +173,11 @@ export async function uploadVideo(
     })
 
     // Генерируем thumbnail для видео (первый кадр)
-    const thumbnailUrl = result.secure_url.replace('/upload/', '/upload/so_0/').replace(/\.[^.]+$/, '.jpg')
+    // Cloudinary автоматически генерирует thumbnail при загрузке видео
+    // Используем трансформацию для получения первого кадра как изображения
+    const thumbnailUrl = result.secure_url
+      .replace('/video/upload/', '/video/upload/so_0,w_800,h_600,c_fill,f_jpg/')
+      .replace(/\.[^.]+$/, '.jpg')
 
     return {
       url: result.secure_url,
