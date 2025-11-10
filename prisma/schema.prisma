@@ -35,6 +35,11 @@ model User {
   bonusBalance   Decimal   @default(0) @db.Decimal(15, 2)
   bonusExpiresAt DateTime?
 
+  // Блокировка
+  blocked      Boolean   @default(false)
+  blockedAt    DateTime?
+  blockedReason String?
+
   // Связи
   transactions Transaction[]
   requests     UserRequest[]
@@ -46,6 +51,7 @@ model User {
 
   @@index([phone])
   @@index([email])
+  @@index([blocked])
 }
 
 // ========================================
@@ -116,6 +122,11 @@ model SpecialistProfile {
   verifiedAt       DateTime?
   acceptingClients Boolean   @default(true)
 
+  // Блокировка профиля специалиста
+  blocked       Boolean   @default(false)
+  blockedAt     DateTime?
+  blockedReason String?
+
   // SEO
   metaTitle       String?
   metaDescription String?
@@ -151,6 +162,7 @@ model SpecialistProfile {
   @@index([verified])
   @@index([averageRating])
   @@index([totalReviews])
+  @@index([blocked])
 }
 
 // ========================================
@@ -816,4 +828,41 @@ model Review {
   @@index([specialistId])
   @@index([userId])
   @@index([rating])
+}
+
+// ========================================
+// АДМИНИСТРАТОР
+// ========================================
+
+model Admin {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  passwordHash String
+  sessions     AdminSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([username])
+}
+
+model AdminSession {
+  id           String   @id @default(cuid())
+  adminId      String
+  admin        Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  sessionToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+
+  isActive  Boolean  @default(true)
+  expiresAt DateTime
+  lastUsedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([adminId])
+  @@index([sessionToken])
+  @@index([expiresAt])
 }

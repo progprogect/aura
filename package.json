@@ -18,13 +18,16 @@
     "chat": "tsx scripts/interactive-chat.ts",
     "migrate:previews": "tsx scripts/migrate-lead-magnet-previews.ts",
     "reviews:init-stats": "tsx prisma/scripts/initialize-review-stats.ts",
-    "reviews:create-test": "tsx prisma/scripts/create-test-reviews.ts"
+    "reviews:create-test": "tsx prisma/scripts/create-test-reviews.ts",
+    "admin:create": "tsx prisma/scripts/create-admin.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-popover": "^1.1.15",
+    "@types/bcryptjs": "^2.4.6",
     "axios": "^1.12.2",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.61.0",
     "canvas": "^3.2.0",
     "class-variance-authority": "^0.7.0",

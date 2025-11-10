@@ -1,6 +1,7 @@
 /**
  * Middleware для обработки авторизации
  * Поддерживает unified auth систему (User + SpecialistProfile)
+ * Защищает админ-роуты
  */
 
 import { NextResponse } from 'next/server'
@@ -8,6 +9,27 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  
+  // Админ-роуты (защита отдельно)
+  if (pathname.startsWith('/admin')) {
+    // Страница входа - пропускаем
+    if (pathname === '/admin/login') {
+      return NextResponse.next()
+    }
+
+    // Проверяем наличие админ-сессии в cookie
+    // Полная валидация будет в серверных компонентах и API routes
+    const adminSessionToken = request.cookies.get('admin_session_token')?.value
+    
+    if (!adminSessionToken) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Cookie есть - пропускаем (валидация в компонентах)
+    return NextResponse.next()
+  }
   
   // Проверяем токен сессии из cookies (единый для всех пользователей)
   const sessionToken = request.cookies.get('session_token')?.value
