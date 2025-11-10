@@ -70,7 +70,7 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
                 w-full md:w-[800px]
                 bg-white rounded-t-2xl md:rounded-2xl
                 shadow-2xl
-                max-h-[95vh] md:max-h-[90vh]
+                max-h-[90vh] md:max-h-[85vh]
                 overflow-hidden
                 pointer-events-auto
                 safe-area-inset-bottom
@@ -90,7 +90,7 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
               </div>
 
               {/* Content */}
-              <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(95vh-140px)] md:max-h-[calc(90vh-140px)]">
+              <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(90vh-140px)] md:max-h-[calc(85vh-140px)]">
                 {children}
               </div>
 

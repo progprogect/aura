@@ -318,13 +318,14 @@ export function ExpertOnboardingFlow({
         }
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-start">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 md:w-1/2 md:max-w-md">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl md:w-1/2 md:max-w-md">
             <Image
               src={stepData.illustration}
               alt=""
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain object-center"
+              className="object-cover object-[center_top]"
+              style={{ objectPosition: 'center 1%' }}
               priority
             />
           </div>
