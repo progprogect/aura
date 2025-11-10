@@ -38,8 +38,9 @@ export function AuthAwareNavigation() {
             <Image
               src="/icons/logo-evolutsia360.png"
               alt="Эволюция 360"
-              width={114}
-              height={114}
+              width={64}
+              height={64}
+              className="w-12 h-12 md:w-16 md:h-16"
               priority
             />
             <span className="text-xl font-semibold tracking-tight text-slate-900">Эволюция&nbsp;360</span>

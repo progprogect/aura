@@ -45,7 +45,7 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
   
   const heightClassName = variant === 'hero' ? 'h-20' : 'h-16'
   
-  const logoDimension = variant === 'hero' ? 102 : 114
+  const logoDimension = 64
   const logoTextSize = variant === 'hero' ? 'text-xs' : 'text-sm'
   
   const brandTextSize = variant === 'hero'
@@ -67,6 +67,7 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
               alt="Эволюция 360"
               width={logoDimension}
               height={logoDimension}
+              className="w-12 h-12 md:w-16 md:h-16"
               priority={variant === 'hero'}
             />
             <span className={`${brandTextSize} font-semibold tracking-tight text-slate-900`}>Эволюция&nbsp;360</span>
