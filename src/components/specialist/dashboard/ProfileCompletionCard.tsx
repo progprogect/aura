@@ -45,7 +45,8 @@ export function ProfileCompletionCard({ completionPercentage, tasks, specialistS
     const sectionId = taskToSectionMap[task.id]
     if (sectionId) {
       // Переход на страницу профиля с параметрами редактирования
-      router.push(`/specialist/${specialistSlug}?edit=true&section=${sectionId}`)
+      // Добавляем параметр from=profile для возможности вернуться назад
+      router.push(`/specialist/${specialistSlug}?edit=true&section=${sectionId}&from=profile`)
     }
   }
 

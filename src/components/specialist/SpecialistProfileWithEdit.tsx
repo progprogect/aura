@@ -6,7 +6,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
 import { SpecialistHero } from './SpecialistHero'
@@ -128,6 +128,7 @@ export function SpecialistProfileWithEdit({
   data 
 }: SpecialistProfileWithEditProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isEditMode, setIsEditMode] = useState(false)
   const [acceptingClients, setAcceptingClients] = useState(heroData.acceptingClients)
@@ -181,9 +182,32 @@ export function SpecialistProfileWithEdit({
 
   const handleExitEditMode = useCallback(() => {
     setIsEditMode(false)
-    // Обновляем данные из сервера (без полной перезагрузки страницы)
-    router.refresh()
-  }, [router])
+    
+    // Проверяем, есть ли параметр from в URL (для возврата на предыдущую страницу)
+    const fromParam = searchParams.get('from')
+    
+    if (fromParam === 'profile') {
+      // Возвращаемся на страницу профиля
+      router.push('/profile')
+      // Обновляем данные на странице профиля
+      router.refresh()
+    } else {
+      // Убираем параметры edit, section и from из URL
+      const newSearchParams = new URLSearchParams(searchParams.toString())
+      newSearchParams.delete('edit')
+      newSearchParams.delete('section')
+      newSearchParams.delete('from')
+      
+      const newUrl = newSearchParams.toString()
+        ? `${pathname}?${newSearchParams.toString()}`
+        : pathname
+      
+      // Используем replace вместо push, чтобы не добавлять новую запись в историю
+      router.replace(newUrl)
+      // Обновляем данные после изменения URL
+      router.refresh()
+    }
+  }, [router, searchParams, pathname])
 
   // Функция для сохранения одного поля
   const handleSaveField = useCallback(async (field: string, value: string | number | boolean) => {
