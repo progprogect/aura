@@ -28,7 +28,7 @@ export function Navigation() {
           {/* Логотип */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
             <Image
-              src="/icons/logo-evolutsia360.svg"
+              src="/icons/logo-evolutsia360.png"
               alt="Эволюция 360"
               width={38}
               height={38}

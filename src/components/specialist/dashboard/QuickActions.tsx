@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
-import { useOnboarding } from './OnboardingContext'
 
 interface QuickActionsProps {
   slug?: string
@@ -27,20 +26,6 @@ interface QuickActionsProps {
 }
 
 export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, isSpecialist = true, purchasesStats, onOpenOnboarding }: QuickActionsProps) {
-  let onboardingContext: { openOnboarding: () => void } | null = null
-  try {
-    onboardingContext = useOnboarding()
-  } catch {
-    // Контекст не доступен, используем пропс
-  }
-
-  const handleOpenOnboarding = () => {
-    if (onboardingContext) {
-      onboardingContext.openOnboarding()
-    } else if (onOpenOnboarding) {
-      onOpenOnboarding()
-    }
-  }
   const specialistActions = [
     {
       href: `/specialist/${slug}`,
@@ -113,7 +98,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       variant: 'outline' as const,
       disabled: false
     },
-    ...((onboardingContext || onOpenOnboarding) ? [{
+    ...(onOpenOnboarding ? [{
       href: '#',
       icon: BookOpen,
       label: 'Как работает платформа',
@@ -122,7 +107,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false,
       onClick: (e: React.MouseEvent) => {
         e.preventDefault()
-        handleOpenOnboarding()
+        onOpenOnboarding()
       }
     }] : [])
   ]

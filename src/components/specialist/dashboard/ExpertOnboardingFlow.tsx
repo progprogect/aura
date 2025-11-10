@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -11,6 +11,7 @@ type ExpertOnboardingFlowProps = {
   initialStep?: number
   initialCompleted?: boolean
   guideHref?: string
+  onOpenRequest?: (open: () => void) => void
 }
 
 type Step = {
@@ -31,6 +32,7 @@ export function ExpertOnboardingFlow({
   initialStep = 0,
   initialCompleted = false,
   guideHref = GUIDE_FALLBACK_URL,
+  onOpenRequest,
 }: ExpertOnboardingFlowProps) {
   const steps = useMemo<Step[]>(
     () => [
@@ -138,7 +140,6 @@ export function ExpertOnboardingFlow({
         illustration: '/onboarding/expert-onboarding-step-5.webp',
         allowSkip: false,
         isFinal: true,
-        secondaryLinkLabel: 'Открыть гайд сразу',
         content: () => (
           <div className="space-y-3 text-sm md:text-base text-gray-700">
             <ol className="list-decimal space-y-2 pl-4">
@@ -165,6 +166,15 @@ export function ExpertOnboardingFlow({
   const stepData = steps[currentStep]
   const progress = ((currentStep + 1) / steps.length) * 100
   const StepContent = stepData.content
+
+  // Предоставляем функцию открытия онбординга извне
+  useEffect(() => {
+    if (onOpenRequest) {
+      onOpenRequest(() => {
+        setIsOpen(true)
+      })
+    }
+  }, [onOpenRequest])
 
   async function updateProgress(payload: { step?: number; completed?: boolean }) {
     try {
@@ -232,29 +242,12 @@ export function ExpertOnboardingFlow({
       </div>
     ) : null
 
-  const CompletedCard = () =>
-    isCompleted ? (
-      <div className="mb-6 rounded-2xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm md:flex md:items-center md:justify-between">
-        <div className="space-y-1">
-          <div className="text-sm font-semibold text-emerald-700">Онбординг пройден</div>
-          <p className="text-sm text-gray-700">
-            Следуйте гайду в кабинете — он поможет заполнить профиль, настроить услуги и получать
-            заказы.
-          </p>
-        </div>
-        <Button asChild variant="secondary" className="mt-4 w-full md:mt-0 md:w-auto">
-          <Link href={guideHref}>Открыть гайд</Link>
-        </Button>
-      </div>
-    ) : null
-
   return (
     <div className="mb-6">
       <ReminderCard />
-      <CompletedCard />
 
       <Dialog
-        isOpen={isOpen && !isCompleted}
+        isOpen={isOpen}
         onClose={() => {
           setIsOpen(false)
           if (!isCompleted) {
@@ -294,16 +287,10 @@ export function ExpertOnboardingFlow({
                 </div>
               )}
 
-              <div className="flex flex-col gap-3 md:flex-row md:order-2">
-                {stepData.isFinal && stepData.secondaryLinkLabel && (
-                  <Button asChild variant="outline" disabled={isSaving} className="md:order-1">
-                    <Link href={guideHref}>{stepData.secondaryLinkLabel}</Link>
-                  </Button>
-                )}
+              <div className="flex flex-col gap-3 md:flex-row md:order-2 md:justify-end">
                 <Button
                   onClick={stepData.isFinal ? handleComplete : handleNext}
                   disabled={isSaving}
-                  className="md:order-2"
                 >
                   {isSaving ? 'Сохраняем...' : stepData.ctaLabel}
                 </Button>
