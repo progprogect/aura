@@ -89,6 +89,13 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
                 const imageUrl = item.thumbnailUrl || item.url
                 const hasError = imageErrors.has(item.id)
                 
+                // Нормализуем URL
+                const normalizedUrl = imageUrl?.startsWith('http') 
+                  ? imageUrl 
+                  : imageUrl?.startsWith('/') 
+                    ? imageUrl 
+                    : imageUrl
+                
                 return (
                   <motion.div
                     key={item.id}
@@ -99,19 +106,20 @@ export function SpecialistGallery({ items }: SpecialistGalleryProps) {
                     className="group relative aspect-square cursor-pointer overflow-hidden bg-gray-100 rounded-lg"
                     onClick={() => openLightbox(index)}
                   >
-                    {!hasError && imageUrl ? (
+                    {!hasError && normalizedUrl ? (
                       <>
                         {/* Изображение */}
                         <Image
-                          src={imageUrl}
+                          src={normalizedUrl}
                           alt={item.caption || `Фото ${index + 1}`}
                           fill
                           sizes="(max-width: 768px) 50vw, 33vw"
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
                           onError={() => {
+                            console.error('[Gallery] Failed to load image:', normalizedUrl)
                             setImageErrors(prev => new Set(prev).add(item.id))
                           }}
-                          unoptimized={imageUrl.startsWith('http') && !imageUrl.includes('cloudinary')}
+                          unoptimized={normalizedUrl.startsWith('http')}
                         />
                         {/* Overlay при hover */}
                         <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
