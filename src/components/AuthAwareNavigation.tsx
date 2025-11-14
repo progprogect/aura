@@ -81,6 +81,16 @@ export function AuthAwareNavigation() {
               Каталог специалистов
             </Link>
             <Link
+              href="/library"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/library') 
+                  ? 'text-blue-600' 
+                  : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              Библиотека ресурсов
+            </Link>
+            <Link
               href="/find-work"
               className={`text-sm font-medium transition-colors ${
                 isActive('/find-work') 
@@ -205,6 +215,17 @@ export function AuthAwareNavigation() {
                 onClick={closeMobileMenu}
               >
                 Каталог специалистов
+              </Link>
+              <Link
+                href="/library"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/library') 
+                    ? 'text-blue-600 bg-blue-50' 
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Библиотека ресурсов
               </Link>
               <Link
                 href="/find-work"

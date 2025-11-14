@@ -92,3 +92,16 @@ export type CreateRequestInput = z.infer<typeof CreateRequestSchema>
 export type CreateProposalInput = z.infer<typeof CreateProposalSchema>
 export type AcceptProposalInput = z.infer<typeof AcceptProposalSchema>
 export type CreateReviewInput = z.infer<typeof CreateReviewSchema>
+
+// Схема валидации для API ресурсов
+export const GetResourcesQuerySchema = z.object({
+  category: z.string().optional(),
+  type: z.enum(['file', 'link', 'service', 'all']).optional(),
+  targetAudience: z.string().optional(),
+  sortBy: z.enum(['popularity', 'date', 'relevance']).optional(),
+  search: z.string().max(100).optional(),
+  page: z.coerce.number().min(1).max(100).optional(),
+  limit: z.coerce.number().min(1).max(50).optional(),
+})
+
+export type GetResourcesQuery = z.infer<typeof GetResourcesQuerySchema>

@@ -81,6 +81,16 @@ export function HeroNavigation() {
               Специалисты
             </Link>
             <Link
+              href="/library"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/library') 
+                  ? 'text-primary' 
+                  : 'text-gray-700 hover:text-primary'
+              }`}
+            >
+              Библиотека ресурсов
+            </Link>
+            <Link
               href="/find-work"
               className={`text-sm font-medium transition-colors ${
                 isActive('/find-work') 
@@ -202,6 +212,17 @@ export function HeroNavigation() {
                 onClick={closeMobileMenu}
               >
                 Специалисты
+              </Link>
+              <Link
+                href="/library"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/library') 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-gray-700 hover:text-primary hover:bg-gray-50'
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Библиотека ресурсов
               </Link>
               <Link
                 href="/find-work"

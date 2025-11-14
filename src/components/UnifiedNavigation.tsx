@@ -108,6 +108,16 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
               Каталог специалистов
             </Link>
             <Link
+              href="/library"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/library') 
+                  ? activeColor 
+                  : `${inactiveColor} ${hoverColor}`
+              }`}
+            >
+              Библиотека ресурсов
+            </Link>
+            <Link
               href="/find-work"
               className={`text-sm font-medium transition-colors ${
                 isActive('/find-work') 
@@ -236,6 +246,17 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
                 onClick={closeMobileMenu}
               >
                 Каталог специалистов
+              </Link>
+              <Link
+                href="/library"
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive('/library') 
+                    ? `${activeColor} bg-blue-50` 
+                    : `${inactiveColor} ${hoverColor} hover:bg-gray-50`
+                }`}
+                onClick={closeMobileMenu}
+              >
+                Библиотека ресурсов
               </Link>
               <Link
                 href="/find-work"
