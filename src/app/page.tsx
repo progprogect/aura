@@ -4,6 +4,7 @@ import { HowItWorksSection } from '@/components/homepage/HowItWorksSection'
 import { CategoriesSection } from '@/components/homepage/CategoriesSection'
 import { AdvantagesSection } from '@/components/homepage/AdvantagesSection'
 import { FeaturedSpecialists } from '@/components/homepage/FeaturedSpecialists'
+import { FeaturedResources } from '@/components/homepage/FeaturedResources'
 import { ErrorBoundary, HomepageErrorFallback } from '@/components/ui/error-boundary'
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function Home() {
         <ErrorBoundary fallback={HomepageErrorFallback}>
           <HeroSection />
           <FeaturedSpecialists />
+          <FeaturedResources />
           <HowItWorksSection />
           <CategoriesSection />
           <AdvantagesSection />

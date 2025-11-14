@@ -85,18 +85,6 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
             >
               Главная
             </Link>
-            <span className="relative group">
-              <span className={`text-sm font-medium transition-colors opacity-60 cursor-not-allowed ${
-                isActive('/chat') 
-                  ? activeColor 
-                  : inactiveColor
-              }`}>
-                AI-Помощник
-              </span>
-              <span className="absolute -top-2 -right-6 bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                Скоро
-              </span>
-            </span>
             <Link
               href="/catalog"
               className={`text-sm font-medium transition-colors ${
@@ -224,18 +212,6 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
               >
                 Главная
               </Link>
-              <div className="relative group">
-                <span className={`block px-3 py-2 rounded-md text-base font-medium opacity-60 cursor-not-allowed ${
-                  isActive('/chat') 
-                    ? `${activeColor} bg-blue-50` 
-                    : inactiveColor
-                }`}>
-                  AI-Помощник
-                  <span className="ml-2 bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                    Скоро
-                  </span>
-                </span>
-              </div>
               <Link
                 href="/catalog"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${

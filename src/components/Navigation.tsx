@@ -50,16 +50,6 @@ export function Navigation() {
               Главная
             </Link>
             <Link
-              href="/chat"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/chat') 
-                  ? 'text-blue-600' 
-                  : 'text-gray-700 hover:text-blue-600'
-              }`}
-            >
-              AI-Помощник
-            </Link>
-            <Link
               href="/catalog"
               className={`text-sm font-medium transition-colors ${
                 isActive('/catalog') 
@@ -127,17 +117,6 @@ export function Navigation() {
                 onClick={closeMobileMenu}
               >
                 Главная
-              </Link>
-              <Link
-                href="/chat"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/chat') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
-                onClick={closeMobileMenu}
-              >
-                AI-Помощник
               </Link>
               <Link
                 href="/catalog"
