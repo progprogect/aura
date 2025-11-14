@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     const validationResult = GetResourcesQuerySchema.safeParse({
       category: searchParams.get('category') ?? undefined,
       type: searchParams.get('type') ?? undefined,
-      targetAudience: searchParams.get('targetAudience') ?? undefined,
       sortBy: searchParams.get('sortBy') ?? undefined,
       search: searchParams.get('search') ?? undefined,
       page: searchParams.get('page') ?? undefined,
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
     const {
       category,
       type,
-      targetAudience,
       sortBy,
       search,
       page,
@@ -82,11 +80,6 @@ export async function GET(request: NextRequest) {
     // Фильтр по типу лид-магнита
     if (finalType) {
       where.type = finalType
-    }
-    
-    // Фильтр по целевой аудитории
-    if (targetAudience && targetAudience !== 'all') {
-      where.targetAudience = targetAudience
     }
     
     // Поиск по тексту (с приоритетом title над description)

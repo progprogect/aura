@@ -15,7 +15,6 @@ interface UseResourcesFiltersReturn {
   setters: {
     setCategory: (value: string) => void
     setType: (value: string) => void
-    setTargetAudience: (value: string) => void
     setSortBy: (value: string) => void
     setSearch: (value: string) => void
   }
@@ -33,7 +32,6 @@ export function useResourcesFilters(): UseResourcesFiltersReturn {
   // URL состояние для всех фильтров
   const [category, setCategory] = useURLString('category', FILTER_DEFAULTS.CATEGORY)
   const [type, setType] = useURLString('type', FILTER_DEFAULTS.TYPE)
-  const [targetAudience, setTargetAudience] = useURLString('targetAudience', FILTER_DEFAULTS.TARGET_AUDIENCE)
   const [sortBy, setSortBy] = useURLString('sortBy', FILTER_DEFAULTS.SORT_BY)
   const [search, setSearch] = useURLString('search', FILTER_DEFAULTS.SEARCH)
 
@@ -42,11 +40,10 @@ export function useResourcesFilters(): UseResourcesFiltersReturn {
     () => ({
       category,
       type,
-      targetAudience,
       sortBy,
       search,
     }),
-    [category, type, targetAudience, sortBy, search]
+    [category, type, sortBy, search]
   )
 
   // Setters для отдельных фильтров
@@ -54,11 +51,10 @@ export function useResourcesFilters(): UseResourcesFiltersReturn {
     () => ({
       setCategory,
       setType,
-      setTargetAudience,
       setSortBy,
       setSearch,
     }),
-    [setCategory, setType, setTargetAudience, setSortBy, setSearch]
+    [setCategory, setType, setSortBy, setSearch]
   )
 
   // Batch update нескольких фильтров
@@ -72,7 +68,6 @@ export function useResourcesFilters(): UseResourcesFiltersReturn {
         const defaults: Record<string, any> = {
           category: FILTER_DEFAULTS.CATEGORY,
           type: FILTER_DEFAULTS.TYPE,
-          targetAudience: FILTER_DEFAULTS.TARGET_AUDIENCE,
           sortBy: FILTER_DEFAULTS.SORT_BY,
           search: FILTER_DEFAULTS.SEARCH,
         }
@@ -107,11 +102,10 @@ export function useResourcesFilters(): UseResourcesFiltersReturn {
     let count = 0
     if (category !== FILTER_DEFAULTS.CATEGORY) count++
     if (type !== FILTER_DEFAULTS.TYPE) count++
-    if (targetAudience !== FILTER_DEFAULTS.TARGET_AUDIENCE) count++
     if (sortBy !== FILTER_DEFAULTS.SORT_BY) count++
     if (search && search.trim()) count++
     return count
-  }, [category, type, targetAudience, sortBy, search])
+  }, [category, type, sortBy, search])
 
   const hasActiveFilters = activeFiltersCount > 0
 

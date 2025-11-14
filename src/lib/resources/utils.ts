@@ -25,10 +25,6 @@ export function buildFilterParams(
     params.set('type', filters.type)
   }
 
-  // Целевая аудитория
-  if (filters.targetAudience && filters.targetAudience !== FILTER_DEFAULTS.TARGET_AUDIENCE) {
-    params.set('targetAudience', filters.targetAudience)
-  }
 
   // Сортировка
   if (filters.sortBy && filters.sortBy !== FILTER_DEFAULTS.SORT_BY) {
@@ -54,7 +50,6 @@ export function parseURLFilters(searchParams: URLSearchParams): ResourceFilterSt
   return {
     category: searchParams.get('category') || FILTER_DEFAULTS.CATEGORY,
     type: searchParams.get('type') || FILTER_DEFAULTS.TYPE,
-    targetAudience: searchParams.get('targetAudience') || FILTER_DEFAULTS.TARGET_AUDIENCE,
     sortBy: searchParams.get('sortBy') || FILTER_DEFAULTS.SORT_BY,
     search: searchParams.get('search') || FILTER_DEFAULTS.SEARCH,
   }

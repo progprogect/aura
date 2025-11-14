@@ -97,7 +97,6 @@ export type CreateReviewInput = z.infer<typeof CreateReviewSchema>
 export const GetResourcesQuerySchema = z.object({
   category: z.string().optional(),
   type: z.enum(['file', 'link', 'service', 'all']).optional(),
-  targetAudience: z.string().optional(),
   sortBy: z.enum(['popularity', 'date', 'relevance']).optional(),
   search: z.string().max(100).optional(),
   page: z.coerce.number().min(1).max(100).optional(),

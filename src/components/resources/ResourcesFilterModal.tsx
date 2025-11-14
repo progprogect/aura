@@ -25,7 +25,6 @@ function areFiltersEqual(a: ResourceFilterState, b: ResourceFilterState): boolea
   return (
     a.category === b.category &&
     a.type === b.type &&
-    a.targetAudience === b.targetAudience &&
     a.sortBy === b.sortBy &&
     a.search === b.search
   )

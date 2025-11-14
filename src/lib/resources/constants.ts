@@ -42,7 +42,6 @@ export const CACHE_DURATIONS = {
 export const FILTER_DEFAULTS = {
   CATEGORY: 'all',
   TYPE: 'all',
-  TARGET_AUDIENCE: 'all',
   SORT_BY: 'popularity',
   SEARCH: '',
 } as const

@@ -15,7 +15,6 @@ import type { LeadMagnetUI } from '@/types/lead-magnet'
 export interface ResourceFilterState {
   category: string
   type: string
-  targetAudience: string
   sortBy: string
   search: string
 }
