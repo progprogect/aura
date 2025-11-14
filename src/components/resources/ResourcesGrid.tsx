@@ -7,7 +7,8 @@
 import { ResourceViewModel, PaginationInfo } from '@/lib/resources/types'
 import { ResourceCard } from './ResourceCard'
 import { Icon } from '@/components/ui/icons/Icon'
-import { FileText, ChevronDown, Loader2 } from '@/components/ui/icons/catalog-icons'
+import { ChevronDown, Loader2 } from '@/components/ui/icons/catalog-icons'
+import { BookOpen } from 'lucide-react'
 import { MESSAGES } from '@/lib/resources/constants'
 
 interface ResourcesGridProps {
@@ -28,7 +29,7 @@ export function ResourcesGrid({
     return (
       <div className="text-center py-12">
         <div className="mx-auto h-24 w-24 text-gray-400 mb-4 flex items-center justify-center">
-          <Icon icon={FileText} size={96} className="text-gray-300" aria-hidden />
+          <Icon icon={BookOpen} size={96} className="text-gray-300" aria-hidden />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
           {MESSAGES.NO_RESULTS}
