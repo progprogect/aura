@@ -74,10 +74,11 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
                 overflow-hidden
                 pointer-events-auto
                 safe-area-inset-bottom
+                flex flex-col
               "
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 md:p-6 border-b">
+              <div className="flex items-center justify-between p-4 md:p-6 border-b flex-shrink-0">
                 <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                 <Button
                   variant="ghost"
@@ -90,13 +91,13 @@ export function Dialog({ isOpen, onClose, title, children, footer }: DialogProps
               </div>
 
               {/* Content */}
-              <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(90vh-140px)] md:max-h-[calc(85vh-140px)]">
+              <div className="p-4 md:p-6 overflow-y-auto flex-1 min-h-0">
                 {children}
               </div>
 
               {/* Footer */}
               {footer && (
-                <div className="p-4 md:p-6 border-t bg-gray-50 safe-area-inset-bottom">
+                <div className="flex-shrink-0 p-4 md:p-6 border-t bg-white shadow-lg safe-area-inset-bottom">
                   {footer}
                 </div>
               )}

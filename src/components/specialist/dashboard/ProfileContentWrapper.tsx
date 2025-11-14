@@ -6,6 +6,7 @@ import { useOnboarding } from './OnboardingContext'
 type ProfileContentWrapperProps = {
   initialStep?: number
   initialCompleted?: boolean
+  initialSeen?: boolean
   guideHref?: string
   quickActionsProps: {
     slug?: string
@@ -25,6 +26,7 @@ type ProfileContentWrapperProps = {
 export function ProfileContentWrapper({
   initialStep,
   initialCompleted,
+  initialSeen,
   guideHref,
 }: Omit<ProfileContentWrapperProps, 'quickActionsProps'>) {
   const onboardingContext = useOnboarding()
@@ -39,6 +41,7 @@ export function ProfileContentWrapper({
     <ProfileOnboardingManager
       initialStep={initialStep}
       initialCompleted={initialCompleted}
+      initialSeen={initialSeen}
       guideHref={guideHref}
       onOpenRequest={handleOpenRequest}
     />

@@ -10,6 +10,7 @@ import { Dialog } from '@/components/ui/dialog'
 type ExpertOnboardingFlowProps = {
   initialStep?: number
   initialCompleted?: boolean
+  initialSeen?: boolean
   guideHref?: string
   onOpenRequest?: (open: () => void) => void
 }
@@ -31,6 +32,7 @@ const GUIDE_FALLBACK_URL = '/profile?section=guide'
 export function ExpertOnboardingFlow({
   initialStep = 0,
   initialCompleted = false,
+  initialSeen = false,
   guideHref = GUIDE_FALLBACK_URL,
   onOpenRequest,
 }: ExpertOnboardingFlowProps) {
@@ -159,7 +161,7 @@ export function ExpertOnboardingFlow({
     Math.min(Math.max(initialStep, 0), steps.length - 1)
   )
   const [isCompleted, setIsCompleted] = useState(initialCompleted)
-  const [isOpen, setIsOpen] = useState(!initialCompleted)
+  const [isOpen, setIsOpen] = useState(!initialCompleted && !initialSeen)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -176,7 +178,7 @@ export function ExpertOnboardingFlow({
     }
   }, [onOpenRequest])
 
-  async function updateProgress(payload: { step?: number; completed?: boolean }) {
+  async function updateProgress(payload: { step?: number; completed?: boolean; seen?: boolean }) {
     try {
       setIsSaving(true)
       setError(null)
@@ -222,12 +224,12 @@ export function ExpertOnboardingFlow({
   }
 
   async function handleSkip() {
-    await updateProgress({ step: currentStep })
+    await updateProgress({ step: currentStep, seen: true })
     setIsOpen(false)
   }
 
   async function handleComplete() {
-    await updateProgress({ step: steps.length - 1, completed: true })
+    await updateProgress({ step: steps.length - 1, completed: true, seen: true })
     setIsOpen(false)
   }
 
@@ -257,12 +259,12 @@ export function ExpertOnboardingFlow({
         onClose={() => {
           setIsOpen(false)
           if (!isCompleted) {
-            updateProgress({ step: currentStep })
+            updateProgress({ step: currentStep, seen: true })
           }
         }}
         title={stepData.title}
         footer={
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             <div>
               <div className="text-xs font-medium text-gray-500">
                 Шаг {currentStep + 1} из {steps.length}
@@ -275,43 +277,48 @@ export function ExpertOnboardingFlow({
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-red-500 break-words">{error}</p>}
 
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3 order-1">
-                {currentStep > 0 && (
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={isSaving}
-                    className="text-sm md:text-base"
-                  >
-                    Назад
-                  </Button>
-                )}
-              {stepData.allowSkip ? (
-                <Button
-                  variant="ghost"
-                  onClick={handleSkip}
-                  disabled={isSaving}
-                    className="text-sm text-gray-500 md:text-base"
-                >
-                  Вернуться позже
-                </Button>
-              ) : (
-                  <div className="text-sm text-gray-400 md:text-base">
-                  Почти готово — завершите онбординг
-                </div>
-              )}
-              </div>
-
-              <div className="flex flex-col gap-3 md:flex-row md:order-2 md:justify-end">
+            <div className="flex flex-col gap-3 w-full">
+              {/* Основная кнопка действия - всегда видна */}
+              <div className="flex justify-end w-full">
                 <Button
                   onClick={stepData.isFinal ? handleComplete : handleNext}
                   disabled={isSaving}
+                  className="w-full md:w-auto min-w-[120px] text-sm md:text-base"
                 >
                   {isSaving ? 'Сохраняем...' : stepData.ctaLabel}
                 </Button>
+              </div>
+
+              {/* Вспомогательные кнопки */}
+              <div className="flex items-center justify-between gap-2 w-full flex-wrap">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {currentStep > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={handlePrevious}
+                      disabled={isSaving}
+                      className="text-sm md:text-base"
+                    >
+                      Назад
+                    </Button>
+                  )}
+                </div>
+                {stepData.allowSkip ? (
+                  <Button
+                    variant="ghost"
+                    onClick={handleSkip}
+                    disabled={isSaving}
+                    className="text-sm text-gray-500 md:text-base flex-shrink-0"
+                  >
+                    Вернуться позже
+                  </Button>
+                ) : (
+                  <div className="text-sm text-gray-400 md:text-base">
+                    Почти готово — завершите онбординг
+                  </div>
+                )}
               </div>
             </div>
           </div>

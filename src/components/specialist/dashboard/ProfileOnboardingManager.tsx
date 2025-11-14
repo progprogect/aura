@@ -6,6 +6,7 @@ import { ExpertOnboardingFlow } from './ExpertOnboardingFlow'
 type ProfileOnboardingManagerProps = {
   initialStep?: number
   initialCompleted?: boolean
+  initialSeen?: boolean
   guideHref?: string
   onOpenRequest?: (open: () => void) => void
 }
@@ -13,6 +14,7 @@ type ProfileOnboardingManagerProps = {
 export function ProfileOnboardingManager({
   initialStep,
   initialCompleted,
+  initialSeen,
   guideHref,
   onOpenRequest,
 }: ProfileOnboardingManagerProps) {
@@ -29,6 +31,7 @@ export function ProfileOnboardingManager({
     <ExpertOnboardingFlow
       initialStep={initialStep}
       initialCompleted={initialCompleted}
+      initialSeen={initialSeen}
       guideHref={guideHref}
       onOpenRequest={handleOpenRequest}
     />

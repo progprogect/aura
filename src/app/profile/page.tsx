@@ -285,6 +285,7 @@ async function getUserData() {
         contactViews: profile.contactViews,
         onboardingStep: profile.onboardingStep,
         onboardingCompletedAt: profile.onboardingCompletedAt,
+        onboardingSeenAt: profile.onboardingSeenAt,
       }
 
       userData.stats = {
@@ -360,6 +361,7 @@ export default async function ProfilePage() {
             <ProfileContentWrapper
               initialStep={user.specialistProfile.onboardingStep ?? 0}
               initialCompleted={Boolean(user.specialistProfile.onboardingCompletedAt)}
+              initialSeen={Boolean(user.specialistProfile.onboardingSeenAt)}
               guideHref="/profile?section=guide"
             />
           )}

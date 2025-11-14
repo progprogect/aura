@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db'
 const updateSchema = z.object({
   step: z.number().int().min(0).max(4).optional(),
   completed: z.boolean().optional(),
+  seen: z.boolean().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
     select: {
       onboardingStep: true,
       onboardingCompletedAt: true,
+      onboardingSeenAt: true,
     },
   })
 
@@ -42,6 +44,7 @@ export async function GET(request: NextRequest) {
     success: true,
     step: profile.onboardingStep ?? 0,
     completedAt: profile.onboardingCompletedAt,
+    seenAt: profile.onboardingSeenAt,
   })
 }
 
@@ -61,11 +64,12 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
-  const { step, completed } = updateSchema.parse(body)
+  const { step, completed, seen } = updateSchema.parse(body)
 
   const updateData: {
     onboardingStep?: number
     onboardingCompletedAt?: Date | null
+    onboardingSeenAt?: Date | null
   } = {}
 
   if (typeof step === 'number') {
@@ -76,6 +80,12 @@ export async function POST(request: NextRequest) {
     updateData.onboardingCompletedAt = new Date()
   } else if (completed === false) {
     updateData.onboardingCompletedAt = null
+  }
+
+  if (seen === true) {
+    updateData.onboardingSeenAt = new Date()
+  } else if (seen === false) {
+    updateData.onboardingSeenAt = null
   }
 
   if (Object.keys(updateData).length === 0) {
@@ -91,6 +101,7 @@ export async function POST(request: NextRequest) {
     select: {
       onboardingStep: true,
       onboardingCompletedAt: true,
+      onboardingSeenAt: true,
     },
   })
 
@@ -98,6 +109,7 @@ export async function POST(request: NextRequest) {
     success: true,
     step: profile.onboardingStep ?? 0,
     completedAt: profile.onboardingCompletedAt,
+    seenAt: profile.onboardingSeenAt,
   })
 }
 
