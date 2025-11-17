@@ -79,8 +79,16 @@ const CompanyOnboardingSchema = z.object({
     .refine(
       (val) => {
         if (!val || val.trim() === '') return true
+        const trimmed = val.trim()
+        // Проверяем, является ли это валидным URL (с протоколом или без)
         try {
-          new URL(val)
+          // Если есть протокол, проверяем как есть
+          if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+            new URL(trimmed)
+            return true
+          }
+          // Если нет протокола, добавляем https:// для проверки
+          new URL(`https://${trimmed}`)
           return true
         } catch {
           return false
@@ -88,7 +96,16 @@ const CompanyOnboardingSchema = z.object({
       },
       { message: 'Некорректный URL сайта' }
     )
-    .transform((val) => (val && val.trim() !== '' ? val : null)),
+    .transform((val) => {
+      if (!val || val.trim() === '') return null
+      const trimmed = val.trim()
+      // Если протокол уже есть, возвращаем как есть
+      if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed
+      }
+      // Если протокола нет, добавляем https://
+      return `https://${trimmed}`
+    }),
   country: z.string().default('Россия'),
   workFormats: z.array(z.enum(['online', 'offline', 'hybrid'])).default(['online']),
 })

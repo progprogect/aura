@@ -130,8 +130,15 @@ export function OnboardingWizard({ initialPhone, profileType = 'specialist' }: O
         }
 
         if (formData.website && formData.website.trim()) {
+          const trimmed = formData.website.trim()
           try {
-            new URL(formData.website)
+            // Проверяем URL с протоколом или без
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+              new URL(trimmed)
+            } else {
+              // Если протокола нет, проверяем с https://
+              new URL(`https://${trimmed}`)
+            }
           } catch {
             newErrors.website = 'Некорректный URL сайта'
           }
