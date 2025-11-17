@@ -113,7 +113,7 @@ async function getSpecialist(slug: string) {
     avatar: specialistProfile.user.avatar,
     phone: specialistProfile.user.phone, // Добавляем phone для контактов
     slug: specialistProfile.slug,
-    profileType: specialistProfile.profileType || 'specialist',
+    profileType: (specialistProfile.profileType || 'specialist') as 'specialist' | 'company',
     companyName: specialistProfile.companyName,
     address: specialistProfile.address,
     addressCoordinates: specialistProfile.addressCoordinates,

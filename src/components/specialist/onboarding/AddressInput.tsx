@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, MapPin } from 'lucide-react'
@@ -55,7 +55,7 @@ export function AddressInput({
   }, [value])
 
   // Запрос к API геокодера
-  const fetchSuggestions = async (searchQuery: string) => {
+  const fetchSuggestions = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 3) {
       setSuggestions([])
       setShowSuggestions(false)
@@ -86,7 +86,7 @@ export function AddressInput({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   // Debounce для запросов
   useEffect(() => {
@@ -105,7 +105,7 @@ export function AddressInput({
         clearTimeout(debounceTimerRef.current)
       }
     }
-  }, [query])
+  }, [query, value, fetchSuggestions]) // fetchSuggestions используется внутри
 
   // Обработка выбора адреса
   const handleSelectAddress = (suggestion: AddressSuggestion) => {

@@ -55,16 +55,29 @@ export async function POST(request: NextRequest) {
     const data: NominatimAddress[] = await response.json()
 
     // Преобразуем данные Nominatim в наш формат
-    const addresses = data.map((item) => ({
-      text: item.display_name,
-      coordinates: {
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
-      },
-      placeId: item.place_id,
-      type: item.type,
-      importance: item.importance,
-    }))
+    // Фильтруем адреса с валидными координатами
+    const addresses = data
+      .map((item) => {
+        const lat = parseFloat(item.lat)
+        const lng = parseFloat(item.lon)
+        
+        // Проверяем что координаты валидны (не NaN и в допустимом диапазоне)
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          return null
+        }
+        
+        return {
+          text: item.display_name,
+          coordinates: {
+            lat,
+            lng,
+          },
+          placeId: item.place_id,
+          type: item.type,
+          importance: item.importance,
+        }
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
 
     // Сортируем по важности (более релевантные адреса первыми)
     addresses.sort((a, b) => b.importance - a.importance)
