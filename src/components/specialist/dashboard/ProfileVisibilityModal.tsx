@@ -4,7 +4,9 @@
 
 'use client'
 
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { Dialog } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,14 +22,66 @@ interface ProfileVisibilityModalProps {
     hasPositiveBalance: boolean
     balance: number
   }
+  onCriteriaUpdate?: () => void
 }
 
 export function ProfileVisibilityModal({
   isOpen,
   onClose,
   criteria,
+  onCriteriaUpdate,
 }: ProfileVisibilityModalProps) {
-  const allMet = criteria.notBlocked && criteria.acceptingClients && criteria.verified && criteria.hasPositiveBalance
+  const router = useRouter()
+  const [acceptingClients, setAcceptingClients] = useState(criteria.acceptingClients)
+  const [isToggling, setIsToggling] = useState(false)
+  const [error, setError] = useState('')
+
+  // Синхронизируем состояние с пропсами при изменении
+  useEffect(() => {
+    setAcceptingClients(criteria.acceptingClients)
+  }, [criteria.acceptingClients])
+
+  const allMet = criteria.notBlocked && acceptingClients && criteria.verified && criteria.hasPositiveBalance
+
+  const handleToggleAcceptingClients = async () => {
+    setIsToggling(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/specialist/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          field: 'acceptingClients',
+          value: !acceptingClients,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        setError(errorData.error || 'Ошибка при обновлении статуса')
+        return
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        setAcceptingClients(!acceptingClients)
+        // Обновляем данные на странице
+        if (onCriteriaUpdate) {
+          onCriteriaUpdate()
+        } else {
+          router.refresh()
+        }
+      } else {
+        setError(result.error || 'Ошибка при обновлении статуса')
+      }
+    } catch (err) {
+      setError('Произошла ошибка. Попробуйте позже.')
+    } finally {
+      setIsToggling(false)
+    }
+  }
 
   const criteriaList = [
     {
@@ -37,9 +91,13 @@ export function ProfileVisibilityModal({
     },
     {
       label: 'Принимаете новых клиентов',
-      met: criteria.acceptingClients,
-      description: 'Включите опцию "Принимаю клиентов" в настройках профиля',
-      action: criteria.acceptingClients ? null : { label: 'Включить', href: '/profile' },
+      met: acceptingClients,
+      description: acceptingClients 
+        ? 'Вы принимаете новых клиентов' 
+        : 'Включите опцию "Принимаю клиентов" в настройках профиля',
+      action: acceptingClients 
+        ? { label: 'Выключить', onClick: handleToggleAcceptingClients, isToggle: true }
+        : { label: 'Включить', onClick: handleToggleAcceptingClients, isToggle: true },
     },
     {
       label: 'Профиль верифицирован',
@@ -114,17 +172,45 @@ export function ProfileVisibilityModal({
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{criterion.description}</p>
                   {criterion.action && (
-                    <Link href={criterion.action.href}>
-                      <Button size="sm" variant="outline" className="mt-2">
-                        {criterion.action.label}
-                      </Button>
-                    </Link>
+                    <>
+                      {criterion.action.isToggle ? (
+                        <Button 
+                          size="sm" 
+                          variant={criterion.met ? "outline" : "default"}
+                          className="mt-2"
+                          onClick={criterion.action.onClick}
+                          disabled={isToggling}
+                        >
+                          {isToggling ? (
+                            <>
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              Обновление...
+                            </>
+                          ) : (
+                            criterion.action.label
+                          )}
+                        </Button>
+                      ) : (
+                        <Link href={criterion.action.href}>
+                          <Button size="sm" variant="outline" className="mt-2">
+                            {criterion.action.label}
+                          </Button>
+                        </Link>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Ошибка */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
       </div>
     </Dialog>
   )

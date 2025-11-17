@@ -6,6 +6,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Edit, CheckCircle2, Eye, EyeOff, User } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -44,6 +45,7 @@ export function ProfileHero({
   hasSpecialistProfile,
   specialistProfile,
 }: ProfileHeroProps) {
+  const router = useRouter()
   const [isVisibilityModalOpen, setIsVisibilityModalOpen] = useState(false)
   const fullName = `${firstName} ${lastName}`.trim()
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -158,6 +160,7 @@ export function ProfileHero({
           isOpen={isVisibilityModalOpen}
           onClose={() => setIsVisibilityModalOpen(false)}
           criteria={specialistProfile.visibilityCriteria}
+          onCriteriaUpdate={() => router.refresh()}
         />
       )}
     </Card>
