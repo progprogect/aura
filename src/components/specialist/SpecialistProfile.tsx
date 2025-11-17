@@ -13,6 +13,7 @@ import { SpecialistFAQ } from './SpecialistFAQ'
 import { SpecialistContact } from './SpecialistContact'
 import { SpecialistLeadMagnets } from './SpecialistLeadMagnets'
 import { SpecialistServices } from './SpecialistServices'
+import { CompanyMap } from './CompanyMap'
 import { ReviewList } from '@/components/reviews/ReviewList'
 import { ReviewStats } from '@/components/reviews/ReviewStats'
 import type { CategoryConfig } from '@/lib/category-config'
@@ -23,6 +24,9 @@ import type { ReviewsResponse } from '@/types/review'
 interface SpecialistProfileProps {
   tabs: Tab[]
   categoryConfig: CategoryConfig | null // Конфигурация категории из сервера
+  profileType?: 'specialist' | 'company'
+  address?: string | null
+  addressCoordinates?: { lat: number; lng: number } | null
   data: {
     id: string
     slug: string
@@ -72,7 +76,7 @@ interface SpecialistProfileProps {
   onSaveCustomField?: (key: string, value: any) => Promise<any>
 }
 
-export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = false, onSaveField, onSaveCustomField }: SpecialistProfileProps) {
+export function SpecialistProfile({ tabs, categoryConfig, profileType, address, addressCoordinates, data, isEditMode = false, onSaveField, onSaveCustomField }: SpecialistProfileProps) {
   const router = useRouter()
   const activeTab = useActiveTab(tabs)
 
@@ -95,6 +99,14 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
           isEditMode={isEditMode}
           onSave={onSaveField}
         />
+
+        {/* Карта с адресом (только для компаний) */}
+        {profileType === 'company' && address && (
+          <CompanyMap 
+            address={address}
+            coordinates={addressCoordinates}
+          />
+        )}
 
         {/* Специализация (условно) */}
         {(data.customFields || isEditMode) && categoryConfig && (

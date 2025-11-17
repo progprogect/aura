@@ -361,6 +361,9 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
             totalReviews: specialist.totalReviews,
             profileType: specialist.profileType,
             companyName: specialist.companyName,
+            addressCoordinates: specialist.addressCoordinates,
+            taxId: specialist.taxId,
+            website: specialist.website,
           }}
           contactsData={{
             email: specialist.email,

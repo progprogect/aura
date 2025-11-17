@@ -11,6 +11,7 @@ import { AnimatePresence } from 'framer-motion'
 import { SpecialistProfile } from './SpecialistProfile'
 import { SpecialistHero } from './SpecialistHero'
 import { SpecialistHeroEdit } from './SpecialistHeroEdit'
+import { CompanyHeroEdit } from './CompanyHeroEdit'
 import { ContactsEditor } from './edit/ContactsEditor'
 import { EditModeToggle } from './edit/EditModeToggle'
 import { EditToolbar } from './edit/EditToolbar'
@@ -48,6 +49,7 @@ interface SpecialistProfileWithEditProps {
     tagline: string | null
     city: string | null
     address?: string | null
+    addressCoordinates?: { lat: number; lng: number } | null
     country?: string
     workFormats: string[]
     yearsOfPractice?: number | null
@@ -59,6 +61,8 @@ interface SpecialistProfileWithEditProps {
     totalReviews?: number
     profileType?: 'specialist' | 'company'
     companyName?: string | null
+    taxId?: string | null
+    website?: string | null
   }
   contactsData: {
     email: string | null
@@ -221,7 +225,7 @@ export function SpecialistProfileWithEdit({
   }, [router, searchParams, pathname])
 
   // Функция для сохранения одного поля
-  const handleSaveField = useCallback(async (field: string, value: string | number | boolean) => {
+  const handleSaveField = useCallback(async (field: string, value: string | number | boolean | { lat: number; lng: number } | null) => {
     try {
       const response = await fetch('/api/specialist/profile', {
         method: 'PATCH',
@@ -352,18 +356,37 @@ export function SpecialistProfileWithEdit({
                   </span>
                   <span className="text-base sm:text-xl">Основная информация</span>
                 </h2>
-                <SpecialistHeroEdit
-                  firstName={heroData.firstName}
-                  lastName={heroData.lastName}
-                  avatar={heroData.avatar}
-                  category={data.category}
-                  tagline={heroData.tagline}
-                  city={heroData.city}
-                  specializations={heroData.specializations}
-                  onSaveField={handleSaveField}
-                  onSaveArray={handleSaveArray}
-                  onRefresh={handleExitEditMode}
-                />
+                {heroData.profileType === 'company' ? (
+                  <CompanyHeroEdit
+                    companyName={heroData.companyName}
+                    firstName={heroData.firstName}
+                    lastName={heroData.lastName}
+                    avatar={heroData.avatar}
+                    category={data.category}
+                    tagline={heroData.tagline}
+                    address={heroData.address}
+                    addressCoordinates={heroData.addressCoordinates}
+                    taxId={heroData.taxId}
+                    website={heroData.website}
+                    specializations={heroData.specializations}
+                    onSaveField={handleSaveField}
+                    onSaveArray={handleSaveArray}
+                    onRefresh={handleExitEditMode}
+                  />
+                ) : (
+                  <SpecialistHeroEdit
+                    firstName={heroData.firstName}
+                    lastName={heroData.lastName}
+                    avatar={heroData.avatar}
+                    category={data.category}
+                    tagline={heroData.tagline}
+                    city={heroData.city}
+                    specializations={heroData.specializations}
+                    onSaveField={handleSaveField}
+                    onSaveArray={handleSaveArray}
+                    onRefresh={handleExitEditMode}
+                  />
+                )}
               </div>
               
               {/* Контакты для связи */}
@@ -566,6 +589,9 @@ export function SpecialistProfileWithEdit({
         <SpecialistProfile
           tabs={tabs}
           categoryConfig={categoryConfig}
+          profileType={heroData.profileType}
+          address={heroData.address}
+          addressCoordinates={heroData.addressCoordinates}
           data={data}
           isEditMode={false}
           onSaveField={handleSaveField}

@@ -33,9 +33,20 @@ const UpdateProfileSchema = z.object({
     'contactEmail',
     'contactPhone',
     'contactTelegram',
-    'contactWhatsapp'
+    'contactWhatsapp',
+    // Поля для компаний
+    'companyName',
+    'address',
+    'addressCoordinates',
+    'taxId'
   ]),
-  value: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+  value: z.union([
+    z.string(), 
+    z.number(), 
+    z.boolean(), 
+    z.null(),
+    z.object({ lat: z.number(), lng: z.number() }) // Для addressCoordinates
+  ]),
 })
 
 export async function PATCH(request: NextRequest) {
@@ -66,6 +77,20 @@ export async function PATCH(request: NextRequest) {
         processedValue = value ? parseInt(value, 10) : null
       }
     }
+    
+    // Специальная обработка для addressCoordinates (JSON)
+    if (field === 'addressCoordinates') {
+      if (value && typeof value === 'object' && 'lat' in value && 'lng' in value) {
+        processedValue = value as { lat: number; lng: number }
+      } else if (value === null) {
+        processedValue = null
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Некорректный формат координат' },
+          { status: 400 }
+        )
+      }
+    }
 
     // Поля User (обновляем в таблице User)
     const userFields = ['firstName', 'lastName', 'email']
@@ -75,7 +100,9 @@ export async function PATCH(request: NextRequest) {
       'category', 'tagline', 'about', 'city', 'country',
       'telegram', 'whatsapp', 'website',
       'priceFrom', 'priceTo', 'priceDescription',
-      'yearsOfPractice', 'videoUrl', 'acceptingClients'
+      'yearsOfPractice', 'videoUrl', 'acceptingClients',
+      // Поля для компаний
+      'companyName', 'address', 'addressCoordinates', 'taxId'
     ]
 
     let updatedValue
