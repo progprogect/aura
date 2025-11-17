@@ -22,6 +22,8 @@ declare global {
 export function CompanyMap({ address, coordinates, className = '' }: CompanyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     // Проверяем наличие координат
@@ -35,16 +37,24 @@ export function CompanyMap({ address, coordinates, className = '' }: CompanyMapP
       const existingScript = document.querySelector('script[src*="api-maps.yandex.ru"]')
       if (existingScript) {
         // Скрипт уже добавлен, ждем его загрузки
-        const checkYmaps = setInterval(() => {
+        intervalRef.current = setInterval(() => {
           if (window.ymaps) {
-            clearInterval(checkYmaps)
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current)
+              intervalRef.current = null
+            }
             window.ymaps.ready(() => {
               initMap()
             })
           }
         }, 100)
         // Очищаем интервал через 10 секунд, если API не загрузилось
-        setTimeout(() => clearInterval(checkYmaps), 10000)
+        timeoutRef.current = setTimeout(() => {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+          }
+        }, 10000)
       } else {
         // Загружаем Yandex Maps API
         const script = document.createElement('script')
@@ -98,6 +108,14 @@ export function CompanyMap({ address, coordinates, className = '' }: CompanyMapP
 
     return () => {
       // Очистка при размонтировании
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.destroy()
         mapInstanceRef.current = null
