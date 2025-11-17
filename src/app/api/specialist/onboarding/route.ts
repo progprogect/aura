@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { generateSlug } from '@/lib/utils/slug'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 // Базовая схема для специалистов
 const SpecialistOnboardingSchema = z.object({
@@ -228,6 +229,34 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    // Обработка ошибок Prisma (дублирование уникальных полей)
+    if (error instanceof PrismaClientKnownRequestError) {
+      // P2002 - Unique constraint violation
+      if (error.code === 'P2002') {
+        const target = error.meta?.target as string[] | undefined
+        
+        if (target?.includes('email')) {
+          return NextResponse.json(
+            { success: false, error: 'Пользователь с таким email уже существует' },
+            { status: 400 }
+          )
+        }
+        
+        if (target?.includes('phone')) {
+          return NextResponse.json(
+            { success: false, error: 'Пользователь с таким номером телефона уже существует' },
+            { status: 400 }
+          )
+        }
+        
+        // Общая ошибка для других уникальных полей
+        return NextResponse.json(
+          { success: false, error: 'Данные уже используются другим пользователем' },
+          { status: 400 }
+        )
+      }
     }
 
     return NextResponse.json(
