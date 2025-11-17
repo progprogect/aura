@@ -212,7 +212,9 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
           about: '',
           workFormats: ['online'],
           verified: false,
-          acceptingClients: false
+          acceptingClients: false,
+          // Автоматически добавляем телефон в WhatsApp для удобства
+          whatsapp: normalizedPhone
         }
       })
       

@@ -22,7 +22,6 @@ const UpdateProfileSchema = z.object({
     'email',
     'telegram',
     'whatsapp',
-    'instagram',
     'website',
     'priceFrom',
     'priceTo',
@@ -74,7 +73,7 @@ export async function PATCH(request: NextRequest) {
     // Поля SpecialistProfile (обновляем в таблице SpecialistProfile)
     const specialistFields = [
       'category', 'tagline', 'about', 'city', 'country',
-      'telegram', 'whatsapp', 'instagram', 'website',
+      'telegram', 'whatsapp', 'website',
       'priceFrom', 'priceTo', 'priceDescription',
       'yearsOfPractice', 'videoUrl', 'acceptingClients'
     ]

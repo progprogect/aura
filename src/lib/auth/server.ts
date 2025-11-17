@@ -70,7 +70,6 @@ export async function getCurrentSpecialist() {
     yearsOfPractice: profile.yearsOfPractice,
     telegram: profile.telegram,
     whatsapp: profile.whatsapp,
-    instagram: profile.instagram,
     website: profile.website,
     priceFrom: profile.priceFrom,
     priceTo: profile.priceTo,

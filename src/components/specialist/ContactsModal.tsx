@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Mail, Phone, MessageCircle, MessageSquare, Instagram, Globe, Copy, Check, ExternalLink } from 'lucide-react'
+import { X, Mail, Phone, MessageCircle, MessageSquare, Globe, Copy, Check, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface ContactsModalProps {
@@ -17,7 +17,6 @@ interface ContactsModalProps {
   email?: string | null
   telegram?: string | null
   whatsapp?: string | null
-  instagram?: string | null
   website?: string | null
 }
 
@@ -29,7 +28,6 @@ export function ContactsModal({
   email,
   telegram,
   whatsapp,
-  instagram,
   website,
 }: ContactsModalProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null)
@@ -59,7 +57,7 @@ export function ContactsModal({
   }
 
   // Проверяем, есть ли хотя бы один контакт
-  const hasAnyContact = !!(email || telegram || whatsapp || instagram || website)
+  const hasAnyContact = !!(email || telegram || whatsapp || website)
 
   if (!isOpen) return null
 
@@ -142,18 +140,6 @@ export function ContactsModal({
                     href={getWhatsappUrl(whatsapp)}
                     onCopy={() => handleCopy(whatsapp, 'whatsapp')}
                     isCopied={copiedField === 'whatsapp'}
-                  />
-                )}
-
-                {/* Instagram */}
-                {instagram && (
-                  <ContactItem
-                    icon={Instagram}
-                    label="Instagram"
-                    value={instagram}
-                    href={`https://instagram.com/${instagram.replace('@', '')}`}
-                    onCopy={() => handleCopy(instagram, 'instagram')}
-                    isCopied={copiedField === 'instagram'}
                   />
                 )}
 

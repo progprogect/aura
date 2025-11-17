@@ -34,7 +34,6 @@ export interface SpecialistHeroProps {
   email?: string | null
   telegram?: string | null
   whatsapp?: string | null
-  instagram?: string | null
   website?: string | null
 }
 
@@ -59,7 +58,6 @@ export function SpecialistHero({
   email,
   telegram,
   whatsapp,
-  instagram,
   website,
 }: SpecialistHeroProps) {
   const fullName = `${firstName || ''} ${lastName || ''}`.trim() || 'Специалист'
@@ -437,7 +435,6 @@ export function SpecialistHero({
         email={email}
         telegram={telegram}
         whatsapp={whatsapp}
-        instagram={instagram}
         website={website}
       />
     </>

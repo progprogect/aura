@@ -61,7 +61,6 @@ interface SpecialistProfileWithEditProps {
     email: string | null
     telegram: string | null
     whatsapp: string | null
-    instagram: string | null
     website: string | null
   }
   data: {
@@ -318,7 +317,6 @@ export function SpecialistProfileWithEdit({
           email={contactsData.email}
           telegram={contactsData.telegram}
           whatsapp={contactsData.whatsapp}
-          instagram={contactsData.instagram}
           website={contactsData.website}
         />
       )}
@@ -380,7 +378,6 @@ export function SpecialistProfileWithEdit({
                   email={contactsData.email}
                   telegram={contactsData.telegram}
                   whatsapp={contactsData.whatsapp}
-                  instagram={contactsData.instagram}
                   website={contactsData.website}
                   onSave={handleSaveField}
                 />

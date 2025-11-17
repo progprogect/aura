@@ -1,19 +1,18 @@
 /**
  * Редактор контактов специалиста
- * Email, Telegram, WhatsApp, Instagram, Website
+ * Email, Telegram, WhatsApp, Website
  */
 
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InlineInput } from './InlineInput'
-import { Mail, MessageCircle, Phone, Instagram as InstagramIcon, Globe } from 'lucide-react'
+import { Mail, MessageCircle, Phone, Globe } from 'lucide-react'
 
 interface ContactsEditorProps {
   email: string | null
   telegram: string | null
   whatsapp: string | null
-  instagram: string | null
   website: string | null
   onSave: (field: string, value: string | number) => Promise<any>
 }
@@ -22,7 +21,6 @@ export function ContactsEditor({
   email,
   telegram,
   whatsapp,
-  instagram,
   website,
   onSave
 }: ContactsEditorProps) {
@@ -82,23 +80,6 @@ export function ContactsEditor({
               isEditMode={true}
               placeholder="+7 (999) 123-45-67"
               label="WhatsApp"
-            />
-          </div>
-        </div>
-
-        {/* Instagram */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-pink-50 rounded-lg flex-shrink-0">
-            <InstagramIcon className="w-5 h-5 text-pink-600" />
-          </div>
-          <div className="flex-1">
-            <InlineInput
-              value={instagram || ''}
-              field="instagram"
-              onSave={onSave}
-              isEditMode={true}
-              placeholder="@username"
-              label="Instagram"
             />
           </div>
         </div>

@@ -118,7 +118,6 @@ async function getSpecialist(slug: string) {
     yearsOfPractice: specialistProfile.yearsOfPractice,
     telegram: specialistProfile.telegram,
     whatsapp: specialistProfile.whatsapp,
-    instagram: specialistProfile.instagram,
     website: specialistProfile.website,
     priceFrom: specialistProfile.priceFrom,
     priceTo: specialistProfile.priceTo,
@@ -346,7 +345,6 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
             email: specialist.email,
             telegram: specialist.telegram,
             whatsapp: specialist.whatsapp,
-            instagram: specialist.instagram,
             website: specialist.website,
           }}
           data={{
