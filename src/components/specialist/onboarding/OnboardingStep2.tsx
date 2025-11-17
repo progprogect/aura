@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
+import { parseSpecializations, canAddSpecialization, MAX_SPECIALIZATIONS } from '@/lib/utils/specializations'
 
 interface OnboardingStep2Props {
   data: {
@@ -24,11 +25,23 @@ interface OnboardingStep2Props {
 export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props) {
   const [newSpecialization, setNewSpecialization] = useState('')
 
-  const handleAddSpecialization = () => {
-    const trimmed = newSpecialization.trim()
-    if (trimmed && !data.specializations.includes(trimmed)) {
-      onChange('specializations', [...data.specializations, trimmed])
+  // Обработка добавления специализаций (поддержка запятых и одиночных значений)
+  const handleAddSpecializations = () => {
+    if (!newSpecialization.trim()) return
+
+    const parsed = parseSpecializations(newSpecialization, data.specializations)
+    
+    if (parsed.length > 0) {
+      const newList = [...data.specializations, ...parsed].slice(0, MAX_SPECIALIZATIONS)
+      onChange('specializations', newList)
       setNewSpecialization('')
+    }
+  }
+
+  // Обработка потери фокуса - автоматический парсинг запятых
+  const handleBlur = () => {
+    if (newSpecialization.trim()) {
+      handleAddSpecializations()
     }
   }
 
@@ -36,10 +49,11 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
     onChange('specializations', data.specializations.filter(s => s !== spec))
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  // Обработка Enter: если есть запятая - парсинг, иначе - добавление одного значения
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleAddSpecialization()
+      handleAddSpecializations()
     }
   }
 
@@ -124,9 +138,14 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
 
       {/* Специализации */}
       <div className="space-y-3">
-        <Label htmlFor="specializations">
-          Специализации <span className="text-red-500">*</span>
-        </Label>
+        <div className="space-y-1">
+          <Label htmlFor="specializations">
+            Специализации <span className="text-red-500">*</span>
+          </Label>
+          <p className="text-xs text-gray-600">
+            Что вы умеете? Укажите ваши ключевые навыки и методы работы
+          </p>
+        </div>
         
         {/* Существующие специализации */}
         {data.specializations.length > 0 && (
@@ -135,13 +154,13 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
               <Badge
                 key={spec}
                 variant="secondary"
-                className="px-3 py-1.5 text-sm flex items-center gap-2"
+                className="px-3 py-1.5 text-sm flex items-center gap-2 touch-manipulation"
               >
                 {spec}
                 <button
                   type="button"
                   onClick={() => handleRemoveSpecialization(spec)}
-                  className="hover:text-red-500 transition-colors"
+                  className="hover:text-red-500 transition-colors touch-manipulation"
                   aria-label={`Удалить ${spec}`}
                 >
                   <X size={14} />
@@ -152,42 +171,29 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
         )}
 
         {/* Добавление новой специализации */}
-        {data.specializations.length < 5 && (
-          <div className="flex gap-2">
-            <Input
-              id="specializations"
-              type="text"
-              placeholder="Например: КПТ-терапия, Работа с тревогой..."
-              value={newSpecialization}
-              onChange={(e) => setNewSpecialization(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="h-12 text-base flex-1"
-            />
-            <button
-              type="button"
-              onClick={handleAddSpecialization}
-              disabled={!newSpecialization.trim()}
-              className="
-                px-4 h-12 rounded-md bg-blue-600 text-white font-medium
-                hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors
-              "
-            >
-              Добавить
-            </button>
-          </div>
+        {canAddSpecialization(data.specializations.length) && (
+          <Input
+            id="specializations"
+            type="text"
+            placeholder="Например: КПТ-терапия, работа с тревогой, семейная терапия"
+            value={newSpecialization}
+            onChange={(e) => setNewSpecialization(e.target.value)}
+            onKeyPress={handleKeyPress}
+            onBlur={handleBlur}
+            className="h-12 text-base w-full"
+          />
         )}
 
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
           {errors?.specializations ? (
             <p className="text-sm text-red-500">{errors.specializations}</p>
           ) : (
             <p className="text-xs text-gray-500">
-              Добавьте от 1 до 5 специализаций. Нажмите Enter или кнопку &quot;Добавить&quot;.
+              Можно вводить через запятую или по одной (Enter). Добавьте от 1 до {MAX_SPECIALIZATIONS} специализаций.
             </p>
           )}
-          <span className={`text-xs ${data.specializations.length === 0 ? 'text-red-500' : 'text-gray-400'}`}>
-            {data.specializations.length}/5
+          <span className={`text-xs font-medium ${data.specializations.length === 0 ? 'text-red-500' : data.specializations.length >= MAX_SPECIALIZATIONS ? 'text-blue-600' : 'text-gray-400'}`}>
+            {data.specializations.length}/{MAX_SPECIALIZATIONS}
           </span>
         </div>
       </div>
