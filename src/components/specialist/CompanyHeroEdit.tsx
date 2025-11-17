@@ -10,7 +10,7 @@ import { InlineTagsEditor } from './edit/InlineTagsEditor'
 import { AvatarUploader } from './edit/AvatarUploader'
 import { CategorySelector } from './edit/CategorySelector'
 import { AddressInput } from '../specialist/onboarding/AddressInput'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface CompanyHeroEditProps {
   companyName: string | null
@@ -47,6 +47,12 @@ export function CompanyHeroEdit({
 }: CompanyHeroEditProps) {
   const [localAddress, setLocalAddress] = useState(address || '')
   const [localCoordinates, setLocalCoordinates] = useState<{ lat: number; lng: number } | null>(addressCoordinates)
+
+  // Синхронизируем локальное состояние с пропсами
+  useEffect(() => {
+    setLocalAddress(address || '')
+    setLocalCoordinates(addressCoordinates)
+  }, [address, addressCoordinates])
 
   const handleAddressChange = async (newAddress: string, coordinates?: { lat: number; lng: number }) => {
     setLocalAddress(newAddress)

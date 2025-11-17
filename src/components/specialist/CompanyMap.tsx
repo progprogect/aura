@@ -31,17 +31,33 @@ export function CompanyMap({ address, coordinates, className = '' }: CompanyMapP
 
     // Проверяем наличие Yandex Maps API
     if (!window.ymaps) {
-      // Загружаем Yandex Maps API
-      const script = document.createElement('script')
-      const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || ''
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`
-      script.async = true
-      script.onload = () => {
-        window.ymaps.ready(() => {
-          initMap()
-        })
+      // Проверяем, не добавлен ли уже скрипт
+      const existingScript = document.querySelector('script[src*="api-maps.yandex.ru"]')
+      if (existingScript) {
+        // Скрипт уже добавлен, ждем его загрузки
+        const checkYmaps = setInterval(() => {
+          if (window.ymaps) {
+            clearInterval(checkYmaps)
+            window.ymaps.ready(() => {
+              initMap()
+            })
+          }
+        }, 100)
+        // Очищаем интервал через 10 секунд, если API не загрузилось
+        setTimeout(() => clearInterval(checkYmaps), 10000)
+      } else {
+        // Загружаем Yandex Maps API
+        const script = document.createElement('script')
+        const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || ''
+        script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`
+        script.async = true
+        script.onload = () => {
+          window.ymaps.ready(() => {
+            initMap()
+          })
+        }
+        document.head.appendChild(script)
       }
-      document.head.appendChild(script)
     } else {
       // API уже загружен
       window.ymaps.ready(() => {
