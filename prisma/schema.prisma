@@ -105,6 +105,7 @@ model SpecialistProfile {
   education            Education[]
   certificates         Certificate[]
   gallery              GalleryItem[]
+  portfolio            PortfolioItem[]
   faqs                 FAQ[]
   leadMagnets          LeadMagnet[]
   consultationRequests ConsultationRequest[]
@@ -222,6 +223,28 @@ model GalleryItem {
 
   order     Int      @default(0) // Порядок отображения
   createdAt DateTime @default(now())
+
+  @@index([specialistProfileId])
+}
+
+// ========================================
+// ПОРТФОЛИО
+// ========================================
+
+model PortfolioItem {
+  id                  String            @id @default(cuid())
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  type         String // "photo" | "video"
+  url          String // URL медиафайла
+  thumbnailUrl String? // URL превью (для видео)
+  title        String // Заголовок работы
+  description  String? // Описание работы
+
+  order     Int      @default(0) // Порядок отображения
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([specialistProfileId])
 }

@@ -48,6 +48,9 @@ async function getSpecialist(slug: string) {
       gallery: {
         orderBy: { order: 'asc' },
       },
+      portfolio: {
+        orderBy: { order: 'asc' },
+      },
       faqs: {
         orderBy: { order: 'asc' },
       },
@@ -142,6 +145,7 @@ async function getSpecialist(slug: string) {
     education: specialistProfile.education,
     certificates: specialistProfile.certificates,
     gallery: specialistProfile.gallery,
+    portfolio: specialistProfile.portfolio,
     faqs: specialistProfile.faqs,
     leadMagnets: specialistProfile.leadMagnets.map(lm => fromPrismaLeadMagnet(lm)),
     services: specialistProfile.services,
@@ -364,6 +368,14 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
               url: item.url,
               thumbnailUrl: item.thumbnailUrl,
               caption: item.caption,
+            })),
+            portfolio: specialist.portfolio.map(item => ({
+              id: item.id,
+              type: item.type as 'photo' | 'video',
+              url: item.url,
+              thumbnailUrl: item.thumbnailUrl,
+              title: item.title,
+              description: item.description,
             })),
             education: specialist.education.map(edu => ({
               id: edu.id,

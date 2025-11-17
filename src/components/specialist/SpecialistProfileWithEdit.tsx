@@ -19,6 +19,8 @@ import { SpecialistAbout } from './SpecialistAbout'
 import { SpecialistSpecialization } from './SpecialistSpecialization'
 import { SpecialistVideo } from './SpecialistVideo'
 import { SpecialistGalleryContent } from './SpecialistGalleryContent'
+import { PortfolioEditor } from './edit/PortfolioEditor'
+import { PortfolioContent } from './PortfolioContent'
 import { SpecialistEducationContent } from './SpecialistEducationContent'
 import { SpecialistPricingContent } from './SpecialistPricingContent'
 import { SpecialistFAQContent } from './SpecialistFAQContent'
@@ -78,6 +80,14 @@ interface SpecialistProfileWithEditProps {
       url: string
       thumbnailUrl?: string | null
       caption?: string | null
+    }>
+    portfolio: Array<{
+      id: string
+      type: 'photo' | 'video'
+      url: string
+      thumbnailUrl?: string | null
+      title: string
+      description?: string | null
     }>
     education: Array<{
       id: string
@@ -468,6 +478,24 @@ export function SpecialistProfileWithEdit({
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>Галерея пуста</p>
+                </div>
+              )
+            )}
+          </Section>
+
+          {/* Портфолио */}
+          <Section id="section-portfolio" title="Портфолио" icon="💼" iconBgColor="bg-purple-100" iconTextColor="text-purple-600">
+            {isEditMode ? (
+              <PortfolioEditor
+                items={data.portfolio}
+                onRefresh={() => router.refresh()}
+              />
+            ) : (
+              data.portfolio.length > 0 ? (
+                <PortfolioContent items={data.portfolio} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Портфолио пусто</p>
                 </div>
               )
             )}
