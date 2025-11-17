@@ -10,7 +10,7 @@ import { useUser } from '@/hooks/useUser'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SlideContentProps {
-  leadMagnet: Pick<LeadMagnet, 'id' | 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl' | 'priceInPoints'>
+  leadMagnet: Pick<LeadMagnet, 'id' | 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl' | 'priceInPoints' | 'emoji' | 'slug'>
   specialistId?: string
   specialistName?: string
   className?: string
