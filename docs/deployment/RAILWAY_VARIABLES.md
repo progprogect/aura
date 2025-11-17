@@ -43,6 +43,16 @@ Variable name: NEXT_PUBLIC_APP_URL
 Value: https://${{RAILWAY_PUBLIC_DOMAIN}}
 ```
 
+#### ⚠️ NEXT_PUBLIC_YANDEX_MAPS_API_KEY (опционально)
+
+```
+Variable name: NEXT_PUBLIC_YANDEX_MAPS_API_KEY
+Value: ваш-ключ-от-yandex-maps
+```
+
+**Опционально:** Карта будет работать и без ключа, но с ограничениями.  
+Получите ключ на https://developer.tech.yandex.ru/services/
+
 ---
 
 ## 2️⃣ После деплоя - выполните команды
