@@ -58,6 +58,15 @@ export function ContactsModal({
     return telegram.startsWith('@') ? telegram : `@${telegram}`
   }
 
+  const formatPhone = (phone: string) => {
+    // Простое форматирование телефона
+    const cleaned = phone.replace(/\D/g, '')
+    if (cleaned.length === 11 && cleaned.startsWith('7')) {
+      return `+${cleaned.slice(0, 1)} (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`
+    }
+    return phone
+  }
+
   // Проверяем, есть ли хотя бы один контакт
   const hasAnyContact = !!(email || phone || telegram || whatsapp || website)
 
@@ -126,7 +135,7 @@ export function ContactsModal({
                   <ContactItem
                     icon={Phone}
                     label="Телефон"
-                    value={phone}
+                    value={formatPhone(phone)}
                     href={`tel:${phone}`}
                     onCopy={() => handleCopy(phone, 'phone')}
                     isCopied={copiedField === 'phone'}
