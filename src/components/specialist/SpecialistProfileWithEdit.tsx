@@ -59,6 +59,7 @@ interface SpecialistProfileWithEditProps {
   }
   contactsData: {
     email: string | null
+    phone: string | null // Телефон из User.phone для отображения в контактах
     telegram: string | null
     whatsapp: string | null
     website: string | null
@@ -315,6 +316,7 @@ export function SpecialistProfileWithEdit({
           averageRating={heroData.averageRating}
           totalReviews={heroData.totalReviews}
           email={contactsData.email}
+          phone={contactsData.phone}
           telegram={contactsData.telegram}
           whatsapp={contactsData.whatsapp}
           website={contactsData.website}
@@ -376,6 +378,7 @@ export function SpecialistProfileWithEdit({
                 
                 <ContactsEditor
                   email={contactsData.email}
+                  phone={contactsData.phone}
                   telegram={contactsData.telegram}
                   whatsapp={contactsData.whatsapp}
                   website={contactsData.website}

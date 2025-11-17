@@ -32,6 +32,7 @@ export interface SpecialistHeroProps {
   totalReviews?: number
   // Контакты для модального окна
   email?: string | null
+  phone?: string | null // Телефон из User.phone
   telegram?: string | null
   whatsapp?: string | null
   website?: string | null
@@ -56,6 +57,7 @@ export function SpecialistHero({
   averageRating,
   totalReviews,
   email,
+  phone,
   telegram,
   whatsapp,
   website,
@@ -433,6 +435,7 @@ export function SpecialistHero({
         onContactClick={handleContactClick}
         specialistName={fullName}
         email={email}
+        phone={phone}
         telegram={telegram}
         whatsapp={whatsapp}
         website={website}

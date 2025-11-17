@@ -36,6 +36,7 @@ async function getSpecialist(slug: string) {
           lastName: true,
           email: true,
           avatar: true,
+          phone: true, // Добавляем phone для отображения в контактах
         }
       },
       education: {
@@ -107,6 +108,7 @@ async function getSpecialist(slug: string) {
     lastName: specialistProfile.user.lastName,
     email: specialistProfile.user.email,
     avatar: specialistProfile.user.avatar,
+    phone: specialistProfile.user.phone, // Добавляем phone для контактов
     slug: specialistProfile.slug,
     category: specialistProfile.category,
     specializations: specialistProfile.specializations,
@@ -343,6 +345,7 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
           }}
           contactsData={{
             email: specialist.email,
+            phone: specialist.phone, // Телефон из User.phone
             telegram: specialist.telegram,
             whatsapp: specialist.whatsapp,
             website: specialist.website,

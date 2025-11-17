@@ -11,6 +11,7 @@ import { Mail, MessageCircle, Phone, Globe } from 'lucide-react'
 
 interface ContactsEditorProps {
   email: string | null
+  phone: string | null // Телефон из User.phone
   telegram: string | null
   whatsapp: string | null
   website: string | null
@@ -19,6 +20,7 @@ interface ContactsEditorProps {
 
 export function ContactsEditor({
   email,
+  phone,
   telegram,
   whatsapp,
   website,
@@ -32,6 +34,22 @@ export function ContactsEditor({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Телефон */}
+        {phone && (
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">
+              <Phone className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <label className="text-sm font-medium text-gray-700 mb-1 block">Телефон</label>
+              <div className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                {phone}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Номер телефона из регистрации</p>
+            </div>
+          </div>
+        )}
+
         {/* Email */}
         <div className="flex items-start gap-3">
           <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0">

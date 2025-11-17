@@ -212,11 +212,12 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
           about: '',
           workFormats: ['online'],
           verified: false,
-          acceptingClients: false,
-          // Автоматически добавляем телефон в WhatsApp для удобства
-          whatsapp: normalizedPhone
+          acceptingClients: false
         }
       })
+      
+      // Примечание: User.phone уже установлен при создании пользователя выше
+      // и будет автоматически отображаться в контактах специалиста
       
       createdSlug = slug
     }

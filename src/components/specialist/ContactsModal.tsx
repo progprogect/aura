@@ -15,6 +15,7 @@ interface ContactsModalProps {
   onContactClick: () => void
   specialistName: string
   email?: string | null
+  phone?: string | null // Телефон из User.phone
   telegram?: string | null
   whatsapp?: string | null
   website?: string | null
@@ -26,6 +27,7 @@ export function ContactsModal({
   onContactClick,
   specialistName,
   email,
+  phone,
   telegram,
   whatsapp,
   website,
@@ -57,7 +59,7 @@ export function ContactsModal({
   }
 
   // Проверяем, есть ли хотя бы один контакт
-  const hasAnyContact = !!(email || telegram || whatsapp || website)
+  const hasAnyContact = !!(email || phone || telegram || whatsapp || website)
 
   if (!isOpen) return null
 
@@ -116,6 +118,18 @@ export function ContactsModal({
                     href={`mailto:${email}`}
                     onCopy={() => handleCopy(email, 'email')}
                     isCopied={copiedField === 'email'}
+                  />
+                )}
+
+                {/* Телефон */}
+                {phone && (
+                  <ContactItem
+                    icon={Phone}
+                    label="Телефон"
+                    value={phone}
+                    href={`tel:${phone}`}
+                    onCopy={() => handleCopy(phone, 'phone')}
+                    isCopied={copiedField === 'phone'}
                   />
                 )}
 
