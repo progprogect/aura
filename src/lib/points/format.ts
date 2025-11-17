@@ -12,18 +12,43 @@ import {
 import { TransactionType } from '@/types/points';
 
 /**
- * Форматировать баллы для отображения
+ * Форматировать баллы для отображения (без потери точности)
+ * Показывает все значащие цифры, убирает только лишние нули в конце
  */
-export function formatPoints(amount: string | number): string {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  const formatted = num.toFixed(2);
+export function formatPoints(amount: string | number | any): string {
+  let value: string;
   
-  // Убрать .00 если целое число
-  if (formatted.endsWith('.00')) {
-    return formatted.slice(0, -3);
+  if (typeof amount === 'string') {
+    value = amount;
+  } else if (amount && typeof amount === 'object' && 'toString' in amount) {
+    // Decimal из decimal.js или Prisma
+    value = amount.toString();
+  } else if (typeof amount === 'number') {
+    // Для чисел используем toFixed с достаточной точностью, затем убираем лишние нули
+    value = amount.toFixed(10);
+  } else {
+    value = String(amount);
   }
   
-  return formatted;
+  return formatDecimalPoints(value);
+}
+
+/**
+ * Форматировать Decimal значение без потери точности
+ * Убирает только trailing zeros, сохраняет все значащие цифры
+ */
+function formatDecimalPoints(value: string): string {
+  // Убираем trailing zeros после точки, но оставляем точку если была дробная часть
+  if (value.includes('.')) {
+    // Убираем только нули в конце после точки
+    value = value.replace(/0+$/, '');
+    // Если после точки ничего не осталось, убираем точку
+    if (value.endsWith('.')) {
+      value = value.slice(0, -1);
+    }
+  }
+  
+  return value;
 }
 
 /**

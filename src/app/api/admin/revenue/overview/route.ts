@@ -122,21 +122,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       stats: {
-        totalCommission: totalCommission.toNumber(),
-        totalCashback: totalCashback.toNumber(),
-        totalNetRevenue: totalNetRevenue.toNumber(),
+        totalCommission: totalCommission.toString(),
+        totalCashback: totalCashback.toString(),
+        totalNetRevenue: totalNetRevenue.toString(),
         totalTransactions: revenues.length,
         byType: {
           leadMagnet: {
-            commission: byType.leadMagnet.commission.toNumber(),
-            cashback: byType.leadMagnet.cashback.toNumber(),
-            netRevenue: byType.leadMagnet.netRevenue.toNumber(),
+            commission: byType.leadMagnet.commission.toString(),
+            cashback: byType.leadMagnet.cashback.toString(),
+            netRevenue: byType.leadMagnet.netRevenue.toString(),
             count: byType.leadMagnet.count,
           },
           service: {
-            commission: byType.service.commission.toNumber(),
-            cashback: byType.service.cashback.toNumber(),
-            netRevenue: byType.service.netRevenue.toNumber(),
+            commission: byType.service.commission.toString(),
+            cashback: byType.service.cashback.toString(),
+            netRevenue: byType.service.netRevenue.toString(),
             count: byType.service.count,
           },
         },
@@ -183,9 +183,9 @@ async function getPeriodStats(start: Date, end: Date) {
   )
 
   return {
-    commission: commission.toNumber(),
-    cashback: cashback.toNumber(),
-    netRevenue: netRevenue.toNumber(),
+    commission: commission.toString(),
+    cashback: cashback.toString(),
+    netRevenue: netRevenue.toString(),
     count: revenues.length,
   }
 }

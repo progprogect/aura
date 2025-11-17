@@ -6,23 +6,24 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Coins, TrendingUp, Gift, DollarSign } from 'lucide-react'
+import { formatPoints } from '@/lib/points/format'
 
 interface RevenueStatsProps {
-  totalCommission: number
-  totalCashback: number
-  totalNetRevenue: number
+  totalCommission: string | number
+  totalCashback: string | number
+  totalNetRevenue: string | number
   totalTransactions: number
   byType: {
     leadMagnet: {
-      commission: number
-      cashback: number
-      netRevenue: number
+      commission: string | number
+      cashback: string | number
+      netRevenue: string | number
       count: number
     }
     service: {
-      commission: number
-      cashback: number
-      netRevenue: number
+      commission: string | number
+      cashback: string | number
+      netRevenue: string | number
       count: number
     }
   }
@@ -48,7 +49,7 @@ export function RevenueStats({
           <div className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-blue-600" />
             <div className="text-2xl font-bold text-gray-900">
-              {totalCommission.toFixed(2)}
+              {formatPoints(totalCommission)}
             </div>
             <span className="text-sm text-gray-500">баллов</span>
           </div>
@@ -66,7 +67,7 @@ export function RevenueStats({
           <div className="flex items-center gap-2">
             <Gift className="w-5 h-5 text-green-600" />
             <div className="text-2xl font-bold text-gray-900">
-              {totalCashback.toFixed(2)}
+              {formatPoints(totalCashback)}
             </div>
             <span className="text-sm text-gray-500">баллов</span>
           </div>
@@ -84,7 +85,7 @@ export function RevenueStats({
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-amber-600" />
             <div className="text-2xl font-bold text-gray-900">
-              {totalNetRevenue.toFixed(2)}
+              {formatPoints(totalNetRevenue)}
             </div>
             <span className="text-sm text-gray-500">баллов</span>
           </div>
@@ -132,7 +133,7 @@ export function RevenueStats({
                 {byType.service.count} транзакций
               </div>
               <div className="text-sm text-gray-600">
-                Комиссия: {byType.service.commission.toFixed(2)} баллов
+                Комиссия: {formatPoints(byType.service.commission)} баллов
               </div>
             </div>
           </div>

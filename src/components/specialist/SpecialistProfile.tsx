@@ -125,8 +125,8 @@ export function SpecialistProfile({ tabs, categoryConfig, profileType, address, 
         {/* Галерея */}
         {data.gallery.length > 0 && <SpecialistGallery items={data.gallery} />}
 
-        {/* Образование */}
-        {(data.education.length > 0 || data.certificates.length > 0 || isEditMode) && (
+        {/* Образование (только для специалистов) */}
+        {profileType !== 'company' && (data.education.length > 0 || data.certificates.length > 0 || isEditMode) && (
           <SpecialistEducation
             education={data.education}
             certificates={data.certificates}

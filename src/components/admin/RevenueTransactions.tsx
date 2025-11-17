@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { formatPoints } from '@/lib/points/format'
 
 interface PlatformRevenue {
   id: string
@@ -121,13 +122,13 @@ export function RevenueTransactions({
               </div>
               <div className="text-right ml-4">
                 <div className="text-sm font-semibold text-gray-900">
-                  Комиссия: {revenue.commissionAmount.toFixed(2)}
+                  Комиссия: {formatPoints(revenue.commissionAmount)}
                 </div>
                 <div className="text-xs text-gray-500">
-                  Кешбэк: {revenue.cashbackAmount.toFixed(2)}
+                  Кешбэк: {formatPoints(revenue.cashbackAmount)}
                 </div>
                 <div className="text-xs text-green-600 font-medium">
-                  Прибыль: {revenue.netRevenue.toFixed(2)}
+                  Прибыль: {formatPoints(revenue.netRevenue)}
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@ import { X, Loader2, Coins, AlertCircle, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 import Link from 'next/link'
+import { formatPoints } from '@/lib/points/format'
 
 interface PurchaseConfirmModalProps {
   isOpen: boolean
@@ -177,7 +178,7 @@ export function PurchaseConfirmModal({
                 <div className="flex items-center gap-1 mt-2 pt-2 border-t border-amber-300">
                   <Gift className="w-4 h-4 text-green-600" />
                   <span className="text-xs text-green-700">
-                    Кешбэк: <span className="font-semibold">{cashbackAmount.toFixed(2)}</span> баллов
+                    Кешбэк: <span className="font-semibold">{formatPoints(cashbackAmount)}</span> баллов
                   </span>
                 </div>
               )}

@@ -31,8 +31,8 @@ model User {
   socialAccounts SocialAccount[]
 
   // Балансы (система баллов)
-  balance        Decimal   @default(0) @db.Decimal(15, 2)
-  bonusBalance   Decimal   @default(0) @db.Decimal(15, 2)
+  balance        Decimal   @default(0) @db.Decimal(15, 4)
+  bonusBalance   Decimal   @default(0) @db.Decimal(15, 4)
   bonusExpiresAt DateTime?
 
   // Блокировка
@@ -380,9 +380,9 @@ model PlatformRevenue {
   leadMagnetPurchaseId String?
 
   // Суммы
-  commissionAmount Decimal @db.Decimal(15, 2) // Комиссия платформы (5%)
-  cashbackAmount   Decimal @db.Decimal(15, 2) // Кешбэк клиенту (2.5%)
-  netRevenue       Decimal @db.Decimal(15, 2) // Чистая прибыль платформы (2.5%)
+  commissionAmount Decimal @db.Decimal(15, 4) // Комиссия платформы (5%)
+  cashbackAmount   Decimal @db.Decimal(15, 4) // Кешбэк клиенту (2.5%)
+  netRevenue       Decimal @db.Decimal(15, 4) // Чистая прибыль платформы (2.5%)
 
   // Участники
   clientUserId     String // Кто купил
@@ -801,11 +801,11 @@ model Transaction {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   type        String // "bonus_registration", "purchase", "withdrawal", "bonus_expired", "bonus_reward", "deposit", "refund"
-  amount      Decimal @db.Decimal(15, 2)
+  amount      Decimal @db.Decimal(15, 4)
   balanceType String // "balance" | "bonusBalance"
 
-  balanceBefore Decimal @db.Decimal(15, 2)
-  balanceAfter  Decimal @db.Decimal(15, 2)
+  balanceBefore Decimal @db.Decimal(15, 4)
+  balanceAfter  Decimal @db.Decimal(15, 4)
 
   description String? // Человекочитаемое описание
   metadata    Json?   @db.JsonB // Доп. данные: { leadMagnetId, productId, etc }

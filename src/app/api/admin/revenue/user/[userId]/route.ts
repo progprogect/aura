@@ -45,8 +45,8 @@ export async function GET(
     return NextResponse.json({
       success: true,
       stats: {
-        totalCommission: totalCommission.toNumber(),
-        totalCashback: totalCashback.toNumber(),
+        totalCommission: totalCommission.toString(),
+        totalCashback: totalCashback.toString(),
         totalTransactions: revenues.length,
         byType,
       },

@@ -528,15 +528,17 @@ export function SpecialistProfileWithEdit({
             )}
           </Section>
 
-          {/* Образование и сертификаты */}
-          <Section id="section-education" title="Образование и сертификаты" icon="🎓" iconBgColor="bg-yellow-100" iconTextColor="text-yellow-600">
-            <SpecialistEducationContent
-              education={data.education}
-              certificates={data.certificates}
-              isEditMode={isEditMode}
-              onRefresh={() => router.refresh()}
-            />
-          </Section>
+          {/* Образование и сертификаты (только для специалистов) */}
+          {(heroData.profileType || 'specialist') !== 'company' && (
+            <Section id="section-education" title="Образование и сертификаты" icon="🎓" iconBgColor="bg-yellow-100" iconTextColor="text-yellow-600">
+              <SpecialistEducationContent
+                education={data.education}
+                certificates={data.certificates}
+                isEditMode={isEditMode}
+                onRefresh={() => router.refresh()}
+              />
+            </Section>
+          )}
 
           {/* Стоимость - убрана, теперь цены только в услугах */}
           {/* Показываем только для старых профилей, которые уже имеют цены */}
