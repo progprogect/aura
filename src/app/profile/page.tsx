@@ -391,6 +391,8 @@ export default async function ProfilePage() {
                 acceptingClients: user.specialistProfile.acceptingClients,
                 isVisible: user.specialistProfile.isVisible ?? false,
                 visibilityCriteria: user.specialistProfile.visibilityCriteria,
+                profileType: user.specialistProfile.profileType,
+                companyName: user.specialistProfile.companyName,
               } : undefined}
             />
           </div>
