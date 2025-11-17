@@ -116,7 +116,14 @@ async function getSpecialist(slug: string) {
     profileType: (specialistProfile.profileType || 'specialist') as 'specialist' | 'company',
     companyName: specialistProfile.companyName,
     address: specialistProfile.address,
-    addressCoordinates: specialistProfile.addressCoordinates,
+    addressCoordinates: (() => {
+      const coords = specialistProfile.addressCoordinates
+      if (!coords || typeof coords !== 'object' || Array.isArray(coords)) return null
+      if ('lat' in coords && 'lng' in coords && typeof coords.lat === 'number' && typeof coords.lng === 'number') {
+        return { lat: coords.lat, lng: coords.lng }
+      }
+      return null
+    })(),
     taxId: specialistProfile.taxId,
     category: specialistProfile.category,
     specializations: specialistProfile.specializations,

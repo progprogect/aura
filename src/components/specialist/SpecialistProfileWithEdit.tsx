@@ -358,16 +358,16 @@ export function SpecialistProfileWithEdit({
                 </h2>
                 {heroData.profileType === 'company' ? (
                   <CompanyHeroEdit
-                    companyName={heroData.companyName}
+                    companyName={heroData.companyName ?? null}
                     firstName={heroData.firstName}
                     lastName={heroData.lastName}
                     avatar={heroData.avatar}
                     category={data.category}
                     tagline={heroData.tagline}
-                    address={heroData.address}
-                    addressCoordinates={heroData.addressCoordinates}
-                    taxId={heroData.taxId}
-                    website={heroData.website}
+                    address={heroData.address ?? null}
+                    addressCoordinates={heroData.addressCoordinates ?? null}
+                    taxId={heroData.taxId ?? null}
+                    website={heroData.website ?? null}
                     specializations={heroData.specializations}
                     onSaveField={handleSaveField}
                     onSaveArray={handleSaveArray}

@@ -76,7 +76,7 @@ export function CompanyMap({ address, coordinates, className = '' }: CompanyMapP
     }
 
     function initMap() {
-      if (!mapRef.current || !window.ymaps) return
+      if (!mapRef.current || !window.ymaps || !coordinates || !coordinates.lat || !coordinates.lng) return
 
       // Удаляем предыдущую карту, если она существует
       if (mapInstanceRef.current) {
