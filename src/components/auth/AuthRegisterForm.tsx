@@ -147,7 +147,7 @@ export function AuthRegisterForm() {
       {/* Заголовок */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Присоединяйтесь к Ауре
+          Присоединяйтесь к Эволюции
         </h1>
         <p className="text-muted-foreground">
           Зарегистрируйтесь как специалист и начните помогать людям
