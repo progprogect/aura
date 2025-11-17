@@ -53,13 +53,15 @@ export function PurchasedLeadMagnetsList() {
     setError('')
     try {
       const response = await fetch(`/api/user/lead-magnets?page=${pagination.page}&limit=${pagination.limit}`)
-      const data: PurchasedLeadMagnetsResponse = await response.json()
+      const data = await response.json()
 
       if (response.ok) {
-        setLeadMagnets(data.leadMagnets)
-        setPagination(data.pagination)
+        const successData = data as PurchasedLeadMagnetsResponse
+        setLeadMagnets(successData.leadMagnets)
+        setPagination(successData.pagination)
       } else {
-        setError(data.error || 'Ошибка загрузки лид-магнитов')
+        const errorData = data as { error?: string }
+        setError(errorData.error || 'Ошибка загрузки лид-магнитов')
       }
     } catch (err) {
       console.error('Ошибка:', err)
