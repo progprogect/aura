@@ -25,7 +25,6 @@ import { SpecialistEducationContent } from './SpecialistEducationContent'
 import { SpecialistPricingContent } from './SpecialistPricingContent'
 import { SpecialistFAQContent } from './SpecialistFAQContent'
 import { SpecialistServicesContent } from './SpecialistServicesContent'
-import { SpecialistLeadMagnetsContent } from './SpecialistLeadMagnetsContent'
 import { Section } from './Section'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import { GalleryEditor } from './edit/GalleryEditor'
@@ -551,20 +550,6 @@ export function SpecialistProfileWithEdit({
             </Section>
           )}
 
-          {/* Лид-магниты */}
-          <Section id="section-lead-magnets" title="Бесплатные материалы" icon="🎁" iconBgColor="bg-pink-100" iconTextColor="text-pink-600">
-            {data.leadMagnets && data.leadMagnets.length > 0 ? (
-              <SpecialistLeadMagnetsContent
-                leadMagnets={data.leadMagnets}
-                specialistSlug={data.slug}
-                specialistName={data.fullName}
-              />
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>Лид-магниты не добавлены</p>
-              </div>
-            )}
-          </Section>
 
         </div>
       ) : (

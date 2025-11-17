@@ -123,7 +123,7 @@ export function LeadMagnetsList({ leadMagnets: initialLeadMagnets, onRefresh, sp
               <Gift className="w-8 h-8 text-purple-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Создайте бесплатные материалы
+              Создайте полезные материалы
             </h3>
             <p className="text-gray-600 max-w-md mx-auto mb-6">
               Привлекайте клиентов полезными материалами: чек-листы, гайды, видео, бесплатные консультации.

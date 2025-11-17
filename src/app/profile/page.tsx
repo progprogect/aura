@@ -266,7 +266,7 @@ async function getUserData() {
         tasks.push({
           id: 'leadMagnets',
           title: 'Создайте лид-магниты',
-          description: 'Привлекайте клиентов бесплатными материалами',
+          description: 'Привлекайте клиентов полезными материалами',
           bonus: 10,
           completed: false
         })
@@ -431,7 +431,7 @@ export default async function ProfilePage() {
             {user.hasSpecialistProfile && user.leadMagnets && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">🎁 Бесплатные материалы</CardTitle>
+                  <CardTitle className="text-lg">🎁 Полезные материалы</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <LeadMagnetsListWrapper 
