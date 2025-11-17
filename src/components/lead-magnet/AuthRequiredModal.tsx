@@ -25,7 +25,7 @@ export function AuthRequiredModal({
 }: AuthRequiredModalProps) {
   if (!isOpen) return null
 
-  const isPaid = priceInPoints !== null && priceInPoints > 0
+  const isPaid = typeof priceInPoints === 'number' && priceInPoints > 0
 
   return (
     <AnimatePresence>
