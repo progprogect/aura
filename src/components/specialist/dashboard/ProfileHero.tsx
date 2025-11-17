@@ -53,14 +53,15 @@ export function ProfileHero({
   // Определяем тип профиля и отображаемое имя
   const profileType = specialistProfile?.profileType || 'specialist'
   const isCompany = profileType === 'company'
-  const displayName = isCompany && specialistProfile?.companyName
-    ? specialistProfile.companyName
+  const companyName = specialistProfile?.companyName?.trim()
+  const displayName = isCompany && companyName
+    ? companyName
     : `${firstName} ${lastName}`.trim()
   
   // Инициалы для аватара
-  const initials = isCompany && specialistProfile?.companyName
-    ? specialistProfile.companyName.substring(0, 2).toUpperCase()
-    : `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  const initials = isCompany && companyName && companyName.length >= 2
+    ? companyName.substring(0, 2).toUpperCase()
+    : `${firstName.charAt(0) || ''}${lastName.charAt(0) || ''}`.toUpperCase() || 'U'
 
   return (
     <Card className="border-gray-200 shadow-sm">

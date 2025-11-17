@@ -109,8 +109,8 @@ export function AuthAwareNavigation() {
                         <User className="w-4 h-4" />
                       )}
                       <span>
-                        {user?.profileType === 'company' && user?.companyName
-                          ? user.companyName
+                        {user?.profileType === 'company' && user?.companyName?.trim()
+                          ? user.companyName.trim()
                           : `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
                       </span>
                     </Link>
