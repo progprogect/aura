@@ -38,6 +38,10 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
   const [highlights, setHighlights] = useState<string[]>([''])
   const [targetAudience, setTargetAudience] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  
+  // Монетизация
+  const [isPaid, setIsPaid] = useState(false)
+  const [priceInPoints, setPriceInPoints] = useState<string>('')
 
   // Превью state
   const [previewFile, setPreviewFile] = useState<File | null>(null)
@@ -60,6 +64,11 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       setHighlights(editingMagnet.highlights && editingMagnet.highlights.length > 0 ? editingMagnet.highlights : [''])
       setTargetAudience(editingMagnet.targetAudience || '')
       setShowAdvanced(!!editingMagnet.highlights?.length || !!editingMagnet.targetAudience)
+      
+      // Инициализация цены
+      const hasPrice = editingMagnet.priceInPoints !== null && editingMagnet.priceInPoints > 0
+      setIsPaid(hasPrice)
+      setPriceInPoints(hasPrice ? String(editingMagnet.priceInPoints) : '')
       
       // Инициализация превью
       const previewUrl = getPreviewUrl(editingMagnet.previewUrls, 'card')
@@ -113,6 +122,15 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       return
     }
 
+    // Валидация цены
+    if (isPaid) {
+      const price = parseInt(priceInPoints, 10)
+      if (isNaN(price) || price < 1 || price > 1000) {
+        alert('Цена должна быть от 1 до 1000 баллов')
+        return
+      }
+    }
+
     setIsSaving(true)
 
     try {
@@ -137,6 +155,13 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
         formData.append('highlights', JSON.stringify(cleanHighlights))
         if (targetAudience.trim()) {
           formData.append('targetAudience', targetAudience.trim())
+        }
+        
+        // Монетизация
+        if (isPaid && priceInPoints.trim()) {
+          formData.append('priceInPoints', priceInPoints.trim())
+        } else {
+          formData.append('priceInPoints', '')
         }
 
         // Файл лид-магнита (только если не пустой)
@@ -187,6 +212,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
           emoji,
           highlights: cleanHighlights,
           ...(targetAudience.trim() && { targetAudience: targetAudience.trim() }),
+          priceInPoints: isPaid && priceInPoints.trim() ? parseInt(priceInPoints.trim(), 10) : null,
         }),
       })
 
@@ -215,6 +241,8 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
     setHighlights([''])
     setTargetAudience('')
     setShowAdvanced(false)
+    setIsPaid(false)
+    setPriceInPoints('')
     setPreviewFile(null)
     setPreviewDataUrl(null)
     setExistingPreviewUrl(null)
@@ -483,6 +511,82 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
                 placeholder="🎁"
                 maxLength={2}
               />
+            </div>
+
+            {/* Монетизация */}
+            <div className="space-y-3 border-t border-gray-200 pt-4">
+              <label className="text-sm font-medium text-gray-900">
+                Монетизация
+              </label>
+              
+              {/* Переключатель бесплатно/платно */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPaid(false)
+                    setPriceInPoints('')
+                  }}
+                  className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                    !isPaid
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-lg mb-1">🆓</div>
+                  <div className="text-sm font-medium">Бесплатно</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPaid(true)}
+                  className={`flex-1 p-3 rounded-lg border-2 transition-all ${
+                    isPaid
+                      ? 'border-amber-500 bg-amber-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-lg mb-1">💰</div>
+                  <div className="text-sm font-medium">Платно</div>
+                </button>
+              </div>
+
+              {/* Поле цены (если платно) */}
+              {isPaid && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900">
+                    Цена в баллах <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    value={priceInPoints}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Разрешаем только цифры
+                      if (value === '' || /^\d+$/.test(value)) {
+                        setPriceInPoints(value)
+                      }
+                    }}
+                    placeholder="50"
+                    min={1}
+                    max={1000}
+                  />
+                  <p className="text-xs text-gray-500">
+                    Минимум 1, максимум 1000 баллов
+                    {priceInPoints && (
+                      (() => {
+                        const price = parseInt(priceInPoints, 10)
+                        if (isNaN(price) || price < 1) {
+                          return <span className="text-red-500 ml-2">⚠️ Минимум 1 балл</span>
+                        }
+                        if (price > 1000) {
+                          return <span className="text-red-500 ml-2">⚠️ Максимум 1000 баллов</span>
+                        }
+                        return <span className="text-green-600 ml-2">✅ Корректная цена</span>
+                      })()
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Превью */}

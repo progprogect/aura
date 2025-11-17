@@ -73,6 +73,15 @@ export function LeadMagnetCard({ leadMagnet, specialistSlug, index }: LeadMagnet
               ))}
             </div>
           )}
+          
+          {/* Badge с ценой (если платно) */}
+          {leadMagnet.priceInPoints !== null && leadMagnet.priceInPoints > 0 && (
+            <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
+                {leadMagnet.priceInPoints} баллов
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Контент - снизу (адаптивные отступы и размеры) */}

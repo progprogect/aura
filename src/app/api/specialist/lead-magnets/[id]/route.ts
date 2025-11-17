@@ -25,6 +25,8 @@ const UpdateLeadMagnetSchema = z.object({
   highlights: z.array(z.string()).max(LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS).optional(),
   targetAudience: z.string().max(LEAD_MAGNET_LIMITS.TARGET_AUDIENCE_MAX_LENGTH).optional(),
   ogImage: z.string().url().optional().or(z.literal('')),
+  // Монетизация
+  priceInPoints: z.number().int().min(1).max(1000).optional().nullable(),
 })
 
 export async function PUT(
@@ -78,6 +80,7 @@ export async function PUT(
       const fileUrlForm = formData.get('fileUrl') as string || undefined
       const linkUrl = formData.get('linkUrl') as string || undefined
       const removePreview = formData.get('removePreview') === 'true'
+      const priceInPointsRaw = formData.get('priceInPoints') as string | null
 
       // Загружаем файл лид-магнита только если он есть
       let fileUrl = fileUrlForm
@@ -116,6 +119,15 @@ export async function PUT(
         // Игнорируем ошибки парсинга
       }
 
+      // Парсим priceInPoints
+      let priceInPoints: number | null = null
+      if (priceInPointsRaw && priceInPointsRaw.trim() !== '') {
+        const parsed = parseInt(priceInPointsRaw, 10)
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 1000) {
+          priceInPoints = parsed
+        }
+      }
+
       data = {
         type,
         title,
@@ -126,6 +138,7 @@ export async function PUT(
         highlights,
         targetAudience,
         ogImage,
+        priceInPoints,
       }
 
       // Обработка превью
@@ -280,6 +293,7 @@ export async function PUT(
     if (sanitizedHighlights !== undefined) updateData.highlights = sanitizedHighlights
     if (data.targetAudience !== undefined) updateData.targetAudience = data.targetAudience
     if (data.ogImage !== undefined) updateData.ogImage = data.ogImage
+    if (data.priceInPoints !== undefined) updateData.priceInPoints = data.priceInPoints
     if (fileSize !== null) updateData.fileSize = fileSize
     if (newSlug !== currentLeadMagnet?.slug) updateData.slug = newSlug
     

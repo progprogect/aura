@@ -41,9 +41,10 @@ model User {
   blockedReason String?
 
   // Связи
-  transactions Transaction[]
-  requests     UserRequest[]
-  reviews      Review[]
+  transactions        Transaction[]
+  requests           UserRequest[]
+  reviews            Review[]
+  leadMagnetPurchases LeadMagnetPurchase[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -154,6 +155,9 @@ model SpecialistProfile {
 
   // История покупок пакетов
   packagePurchases PackagePurchase[]
+
+  // Покупки лид-магнитов (аналитика)
+  leadMagnetPurchases LeadMagnetPurchase[]
 
   // Аналитика (агрегированные данные по дням)
   analyticsDaily SpecialistAnalyticsDaily[]
@@ -310,7 +314,11 @@ model LeadMagnet {
   viewCount     Int @default(0)
   downloadCount Int @default(0)
 
+  // Монетизация
+  priceInPoints Int? // null = бесплатно, min: 1, max: 1000
+
   consultationRequests ConsultationRequest[]
+  purchases            LeadMagnetPurchase[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -318,6 +326,37 @@ model LeadMagnet {
   @@unique([specialistProfileId, slug])
   @@index([specialistProfileId, isActive])
   @@index([slug])
+}
+
+// ========================================
+// ПОКУПКИ ЛИД-МАГНИТОВ (аналитика)
+// ========================================
+
+model LeadMagnetPurchase {
+  id String @id @default(cuid())
+
+  leadMagnetId String
+  leadMagnet   LeadMagnet @relation(fields: [leadMagnetId], references: [id], onDelete: Cascade)
+
+  specialistProfileId String
+  specialistProfile   SpecialistProfile @relation(fields: [specialistProfileId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Данные покупки
+  priceInPoints Int // Цена на момент покупки
+  pointsSpent   Decimal @db.Decimal(15, 2) // Фактически потрачено (может отличаться из-за бонусов)
+
+  // Связь с транзакцией
+  transactionId String? @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([leadMagnetId])
+  @@index([specialistProfileId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // ========================================

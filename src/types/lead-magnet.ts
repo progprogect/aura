@@ -56,6 +56,7 @@ export interface LeadMagnet {
   customPreview?: boolean  // Флаг: загружено ли кастомное превью (vs fallback)
   viewCount?: number
   downloadCount?: number
+  priceInPoints?: number | null  // null = бесплатно, min: 1, max: 1000
 }
 
 // Упрощенная версия для UI компонентов (без необязательных полей)
@@ -77,6 +78,7 @@ export interface LeadMagnetUI {
   customPreview?: boolean  // Флаг: загружено ли кастомное превью
   viewCount?: number
   downloadCount?: number
+  priceInPoints?: number | null  // null = бесплатно, min: 1, max: 1000
   createdAt?: Date | string
 }
 
@@ -107,5 +109,6 @@ export interface EditableLeadMagnet {
   targetAudience?: string | null
   previewUrls?: PreviewUrls | null
   customPreview?: boolean
+  priceInPoints?: number | null  // null = бесплатно, min: 1, max: 1000
 }
 

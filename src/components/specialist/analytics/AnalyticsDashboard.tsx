@@ -11,6 +11,7 @@ import { PeriodFilter } from './PeriodFilter'
 import { TrendChart } from './TrendChart'
 import { ConversionFunnel } from './ConversionFunnel'
 import { SourcesChart } from './SourcesChart'
+import { LeadMagnetsAnalytics } from '../dashboard/LeadMagnetsAnalytics'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, AlertCircle, BarChart3 } from 'lucide-react'
 import type {
@@ -174,6 +175,9 @@ export function AnalyticsDashboard() {
 
       {/* Источники трафика */}
       <SourcesChart data={data.sources} />
+
+      {/* Аналитика покупок лид-магнитов */}
+      <LeadMagnetsAnalytics />
     </div>
   )
 }

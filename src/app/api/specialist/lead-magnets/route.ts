@@ -25,6 +25,8 @@ const CreateLeadMagnetSchema = z.object({
   highlights: z.array(z.string()).max(LEAD_MAGNET_LIMITS.MAX_HIGHLIGHTS).optional().default([]),
   targetAudience: z.string().max(LEAD_MAGNET_LIMITS.TARGET_AUDIENCE_MAX_LENGTH).optional(),
   ogImage: z.string().url().optional().or(z.literal('')),
+  // Монетизация
+  priceInPoints: z.number().int().min(1).max(1000).optional().nullable(),
 })
 
 export async function GET(request: NextRequest) {
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest) {
       const targetAudience = formData.get('targetAudience') as string || undefined
       const linkUrl = formData.get('linkUrl') as string || undefined
       const fileUrl = formData.get('fileUrl') as string || undefined
+      const priceInPointsRaw = formData.get('priceInPoints') as string | null
 
       let uploadedFileUrl: string | undefined = fileUrl
 
@@ -148,6 +151,15 @@ export async function POST(request: NextRequest) {
         // Игнорируем ошибки парсинга
       }
 
+      // Парсим priceInPoints
+      let priceInPoints: number | null = null
+      if (priceInPointsRaw && priceInPointsRaw.trim() !== '') {
+        const parsed = parseInt(priceInPointsRaw, 10)
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 1000) {
+          priceInPoints = parsed
+        }
+      }
+
       data = {
         type,
         title,
@@ -157,6 +169,7 @@ export async function POST(request: NextRequest) {
         emoji,
         highlights,
         targetAudience,
+        priceInPoints,
       }
 
       // Обработка превью (только если файл не пустой)
@@ -256,6 +269,8 @@ export async function POST(request: NextRequest) {
         targetAudience: data.targetAudience,
         fileSize: fileSize,
         ogImage: data.ogImage,
+        // Монетизация
+        priceInPoints: data.priceInPoints ?? null,
         // Превью
         previewUrls: previewUrls ? (previewUrls as any) : null,
       }

@@ -1,16 +1,25 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Download, ExternalLink, MessageCircle } from 'lucide-react'
+import { Download, ExternalLink, MessageCircle, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
+import { CTAButton } from './CTAButton'
+import { useUser } from '@/hooks/useUser'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
 interface SlideContentProps {
-  leadMagnet: Pick<LeadMagnet, 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl'>
+  leadMagnet: Pick<LeadMagnet, 'id' | 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl' | 'priceInPoints'>
   specialistId?: string
   specialistName?: string
   className?: string
+}
+
+interface UserBalance {
+  balance: string
+  bonusBalance: string
+  total: string
 }
 
 // Компонент для мета-информации (бейджи)
@@ -101,81 +110,70 @@ function HighlightsList({ highlights }: { highlights: string[] }) {
   )
 }
 
-// Компонент для кнопки CTA (интегрированная)
-function CTAButton({ 
-  leadMagnet, 
-  specialistId, 
-  specialistName 
+// Компонент для отображения цены и баланса
+function PriceAndBalance({ 
+  priceInPoints,
+  balance 
 }: {
-  leadMagnet: Pick<LeadMagnet, 'type' | 'fileUrl' | 'linkUrl'>
-  specialistId?: string
-  specialistName?: string
+  priceInPoints?: number | null
+  balance?: UserBalance | null
 }) {
-  const getButtonConfig = () => {
-    switch (leadMagnet.type) {
-      case 'file':
-        return {
-          text: 'Скачать файл',
-          icon: Download,
-        }
-      case 'link':
-        return {
-          text: 'Перейти по ссылке',
-          icon: ExternalLink,
-        }
-      case 'service':
-        return {
-          text: 'Записаться на консультацию',
-          icon: MessageCircle,
-        }
-      default:
-        return {
-          text: 'Получить доступ',
-          icon: Download,
-        }
-    }
-  }
+  const isPaid = priceInPoints !== null && priceInPoints > 0
+  const totalBalance = balance ? parseFloat(balance.total) : 0
 
-  const handleClick = () => {
-    switch (leadMagnet.type) {
-      case 'file':
-        if (leadMagnet.fileUrl) {
-          window.open(leadMagnet.fileUrl, '_blank')
-        }
-        break
-      case 'link':
-        if (leadMagnet.linkUrl) {
-          window.open(leadMagnet.linkUrl, '_blank')
-        }
-        break
-      case 'service':
-        console.log('Запись на консультацию к', specialistName)
-        break
-    }
-  }
-
-  const { text, icon: Icon } = getButtonConfig()
+  if (!isPaid && !balance) return null
 
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.4 }}
-      onClick={handleClick}
-      className={cn(
-        "inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white rounded-xl transition-colors duration-200",
-        "bg-blue-600 hover:bg-blue-700",
-        "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2",
-        "w-full md:w-auto"
+    <div className="space-y-3">
+      {/* Цена */}
+      {isPaid && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-amber-900">Стоимость:</span>
+            <span className="text-lg font-bold text-amber-900 flex items-center gap-1">
+              <Coins className="w-5 h-5" />
+              {priceInPoints} баллов
+            </span>
+          </div>
+        </div>
       )}
-    >
-      <Icon className="w-5 h-5" />
-      <span>{text}</span>
-    </motion.button>
+
+      {/* Баланс пользователя (если авторизован) */}
+      {balance && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Ваш баланс:</span>
+            <span className={`font-semibold ${totalBalance >= (priceInPoints || 0) ? 'text-green-600' : 'text-gray-900'}`}>
+              {totalBalance} баллов
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
 export function SlideContent({ leadMagnet, specialistId, specialistName, className }: SlideContentProps) {
+  const { isAuthenticated } = useUser()
+  const [balance, setBalance] = useState<UserBalance | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(true)
+
+  // Загружаем баланс если пользователь авторизован
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch('/api/user/balance')
+        .then(res => res.json())
+        .then(data => {
+          if (data.balance !== undefined) {
+            setBalance(data)
+          }
+        })
+        .catch(err => console.error('Ошибка загрузки баланса:', err))
+        .finally(() => setLoadingBalance(false))
+    } else {
+      setLoadingBalance(false)
+    }
+  }, [isAuthenticated])
 
   return (
     <motion.div
@@ -210,6 +208,16 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
         />
       </div>
 
+      {/* Цена и баланс */}
+      {(leadMagnet.priceInPoints !== null && leadMagnet.priceInPoints > 0) || balance ? (
+        <div>
+          <PriceAndBalance 
+            priceInPoints={leadMagnet.priceInPoints}
+            balance={balance}
+          />
+        </div>
+      ) : null}
+
       {/* Highlights (если есть) */}
       {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
         <div>
@@ -217,8 +225,8 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
         </div>
       )}
 
-      {/* CTA кнопка (только для файлов и ссылок, не для услуг) */}
-      {leadMagnet.type !== 'service' && (
+      {/* CTA кнопка (используем обновленный компонент) */}
+      {specialistId && specialistName && (
         <div className="pt-2">
           <CTAButton
             leadMagnet={leadMagnet}

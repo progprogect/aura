@@ -53,6 +53,7 @@ export function getTransactionLabel(type: TransactionType): string {
     contact_view: 'Просмотр контакта',
     request_received: 'Получение заявки',
     package_purchase: 'Покупка пакета',
+    lead_magnet_purchase: 'Покупка лид-магнита',
   };
   
   return labels[type] || type;
@@ -77,6 +78,7 @@ export function getTransactionIcon(type: TransactionType) {
     contact_view: Eye,
     request_received: MessageSquare,
     package_purchase: ShoppingCart,
+    lead_magnet_purchase: Gift,
   };
   
   return icons[type] || Coins;
@@ -92,7 +94,7 @@ export function getTransactionColor(type: TransactionType): string {
   }
   
   // Отрицательные операции
-  if (['purchase', 'withdrawal', 'bonus_expired', 'service_purchase', 'contact_view', 'request_received'].includes(type)) {
+  if (['purchase', 'withdrawal', 'bonus_expired', 'service_purchase', 'contact_view', 'request_received', 'lead_magnet_purchase'].includes(type)) {
     return 'text-red-600';
   }
   
