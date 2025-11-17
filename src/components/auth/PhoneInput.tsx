@@ -119,9 +119,11 @@ export function PhoneInput({
     let normalized = ''
     if (digits) {
       if (international) {
-        normalized = normalizePhoneNumber(digits)
+        // Используем код определенной страны для нормализации
+        const countryToUse = country || currentCountry
+        normalized = normalizePhoneNumber(digits, countryToUse?.code)
       } else {
-        // Старая логика
+        // Старая логика (fallback для неинтернационального режима)
         if (digits.startsWith('8')) {
           normalized = '+7' + digits.slice(1)
         } else if (digits.startsWith('7')) {

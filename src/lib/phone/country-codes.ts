@@ -643,14 +643,26 @@ export function formatPhoneNumber(input: string, countryCode?: CountryCode): str
 
 /**
  * Нормализует номер телефона в международный формат
+ * @param input - номер телефона (может быть с + или без)
+ * @param selectedCountryCode - опциональный код выбранной страны (например, '7', '375', '1')
  */
-export function normalizePhoneNumber(input: string): string {
+export function normalizePhoneNumber(input: string, selectedCountryCode?: string): string {
   const digits = input.replace(/\D/g, '')
   if (!digits) return ''
   
   // Если номер уже начинается с +, возвращаем как есть
   if (input.startsWith('+')) {
     return input
+  }
+  
+  // Если передан код выбранной страны, используем его
+  if (selectedCountryCode) {
+    // Проверяем, начинается ли номер с кода страны
+    if (digits.startsWith(selectedCountryCode)) {
+      return '+' + digits
+    }
+    // Если номер не начинается с кода страны, добавляем его
+    return '+' + selectedCountryCode + digits
   }
   
   // Определяем страну по цифрам
@@ -672,6 +684,7 @@ export function normalizePhoneNumber(input: string): string {
   }
   
   // Для неизвестных номеров добавляем + в начало
+  // ВАЖНО: это fallback, но лучше всегда передавать selectedCountryCode
   return '+' + digits
 }
 

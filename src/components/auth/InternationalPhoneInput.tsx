@@ -78,7 +78,8 @@ export function InternationalPhoneInput({
     if (value) {
       const digits = value.replace(/\D/g, '')
       const formatted = formatPhoneNumber(digits, selectedCountry)
-      const normalized = normalizePhoneNumber(digits)
+      // Используем код выбранной страны для нормализации
+      const normalized = normalizePhoneNumber(digits, selectedCountry?.code)
       isInternalChange.current = true
       setDisplayValue(formatted)
       onChange(normalized)
@@ -100,8 +101,9 @@ export function InternationalPhoneInput({
     
     // Форматируем для отображения
     const formatted = formatPhoneNumber(digits, detectedCountry || selectedCountry)
-    // Нормализуем для передачи наверх
-    const normalized = digits ? normalizePhoneNumber(digits) : ''
+    // Нормализуем для передачи наверх (используем выбранную или определенную страну)
+    const countryToUse = detectedCountry || selectedCountry
+    const normalized = digits ? normalizePhoneNumber(digits, countryToUse?.code) : ''
     
     // Помечаем что это внутреннее изменение
     isInternalChange.current = true
@@ -118,7 +120,8 @@ export function InternationalPhoneInput({
     if (displayValue) {
       const digits = displayValue.replace(/\D/g, '')
       const formatted = formatPhoneNumber(digits, country)
-      const normalized = normalizePhoneNumber(formatted)
+      // Используем код выбранной страны для нормализации
+      const normalized = normalizePhoneNumber(digits, country.code)
       setDisplayValue(formatted)
       onChange(normalized)
     }
