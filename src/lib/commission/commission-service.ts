@@ -25,22 +25,8 @@ export class CommissionService {
    * Расчет комиссий (без выполнения транзакций)
    */
   static calculate(amount: Decimal): CommissionBreakdown {
-    // Проверка: сумма должна быть больше или равна минимальной комиссии
-    // Минимальная комиссия 0.01 = 5% от суммы, значит минимальная сумма = 0.01 / 0.05 = 0.2
-    const minAmount = new Decimal(COMMISSION_CONFIG.MIN_COMMISSION).div(COMMISSION_CONFIG.RATE)
-    if (amount.lt(minAmount)) {
-      throw new Error(
-        `Amount ${amount} is too small. Minimum amount is ${minAmount} (to cover minimum commission ${COMMISSION_CONFIG.MIN_COMMISSION})`
-      )
-    }
-
-    // Комиссия платформы: 5%
-    let commission = amount.mul(COMMISSION_CONFIG.RATE)
-    
-    // Минимальная комиссия: 0.01
-    if (commission.lt(COMMISSION_CONFIG.MIN_COMMISSION)) {
-      commission = new Decimal(COMMISSION_CONFIG.MIN_COMMISSION)
-    }
+    // Комиссия платформы: 5% (точный расчет без округления)
+    const commission = amount.mul(COMMISSION_CONFIG.RATE)
     
     // Кешбэк: 50% от комиссии (без округления - точный расчет)
     const cashback = commission.mul(0.5)

@@ -43,11 +43,35 @@ describe('CommissionService', () => {
       expect(breakdown.cashback.toString()).toBe('0.83325')
     })
 
-    it('должен гарантировать минимальную комиссию 0.01', () => {
+    it('должен рассчитывать комиссию для суммы 1 балл', () => {
+      const amount = new Decimal(1)
+      const breakdown = CommissionService.calculate(amount)
+
+      // 5% от 1 = 0.05
+      expect(breakdown.commission.toNumber()).toBe(0.05)
+      expect(breakdown.cashback.toNumber()).toBe(0.025) // 50% от комиссии
+      expect(breakdown.specialistAmount.toNumber()).toBe(0.95) // 1 - 0.05
+      expect(breakdown.netRevenue.toNumber()).toBe(0.025) // 0.05 - 0.025
+    })
+
+    it('должен рассчитывать комиссию для очень маленьких сумм', () => {
       const amount = new Decimal(0.1)
       const breakdown = CommissionService.calculate(amount)
 
-      expect(breakdown.commission.toNumber()).toBeGreaterThanOrEqual(0.01)
+      // 5% от 0.1 = 0.005 (без минимальной комиссии)
+      expect(breakdown.commission.toNumber()).toBe(0.005)
+      expect(breakdown.cashback.toNumber()).toBe(0.0025) // 50% от комиссии
+      expect(breakdown.specialistAmount.toNumber()).toBe(0.095) // 0.1 - 0.005
+    })
+
+    it('должен возвращать нулевые значения для суммы 0', () => {
+      const amount = new Decimal(0)
+      const breakdown = CommissionService.calculate(amount)
+
+      expect(breakdown.commission.toNumber()).toBe(0)
+      expect(breakdown.cashback.toNumber()).toBe(0)
+      expect(breakdown.specialistAmount.toNumber()).toBe(0)
+      expect(breakdown.netRevenue.toNumber()).toBe(0)
     })
 
     it('должен валидировать баланс: specialistAmount + commission = amount', () => {
