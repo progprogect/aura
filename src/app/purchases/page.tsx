@@ -4,7 +4,7 @@
 
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/server'
-import { PurchasesList } from '@/components/purchases/PurchasesList'
+import { PurchasesPageContent } from '@/components/purchases/PurchasesPageContent'
 
 export default async function PurchasesPage() {
   // Проверяем авторизацию
@@ -20,12 +20,12 @@ export default async function PurchasesPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Мои покупки</h1>
           <p className="text-gray-600">
-            Здесь вы можете отслеживать все ваши заказы и их статусы
+            Здесь вы можете отслеживать все ваши заказы и покупки
           </p>
         </div>
 
-        {/* Список покупок */}
-        <PurchasesList />
+        {/* Контент с табами */}
+        <PurchasesPageContent />
       </div>
     </div>
   )
