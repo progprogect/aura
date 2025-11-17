@@ -16,6 +16,7 @@ import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { ServicesList } from '@/components/specialist/dashboard/ServicesList'
+import { LeadMagnetsListWrapper } from '@/components/specialist/dashboard/LeadMagnetsListWrapper'
 import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
@@ -26,6 +27,7 @@ import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
 import { PointsService } from '@/lib/points/points-service'
 import { ProfileHero } from '@/components/specialist/dashboard/ProfileHero'
 import { RequestsAlert } from '@/components/specialist/dashboard/RequestsAlert'
+import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 
 async function getUserData() {
   try {
@@ -320,6 +322,7 @@ async function getUserData() {
       userData.newRequestsCount = newRequestsCount
       userData.newOrdersCount = newOrdersCount
       userData.services = profile.services
+      userData.leadMagnets = profile.leadMagnets.map(lm => fromPrismaLeadMagnet(lm))
       userData.recentOrders = profile.orders
     }
 
@@ -424,6 +427,20 @@ export default async function ProfilePage() {
               </Card>
             )}
 
+            {/* Лид-магниты (для специалистов) */}
+            {user.hasSpecialistProfile && user.leadMagnets && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">🎁 Бесплатные материалы</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LeadMagnetsListWrapper 
+                    leadMagnets={user.leadMagnets}
+                    specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Личная информация */}
             <Card>

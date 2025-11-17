@@ -30,7 +30,6 @@ import { Section } from './Section'
 import { VideoUrlEditor } from './edit/VideoUrlEditor'
 import { GalleryEditor } from './edit/GalleryEditor'
 import { FAQEditor } from './edit/FAQEditor'
-import { LeadMagnetsEditor } from './edit/LeadMagnetsEditor'
 import type { Tab } from './SpecialistTabs'
 import type { CategoryConfig } from '@/lib/category-config'
 import type { Service } from '@/types/service'
@@ -554,12 +553,7 @@ export function SpecialistProfileWithEdit({
 
           {/* Лид-магниты */}
           <Section id="section-lead-magnets" title="Бесплатные материалы" icon="🎁" iconBgColor="bg-pink-100" iconTextColor="text-pink-600">
-            {isEditMode ? (
-              <LeadMagnetsEditor
-                leadMagnets={data.leadMagnets || []}
-                onRefresh={() => router.refresh()}
-              />
-            ) : data.leadMagnets && data.leadMagnets.length > 0 ? (
+            {data.leadMagnets && data.leadMagnets.length > 0 ? (
               <SpecialistLeadMagnetsContent
                 leadMagnets={data.leadMagnets}
                 specialistSlug={data.slug}

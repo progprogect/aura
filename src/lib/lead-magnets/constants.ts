@@ -94,7 +94,7 @@ export const CLOUDINARY_TRANSFORMATIONS = {
  * Лимиты лид-магнитов
  */
 export const LEAD_MAGNET_LIMITS = {
-  MAX_COUNT: 6,              // Максимум лид-магнитов на специалиста
+  MAX_COUNT: 9,              // Максимум лид-магнитов на специалиста
   MAX_HIGHLIGHTS: 5,         // Максимум пунктов "что внутри"
   MAX_FILE_SIZE: 10 * 1024 * 1024,  // 10MB для файлов лид-магнитов
   TITLE_MIN_LENGTH: 5,

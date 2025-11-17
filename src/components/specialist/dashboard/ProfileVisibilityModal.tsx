@@ -190,13 +190,13 @@ export function ProfileVisibilityModal({
                             criterion.action.label
                           )}
                         </Button>
-                      ) : (
+                      ) : criterion.action.href ? (
                         <Link href={criterion.action.href}>
                           <Button size="sm" variant="outline" className="mt-2">
                             {criterion.action.label}
                           </Button>
                         </Link>
-                      )}
+                      ) : null}
                     </>
                   )}
                 </div>
