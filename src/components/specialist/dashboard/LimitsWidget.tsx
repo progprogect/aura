@@ -6,10 +6,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, MessageSquare, Package, AlertCircle, CheckCircle } from 'lucide-react'
+import { Eye, MessageSquare, Package, AlertCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
 interface LimitsData {
@@ -86,19 +85,8 @@ export function LimitsWidget({ specialistId }: LimitsWidgetProps) {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h3 className="text-lg font-semibold">Мои лимиты</h3>
-        {limits.isVisible ? (
-          <Badge variant="default" className="bg-green-100 text-green-800">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Профиль виден
-          </Badge>
-        ) : (
-          <Badge variant="destructive">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Профиль скрыт
-          </Badge>
-        )}
       </div>
 
       <div className="space-y-4">

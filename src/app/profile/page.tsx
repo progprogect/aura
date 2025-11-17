@@ -23,6 +23,7 @@ import { ensureSlugExists } from '@/lib/auth/server'
 import { ProfileContentWrapper } from '@/components/specialist/dashboard/ProfileContentWrapper'
 import { ProfileSectionWrapper } from '@/components/specialist/dashboard/ProfileSectionWrapper'
 import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
+import { PointsService } from '@/lib/points/points-service'
 import { ProfileHero } from '@/components/specialist/dashboard/ProfileHero'
 import { RequestsAlert } from '@/components/specialist/dashboard/RequestsAlert'
 
@@ -271,6 +272,10 @@ async function getUserData() {
 
       // Вычисляем видимость профиля (проверяет: блокировка, acceptingClients, verified, баланс)
       const isVisible = await SpecialistLimitsService.isProfileVisible(profile.id)
+      
+      // Получаем баланс для отображения в модальном окне
+      const balance = await PointsService.getBalance(user.id)
+      const balanceTotal = balance.total.toNumber()
 
       // Добавляем данные специалиста
       userData.specialistProfile = {
@@ -281,6 +286,14 @@ async function getUserData() {
         verified: profile.verified,
         acceptingClients: profile.acceptingClients,
         isVisible, // Видимость профиля (зависит от баланса и других факторов)
+        blocked: profile.blocked, // Для модального окна
+        visibilityCriteria: {
+          notBlocked: !profile.blocked,
+          acceptingClients: profile.acceptingClients,
+          verified: profile.verified,
+          hasPositiveBalance: balanceTotal > 0,
+          balance: balanceTotal,
+        },
         about: profile.about,
         tagline: profile.tagline,
         city: profile.city,
@@ -342,6 +355,7 @@ export default async function ProfilePage() {
                 verified: user.specialistProfile.verified,
                 acceptingClients: user.specialistProfile.acceptingClients,
                 isVisible: user.specialistProfile.isVisible ?? false,
+                visibilityCriteria: user.specialistProfile.visibilityCriteria,
               } : undefined}
             />
           </div>

@@ -5,12 +5,14 @@
 
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Edit, CheckCircle2, Eye, EyeOff, User } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
+import { ProfileVisibilityModal } from './ProfileVisibilityModal'
 
 interface ProfileHeroProps {
   // Базовые данные
@@ -25,6 +27,13 @@ interface ProfileHeroProps {
     verified: boolean
     acceptingClients: boolean
     isVisible: boolean // вычисляется на сервере
+    visibilityCriteria?: {
+      notBlocked: boolean
+      acceptingClients: boolean
+      verified: boolean
+      hasPositiveBalance: boolean
+      balance: number
+    }
   }
 }
 
@@ -35,6 +44,7 @@ export function ProfileHero({
   hasSpecialistProfile,
   specialistProfile,
 }: ProfileHeroProps) {
+  const [isVisibilityModalOpen, setIsVisibilityModalOpen] = useState(false)
   const fullName = `${firstName} ${lastName}`.trim()
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 
@@ -86,12 +96,20 @@ export function ProfileHero({
 
                 {/* Видимость профиля */}
                 {specialistProfile.isVisible ? (
-                  <Badge variant="success" className="flex items-center gap-1">
+                  <Badge
+                    variant="success"
+                    className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setIsVisibilityModalOpen(true)}
+                  >
                     <Eye className="h-3 w-3" />
                     <span>Профиль виден</span>
                   </Badge>
                 ) : (
-                  <Badge variant="destructive" className="flex items-center gap-1">
+                  <Badge
+                    variant="destructive"
+                    className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => setIsVisibilityModalOpen(true)}
+                  >
                     <EyeOff className="h-3 w-3" />
                     <span>Профиль не виден</span>
                   </Badge>
@@ -133,6 +151,15 @@ export function ProfileHero({
           </div>
         </div>
       </CardContent>
+      
+      {/* Модальное окно видимости профиля */}
+      {hasSpecialistProfile && specialistProfile?.visibilityCriteria && (
+        <ProfileVisibilityModal
+          isOpen={isVisibilityModalOpen}
+          onClose={() => setIsVisibilityModalOpen(false)}
+          criteria={specialistProfile.visibilityCriteria}
+        />
+      )}
     </Card>
   )
 }
