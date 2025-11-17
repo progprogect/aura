@@ -197,7 +197,15 @@ export function OnboardingWizard({ initialPhone, profileType = 'specialist' }: O
           })
           setErrors(serverErrors)
         } else {
-          setErrors({ general: data.error || 'Ошибка при создании профиля' })
+          // Проверяем, является ли ошибка связанной с email
+          const errorMessage = data.error || 'Ошибка при создании профиля'
+          if (errorMessage.includes('email')) {
+            setErrors({ email: errorMessage })
+          } else if (errorMessage.includes('телефон') || errorMessage.includes('номер')) {
+            setErrors({ phone: errorMessage })
+          } else {
+            setErrors({ general: errorMessage })
+          }
         }
       }
     } catch (error) {
