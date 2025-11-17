@@ -19,6 +19,7 @@ import { useScrollLock } from '@/hooks/useScrollLock'
 import { FilterState } from '@/lib/catalog/types'
 import { areFiltersEqual } from '@/lib/catalog/utils'
 import {
+  PROFILE_TYPE_OPTIONS,
   EXPERIENCE_OPTIONS,
   FORMAT_OPTIONS,
   SORT_OPTIONS,
@@ -113,6 +114,10 @@ export function FilterModal({
   // Обработчики изменяют только draft (не применяют!)
   const handleCategoryChange = (category: string) => {
     setDraftFilters((prev) => ({ ...prev, category }))
+  }
+
+  const handleProfileTypeChange = (profileType: string) => {
+    setDraftFilters((prev) => ({ ...prev, profileType }))
   }
 
   const handleExperienceChange = (experience: string) => {
@@ -226,6 +231,24 @@ export function FilterModal({
                     ))}
                   </div>
                 )}
+              </fieldset>
+
+              {/* Тип профиля */}
+              <fieldset>
+                <legend className="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-4">
+                  Тип профиля
+                </legend>
+                <div className="space-y-3" role="radiogroup">
+                  {PROFILE_TYPE_OPTIONS.map((option) => (
+                    <FilterRadioButton
+                      key={option.value}
+                      label={option.label}
+                      value={option.value}
+                      checked={draftFilters.profileType === option.value}
+                      onChange={handleProfileTypeChange}
+                    />
+                  ))}
+                </div>
               </fieldset>
 
               {/* Опыт работы */}

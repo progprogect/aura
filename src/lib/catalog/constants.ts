@@ -55,6 +55,7 @@ export const DEBOUNCE_DELAYS = {
  */
 export const FILTER_DEFAULTS = {
   CATEGORY: 'all',
+  PROFILE_TYPE: 'all',
   EXPERIENCE: 'any',
   FORMAT: [] as string[],
   VERIFIED: false, // По умолчанию показываем всех верифицированных (фильтрация происходит в API)
@@ -65,6 +66,15 @@ export const FILTER_DEFAULTS = {
 // ========================================
 // ОПЦИИ ФИЛЬТРОВ
 // ========================================
+
+/**
+ * Опции типа профиля
+ */
+export const PROFILE_TYPE_OPTIONS = [
+  { value: 'all', label: 'Все' },
+  { value: 'specialist', label: 'Специалисты' },
+  { value: 'company', label: 'Компании' },
+] as const
 
 /**
  * Опции опыта работы

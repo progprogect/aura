@@ -12,6 +12,7 @@
  */
 export interface FilterState {
   category: string
+  profileType: string // 'all' | 'specialist' | 'company'
   experience: string
   format: string[]
   verified: boolean
@@ -38,6 +39,11 @@ export type WorkFormatFilter = 'online' | 'offline' | 'hybrid'
  * Опции для сортировки
  */
 export type SortByOption = 'relevance' | 'rating' | 'experience' | 'price'
+
+/**
+ * Опции для фильтра типа профиля
+ */
+export type ProfileTypeFilter = 'all' | 'specialist' | 'company'
 
 // ========================================
 // КАТЕГОРИИ

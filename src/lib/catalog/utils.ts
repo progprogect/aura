@@ -20,6 +20,11 @@ export function buildFilterParams(
     params.set('category', filters.category)
   }
 
+  // Тип профиля
+  if (filters.profileType && filters.profileType !== FILTER_DEFAULTS.PROFILE_TYPE) {
+    params.set('profileType', filters.profileType)
+  }
+
   // Опыт
   if (filters.experience && filters.experience !== FILTER_DEFAULTS.EXPERIENCE) {
     params.set('experience', filters.experience)
@@ -58,6 +63,7 @@ export function buildFilterParams(
 export function parseURLFilters(searchParams: URLSearchParams): FilterState {
   return {
     category: searchParams.get('category') || FILTER_DEFAULTS.CATEGORY,
+    profileType: searchParams.get('profileType') || FILTER_DEFAULTS.PROFILE_TYPE,
     experience: searchParams.get('experience') || FILTER_DEFAULTS.EXPERIENCE,
     format: searchParams.get('format')?.split(',').filter(Boolean) || FILTER_DEFAULTS.FORMAT,
     verified: searchParams.get('verified') === 'true',
@@ -72,6 +78,14 @@ export function parseURLFilters(searchParams: URLSearchParams): FilterState {
 export function validateFilters(filters: Partial<FilterState>): boolean {
   // Валидация категории
   if (filters.category !== undefined && typeof filters.category !== 'string') {
+    return false
+  }
+
+  // Валидация типа профиля
+  if (
+    filters.profileType !== undefined &&
+    !['all', 'specialist', 'company'].includes(filters.profileType)
+  ) {
     return false
   }
 
@@ -120,6 +134,7 @@ export function countActiveFilters(filters: FilterState): number {
   let count = 0
 
   if (filters.category !== FILTER_DEFAULTS.CATEGORY) count++
+  if (filters.profileType !== FILTER_DEFAULTS.PROFILE_TYPE) count++
   if (filters.experience !== FILTER_DEFAULTS.EXPERIENCE) count++
   if (filters.format.length > 0) count++
   if (filters.verified) count++
@@ -134,6 +149,7 @@ export function countActiveFilters(filters: FilterState): number {
 export function resetFilters(): FilterState {
   return {
     category: FILTER_DEFAULTS.CATEGORY,
+    profileType: FILTER_DEFAULTS.PROFILE_TYPE,
     experience: FILTER_DEFAULTS.EXPERIENCE,
     format: [...FILTER_DEFAULTS.FORMAT],
     verified: FILTER_DEFAULTS.VERIFIED,
@@ -148,6 +164,7 @@ export function resetFilters(): FilterState {
 export function areFiltersEqual(a: FilterState, b: FilterState): boolean {
   return (
     a.category === b.category &&
+    a.profileType === b.profileType &&
     a.experience === b.experience &&
     JSON.stringify(a.format) === JSON.stringify(b.format) &&
     a.verified === b.verified &&

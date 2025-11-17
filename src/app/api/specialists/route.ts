@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     // Преобразуем null в undefined для Zod optional
     const validationResult = GetSpecialistsQuerySchema.safeParse({
       category: searchParams.get('category') ?? undefined,
+      profileType: searchParams.get('profileType') ?? undefined,
       experience: searchParams.get('experience') ?? undefined,
       format: searchParams.get('format') ?? undefined,
       verified: searchParams.get('verified') ?? undefined,
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
         errors: validationResult.error.issues,
         receivedParams: {
           category: searchParams.get('category'),
+          profileType: searchParams.get('profileType'),
           experience: searchParams.get('experience'),
           format: searchParams.get('format'),
           verified: searchParams.get('verified'),
@@ -59,6 +61,7 @@ export async function GET(request: NextRequest) {
     
     const {
       category,
+      profileType,
       experience,
       format: formatParam,
       verified,
@@ -91,6 +94,11 @@ export async function GET(request: NextRequest) {
     // Фильтр по категории
     if (category && category !== 'all') {
       where.category = category
+    }
+    
+    // Фильтр по типу профиля
+    if (profileType && profileType !== 'all') {
+      where.profileType = profileType
     }
     
     // Фильтр по опыту работы

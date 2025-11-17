@@ -33,6 +33,7 @@ interface UseCatalogFiltersReturn {
   /** Функции для обновления отдельных фильтров */
   setters: {
     setCategory: (value: string) => void
+    setProfileType: (value: string) => void
     setExperience: (value: string) => void
     setFormat: (value: string[]) => void
     setVerified: (value: boolean) => void
@@ -83,6 +84,7 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   
   // URL состояние для всех фильтров
   const [category, setCategory] = useURLString('category', FILTER_DEFAULTS.CATEGORY)
+  const [profileType, setProfileType] = useURLString('profileType', FILTER_DEFAULTS.PROFILE_TYPE)
   const [experience, setExperience] = useURLString('experience', FILTER_DEFAULTS.EXPERIENCE)
   const [format, setFormat] = useURLArray('format', FILTER_DEFAULTS.FORMAT)
   const [verified, setVerified] = useURLBoolean('verified', FILTER_DEFAULTS.VERIFIED)
@@ -97,26 +99,28 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   const filters = useMemo<FilterState>(
     () => ({
       category,
+      profileType,
       experience,
       format,
       verified,
       sortBy,
       search,
     }),
-    [category, experience, format, verified, sortBy, search]
+    [category, profileType, experience, format, verified, sortBy, search]
   )
 
   // Setters для отдельных фильтров
   const setters = useMemo(
     () => ({
       setCategory,
+      setProfileType,
       setExperience,
       setFormat,
       setVerified,
       setSortBy,
       setSearch,
     }),
-    [setCategory, setExperience, setFormat, setVerified, setSortBy, setSearch]
+    [setCategory, setProfileType, setExperience, setFormat, setVerified, setSortBy, setSearch]
   )
 
   // Batch update нескольких фильтров
@@ -132,6 +136,7 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
         // Default values для сравнения
         const defaults: Record<string, any> = {
           category: FILTER_DEFAULTS.CATEGORY,
+          profileType: FILTER_DEFAULTS.PROFILE_TYPE,
           experience: FILTER_DEFAULTS.EXPERIENCE,
           format: FILTER_DEFAULTS.FORMAT,
           verified: FILTER_DEFAULTS.VERIFIED,

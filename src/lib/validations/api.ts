@@ -3,6 +3,7 @@ import { z } from 'zod'
 // Схемы валидации для API специалистов
 export const GetSpecialistsQuerySchema = z.object({
   category: z.string().optional(),
+  profileType: z.enum(['all', 'specialist', 'company']).optional(),
   experience: z.enum(['0-2', '2-5', '5+', 'any']).optional(),
   format: z.string().optional(), // Будет парситься как массив
   verified: z.enum(['true', 'false']).optional(),
