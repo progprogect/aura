@@ -9,7 +9,8 @@ import { motion } from 'framer-motion'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { X, Plus } from 'lucide-react'
 import { parseSpecializations, canAddSpecialization, MAX_SPECIALIZATIONS } from '@/lib/utils/specializations'
 
 interface OnboardingStep2Props {
@@ -172,16 +173,27 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
 
         {/* Добавление новой специализации */}
         {canAddSpecialization(data.specializations.length) && (
-          <Input
-            id="specializations"
-            type="text"
-            placeholder="Например: КПТ-терапия, работа с тревогой, семейная терапия"
-            value={newSpecialization}
-            onChange={(e) => setNewSpecialization(e.target.value)}
-            onKeyPress={handleKeyPress}
-            onBlur={handleBlur}
-            className="h-12 text-base w-full"
-          />
+          <div className="flex gap-2">
+            <Input
+              id="specializations"
+              type="text"
+              placeholder="Например: КПТ-терапия, работа с тревогой, семейная терапия"
+              value={newSpecialization}
+              onChange={(e) => setNewSpecialization(e.target.value)}
+              onKeyPress={handleKeyPress}
+              onBlur={handleBlur}
+              className="h-12 text-base flex-1"
+            />
+            <Button
+              type="button"
+              onClick={handleAddSpecializations}
+              disabled={!newSpecialization.trim()}
+              className="h-12 px-4 md:px-6 shrink-0"
+            >
+              <Plus size={18} className="md:mr-2" />
+              <span className="hidden md:inline">Добавить</span>
+            </Button>
+          </div>
         )}
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
@@ -189,7 +201,7 @@ export function OnboardingStep2({ data, onChange, errors }: OnboardingStep2Props
             <p className="text-sm text-red-500">{errors.specializations}</p>
           ) : (
             <p className="text-xs text-gray-500">
-              Можно вводить через запятую или по одной (Enter). Добавьте от 1 до {MAX_SPECIALIZATIONS} специализаций.
+              Можно вводить через запятую или по одной (Enter или кнопка). Добавьте от 1 до {MAX_SPECIALIZATIONS} специализаций.
             </p>
           )}
           <span className={`text-xs font-medium ${data.specializations.length === 0 ? 'text-red-500' : data.specializations.length >= MAX_SPECIALIZATIONS ? 'text-blue-600' : 'text-gray-400'}`}>
