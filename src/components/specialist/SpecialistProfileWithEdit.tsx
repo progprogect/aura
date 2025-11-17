@@ -356,7 +356,7 @@ export function SpecialistProfileWithEdit({
                   </span>
                   <span className="text-base sm:text-xl">Основная информация</span>
                 </h2>
-                {heroData.profileType === 'company' ? (
+                {(heroData.profileType || 'specialist') === 'company' ? (
                   <CompanyHeroEdit
                     companyName={heroData.companyName ?? null}
                     firstName={heroData.firstName}

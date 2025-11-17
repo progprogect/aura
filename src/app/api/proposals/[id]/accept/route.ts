@@ -78,6 +78,15 @@ export async function PATCH(
       )
     }
 
+    // Получаем ID системного пользователя до транзакции
+    let platformUserId: string | null = null
+    try {
+      const { CommissionService } = await import('@/lib/commission/commission-service')
+      platformUserId = await CommissionService.getPlatformUserId()
+    } catch (error) {
+      console.warn('[API/proposals/accept] Системный пользователь не найден, кешбэк не будет начислен')
+    }
+
     // Создаём заказ в транзакции
     const result = await prisma.$transaction(async (tx) => {
       // Создаём временную Service
@@ -153,6 +162,23 @@ export async function PATCH(
           orderId: order.id
         }
       )
+
+      // Начисляем кешбэк сразу при покупке (только если системный пользователь существует)
+      if (platformUserId) {
+        try {
+          const { CommissionService } = await import('@/lib/commission/commission-service')
+          await CommissionService.addCashbackForService(
+            tx,
+            order.id,
+            session.userId,
+            new Decimal(proposal.proposedPrice),
+            platformUserId
+          )
+        } catch (commissionError) {
+          console.error('[API/proposals/accept] Ошибка обработки кешбэка:', commissionError)
+          throw commissionError
+        }
+      }
 
       return {
         order,

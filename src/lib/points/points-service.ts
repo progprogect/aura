@@ -17,7 +17,11 @@ export type TransactionType =
   | 'contact_view'
   | 'request_received'
   | 'package_purchase'
-  | 'lead_magnet_purchase';
+  | 'lead_magnet_purchase'
+  | 'platform_commission'
+  | 'cashback'
+  | 'cashback_paid'
+  | 'lead_magnet_sale';
 
 export type BalanceType = 'balance' | 'bonusBalance';
 

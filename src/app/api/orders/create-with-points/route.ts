@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
+import { CommissionService } from '@/lib/commission/commission-service'
 import { CreateOrderSchema } from '@/lib/validations/api'
 import { Decimal } from 'decimal.js'
 import { notifySpecialistAboutNewOrder } from '@/lib/notifications/order-notifications'
@@ -65,6 +66,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Получаем ID системного пользователя до транзакции
+    let platformUserId: string | null = null
+    try {
+      platformUserId = await CommissionService.getPlatformUserId()
+    } catch (error) {
+      console.warn('[API/orders/create-with-points] Системный пользователь не найден, кешбэк не будет начислен')
+    }
+
     // Создаем заказ в транзакции
     const result = await prisma.$transaction(async (tx) => {
       // Списываем баллы (сначала бонусные, потом обычные)
@@ -121,6 +130,22 @@ export async function POST(request: NextRequest) {
           }
         }
       })
+
+      // Начисляем кешбэк сразу при покупке (только если системный пользователь существует)
+      if (platformUserId) {
+        try {
+          await CommissionService.addCashbackForService(
+            tx,
+            order.id,
+            user.id,
+            new Decimal(pointsUsed),
+            platformUserId
+          )
+        } catch (commissionError) {
+          console.error('[API/orders/create-with-points] Ошибка обработки кешбэка:', commissionError)
+          throw commissionError
+        }
+      }
 
       return order
     })

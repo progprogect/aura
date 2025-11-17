@@ -353,9 +353,57 @@ model LeadMagnetPurchase {
 
   createdAt DateTime @default(now())
 
+  // Комиссия и кешбэк
+  commissionProcessed Boolean @default(false)
+  cashbackProcessed   Boolean @default(false)
+  platformRevenueId  String?
+
   @@index([leadMagnetId])
   @@index([specialistProfileId])
   @@index([userId])
+  @@index([createdAt])
+}
+
+// ========================================
+// КОМИССИИ И КЕШБЭК ПЛАТФОРМЫ
+// ========================================
+
+model PlatformRevenue {
+  id String @id @default(cuid())
+
+  // Тип операции
+  type String // "commission" | "cashback_paid" | "refund"
+
+  // Связь с транзакцией/заказом
+  transactionId        String?
+  orderId              String?
+  leadMagnetPurchaseId String?
+
+  // Суммы
+  commissionAmount Decimal @db.Decimal(15, 2) // Комиссия платформы (5%)
+  cashbackAmount   Decimal @db.Decimal(15, 2) // Кешбэк клиенту (2.5%)
+  netRevenue       Decimal @db.Decimal(15, 2) // Чистая прибыль платформы (2.5%)
+
+  // Участники
+  clientUserId     String // Кто купил
+  specialistUserId String? // Кому продали (null для лид-магнитов без специалиста)
+
+  // Метаданные
+  description String? // "Комиссия за услугу: Консультация"
+  metadata    Json?   @db.JsonB // Доп. данные
+
+  // Статус
+  status String @default("completed") // "completed" | "refunded"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([clientUserId])
+  @@index([specialistUserId])
+  @@index([transactionId])
+  @@index([orderId])
+  @@index([leadMagnetPurchaseId])
   @@index([createdAt])
 }
 
@@ -489,6 +537,11 @@ model Order {
   // Dispute resolution
   disputeReason String?   @db.Text // Причина спора
   disputedAt    DateTime? // Когда открыт спор
+
+  // Комиссия и кешбэк
+  commissionProcessed Boolean @default(false)
+  cashbackProcessed   Boolean @default(false)
+  platformRevenueId   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -366,7 +366,7 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
             specializations: specialist.specializations,
             averageRating: specialist.averageRating,
             totalReviews: specialist.totalReviews,
-            profileType: specialist.profileType,
+            profileType: specialist.profileType || 'specialist',
             companyName: specialist.companyName,
             addressCoordinates: specialist.addressCoordinates,
             taxId: specialist.taxId,

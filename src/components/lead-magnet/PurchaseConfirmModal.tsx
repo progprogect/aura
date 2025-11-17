@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Loader2, Coins, AlertCircle } from 'lucide-react'
+import { X, Loader2, Coins, AlertCircle, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { LeadMagnetUI } from '@/types/lead-magnet'
 import Link from 'next/link'
@@ -37,6 +37,15 @@ export function PurchaseConfirmModal({
   const [error, setError] = useState<string | null>(null)
 
   const priceInPoints = leadMagnet.priceInPoints || 0
+  
+  // Расчет кешбэка (2.5% от суммы)
+  const calculateCashback = (amount: number): number => {
+    const commission = amount * 0.05 // 5% комиссия
+    const cashback = commission * 0.5 // 50% от комиссии = 2.5% от суммы
+    return Math.round(cashback * 100) / 100 // Округление до 2 знаков
+  }
+  
+  const cashbackAmount = priceInPoints > 0 ? calculateCashback(priceInPoints) : 0
 
   // Загружаем баланс при открытии модалки
   useEffect(() => {
@@ -164,6 +173,14 @@ export function PurchaseConfirmModal({
                   {priceInPoints} баллов
                 </span>
               </div>
+              {cashbackAmount > 0 && (
+                <div className="flex items-center gap-1 mt-2 pt-2 border-t border-amber-300">
+                  <Gift className="w-4 h-4 text-green-600" />
+                  <span className="text-xs text-green-700">
+                    Кешбэк: <span className="font-semibold">{cashbackAmount.toFixed(2)}</span> баллов
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Баланс */}

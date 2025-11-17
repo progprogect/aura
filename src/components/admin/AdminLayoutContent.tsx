@@ -15,7 +15,8 @@ import {
   LogOut, 
   BarChart3,
   Menu,
-  X
+  X,
+  DollarSign
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -54,6 +55,7 @@ export function AdminLayoutContent({ children }: AdminLayoutContentProps) {
     { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Статистика' },
     { href: '/admin/specialists', icon: UserCheck, label: 'Специалисты' },
     { href: '/admin/users', icon: Users, label: 'Пользователи' },
+    { href: '/admin/revenue', icon: DollarSign, label: 'Комиссии и кешбэк' },
   ]
 
   return (

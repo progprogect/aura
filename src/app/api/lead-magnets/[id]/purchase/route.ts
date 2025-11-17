@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth/server'
 import { PointsService } from '@/lib/points/points-service'
+import { CommissionService } from '@/lib/commission/commission-service'
 import { Decimal } from 'decimal.js'
 
 export async function POST(
@@ -109,6 +110,14 @@ export async function POST(
       )
     }
 
+    // Получаем ID системного пользователя до транзакции
+    let platformUserId: string | null = null
+    try {
+      platformUserId = await CommissionService.getPlatformUserId()
+    } catch (error) {
+      console.warn('[API/lead-magnets/purchase] Системный пользователь не найден, комиссия не будет начислена')
+    }
+
     // Покупка в транзакции (все проверки внутри для атомарности)
     const result = await prisma.$transaction(async (tx) => {
       // Проверяем повторную покупку внутри транзакции (защита от race condition)
@@ -170,6 +179,23 @@ export async function POST(
           transactionId
         }
       })
+
+      // Обрабатываем комиссию и кешбэк (только если системный пользователь существует)
+      if (platformUserId) {
+        try {
+          await CommissionService.processLeadMagnetPurchase(
+            tx,
+            purchase.id,
+            user.id,
+            leadMagnet.specialistProfile.userId,
+            new Decimal(priceInPoints),
+            platformUserId
+          )
+        } catch (commissionError) {
+          console.error('[API/lead-magnets/purchase] Ошибка обработки комиссии:', commissionError)
+          throw commissionError
+        }
+      }
 
       return {
         purchase,

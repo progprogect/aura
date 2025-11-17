@@ -1,6 +1,6 @@
 /**
- * API для подтверждения выполнения заказа пользователем
- * PATCH /api/orders/[id]/confirm
+ * API для подтверждения выполнения заказа специалистом
+ * PATCH /api/orders/[id]/self-confirm
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -8,7 +8,7 @@ import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth/server'
 import { CommissionService } from '@/lib/commission/commission-service'
 import { Decimal } from 'decimal.js'
-import { notifySpecialistAboutConfirmedCompletion } from '@/lib/notifications/sms-notifications'
+import { notifyUserAboutCompletedWork } from '@/lib/notifications/sms-notifications'
 
 export async function PATCH(
   request: NextRequest,
@@ -56,11 +56,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
     }
 
-    // Проверяем, что пользователь - владелец заказа или специалист
-    const isClient = order.clientUserId === user.id
-    const isSpecialist = order.specialistProfile.userId === user.id
-    
-    if (!isClient && !isSpecialist) {
+    // Проверяем, что пользователь - специалист, владелец услуги
+    if (order.specialistProfile.userId !== user.id) {
       return NextResponse.json({ error: 'Нет прав для подтверждения этого заказа' }, { status: 403 })
     }
 
@@ -82,7 +79,7 @@ export async function PATCH(
     try {
       platformUserId = await CommissionService.getPlatformUserId()
     } catch (error) {
-      console.warn('[API/orders/confirm] Системный пользователь не найден, комиссия не будет начислена')
+      console.warn('[API/orders/self-confirm] Системный пользователь не найден, комиссия не будет начислена')
     }
 
     // Подтверждаем заказ в транзакции
@@ -100,7 +97,7 @@ export async function PATCH(
               platformUserId
             )
           } catch (commissionError) {
-            console.error('[API/orders/confirm] Ошибка обработки комиссии:', commissionError)
+            console.error('[API/orders/self-confirm] Ошибка обработки комиссии:', commissionError)
             throw commissionError
           }
         } else {
@@ -143,24 +140,24 @@ export async function PATCH(
       }
     })
 
-    // Отправляем SMS уведомление специалисту (асинхронно)
-    notifySpecialistAboutConfirmedCompletion(
-      order.specialistProfile.userId,
-      user.firstName,
-      order.service.title,
-      order.pointsUsed
-    ).catch(err => {
-      console.error('[API/orders/confirm] Ошибка отправки уведомления:', err)
-    })
+    // Отправляем SMS уведомление клиенту (асинхронно)
+    if (order.clientUserId) {
+      notifyUserAboutCompletedWork(
+        order.clientUserId,
+        `${order.specialistProfile.user.firstName} ${order.specialistProfile.user.lastName}`,
+        order.service.title
+      ).catch(err => {
+        console.error('[API/orders/self-confirm] Ошибка отправки уведомления:', err)
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Заказ подтверждён! Баллы переведены специалисту.',
-      requiresReview: true // Флаг для показа формы отзыва
+      message: 'Заказ подтверждён! Баллы переведены на ваш баланс.',
     })
 
   } catch (error) {
-    console.error('[API/orders/[id]/confirm] Ошибка:', error)
+    console.error('[API/orders/[id]/self-confirm] Ошибка:', error)
     return NextResponse.json(
       { error: 'Ошибка при подтверждении заказа' },
       { status: 500 }
