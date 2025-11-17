@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Edit, CheckCircle2, Eye, EyeOff, User } from 'lucide-react'
+import { Edit, CheckCircle2, Eye, EyeOff, User, Building2, Stethoscope } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,12 +22,14 @@ interface ProfileHeroProps {
   avatar?: string | null
   hasSpecialistProfile: boolean
   
-  // Для специалистов
+  // Для специалистов/компаний
   specialistProfile?: {
     slug: string
     verified: boolean
     acceptingClients: boolean
     isVisible: boolean // вычисляется на сервере
+    profileType?: 'specialist' | 'company'
+    companyName?: string | null
     visibilityCriteria?: {
       notBlocked: boolean
       acceptingClients: boolean
@@ -47,8 +49,18 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   const router = useRouter()
   const [isVisibilityModalOpen, setIsVisibilityModalOpen] = useState(false)
-  const fullName = `${firstName} ${lastName}`.trim()
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  
+  // Определяем тип профиля и отображаемое имя
+  const profileType = specialistProfile?.profileType || 'specialist'
+  const isCompany = profileType === 'company'
+  const displayName = isCompany && specialistProfile?.companyName
+    ? specialistProfile.companyName
+    : `${firstName} ${lastName}`.trim()
+  
+  // Инициалы для аватара
+  const initials = isCompany && specialistProfile?.companyName
+    ? specialistProfile.companyName.substring(0, 2).toUpperCase()
+    : `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 
   return (
     <Card className="border-gray-200 shadow-sm">
@@ -59,7 +71,7 @@ export function ProfileHero({
             {hasSpecialistProfile && specialistProfile ? (
               <Avatar
                 src={avatar || undefined}
-                alt={fullName}
+                alt={displayName}
                 size={80}
                 verified={specialistProfile.verified}
                 fallback={initials}
@@ -76,14 +88,32 @@ export function ProfileHero({
 
           {/* Информация */}
           <div className="flex-1 text-center sm:text-left min-w-0">
-            {/* Имя */}
+            {/* Имя/Название компании */}
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {fullName}
+              {displayName}
             </h1>
 
-            {/* Статусы для специалистов */}
+            {/* Статусы для специалистов/компаний */}
             {hasSpecialistProfile && specialistProfile && (
               <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start mb-3">
+                {/* Тип профиля */}
+                <Badge 
+                  variant={isCompany ? "default" : "secondary"} 
+                  className={`flex items-center gap-1 ${isCompany ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}
+                >
+                  {isCompany ? (
+                    <>
+                      <Building2 className="h-3 w-3" />
+                      <span>Компания</span>
+                    </>
+                  ) : (
+                    <>
+                      <Stethoscope className="h-3 w-3" />
+                      <span>Специалист</span>
+                    </>
+                  )}
+                </Badge>
+
                 {/* Верификация */}
                 {specialistProfile.verified ? (
                   <Badge variant="verified" className="flex items-center gap-1">

@@ -8,6 +8,7 @@ type ProfileContentWrapperProps = {
   initialCompleted?: boolean
   initialSeen?: boolean
   guideHref?: string
+  profileType?: 'specialist' | 'company'
   quickActionsProps: {
     slug?: string
     newRequestsCount?: number
@@ -28,6 +29,7 @@ export function ProfileContentWrapper({
   initialCompleted,
   initialSeen,
   guideHref,
+  profileType = 'specialist',
 }: Omit<ProfileContentWrapperProps, 'quickActionsProps'>) {
   const onboardingContext = useOnboarding()
 
@@ -44,6 +46,7 @@ export function ProfileContentWrapper({
       initialSeen={initialSeen}
       guideHref={guideHref}
       onOpenRequest={handleOpenRequest}
+      profileType={profileType}
     />
   )
 }

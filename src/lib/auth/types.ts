@@ -106,6 +106,12 @@ export interface UserProfile {
   subscriptionTier: 'FREE' | 'PREMIUM'
   createdAt: Date
   updatedAt: Date
+  // Поля для компаний
+  profileType?: 'specialist' | 'company'
+  companyName?: string | null
+  address?: string | null
+  addressCoordinates?: { lat: number; lng: number } | null
+  taxId?: string | null
 }
 
 export interface SocialProfile {

@@ -129,13 +129,17 @@ export function UnifiedNavigation({ variant = 'standard' }: UnifiedNavigationPro
                       {user?.avatar ? (
                         <img
                           src={user.avatar}
-                          alt={`${user.firstName} ${user.lastName}`}
+                          alt={user.profileType === 'company' && user.companyName ? user.companyName : `${user.firstName} ${user.lastName}`}
                           className="w-6 h-6 rounded-full object-cover"
                         />
                       ) : (
                         <User className="w-4 h-4" />
                       )}
-                      <span>{user?.firstName} {user?.lastName}</span>
+                      <span>
+                        {user?.profileType === 'company' && user?.companyName
+                          ? user.companyName
+                          : `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
+                      </span>
                     </Link>
                     <button
                       onClick={logout}

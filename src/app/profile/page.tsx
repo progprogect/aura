@@ -137,8 +137,30 @@ async function getUserData() {
         }
       }
 
-      // Подсчёт процента заполнения
-      const completionFields = {
+      // Определяем тип профиля
+      const profileType = profile.profileType || 'specialist'
+      const isCompany = profileType === 'company'
+
+      // Подсчёт процента заполнения (разный для специалистов и компаний)
+      const completionFields = isCompany ? {
+        // Для компаний
+        companyName: profile.companyName ? 1 : 0,
+        firstName: user.firstName ? 1 : 0, // Контактное лицо
+        lastName: user.lastName ? 1 : 0, // Контактное лицо
+        about: profile.about ? 1 : 0,
+        specializations: profile.specializations.length > 0 ? 1 : 0,
+        avatar: user.avatar ? 15 : 0,
+        tagline: profile.tagline ? 5 : 0,
+        address: profile.address ? 5 : 0,
+        taxId: profile.taxId ? 5 : 0,
+        email: user.email ? 5 : 0,
+        website: profile.website ? 5 : 0,
+        gallery: profile.gallery.length > 0 ? 10 : 0,
+        faqs: profile.faqs.length > 0 ? 5 : 0,
+        video: profile.videoUrl ? 10 : 0,
+        leadMagnets: profile.leadMagnets.length > 0 ? 10 : 0,
+      } : {
+        // Для специалистов
         firstName: user.firstName ? 1 : 0,
         lastName: user.lastName ? 1 : 0,
         about: profile.about ? 1 : 0,
@@ -158,7 +180,7 @@ async function getUserData() {
       }
 
       const baseCompletion = 20
-      const additionalCompletion = Object.values(completionFields).reduce((sum, val) => sum + val, 0) - 4
+      const additionalCompletion = Object.values(completionFields).reduce((sum, val) => sum + val, 0) - (isCompany ? 2 : 4)
       const completionPercentage = Math.min(100, baseCompletion + additionalCompletion)
 
       // Количество заявок за неделю
@@ -199,50 +221,54 @@ async function getUserData() {
         }
       })
 
-      // Формируем задания
+      // Формируем задания (разные для специалистов и компаний)
       const tasks = []
       
       if (!user.avatar) {
         tasks.push({
           id: 'avatar',
-          title: 'Добавьте фото профиля',
-          description: 'Профиль с фото вызывает больше доверия',
+          title: isCompany ? 'Добавьте логотип компании' : 'Добавьте фото профиля',
+          description: isCompany ? 'Логотип компании вызывает больше доверия' : 'Профиль с фото вызывает больше доверия',
           bonus: 15,
           completed: false
         })
       }
       
-      if (profile.certificates.length === 0) {
-        tasks.push({
-          id: 'certificates',
-          title: 'Загрузите сертификаты',
-          description: 'Подтвердите свою квалификацию',
-          bonus: 20,
-          completed: false
-        })
-      }
-      
-      if (profile.education.length === 0) {
-        tasks.push({
-          id: 'education',
-          title: 'Добавьте образование',
-          description: 'Укажите ваше профессиональное образование',
-          bonus: 15,
-          completed: false
-        })
+      // Сертификаты и образование только для специалистов
+      if (!isCompany) {
+        if (profile.certificates.length === 0) {
+          tasks.push({
+            id: 'certificates',
+            title: 'Загрузите сертификаты',
+            description: 'Подтвердите свою квалификацию',
+            bonus: 20,
+            completed: false
+          })
+        }
+        
+        if (profile.education.length === 0) {
+          tasks.push({
+            id: 'education',
+            title: 'Добавьте образование',
+            description: 'Укажите ваше профессиональное образование',
+            bonus: 15,
+            completed: false
+          })
+        }
       }
       
       if (profile.gallery.length === 0) {
         tasks.push({
           id: 'gallery',
-          title: 'Создайте галерею',
-          description: 'Добавьте фото вашего кабинета или процесса работы',
+          title: isCompany ? 'Создайте галерею офиса/процесса работы' : 'Создайте галерею',
+          description: isCompany ? 'Добавьте фото офиса или процесса работы компании' : 'Добавьте фото вашего кабинета или процесса работы',
           bonus: 10,
           completed: false
         })
       }
       
-      if (!profile.priceFrom && !profile.priceTo) {
+      // Цены только для специалистов (для компаний цены в услугах)
+      if (!isCompany && !profile.priceFrom && !profile.priceTo) {
         tasks.push({
           id: 'pricing',
           title: 'Укажите цены',
@@ -255,8 +281,8 @@ async function getUserData() {
       if (!profile.videoUrl) {
         tasks.push({
           id: 'video',
-          title: 'Добавьте видео-презентацию',
-          description: 'Видео помогает клиентам познакомиться с вами',
+          title: isCompany ? 'Добавьте видео о компании' : 'Добавьте видео-презентацию',
+          description: isCompany ? 'Видео помогает клиентам познакомиться с вашей компанией' : 'Видео помогает клиентам познакомиться с вами',
           bonus: 10,
           completed: false
         })
@@ -279,7 +305,7 @@ async function getUserData() {
       const balance = await PointsService.getBalance(user.id)
       const balanceTotal = balance.total.toNumber()
 
-      // Добавляем данные специалиста
+      // Добавляем данные специалиста/компании
       userData.specialistProfile = {
         id: profile.id,
         slug: profile.slug,
@@ -308,6 +334,12 @@ async function getUserData() {
         onboardingStep: profile.onboardingStep,
         onboardingCompletedAt: profile.onboardingCompletedAt,
         onboardingSeenAt: profile.onboardingSeenAt,
+        // Данные компании
+        profileType: profileType as 'specialist' | 'company',
+        companyName: profile.companyName,
+        address: profile.address,
+        addressCoordinates: profile.addressCoordinates,
+        taxId: profile.taxId,
       }
 
       userData.stats = {
@@ -379,6 +411,7 @@ export default async function ProfilePage() {
               initialCompleted={Boolean(user.specialistProfile.onboardingCompletedAt)}
               initialSeen={Boolean(user.specialistProfile.onboardingSeenAt)}
               guideHref="/profile?section=guide"
+              profileType={user.specialistProfile.profileType}
             />
           )}
 
@@ -450,20 +483,59 @@ export default async function ProfilePage() {
                   <span>Личная информация</span>
                 </CardTitle>
                 <CardDescription>
-                  Ваши основные данные
+                  {user.hasSpecialistProfile && user.specialistProfile?.profileType === 'company' 
+                    ? 'Информация о компании и контактном лице'
+                    : 'Ваши основные данные'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Имя</label>
-                    <p className="text-lg font-semibold text-gray-900">{user.firstName}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Фамилия</label>
-                    <p className="text-lg font-semibold text-gray-900">{user.lastName}</p>
-                  </div>
-                </div>
+                {user.hasSpecialistProfile && user.specialistProfile?.profileType === 'company' ? (
+                  <>
+                    {/* Для компаний */}
+                    {user.specialistProfile.companyName && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Название компании</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.specialistProfile.companyName}</p>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Контактное лицо (Имя)</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.firstName}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Контактное лицо (Фамилия)</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.lastName}</p>
+                      </div>
+                    </div>
+                    {user.specialistProfile.address && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Адрес</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.specialistProfile.address}</p>
+                      </div>
+                    )}
+                    {user.specialistProfile.taxId && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">УНП/ИНН</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.specialistProfile.taxId}</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Для специалистов */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Имя</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.firstName}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">Фамилия</label>
+                        <p className="text-lg font-semibold text-gray-900">{user.lastName}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
                 
                 <div>
                   <label className="text-sm font-medium text-gray-500 flex items-center space-x-1">

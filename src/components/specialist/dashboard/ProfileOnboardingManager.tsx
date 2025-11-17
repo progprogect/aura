@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { ExpertOnboardingFlow } from './ExpertOnboardingFlow'
+import { CompanyOnboardingFlow } from './CompanyOnboardingFlow'
 
 type ProfileOnboardingManagerProps = {
   initialStep?: number
@@ -9,6 +10,7 @@ type ProfileOnboardingManagerProps = {
   initialSeen?: boolean
   guideHref?: string
   onOpenRequest?: (open: () => void) => void
+  profileType?: 'specialist' | 'company'
 }
 
 export function ProfileOnboardingManager({
@@ -17,6 +19,7 @@ export function ProfileOnboardingManager({
   initialSeen,
   guideHref,
   onOpenRequest,
+  profileType = 'specialist',
 }: ProfileOnboardingManagerProps) {
   const openOnboardingRef = useRef<(() => void) | null>(null)
 
@@ -27,7 +30,17 @@ export function ProfileOnboardingManager({
     }
   }
 
-  return (
+  const isCompany = profileType === 'company'
+
+  return isCompany ? (
+    <CompanyOnboardingFlow
+      initialStep={initialStep}
+      initialCompleted={initialCompleted}
+      initialSeen={initialSeen}
+      guideHref={guideHref}
+      onOpenRequest={handleOpenRequest}
+    />
+  ) : (
     <ExpertOnboardingFlow
       initialStep={initialStep}
       initialCompleted={initialCompleted}
