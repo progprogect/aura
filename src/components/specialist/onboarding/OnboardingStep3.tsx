@@ -79,8 +79,7 @@ export function OnboardingStep3({ data, onChange, errors }: OnboardingStep3Props
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="email">
-          Email 
-          <span className="text-gray-500 text-xs ml-2">(опционально)</span>
+          Email <span className="text-red-500">*</span>
         </Label>
         <Input
           id="email"
@@ -89,6 +88,7 @@ export function OnboardingStep3({ data, onChange, errors }: OnboardingStep3Props
           value={data.email}
           onChange={(e) => onChange('email', e.target.value)}
           className={`h-12 text-base ${errors?.email ? 'border-red-500' : ''}`}
+          required
         />
         {errors?.email && (
           <p className="text-sm text-red-500">{errors.email}</p>

@@ -95,7 +95,9 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
     }
 
     if (step === 3) {
-      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      if (!formData.email || !formData.email.trim()) {
+        newErrors.email = 'Введите email'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         newErrors.email = 'Некорректный email'
       }
     }

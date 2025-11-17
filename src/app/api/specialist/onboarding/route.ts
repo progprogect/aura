@@ -32,7 +32,7 @@ const OnboardingSchema = z.object({
   
   // Шаг 3: Контакты и локация
   phone: z.string(),
-  email: z.string().email('Некорректный email').optional().nullable(),
+  email: z.string().email('Некорректный email'),
   city: z.string().optional().nullable(),
   country: z.string().default('Россия'),
   workFormats: z.array(z.enum(['online', 'offline', 'hybrid'])).default(['online']),
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
-        email: data.email || null,
+        email: data.email,
       }
     })
 
