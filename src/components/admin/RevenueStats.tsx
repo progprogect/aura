@@ -124,7 +124,7 @@ export function RevenueStats({
                 {byType.leadMagnet.count} транзакций
               </div>
               <div className="text-sm text-gray-600">
-                Комиссия: {byType.leadMagnet.commission.toFixed(2)} баллов
+                Комиссия: {formatPoints(byType.leadMagnet.commission)} баллов
               </div>
             </div>
             <div>

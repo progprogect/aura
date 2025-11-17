@@ -50,7 +50,12 @@ export async function GET(
         totalTransactions: revenues.length,
         byType,
       },
-      revenues,
+      revenues: revenues.map((r) => ({
+        ...r,
+        commissionAmount: new Decimal(r.commissionAmount).toString(),
+        cashbackAmount: new Decimal(r.cashbackAmount).toString(),
+        netRevenue: new Decimal(r.netRevenue).toString(),
+      })),
     })
   } catch (error) {
     console.error('[API/admin/revenue/user] Ошибка:', error)

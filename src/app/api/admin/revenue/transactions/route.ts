@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin/permissions'
 import { prisma } from '@/lib/db'
+import { Decimal } from 'decimal.js'
 
 export async function GET(request: NextRequest) {
   try {
@@ -60,7 +61,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      revenues,
+      revenues: revenues.map((r) => ({
+        ...r,
+        commissionAmount: new Decimal(r.commissionAmount).toString(),
+        cashbackAmount: new Decimal(r.cashbackAmount).toString(),
+        netRevenue: new Decimal(r.netRevenue).toString(),
+      })),
       pagination: {
         total,
         page,

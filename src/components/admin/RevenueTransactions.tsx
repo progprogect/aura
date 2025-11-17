@@ -13,9 +13,9 @@ import { formatPoints } from '@/lib/points/format'
 interface PlatformRevenue {
   id: string
   type: string
-  commissionAmount: number
-  cashbackAmount: number
-  netRevenue: number
+  commissionAmount: string | number
+  cashbackAmount: string | number
+  netRevenue: string | number
   clientUserId: string
   specialistUserId?: string | null
   description?: string | null
