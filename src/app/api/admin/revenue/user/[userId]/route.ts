@@ -24,9 +24,6 @@ export async function GET(
         status: 'completed',
       },
       orderBy: { createdAt: 'desc' },
-      include: {
-        // Здесь можно добавить связи, если нужно
-      },
     })
 
     // Агрегируем статистику

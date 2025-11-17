@@ -55,9 +55,6 @@ export class BalanceValidator {
         },
         status: 'completed',
       },
-      include: {
-        // Здесь можно добавить связи, если нужно
-      },
     })
 
     for (const revenue of revenues) {

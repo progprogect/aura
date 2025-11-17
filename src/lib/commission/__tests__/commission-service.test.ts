@@ -27,12 +27,20 @@ describe('CommissionService', () => {
       expect(breakdown.netRevenue.toNumber()).toBe(1.25) // 2.5 - 1.25
     })
 
-    it('должен округлять до 2 знаков после запятой', () => {
+    it('должен рассчитывать точные значения без округления', () => {
       const amount = new Decimal(33.33)
       const breakdown = CommissionService.calculate(amount)
 
-      expect(breakdown.commission.toFixed(2)).toBe('1.67')
-      expect(breakdown.cashback.toFixed(2)).toBe('0.83')
+      // Точные расчеты без округления
+      const expectedCommission = amount.mul(0.05) // 1.6665
+      const expectedCashback = expectedCommission.mul(0.5) // 0.83325
+      
+      expect(breakdown.commission.eq(expectedCommission)).toBe(true)
+      expect(breakdown.cashback.eq(expectedCashback)).toBe(true)
+      
+      // Проверка, что значения точные (не округлены)
+      expect(breakdown.commission.toString()).toBe('1.6665')
+      expect(breakdown.cashback.toString()).toBe('0.83325')
     })
 
     it('должен гарантировать минимальную комиссию 0.01', () => {

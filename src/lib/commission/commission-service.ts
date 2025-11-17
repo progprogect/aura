@@ -37,22 +37,19 @@ export class CommissionService {
     // Комиссия платформы: 5%
     let commission = amount.mul(COMMISSION_CONFIG.RATE)
     
-    // Округляем до 2 знаков
-    commission = commission.round(2)
-    
     // Минимальная комиссия: 0.01
     if (commission.lt(COMMISSION_CONFIG.MIN_COMMISSION)) {
       commission = new Decimal(COMMISSION_CONFIG.MIN_COMMISSION)
     }
     
-    // Кешбэк: 50% от комиссии
-    const cashback = commission.mul(0.5).round(2)
+    // Кешбэк: 50% от комиссии (без округления - точный расчет)
+    const cashback = commission.mul(0.5)
     
-    // Сумма для специалиста: сумма - комиссия
-    const specialistAmount = amount.sub(commission).round(2)
+    // Сумма для специалиста: сумма - комиссия (без округления - точный расчет)
+    const specialistAmount = amount.sub(commission)
     
-    // Чистая прибыль платформы: комиссия - кешбэк
-    const netRevenue = commission.sub(cashback).round(2)
+    // Чистая прибыль платформы: комиссия - кешбэк (без округления - точный расчет)
+    const netRevenue = commission.sub(cashback)
     
     // Валидация баланса
     const total = specialistAmount.add(commission)

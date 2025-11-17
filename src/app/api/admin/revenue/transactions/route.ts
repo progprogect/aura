@@ -54,9 +54,6 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip,
-        include: {
-          // Здесь можно добавить связи с User, если нужно
-        },
       }),
       prisma.platformRevenue.count({ where }),
     ])

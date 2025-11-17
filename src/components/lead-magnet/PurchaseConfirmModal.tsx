@@ -38,11 +38,11 @@ export function PurchaseConfirmModal({
 
   const priceInPoints = leadMagnet.priceInPoints || 0
   
-  // Расчет кешбэка (2.5% от суммы)
+  // Расчет кешбэка (2.5% от суммы) - точный расчет без округления
   const calculateCashback = (amount: number): number => {
     const commission = amount * 0.05 // 5% комиссия
     const cashback = commission * 0.5 // 50% от комиссии = 2.5% от суммы
-    return Math.round(cashback * 100) / 100 // Округление до 2 знаков
+    return cashback // Без округления - точное значение
   }
   
   const cashbackAmount = priceInPoints > 0 ? calculateCashback(priceInPoints) : 0
