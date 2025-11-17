@@ -40,11 +40,12 @@ async function applyMigration(client: Client, migrationName: string, sql: string
 
 async function applyAllMigrations() {
   console.log('🔄 Применение миграций напрямую к базе данных...\n')
-  const maskedUrl = DATABASE_URL.replace(/:[^:@]+@/, ':****@')
+  const dbUrl = DATABASE_URL!
+  const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@')
   console.log(`📡 Подключение к: ${maskedUrl}\n`)
 
   const client = new Client({
-    connectionString: DATABASE_URL,
+    connectionString: dbUrl,
   })
 
   try {

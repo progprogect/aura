@@ -18,7 +18,7 @@ if (!DATABASE_URL) {
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: DATABASE_URL,
+      url: DATABASE_URL!,
     },
   },
 })
@@ -57,7 +57,8 @@ async function applyMigration(migrationName: string, sql: string) {
 
 async function applyAllMigrations() {
   console.log('🔄 Применение миграций напрямую к базе данных...\n')
-  console.log(`📡 Подключение к: ${DATABASE_URL.replace(/:[^:@]+@/, ':****@')}\n`)
+  const dbUrl = DATABASE_URL!
+  console.log(`📡 Подключение к: ${dbUrl.replace(/:[^:@]+@/, ':****@')}\n`)
 
   try {
     // Проверяем подключение
