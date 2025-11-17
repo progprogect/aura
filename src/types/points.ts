@@ -15,7 +15,8 @@ export type TransactionType =
   | 'dispute_refund'
   | 'contact_view'
   | 'request_received'
-  | 'package_purchase';
+  | 'package_purchase'
+  | 'lead_magnet_purchase';
 
 /**
  * Тип баланса
