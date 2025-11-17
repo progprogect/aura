@@ -72,7 +72,23 @@ const CompanyOnboardingSchema = z.object({
     lng: z.number(),
   }).optional(),
   taxId: z.string().min(5, 'УНП/ИНН должен содержать минимум 5 символов'),
-  website: z.string().url('Некорректный URL сайта').optional().nullable(),
+  website: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => {
+        if (!val || val.trim() === '') return true
+        try {
+          new URL(val)
+          return true
+        } catch {
+          return false
+        }
+      },
+      { message: 'Некорректный URL сайта' }
+    )
+    .transform((val) => (val && val.trim() !== '' ? val : null)),
   country: z.string().default('Россия'),
   workFormats: z.array(z.enum(['online', 'offline', 'hybrid'])).default(['online']),
 })
