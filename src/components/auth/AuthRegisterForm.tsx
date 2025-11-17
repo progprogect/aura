@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PhoneInput } from '@/components/auth/PhoneInput'
 import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { SMSCodeModal } from '@/components/auth/SMSCodeModal'
-import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -192,8 +191,6 @@ export function AuthRegisterForm() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-
-            <AuthProviderButtons />
           </motion.div>
         )}
 
