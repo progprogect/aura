@@ -15,11 +15,13 @@ import { SMSCodeInput } from '@/components/auth/SMSCodeInput'
 import { SMSCodeModal } from '@/components/auth/SMSCodeModal'
 import { Clock, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { ProfileTypeSelector, type ProfileType } from './ProfileTypeSelector'
 
-type RegisterStep = 'phone' | 'code' | 'profile' | 'success'
+type RegisterStep = 'type' | 'phone' | 'code' | 'profile' | 'success'
 
 export function AuthRegisterForm() {
-  const [step, setStep] = useState<RegisterStep>('phone')
+  const [step, setStep] = useState<RegisterStep>('type')
+  const [profileType, setProfileType] = useState<ProfileType | null>(null)
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
@@ -102,10 +104,17 @@ export function AuthRegisterForm() {
     setError('')
 
     try {
+      const role = profileType === 'company' ? 'company' : 'specialist'
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'phone', phone, code: codeToUse }),
+        body: JSON.stringify({ 
+          provider: 'phone', 
+          phone, 
+          code: codeToUse,
+          role,
+          profileType 
+        }),
       })
 
       const data = await response.json()
@@ -148,6 +157,24 @@ export function AuthRegisterForm() {
       {/* Форма */}
       <div className="bg-card rounded-xl shadow-lg border p-6 space-y-6">
         <AnimatePresence mode="wait">
+        {step === 'type' && (
+          <motion.div
+            key="type"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-6"
+          >
+            <ProfileTypeSelector
+              selectedType={profileType}
+              onSelect={(type) => {
+                setProfileType(type)
+                setTimeout(() => setStep('phone'), 300)
+              }}
+            />
+          </motion.div>
+        )}
+
         {step === 'phone' && (
           <motion.div
             key="phone"
@@ -260,6 +287,16 @@ export function AuthRegisterForm() {
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Изменить номер
+              </Button>
+
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => setStep('type')}
+                disabled={loading}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Изменить тип профиля
               </Button>
             </div>
           </motion.div>

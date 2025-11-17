@@ -7,6 +7,11 @@ export interface SpecialistApiResponse {
   fullName: string
   avatar: string | null
   slug: string
+  profileType: 'specialist' | 'company'
+  companyName?: string | null
+  address?: string | null
+  addressCoordinates?: { lat: number; lng: number } | null
+  taxId?: string | null
   category: string
   specializations: string[]
   tagline: string | null

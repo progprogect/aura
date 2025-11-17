@@ -32,6 +32,8 @@ interface SpecialistRecommendationProps {
     lastName: string
     avatar?: string
     slug: string
+    profileType?: 'specialist' | 'company'
+    companyName?: string
     category: string
     specializations: string[]
     tagline?: string
@@ -55,7 +57,10 @@ export function SpecialistRecommendation({
   onFindSimilar 
 }: SpecialistRecommendationProps) {
   const [categoryConfig, setCategoryConfig] = useState<CategoryConfig | null>(null)
-  const fullName = `${specialist.firstName} ${specialist.lastName}`
+  const isCompany = specialist.profileType === 'company'
+  const fullName = isCompany && specialist.companyName
+    ? specialist.companyName
+    : `${specialist.firstName} ${specialist.lastName}`.trim()
 
   useEffect(() => {
     categoryConfigService.getCategoryConfig(specialist.category).then(setCategoryConfig).catch(() => {
@@ -119,7 +124,9 @@ export function SpecialistRecommendation({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-2xl font-semibold text-muted-foreground">
-                  {specialist.firstName[0]}{specialist.lastName[0]}
+                  {isCompany && specialist.companyName
+                    ? specialist.companyName.substring(0, 2).toUpperCase()
+                    : `${specialist.firstName[0] || ''}${specialist.lastName[0] || ''}`}
                 </div>
               )}
             </div>

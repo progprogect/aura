@@ -13,10 +13,12 @@ interface OnboardingStep1Props {
   data: {
     firstName: string
     lastName: string
+    companyName?: string // Для компаний
     category: string
   }
   onChange: (field: string, value: string) => void
   errors?: Record<string, string>
+  isCompany?: boolean
 }
 
 // Категории с иконками
@@ -31,7 +33,7 @@ const CATEGORIES = [
   { id: 'other', name: 'Другое', emoji: '✨', description: 'Другие направления' },
 ]
 
-export function OnboardingStep1({ data, onChange, errors }: OnboardingStep1Props) {
+export function OnboardingStep1({ data, onChange, errors, isCompany = false }: OnboardingStep1Props) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -43,52 +45,111 @@ export function OnboardingStep1({ data, onChange, errors }: OnboardingStep1Props
       {/* Заголовок */}
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-          Кто вы?
+          {isCompany ? 'О вашей компании' : 'Кто вы?'}
         </h2>
         <p className="text-sm md:text-base text-gray-600">
-          Расскажите немного о себе
+          {isCompany ? 'Расскажите о вашей компании' : 'Расскажите немного о себе'}
         </p>
       </div>
 
-      {/* Имя и Фамилия */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Имя */}
+      {/* Имя и Фамилия / Название компании */}
+      {isCompany ? (
         <div className="space-y-2">
-          <Label htmlFor="firstName">
-            Имя <span className="text-red-500">*</span>
+          <Label htmlFor="companyName">
+            Название компании <span className="text-red-500">*</span>
           </Label>
           <Input
-            id="firstName"
+            id="companyName"
             type="text"
-            placeholder="Александр"
-            value={data.firstName}
-            onChange={(e) => onChange('firstName', e.target.value)}
-            className={`h-12 text-base ${errors?.firstName ? 'border-red-500' : ''}`}
+            placeholder="ООО 'Название компании'"
+            value={data.companyName || ''}
+            onChange={(e) => onChange('companyName', e.target.value)}
+            className={`h-12 text-base ${errors?.companyName ? 'border-red-500' : ''}`}
             autoFocus
           />
-          {errors?.firstName && (
-            <p className="text-sm text-red-500">{errors.firstName}</p>
+          {errors?.companyName && (
+            <p className="text-sm text-red-500">{errors.companyName}</p>
           )}
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Имя */}
+          <div className="space-y-2">
+            <Label htmlFor="firstName">
+              Имя <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              placeholder="Александр"
+              value={data.firstName}
+              onChange={(e) => onChange('firstName', e.target.value)}
+              className={`h-12 text-base ${errors?.firstName ? 'border-red-500' : ''}`}
+              autoFocus
+            />
+            {errors?.firstName && (
+              <p className="text-sm text-red-500">{errors.firstName}</p>
+            )}
+          </div>
 
-        {/* Фамилия */}
-        <div className="space-y-2">
-          <Label htmlFor="lastName">
-            Фамилия <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="lastName"
-            type="text"
-            placeholder="Морозов"
-            value={data.lastName}
-            onChange={(e) => onChange('lastName', e.target.value)}
-            className={`h-12 text-base ${errors?.lastName ? 'border-red-500' : ''}`}
-          />
-          {errors?.lastName && (
-            <p className="text-sm text-red-500">{errors.lastName}</p>
-          )}
+          {/* Фамилия */}
+          <div className="space-y-2">
+            <Label htmlFor="lastName">
+              Фамилия <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              placeholder="Морозов"
+              value={data.lastName}
+              onChange={(e) => onChange('lastName', e.target.value)}
+              className={`h-12 text-base ${errors?.lastName ? 'border-red-500' : ''}`}
+            />
+            {errors?.lastName && (
+              <p className="text-sm text-red-500">{errors.lastName}</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Имя и Фамилия для компаний (контактное лицо) */}
+      {isCompany && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">
+              Имя контактного лица <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              placeholder="Александр"
+              value={data.firstName}
+              onChange={(e) => onChange('firstName', e.target.value)}
+              className={`h-12 text-base ${errors?.firstName ? 'border-red-500' : ''}`}
+            />
+            {errors?.firstName && (
+              <p className="text-sm text-red-500">{errors.firstName}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">
+              Фамилия контактного лица <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              placeholder="Морозов"
+              value={data.lastName}
+              onChange={(e) => onChange('lastName', e.target.value)}
+              className={`h-12 text-base ${errors?.lastName ? 'border-red-500' : ''}`}
+            />
+            {errors?.lastName && (
+              <p className="text-sm text-red-500">{errors.lastName}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Категория */}
       <div className="space-y-3">

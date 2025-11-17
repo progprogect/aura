@@ -36,6 +36,11 @@ export interface Specialist {
   lastName: string
   avatar?: string
   slug: string
+  profileType?: 'specialist' | 'company'
+  companyName?: string
+  address?: string
+  addressCoordinates?: { lat: number; lng: number }
+  taxId?: string
   category: CategoryKey | string
   specializations: string[]
   tagline?: string

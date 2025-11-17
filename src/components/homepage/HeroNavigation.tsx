@@ -135,7 +135,7 @@ export function HeroNavigation() {
                           : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white active:bg-blue-700 active:border-blue-700'
                       }`}
                     >
-                      Стать специалистом
+                      Зарегистрироваться
                     </Link>
                   </>
                 )}
@@ -264,7 +264,7 @@ export function HeroNavigation() {
                         }`}
                         onClick={closeMobileMenu}
                       >
-                        Стать специалистом
+                        Зарегистрироваться
                       </Link>
                     </>
                   )}

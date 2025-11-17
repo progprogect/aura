@@ -56,6 +56,7 @@ async function getSpecialist() {
     phone: user.phone,
     avatar: user.avatar,
     slug: profile.slug,
+    profileType: profile.profileType || 'specialist',
     category: profile.category,
     specializations: profile.specializations,
     tagline: profile.tagline,
@@ -82,6 +83,6 @@ export default async function OnboardingPage() {
     redirect('/specialist/dashboard')
   }
 
-  return <OnboardingWizard initialPhone={specialist.phone || ''} />
+  return <OnboardingWizard initialPhone={specialist.phone || ''} profileType={specialist.profileType as 'specialist' | 'company'} />
 }
 

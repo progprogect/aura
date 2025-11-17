@@ -8,7 +8,7 @@ import { unifiedRegister } from '@/lib/auth/unified-auth-service'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { phone, code } = body
+    const { phone, code, role, profileType } = body
 
     // Валидация
     if (!phone || !code) {
@@ -18,7 +18,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await unifiedRegister({ phone, code, role: 'specialist' })
+    // Определяем роль и тип профиля
+    const userRole = role || 'specialist'
+    const profileTypeValue = profileType || (userRole === 'company' ? 'company' : 'specialist')
+
+    const result = await unifiedRegister({ 
+      phone, 
+      code, 
+      role: userRole as 'user' | 'specialist' | 'company',
+      profileType: profileTypeValue as 'specialist' | 'company'
+    })
 
     if (result.success && result.sessionToken) {
       // Устанавливаем токен сессии в cookies

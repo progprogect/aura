@@ -339,7 +339,7 @@ export function AuthUnifiedLoginForm() {
             href="/auth/register" 
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
-            Стать специалистом
+            Зарегистрироваться
           </Link>
           {' '}или{' '}
           <Link 

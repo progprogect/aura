@@ -9,8 +9,8 @@ import { z } from 'zod'
 import { generateSlug } from '@/lib/utils/slug'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 
-// Валидация данных онбординга
-const OnboardingSchema = z.object({
+// Базовая схема для специалистов
+const SpecialistOnboardingSchema = z.object({
   // Шаг 1: Базовая информация
   firstName: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
   lastName: z.string().min(2, 'Фамилия должна содержать минимум 2 символа'),
@@ -39,6 +39,42 @@ const OnboardingSchema = z.object({
   
   // Опциональные поля
   yearsOfPractice: z.number().int().min(0).max(50).optional().nullable(),
+})
+
+// Схема для компаний
+const CompanyOnboardingSchema = z.object({
+  // Шаг 1: Базовая информация
+  firstName: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
+  lastName: z.string().min(2, 'Фамилия должна содержать минимум 2 символа'),
+  companyName: z.string().min(2, 'Название компании должно содержать минимум 2 символа'),
+  category: z.enum([
+    'psychology',
+    'fitness',
+    'nutrition',
+    'massage',
+    'wellness',
+    'coaching',
+    'medicine',
+    'other'
+  ]),
+  
+  // Шаг 2: Описание
+  tagline: z.string().min(10, 'Краткое описание должно содержать минимум 10 символов').max(200, 'Максимум 200 символов').optional(),
+  about: z.string().min(50, 'Описание должно содержать минимум 50 символов'),
+  specializations: z.array(z.string()).min(1, 'Выберите хотя бы одну специализацию').max(5, 'Максимум 5 специализаций'),
+  
+  // Шаг 3: Контакты и адрес
+  phone: z.string(),
+  email: z.string().email('Некорректный email'),
+  address: z.string().min(5, 'Адрес должен содержать минимум 5 символов'),
+  addressCoordinates: z.object({
+    lat: z.number(),
+    lng: z.number(),
+  }).optional(),
+  taxId: z.string().min(5, 'УНП/ИНН должен содержать минимум 5 символов'),
+  website: z.string().url('Некорректный URL сайта').optional().nullable(),
+  country: z.string().default('Россия'),
+  workFormats: z.array(z.enum(['online', 'offline', 'hybrid'])).default(['online']),
 })
 
 export async function POST(request: NextRequest) {
@@ -70,12 +106,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Парсим тело запроса
+    // Определяем тип профиля
+    const profileType = existingProfile?.profileType || 'specialist'
+
+    // Парсим тело запроса в зависимости от типа профиля
     const body = await request.json()
-    const data = OnboardingSchema.parse(body)
+    let data: any
+
+    if (profileType === 'company') {
+      data = CompanyOnboardingSchema.parse(body)
+    } else {
+      data = SpecialistOnboardingSchema.parse(body)
+    }
 
     // Генерируем уникальный slug
-    const baseSlug = generateSlug(`${data.firstName} ${data.lastName}`)
+    const baseSlug = profileType === 'company' 
+      ? generateSlug(data.companyName) || 'company'
+      : generateSlug(`${data.firstName} ${data.lastName}`) || 'specialist'
     let slug = baseSlug
     let counter = 1
 
@@ -95,20 +142,38 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Обновляем профиль специалиста
+    // Подготавливаем данные для обновления профиля
+    const updateData: any = {
+      slug,
+      category: data.category,
+      tagline: data.tagline || null,
+      about: data.about,
+      specializations: data.specializations,
+      country: data.country,
+      workFormats: data.workFormats,
+    }
+
+    // Добавляем поля в зависимости от типа профиля
+    if (profileType === 'company') {
+      updateData.companyName = data.companyName
+      updateData.address = data.address
+      updateData.addressCoordinates = data.addressCoordinates || null
+      updateData.taxId = data.taxId
+      updateData.website = data.website || null
+      // Для компаний извлекаем город из адреса (опционально)
+      if (data.address) {
+        const cityMatch = data.address.match(/(?:г\.|город|city)\s*([^,]+)/i)
+        updateData.city = cityMatch ? cityMatch[1].trim() : null
+      }
+    } else {
+      updateData.city = data.city || null
+      updateData.yearsOfPractice = data.yearsOfPractice || null
+    }
+
+    // Обновляем профиль
     const specialistProfile = await prisma.specialistProfile.update({
       where: { id: session.specialistProfile!.id },
-      data: {
-        slug,
-        category: data.category,
-        tagline: data.tagline || null,
-        about: data.about,
-        specializations: data.specializations,
-        city: data.city || null,
-        country: data.country,
-        workFormats: data.workFormats,
-        yearsOfPractice: data.yearsOfPractice || null,
-      }
+      data: updateData
     })
 
     return NextResponse.json({

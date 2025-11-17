@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { user: { firstName: { contains: escapedSearch, mode: 'insensitive' } } },
         { user: { lastName: { contains: escapedSearch, mode: 'insensitive' } } },
+        { companyName: { contains: escapedSearch, mode: 'insensitive' } }, // Поиск по названию компании
         { tagline: { contains: escapedSearch, mode: 'insensitive' } },
         { about: { contains: escapedSearch, mode: 'insensitive' } },
         { specializations: { hasSome: [escapedSearch] } },
@@ -187,35 +188,47 @@ export async function GET(request: NextRequest) {
     const specialistProfiles = sortedSpecialists.slice(startIndex, startIndex + finalLimit)
     
     // Подготовка данных для фронтенда (используем трансформер)
-    const formattedSpecialists = specialistProfiles.map(profile => ({
-      id: profile.id,
-      firstName: profile.user.firstName,
-      lastName: profile.user.lastName,
-      avatar: profile.user.avatar,
-      slug: profile.slug,
-      category: profile.category,
-      specializations: profile.specializations,
-      tagline: profile.tagline,
-      about: profile.about,
-      city: profile.city,
-      country: profile.country,
-      workFormats: profile.workFormats,
-      yearsOfPractice: profile.yearsOfPractice,
-      priceFrom: profile.priceFrom,
-      priceTo: profile.priceTo,
-      currency: profile.currency,
-      priceDescription: profile.priceDescription,
-      verified: profile.verified,
-      profileViews: profile.profileViews,
-      averageRating: profile.averageRating,
-      totalReviews: profile.totalReviews,
-      customFields: profile.customFields,
-      fullName: `${profile.user.firstName} ${profile.user.lastName}`,
-      // Обрезаем описание до 150 символов для карточек
-      shortAbout: profile.about.length > 150 
-        ? profile.about.substring(0, 150) + '...' 
-        : profile.about,
-    }))
+    const formattedSpecialists = specialistProfiles.map(profile => {
+      const isCompany = profile.profileType === 'company'
+      const fullName = isCompany && profile.companyName
+        ? profile.companyName
+        : `${profile.user.firstName} ${profile.user.lastName}`.trim()
+      
+      return {
+        id: profile.id,
+        firstName: profile.user.firstName,
+        lastName: profile.user.lastName,
+        avatar: profile.user.avatar,
+        slug: profile.slug,
+        profileType: profile.profileType || 'specialist',
+        companyName: profile.companyName,
+        address: profile.address,
+        addressCoordinates: profile.addressCoordinates,
+        taxId: profile.taxId,
+        category: profile.category,
+        specializations: profile.specializations,
+        tagline: profile.tagline,
+        about: profile.about,
+        city: profile.city,
+        country: profile.country,
+        workFormats: profile.workFormats,
+        yearsOfPractice: profile.yearsOfPractice,
+        priceFrom: profile.priceFrom,
+        priceTo: profile.priceTo,
+        currency: profile.currency,
+        priceDescription: profile.priceDescription,
+        verified: profile.verified,
+        profileViews: profile.profileViews,
+        averageRating: profile.averageRating,
+        totalReviews: profile.totalReviews,
+        customFields: profile.customFields,
+        fullName,
+        // Обрезаем описание до 150 символов для карточек
+        shortAbout: profile.about.length > 150 
+          ? profile.about.substring(0, 150) + '...' 
+          : profile.about,
+      }
+    })
     
     return NextResponse.json({
       specialists: formattedSpecialists,

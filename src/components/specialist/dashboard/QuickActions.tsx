@@ -130,10 +130,10 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
       disabled: false
     },
     {
-      href: '/auth/user/become-specialist',
+      href: '/auth/register',
       icon: Stethoscope,
-      label: 'Стать специалистом',
-      description: 'Создать профиль специалиста',
+      label: 'Зарегистрироваться',
+      description: 'Создать профиль специалиста или компании',
       variant: 'outline' as const,
       isMain: false,
       disabled: false

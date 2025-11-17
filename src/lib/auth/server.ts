@@ -137,7 +137,11 @@ export async function ensureSlugExists(userId: string): Promise<string | null> {
     // Генерируем новый slug с транслитерацией
     console.warn('[ensureSlugExists] Slug отсутствует для профиля', profile.id, '- генерируем новый')
     
-    const baseSlug = generateSlug(`${user.firstName} ${user.lastName}`) || 'specialist'
+    // Для компаний используем companyName, для специалистов - firstName + lastName
+    const isCompany = profile.profileType === 'company'
+    const baseSlug = isCompany && profile.companyName
+      ? generateSlug(profile.companyName) || 'company'
+      : generateSlug(`${user.firstName} ${user.lastName}`) || 'specialist'
     let slug = baseSlug
     let counter = 1
 

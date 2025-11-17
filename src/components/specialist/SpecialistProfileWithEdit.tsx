@@ -47,6 +47,7 @@ interface SpecialistProfileWithEditProps {
     categoryName?: string
     tagline: string | null
     city: string | null
+    address?: string | null
     country?: string
     workFormats: string[]
     yearsOfPractice?: number | null
@@ -56,6 +57,8 @@ interface SpecialistProfileWithEditProps {
     specializations: string[]
     averageRating?: number
     totalReviews?: number
+    profileType?: 'specialist' | 'company'
+    companyName?: string | null
   }
   contactsData: {
     email: string | null
@@ -316,6 +319,7 @@ export function SpecialistProfileWithEdit({
           specializations={heroData.specializations}
           tagline={heroData.tagline}
           city={heroData.city}
+          address={heroData.address}
           country={heroData.country}
           workFormats={heroData.workFormats}
           yearsOfPractice={heroData.yearsOfPractice}
@@ -323,6 +327,8 @@ export function SpecialistProfileWithEdit({
           profileViews={heroData.profileViews}
           averageRating={heroData.averageRating}
           totalReviews={heroData.totalReviews}
+          profileType={heroData.profileType}
+          companyName={heroData.companyName}
           email={contactsData.email}
           phone={contactsData.phone}
           telegram={contactsData.telegram}
@@ -509,18 +515,21 @@ export function SpecialistProfileWithEdit({
             />
           </Section>
 
-          {/* Стоимость */}
-          <Section id="section-pricing" title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
-            <SpecialistPricingContent
-              category={data.category}
-              priceFrom={data.priceFrom}
-              priceTo={data.priceTo}
-              currency={data.currency}
-              priceDescription={data.priceDescription}
-              isEditMode={isEditMode}
-              onSave={handleSaveField}
-            />
-          </Section>
+          {/* Стоимость - убрана, теперь цены только в услугах */}
+          {/* Показываем только для старых профилей, которые уже имеют цены */}
+          {false && (data.priceFrom || data.priceTo) && (
+            <Section id="section-pricing" title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
+              <SpecialistPricingContent
+                category={data.category}
+                priceFrom={data.priceFrom}
+                priceTo={data.priceTo}
+                currency={data.currency}
+                priceDescription={data.priceDescription}
+                isEditMode={isEditMode}
+                onSave={handleSaveField}
+              />
+            </Section>
+          )}
 
           {/* FAQ */}
           <Section title="Часто задаваемые вопросы" icon="❓" iconBgColor="bg-indigo-100" iconTextColor="text-indigo-600">

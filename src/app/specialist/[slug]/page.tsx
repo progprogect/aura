@@ -113,6 +113,11 @@ async function getSpecialist(slug: string) {
     avatar: specialistProfile.user.avatar,
     phone: specialistProfile.user.phone, // Добавляем phone для контактов
     slug: specialistProfile.slug,
+    profileType: specialistProfile.profileType || 'specialist',
+    companyName: specialistProfile.companyName,
+    address: specialistProfile.address,
+    addressCoordinates: specialistProfile.addressCoordinates,
+    taxId: specialistProfile.taxId,
     category: specialistProfile.category,
     specializations: specialistProfile.specializations,
     tagline: specialistProfile.tagline,
@@ -209,7 +214,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const fullName = `${specialist.firstName} ${specialist.lastName}`
+  const isCompany = specialist.profileType === 'company'
+  const fullName = isCompany && specialist.companyName 
+    ? specialist.companyName 
+    : `${specialist.firstName} ${specialist.lastName}`
   const title = specialist.metaTitle || `${fullName} — ${specialist.specializations[0]} | Эволюция 360`
   const description =
     specialist.metaDescription ||
@@ -288,7 +296,10 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
     })
   }
 
-  const fullName = `${specialist.firstName} ${specialist.lastName}`
+  const isCompany = specialist.profileType === 'company'
+  const fullName = isCompany && specialist.companyName 
+    ? specialist.companyName 
+    : `${specialist.firstName} ${specialist.lastName}`
 
   // Получаем конфигурацию категории через сервис
   const categoryConfig = await categoryConfigService.getCategoryConfigSafe(
@@ -304,7 +315,8 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
     specialist.education.length > 0 || specialist.certificates.length > 0
       ? { id: 'education', label: 'Образование', icon: 'academic-cap' }
       : null,
-    specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
+    // Убираем таб "Стоимость" - цены теперь только в услугах
+    // specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
     specialist.services.length > 0 ? { id: 'services', label: 'Услуги', icon: 'shopping-cart' } : null,
     specialist.leadMagnets.length > 0 ? { id: 'lead-magnets', label: 'Материалы', icon: 'gift' } : null,
     specialist.totalReviews && specialist.totalReviews > 0 ? { id: 'reviews', label: 'Отзывы', icon: 'star' } : null,
@@ -337,6 +349,7 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
             categoryName: categoryConfig?.name,
             tagline: specialist.tagline,
             city: specialist.city,
+            address: specialist.address,
             country: specialist.country,
             workFormats: specialist.workFormats,
             yearsOfPractice: specialist.yearsOfPractice,
@@ -346,6 +359,8 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
             specializations: specialist.specializations,
             averageRating: specialist.averageRating,
             totalReviews: specialist.totalReviews,
+            profileType: specialist.profileType,
+            companyName: specialist.companyName,
           }}
           contactsData={{
             email: specialist.email,

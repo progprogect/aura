@@ -10,7 +10,8 @@ import { generateSessionToken } from './utils'
 import { normalizePhoneNumber } from '@/lib/phone/country-codes'
 import { PointsService } from '@/lib/points/points-service'
 
-export type UserRole = 'user' | 'specialist'
+export type UserRole = 'user' | 'specialist' | 'company'
+export type ProfileType = 'specialist' | 'company'
 
 export interface UnifiedLoginData {
   phone: string
@@ -22,6 +23,7 @@ export interface UnifiedRegisterData {
   phone: string
   code: string
   role: UserRole
+  profileType?: ProfileType // Тип профиля для specialist/company
   firstName?: string
   lastName?: string
   // Дополнительные поля для специалистов (будут в отдельном шаге)
@@ -190,11 +192,13 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
       // Не прерываем регистрацию из-за ошибки начисления бонусов
     }
     
-    // 4. Если роль specialist - создаём профиль специалиста
+    // 4. Если роль specialist или company - создаём профиль
     let createdSlug: string | undefined
-    if (role === 'specialist') {
+    const profileType = data.profileType || (role === 'specialist' ? 'specialist' : 'company')
+    
+    if (role === 'specialist' || role === 'company') {
       // Генерируем уникальный slug с транслитерацией
-      const baseSlug = generateSlug(`${user.firstName} ${user.lastName}`) || 'specialist'
+      const baseSlug = generateSlug(`${user.firstName} ${user.lastName}`) || (profileType === 'company' ? 'company' : 'specialist')
       let slug = baseSlug
       let counter = 1
       
@@ -207,6 +211,7 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
         data: {
           userId: user.id,
           slug,
+          profileType,
           category: 'other',
           specializations: [],
           about: '',
@@ -217,7 +222,7 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
       })
       
       // Примечание: User.phone уже установлен при создании пользователя выше
-      // и будет автоматически отображаться в контактах специалиста
+      // и будет автоматически отображаться в контактах специалиста/компании
       
       createdSlug = slug
     }
@@ -248,7 +253,7 @@ export async function unifiedRegister(data: UnifiedRegisterData): Promise<Unifie
         phone: user.phone,
         email: user.email || undefined,
         avatar: user.avatar || undefined,
-        hasSpecialistProfile: role === 'specialist',
+        hasSpecialistProfile: role === 'specialist' || role === 'company',
         specialistProfileSlug: createdSlug
       }
     }

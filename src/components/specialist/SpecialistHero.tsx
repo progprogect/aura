@@ -23,6 +23,7 @@ export interface SpecialistHeroProps {
   specializations: string[]
   tagline?: string | null
   city?: string | null
+  address?: string | null // Для компаний
   country?: string
   workFormats: string[]
   yearsOfPractice?: number | null
@@ -30,6 +31,8 @@ export interface SpecialistHeroProps {
   profileViews: number
   averageRating?: number
   totalReviews?: number
+  profileType?: 'specialist' | 'company'
+  companyName?: string | null
   // Контакты для модального окна
   email?: string | null
   phone?: string | null // Телефон из User.phone
@@ -49,6 +52,7 @@ export function SpecialistHero({
   specializations,
   tagline,
   city,
+  address,
   country,
   workFormats,
   yearsOfPractice,
@@ -56,13 +60,19 @@ export function SpecialistHero({
   profileViews,
   averageRating,
   totalReviews,
+  profileType = 'specialist',
+  companyName,
   email,
   phone,
   telegram,
   whatsapp,
   website,
 }: SpecialistHeroProps) {
-  const fullName = `${firstName || ''} ${lastName || ''}`.trim() || 'Специалист'
+  const isCompany = profileType === 'company'
+  const fullName = isCompany && companyName 
+    ? companyName 
+    : `${firstName || ''} ${lastName || ''}`.trim() || 'Специалист'
+  const location = isCompany && address ? address : city
   const [isContactsModalOpen, setIsContactsModalOpen] = React.useState(false)
 
   // Скролл к форме связи
@@ -169,12 +179,12 @@ export function SpecialistHero({
                   <span>{yearsOfPractice} {yearsOfPractice === 1 ? 'год' : yearsOfPractice < 5 ? 'года' : 'лет'} опыта</span>
                 </>
               )}
-              {city && (
+              {location && (
                 <>
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
-                    {city}
+                    {location}
                   </span>
                 </>
               )}
@@ -328,11 +338,11 @@ export function SpecialistHero({
                 <span className="text-gray-400">·</span>
 
                 {/* Локация */}
-                {city && (
+                {location && (
                   <>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {city}
+                      {location}
                     </span>
                     <span className="text-gray-400">·</span>
                   </>

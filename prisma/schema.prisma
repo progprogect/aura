@@ -66,9 +66,18 @@ model SpecialistProfile {
   // Публичная информация
   slug String @unique
 
+  // Тип профиля
+  profileType String @default("specialist") // "specialist" | "company"
+
   // Категоризация
   category        String // "psychology" | "fitness" | "nutrition" | "massage" | "wellness" | "coaching" | "medicine" | "other"
   specializations String[] // Гибкие теги: ["КПТ-терапевт", "Тренер по йоге", "Нутрициолог"]
+
+  // Поля для компаний
+  companyName         String? // Название компании
+  address             String? // Полный адрес
+  addressCoordinates  Json? // Координаты {lat: number, lng: number} для карты
+  taxId               String? // УНП/ИНН
 
   // Описание
   tagline String? // Краткий слоган (1-2 предложения)
@@ -165,6 +174,7 @@ model SpecialistProfile {
   @@index([averageRating])
   @@index([totalReviews])
   @@index([blocked])
+  @@index([profileType])
 }
 
 // ========================================

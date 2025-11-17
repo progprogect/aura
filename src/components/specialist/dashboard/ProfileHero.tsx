@@ -140,13 +140,13 @@ export function ProfileHero({
                 </Button>
               </Link>
             ) : (
-              <Link href="/auth/user/become-specialist">
+              <Link href="/auth/register">
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full sm:w-auto gap-2"
                 >
-                  <span>Стать специалистом</span>
+                  <span>Зарегистрироваться</span>
                 </Button>
               </Link>
             )}

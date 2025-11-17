@@ -73,7 +73,11 @@ export function ChatMessage({ message, onQuickReply }: ChatMessageProps) {
                   if (onQuickReply) {
                     const specialist = message.specialists?.find(s => s.id === specialistId)
                     if (specialist) {
-                      onQuickReply(`Найти похожих на ${specialist.firstName} ${specialist.lastName}`)
+                      const isCompany = specialist.profileType === 'company'
+                      const name = isCompany && specialist.companyName
+                        ? specialist.companyName
+                        : `${specialist.firstName} ${specialist.lastName}`.trim()
+                      onQuickReply(`Найти похожих на ${name}`)
                     }
                   }
                 }}

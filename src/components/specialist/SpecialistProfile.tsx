@@ -123,8 +123,9 @@ export function SpecialistProfile({ tabs, categoryConfig, data, isEditMode = fal
           />
         )}
 
-        {/* Стоимость */}
-        {(data.priceFrom || data.priceTo || isEditMode) && (
+        {/* Стоимость - убрана, теперь цены только в услугах */}
+        {/* Показываем только для старых профилей, которые уже имеют цены */}
+        {false && (data.priceFrom || data.priceTo || isEditMode) && (
           <SpecialistPricing
             category={data.category}
             priceFrom={data.priceFrom}

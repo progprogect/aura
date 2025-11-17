@@ -78,7 +78,7 @@ export function Navigation() {
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                Стать специалистом
+                Зарегистрироваться
               </Link>
             </div>
           </div>
@@ -149,7 +149,7 @@ export function Navigation() {
                 }`}
                 onClick={closeMobileMenu}
               >
-                Стать специалистом
+                Зарегистрироваться
               </Link>
             </div>
           </div>

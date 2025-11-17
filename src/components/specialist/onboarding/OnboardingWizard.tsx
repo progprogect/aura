@@ -12,24 +12,28 @@ import { OnboardingProgress } from './OnboardingProgress'
 import { OnboardingStep1 } from './OnboardingStep1'
 import { OnboardingStep2 } from './OnboardingStep2'
 import { OnboardingStep3 } from './OnboardingStep3'
+import { OnboardingStep3Company } from './OnboardingStep3Company'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
 
 interface OnboardingWizardProps {
   initialPhone: string
+  profileType?: 'specialist' | 'company'
 }
 
-export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
+export function OnboardingWizard({ initialPhone, profileType = 'specialist' }: OnboardingWizardProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const isCompany = profileType === 'company'
 
   // Состояние формы
   const [formData, setFormData] = useState({
     // Шаг 1
     firstName: '',
     lastName: '',
+    companyName: '', // Только для компаний
     category: '',
     
     // Шаг 2
@@ -40,15 +44,20 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
     // Шаг 3
     phone: initialPhone,
     email: '',
-    city: '',
+    city: '', // Для специалистов
+    address: '', // Для компаний
+    addressCoordinates: null as { lat: number; lng: number } | null, // Для компаний
+    taxId: '', // Для компаний
+    website: '', // Для компаний (опционально)
     country: 'Россия',
     workFormats: ['online'] as string[],
   })
 
+  // Для обоих типов 3 шага с данными, шаг 4 - экран успеха
   const totalSteps = 3
 
   // Обновление поля
-  const handleChange = (field: string, value: string | string[]) => {
+  const handleChange = (field: string, value: string | string[] | { lat: number; lng: number } | null | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Очищаем ошибку при изменении поля
     if (errors[field]) {
@@ -77,6 +86,12 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
         newErrors.lastName = 'Фамилия должна содержать минимум 2 символа'
       }
 
+      if (isCompany && !formData.companyName.trim()) {
+        newErrors.companyName = 'Введите название компании'
+      } else if (isCompany && formData.companyName.trim().length < 2) {
+        newErrors.companyName = 'Название компании должно содержать минимум 2 символа'
+      }
+
       if (!formData.category) {
         newErrors.category = 'Выберите категорию'
       }
@@ -99,6 +114,28 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
         newErrors.email = 'Введите email'
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         newErrors.email = 'Некорректный email'
+      }
+
+      if (isCompany) {
+        if (!formData.address || !formData.address.trim()) {
+          newErrors.address = 'Введите адрес'
+        } else if (formData.address.trim().length < 5) {
+          newErrors.address = 'Адрес должен содержать минимум 5 символов'
+        }
+
+        if (!formData.taxId || !formData.taxId.trim()) {
+          newErrors.taxId = 'Введите УНП/ИНН'
+        } else if (formData.taxId.trim().length < 5) {
+          newErrors.taxId = 'УНП/ИНН должен содержать минимум 5 символов'
+        }
+
+        if (formData.website && formData.website.trim()) {
+          try {
+            new URL(formData.website)
+          } catch {
+            newErrors.website = 'Некорректный URL сайта'
+          }
+        }
       }
     }
 
@@ -168,7 +205,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Прогресс */}
-        {currentStep <= 3 && (
+        {currentStep <= totalSteps && (
           <div className="mb-8">
             <OnboardingProgress currentStep={currentStep} totalSteps={totalSteps} />
           </div>
@@ -183,6 +220,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
                 data={formData}
                 onChange={handleChange}
                 errors={errors}
+                isCompany={isCompany}
               />
             )}
             
@@ -195,9 +233,18 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
               />
             )}
             
-            {currentStep === 3 && (
+            {currentStep === 3 && !isCompany && (
               <OnboardingStep3
                 key="step3"
+                data={formData}
+                onChange={handleChange}
+                errors={errors}
+              />
+            )}
+
+            {currentStep === 3 && isCompany && (
+              <OnboardingStep3Company
+                key="step3-company"
                 data={formData}
                 onChange={handleChange}
                 errors={errors}
@@ -233,7 +280,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
         </div>
 
         {/* Навигация */}
-        {currentStep <= 3 && (
+        {currentStep <= totalSteps && (
           <div className="flex items-center justify-between gap-4">
             {/* Кнопка "Назад" */}
             {currentStep > 1 ? (
@@ -283,7 +330,7 @@ export function OnboardingWizard({ initialPhone }: OnboardingWizardProps) {
         )}
 
         {/* Мобильная навигация (sticky bottom) */}
-        {currentStep <= 3 && (
+        {currentStep <= totalSteps && (
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between gap-4 z-50">
             {currentStep > 1 ? (
               <Button
