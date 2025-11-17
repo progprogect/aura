@@ -66,7 +66,7 @@ export function LeadMagnetModal({ isOpen, onClose, onSuccess, editingMagnet }: L
       setShowAdvanced(!!editingMagnet.highlights?.length || !!editingMagnet.targetAudience)
       
       // Инициализация цены
-      const hasPrice = editingMagnet.priceInPoints !== null && editingMagnet.priceInPoints > 0
+      const hasPrice = typeof editingMagnet.priceInPoints === 'number' && editingMagnet.priceInPoints > 0
       setIsPaid(hasPrice)
       setPriceInPoints(hasPrice ? String(editingMagnet.priceInPoints) : '')
       

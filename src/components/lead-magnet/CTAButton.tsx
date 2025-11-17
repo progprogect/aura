@@ -27,7 +27,7 @@ export function CTAButton({ leadMagnet, specialistId, specialistName }: CTAButto
   const [isTracking, setIsTracking] = useState(false)
 
   const priceInPoints = leadMagnet.priceInPoints
-  const isPaid = priceInPoints !== null && priceInPoints > 0
+  const isPaid = typeof priceInPoints === 'number' && priceInPoints > 0
   const isFree = !isPaid
 
   const trackAction = async (action: 'view' | 'download') => {

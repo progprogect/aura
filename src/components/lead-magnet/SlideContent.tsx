@@ -118,7 +118,7 @@ function PriceAndBalance({
   priceInPoints?: number | null
   balance?: UserBalance | null
 }) {
-  const isPaid = priceInPoints !== null && priceInPoints > 0
+  const isPaid = typeof priceInPoints === 'number' && priceInPoints > 0
   const totalBalance = balance ? parseFloat(balance.total) : 0
 
   if (!isPaid && !balance) return null
@@ -209,7 +209,7 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
       </div>
 
       {/* Цена и баланс */}
-      {(leadMagnet.priceInPoints !== null && leadMagnet.priceInPoints > 0) || balance ? (
+      {(typeof leadMagnet.priceInPoints === 'number' && leadMagnet.priceInPoints > 0) || balance ? (
         <div>
           <PriceAndBalance 
             priceInPoints={leadMagnet.priceInPoints}
