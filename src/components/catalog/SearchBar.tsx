@@ -1,15 +1,16 @@
 /**
  * Компонент поисковой строки
- * Версия 3.0 - Airbnb style:
- * - Поиск только по Enter или кнопке
- * - Локальное состояние для ввода
+ * Версия 3.1 - Улучшенный UX:
+ * - Локальное состояние для ввода (без задержек при вводе)
+ * - Debounce 500ms для автоматического поиска после паузы
+ * - Немедленный поиск при нажатии Enter или кнопки
  * - Кликабельная кнопка поиска (лупа)
  * - Исправлено дублирование иконки X
  */
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/icons/Icon'
 import { Search, X } from '@/components/ui/icons/catalog-icons'
 
@@ -22,18 +23,52 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false)
   // Локальное состояние для ввода (не применённое)
   const [localValue, setLocalValue] = useState(value)
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Синхронизация с внешним value (когда фильтры сбрасываются)
   useEffect(() => {
     setLocalValue(value)
   }, [value])
 
-  // Применить поиск
+  // Применить поиск немедленно (Enter или кнопка)
   const handleSearch = () => {
+    // Очищаем debounce таймер, если он есть
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    
     if (localValue.trim() !== value) {
       onChange(localValue.trim())
     }
   }
+
+  // Обработка изменения input с debounce
+  const handleInputChange = (newValue: string) => {
+    setLocalValue(newValue)
+    
+    // Очищаем предыдущий таймер
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    
+    // Устанавливаем новый таймер для debounce (500ms)
+    debounceTimerRef.current = setTimeout(() => {
+      if (newValue.trim() !== value) {
+        onChange(newValue.trim())
+      }
+      debounceTimerRef.current = null
+    }, 500)
+  }
+
+  // Cleanup при размонтировании
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   // Enter для поиска
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -72,7 +107,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           id="specialist-search"
           placeholder="Поиск специалистов..."
           value={localValue}
-          onChange={(e) => setLocalValue(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}

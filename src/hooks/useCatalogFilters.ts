@@ -89,10 +89,12 @@ export function useCatalogFilters(): UseCatalogFiltersReturn {
   const [format, setFormat] = useURLArray('format', FILTER_DEFAULTS.FORMAT)
   const [verified, setVerified] = useURLBoolean('verified', FILTER_DEFAULTS.VERIFIED)
   const [sortBy, setSortBy] = useURLString('sortBy', FILTER_DEFAULTS.SORT_BY)
+  // Для поиска НЕ используем debounce в useURLString, так как debounce обрабатывается в SearchBar
+  // Это предотвращает двойной debounce и обеспечивает лучший UX
   const [search, setSearch] = useURLString(
     'search',
-    FILTER_DEFAULTS.SEARCH
-    // Debounce убран - поиск только по Enter/кнопке
+    FILTER_DEFAULTS.SEARCH,
+    0 // Без debounce - SearchBar сам обрабатывает debounce
   )
 
   // Мемоизированное состояние фильтров
