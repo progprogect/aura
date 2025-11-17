@@ -1,5 +1,5 @@
--- CreateTable
-CREATE TABLE "PortfolioItem" (
+-- CreateTable (с проверкой существования)
+CREATE TABLE IF NOT EXISTS "PortfolioItem" (
     "id" TEXT NOT NULL,
     "specialistProfileId" TEXT NOT NULL,
     "type" TEXT NOT NULL,
@@ -14,9 +14,18 @@ CREATE TABLE "PortfolioItem" (
     CONSTRAINT "PortfolioItem_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE INDEX "PortfolioItem_specialistProfileId_idx" ON "PortfolioItem"("specialistProfileId");
+-- CreateIndex (с проверкой существования)
+CREATE INDEX IF NOT EXISTS "PortfolioItem_specialistProfileId_idx" ON "PortfolioItem"("specialistProfileId");
 
--- AddForeignKey
-ALTER TABLE "PortfolioItem" ADD CONSTRAINT "PortfolioItem_specialistProfileId_fkey" FOREIGN KEY ("specialistProfileId") REFERENCES "SpecialistProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (с проверкой существования)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'PortfolioItem_specialistProfileId_fkey'
+    ) THEN
+        ALTER TABLE "PortfolioItem" ADD CONSTRAINT "PortfolioItem_specialistProfileId_fkey" 
+        FOREIGN KEY ("specialistProfileId") REFERENCES "SpecialistProfile"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+END $$;
 

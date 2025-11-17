@@ -17,6 +17,7 @@
     "test:personalized-chat": "tsx scripts/test-personalized-chat.ts",
     "chat": "tsx scripts/interactive-chat.ts",
     "migrate:previews": "tsx scripts/migrate-lead-magnet-previews.ts",
+    "migrate:deploy": "tsx prisma/scripts/apply-migrations.ts",
     "reviews:init-stats": "tsx prisma/scripts/initialize-review-stats.ts",
     "reviews:create-test": "tsx prisma/scripts/create-test-reviews.ts",
     "admin:create": "tsx prisma/scripts/create-admin.ts"
