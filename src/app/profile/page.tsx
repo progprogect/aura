@@ -10,7 +10,7 @@ import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { User, Phone, Mail, Stethoscope, ShoppingCart } from 'lucide-react'
+import { User, Phone, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { DashboardStats } from '@/components/specialist/dashboard/DashboardStats'
 import { ProfileCompletionCard } from '@/components/specialist/dashboard/ProfileCompletionCard'
@@ -22,6 +22,9 @@ import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
 import { ProfileContentWrapper } from '@/components/specialist/dashboard/ProfileContentWrapper'
 import { ProfileSectionWrapper } from '@/components/specialist/dashboard/ProfileSectionWrapper'
+import { SpecialistLimitsService } from '@/lib/specialist/limits-service'
+import { ProfileHero } from '@/components/specialist/dashboard/ProfileHero'
+import { RequestsAlert } from '@/components/specialist/dashboard/RequestsAlert'
 
 async function getUserData() {
   try {
@@ -266,6 +269,9 @@ async function getUserData() {
         })
       }
 
+      // Вычисляем видимость профиля (проверяет: блокировка, acceptingClients, verified, баланс)
+      const isVisible = await SpecialistLimitsService.isProfileVisible(profile.id)
+
       // Добавляем данные специалиста
       userData.specialistProfile = {
         id: profile.id,
@@ -274,6 +280,7 @@ async function getUserData() {
         specializations: profile.specializations,
         verified: profile.verified,
         acceptingClients: profile.acceptingClients,
+        isVisible, // Видимость профиля (зависит от баланса и других факторов)
         about: profile.about,
         tagline: profile.tagline,
         city: profile.city,
@@ -318,45 +325,37 @@ export default async function ProfilePage() {
     redirect('/auth/login')
   }
 
-  const fullName = `${user.firstName} ${user.lastName}`
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Заголовок */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                👋 Привет, {user.firstName}!
-              </h1>
-              <p className="text-sm md:text-base text-gray-600">
-                {user.hasSpecialistProfile 
-                  ? 'Добро пожаловать в ваш личный кабинет специалиста'
-                  : 'Добро пожаловать в ваш личный кабинет'
-                }
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              {user.hasSpecialistProfile ? (
-                <Badge variant="secondary" className="flex items-center space-x-1">
-                  <Stethoscope className="h-3 w-3" />
-                  <span>Специалист</span>
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="flex items-center space-x-1">
-                  <User className="h-3 w-3" />
-                  <span>Пользователь</span>
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Контент */}
       <ProfileSectionWrapper>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* ProfileHero - заменяет заголовок и аватар */}
+          <div className="mb-6">
+            <ProfileHero
+              firstName={user.firstName}
+              lastName={user.lastName}
+              avatar={user.avatar}
+              hasSpecialistProfile={user.hasSpecialistProfile}
+              specialistProfile={user.hasSpecialistProfile && user.specialistProfile ? {
+                slug: user.specialistProfile.slug,
+                verified: user.specialistProfile.verified,
+                acceptingClients: user.specialistProfile.acceptingClients,
+                isVisible: user.specialistProfile.isVisible ?? false,
+              } : undefined}
+            />
+          </div>
+
+          {/* RequestsAlert - показывается только если есть новые заявки */}
+          {(user.newRequestsCount || 0) > 0 && (
+            <div className="mb-6">
+              <RequestsAlert
+                newRequestsCount={user.newRequestsCount || 0}
+                specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
+                isSpecialist={user.hasSpecialistProfile}
+              />
+            </div>
+          )}
           {user.hasSpecialistProfile && user.specialistProfile && (
             <ProfileContentWrapper
               initialStep={user.specialistProfile.onboardingStep ?? 0}
@@ -459,31 +458,6 @@ export default async function ProfilePage() {
 
           {/* Боковая панель */}
           <div className="space-y-6">
-            {/* Аватар */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center space-y-4">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={fullName}
-                      className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-900">{fullName}</h3>
-                    <p className="text-sm text-gray-500">
-                      {user.hasSpecialistProfile ? 'Специалист' : 'Пользователь'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Баланс баллов */}
             <BalanceWidgetWrapper />
 

@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
+import { Edit, BarChart3, MessageSquare, Inbox, Stethoscope, Package, ShoppingCart, FileText, Search, BookOpen } from 'lucide-react'
 import { useOnboarding } from './OnboardingContext'
 
 export interface QuickActionsProps {
@@ -31,15 +31,6 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
   const onboardingContext = useOnboarding()
   const onOpenOnboarding = onboardingContext?.openOnboarding || onOpenOnboardingProp
   const specialistActions = [
-    {
-      href: `/specialist/${slug}`,
-      icon: Eye,
-      label: 'Мой профиль',
-      description: 'Посмотреть и редактировать',
-      variant: 'default' as const,
-      isMain: true,
-      disabled: false
-    },
     {
       href: '/specialist/orders',
       icon: Package,
@@ -168,7 +159,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                 asChild={!action.disabled}
                 variant={action.variant}
                 className={`
-                  h-auto py-4 px-4 flex items-center justify-start gap-3 text-left w-full
+                  h-auto py-3 px-3 flex items-center justify-start gap-2.5 text-left w-full
                   ${isMain ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl' : ''}
                   ${action.disabled ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -176,8 +167,8 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
               >
                 {action.disabled ? (
                   <div className="flex items-center gap-3 w-full">
-                    <div className="p-2 rounded-lg bg-gray-100">
-                      <Icon className="w-5 h-5 text-gray-400" />
+                    <div className="p-1.5 rounded-lg bg-gray-100">
+                      <Icon className="w-4 h-4 text-gray-400" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm text-gray-900">
@@ -194,7 +185,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                     className="flex items-center gap-3 w-full text-left"
                   >
                     <div className={`
-                      p-2 rounded-lg relative
+                      p-1.5 rounded-lg relative
                       ${isMain 
                         ? 'bg-white/20' 
                         : action.variant === 'default' 
@@ -203,7 +194,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                       }
                     `}>
                       <Icon className={`
-                        w-5 h-5
+                        w-4 h-4
                         ${isMain 
                           ? 'text-white' 
                           : action.variant === 'default' 
@@ -249,7 +240,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                 ) : (
                   <Link href={action.href} className="flex items-center gap-3 w-full">
                     <div className={`
-                      p-2 rounded-lg relative
+                      p-1.5 rounded-lg relative
                       ${isMain 
                         ? 'bg-white/20' 
                         : action.variant === 'default' 
@@ -258,7 +249,7 @@ export function QuickActions({ slug, newRequestsCount = 0, newOrdersCount = 0, i
                       }
                     `}>
                       <Icon className={`
-                        w-5 h-5
+                        w-4 h-4
                         ${isMain 
                           ? 'text-white' 
                           : action.variant === 'default' 
