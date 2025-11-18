@@ -51,6 +51,8 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV REDIS_URL=$REDIS_URL
 
 # Generate Prisma Client
+# Игнорируем ошибку checksum при недоступности бинарников (временная проблема сети)
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 RUN npx prisma generate
 
 # Build Next.js (теперь DATABASE_URL доступен для SSG)
