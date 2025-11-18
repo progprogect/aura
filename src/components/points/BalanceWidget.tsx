@@ -79,45 +79,45 @@ export function BalanceWidget({ onOpenHistory, onOpenUsageModal }: BalanceWidget
         : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
     }`}>
       {/* Заголовок */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <div className={`rounded-full p-2 ${
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className={`rounded-full p-2 flex-shrink-0 ${
             isNegative ? 'bg-red-600' : 'bg-amber-600'
           }`}>
             <Coins className="w-5 h-5 text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
             {isNegative ? 'Долг по баллам' : 'Мои баллы'}
           </h3>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {onOpenUsageModal && (
             <button
               onClick={onOpenUsageModal}
-              className={`flex items-center gap-1.5 text-sm font-medium transition-colors min-h-[44px] px-2 ${
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors min-h-[44px] px-3 py-2 rounded-lg hover:bg-white/50 ${
                 isNegative 
                   ? 'text-red-700 hover:text-red-800' 
                   : 'text-amber-700 hover:text-amber-800'
               }`}
               aria-label="Как использовать баллы"
             >
-              <HelpCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Как использовать?</span>
+              <HelpCircle className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Как использовать?</span>
             </button>
           )}
           {onOpenHistory && (
             <button
               onClick={onOpenHistory}
-              className={`flex items-center gap-1.5 text-sm font-medium transition-colors min-h-[44px] px-2 ${
+              className={`flex items-center gap-1.5 text-sm font-medium transition-colors min-h-[44px] px-3 py-2 rounded-lg hover:bg-white/50 ${
                 isNegative 
                   ? 'text-red-700 hover:text-red-800' 
                   : 'text-amber-700 hover:text-amber-800'
               }`}
               aria-label="История транзакций"
             >
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">История</span>
+              <History className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">История</span>
             </button>
           )}
         </div>
