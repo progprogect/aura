@@ -6,6 +6,7 @@
 
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { Suspense } from 'react'
 import { prisma } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,6 +29,7 @@ import { PointsService } from '@/lib/points/points-service'
 import { ProfileHero } from '@/components/specialist/dashboard/ProfileHero'
 import { RequestsAlert } from '@/components/specialist/dashboard/RequestsAlert'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
+import { ProfileSectionScroll } from '@/components/profile/ProfileSectionScroll'
 
 async function getUserData() {
   try {
@@ -375,6 +377,11 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Скролл к нужному разделу при переходе с параметром section */}
+      <Suspense fallback={null}>
+        <ProfileSectionScroll />
+      </Suspense>
+      
       {/* Контент */}
       <ProfileSectionWrapper>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -449,7 +456,7 @@ export default async function ProfilePage() {
 
             {/* Услуги (для специалистов) - перенесено в основную колонку */}
             {user.hasSpecialistProfile && user.services && (
-              <Card>
+              <Card id="section-services">
                 <CardHeader>
                   <CardTitle className="text-lg">💼 Мои услуги</CardTitle>
                 </CardHeader>
@@ -464,7 +471,7 @@ export default async function ProfilePage() {
 
             {/* Лид-магниты (для специалистов) */}
             {user.hasSpecialistProfile && user.leadMagnets && (
-              <Card>
+              <Card id="section-lead-magnets">
                 <CardHeader>
                   <CardTitle className="text-lg">🎁 Полезные материалы</CardTitle>
                 </CardHeader>

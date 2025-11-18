@@ -24,15 +24,21 @@ interface ProfileCompletionCardProps {
   specialistSlug: string
 }
 
-// Маппинг ID задач на ID секций в профиле
-const taskToSectionMap: Record<string, string> = {
+// Маппинг ID задач на ID секций в профиле (для редактирования профиля)
+const taskToProfileSectionMap: Record<string, string> = {
   avatar: 'hero',
   certificates: 'education',
   education: 'education',
   gallery: 'gallery',
   pricing: 'pricing',
   video: 'video',
+}
+
+// Маппинг задач для личного кабинета (не в редактирование профиля)
+const dashboardTaskToSectionMap: Record<string, string> = {
   leadMagnets: 'lead-magnets',
+  'lead-magnets': 'lead-magnets',
+  services: 'services',
 }
 
 export function ProfileCompletionCard({ completionPercentage, tasks, specialistSlug }: ProfileCompletionCardProps) {
@@ -42,11 +48,17 @@ export function ProfileCompletionCard({ completionPercentage, tasks, specialistS
   const handleTaskClick = (task: Task) => {
     if (task.completed) return
     
-    const sectionId = taskToSectionMap[task.id]
-    if (sectionId) {
+    // Проверяем, является ли задача задачей для личного кабинета
+    const dashboardSectionId = dashboardTaskToSectionMap[task.id]
+    if (dashboardSectionId) {
+      // Переход в личный кабинет с параметром section для скролла
+      router.push(`/profile?section=${dashboardSectionId}`)
+    } else {
       // Переход на страницу профиля с параметрами редактирования
-      // Добавляем параметр from=profile для возможности вернуться назад
-      router.push(`/specialist/${specialistSlug}?edit=true&section=${sectionId}&from=profile`)
+      const sectionId = taskToProfileSectionMap[task.id]
+      if (sectionId) {
+        router.push(`/specialist/${specialistSlug}?edit=true&section=${sectionId}&from=profile`)
+      }
     }
   }
 
