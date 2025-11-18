@@ -29,6 +29,7 @@ const UpdateProfileSchema = z.object({
     'yearsOfPractice',
     'videoUrl',
     'acceptingClients',
+    'phoneVisible',
     // Новые поля для контактов с клиентами
     'contactEmail',
     'contactPhone',
@@ -100,7 +101,7 @@ export async function PATCH(request: NextRequest) {
       'category', 'tagline', 'about', 'city', 'country',
       'telegram', 'whatsapp', 'website',
       'priceFrom', 'priceTo', 'priceDescription',
-      'yearsOfPractice', 'videoUrl', 'acceptingClients',
+      'yearsOfPractice', 'videoUrl', 'acceptingClients', 'phoneVisible',
       // Поля для компаний
       'companyName', 'address', 'addressCoordinates', 'taxId'
     ]

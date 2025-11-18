@@ -36,6 +36,7 @@ export interface SpecialistHeroProps {
   // Контакты для модального окна
   email?: string | null
   phone?: string | null // Телефон из User.phone
+  phoneVisible?: boolean // Видимость телефона для клиентов
   telegram?: string | null
   whatsapp?: string | null
   website?: string | null
@@ -64,6 +65,7 @@ export function SpecialistHero({
   companyName,
   email,
   phone,
+  phoneVisible = true,
   telegram,
   whatsapp,
   website,
@@ -446,6 +448,7 @@ export function SpecialistHero({
         specialistName={fullName}
         email={email}
         phone={phone}
+        phoneVisible={phoneVisible}
         telegram={telegram}
         whatsapp={whatsapp}
         website={website}

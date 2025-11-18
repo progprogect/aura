@@ -93,10 +93,11 @@ model SpecialistProfile {
   yearsOfPractice Int?
 
   // Контакты (публичные)
-  telegram  String?
-  whatsapp  String?
-  instagram String?
-  website   String?
+  telegram    String?
+  whatsapp    String?
+  instagram   String?
+  website     String?
+  phoneVisible Boolean @default(true) // Показывать ли телефон клиентам
 
   // Стоимость
   priceFrom        Int? // Цена от (в копейках для точности)

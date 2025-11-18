@@ -21,6 +21,7 @@ import {
 interface SpecialistContactForClientsProps {
   email?: string | null
   phone?: string | null
+  phoneVisible?: boolean // Видимость телефона для клиентов
   telegram?: string | null
   whatsapp?: string | null
   isEditMode?: boolean
@@ -30,6 +31,7 @@ interface SpecialistContactForClientsProps {
 export function SpecialistContactForClients({
   email,
   phone,
+  phoneVisible = true,
   telegram,
   whatsapp,
   isEditMode = false,
@@ -162,14 +164,16 @@ export function SpecialistContactForClients({
       />
 
       {/* Телефон */}
-      <ContactItem
-        icon={Phone}
-        label="Телефон"
-        value={phone || null}
-        field="contactPhone"
-        type="phone"
-        href={phone ? `tel:${phone}` : undefined}
-      />
+      {phoneVisible && (
+        <ContactItem
+          icon={Phone}
+          label="Телефон"
+          value={phone || null}
+          field="contactPhone"
+          type="phone"
+          href={phone ? `tel:${phone}` : undefined}
+        />
+      )}
 
       {/* Telegram */}
       <ContactItem

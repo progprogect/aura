@@ -16,6 +16,7 @@ interface ContactsModalProps {
   specialistName: string
   email?: string | null
   phone?: string | null // Телефон из User.phone
+  phoneVisible?: boolean // Видимость телефона для клиентов
   telegram?: string | null
   whatsapp?: string | null
   website?: string | null
@@ -28,6 +29,7 @@ export function ContactsModal({
   specialistName,
   email,
   phone,
+  phoneVisible = true,
   telegram,
   whatsapp,
   website,
@@ -67,8 +69,8 @@ export function ContactsModal({
     return phone
   }
 
-  // Проверяем, есть ли хотя бы один контакт
-  const hasAnyContact = !!(email || phone || telegram || whatsapp || website)
+  // Проверяем, есть ли хотя бы один контакт (телефон учитываем только если он виден)
+  const hasAnyContact = !!(email || (phone && phoneVisible) || telegram || whatsapp || website)
 
   if (!isOpen) return null
 
@@ -131,7 +133,7 @@ export function ContactsModal({
                 )}
 
                 {/* Телефон */}
-                {phone && (
+                {phone && phoneVisible && (
                   <ContactItem
                     icon={Phone}
                     label="Телефон"

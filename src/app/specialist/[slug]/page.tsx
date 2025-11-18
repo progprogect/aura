@@ -136,6 +136,7 @@ async function getSpecialist(slug: string) {
     telegram: specialistProfile.telegram,
     whatsapp: specialistProfile.whatsapp,
     website: specialistProfile.website,
+    phoneVisible: specialistProfile.phoneVisible ?? true, // По умолчанию true для обратной совместимости
     priceFrom: specialistProfile.priceFrom,
     priceTo: specialistProfile.priceTo,
     currency: specialistProfile.currency,
@@ -375,6 +376,7 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
           contactsData={{
             email: specialist.email,
             phone: specialist.phone, // Телефон из User.phone
+            phoneVisible: specialist.phoneVisible, // Видимость телефона для клиентов
             telegram: specialist.telegram,
             whatsapp: specialist.whatsapp,
             website: specialist.website,
