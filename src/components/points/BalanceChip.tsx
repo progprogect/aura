@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Coins, Loader2 } from 'lucide-react';
 import { formatPointsShort } from '@/lib/points/format';
 import { UserBalance } from '@/types/points';
+import { PointsUsageModal } from './PointsUsageModal';
 
 /**
  * Компактный чип баланса для хедера
@@ -11,6 +12,7 @@ import { UserBalance } from '@/types/points';
 export function BalanceChip() {
   const [balance, setBalance] = useState<UserBalance | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBalance();
@@ -46,16 +48,26 @@ export function BalanceChip() {
   const isNegative = total < 0;
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
-      isNegative
-        ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 hover:from-red-100 hover:to-red-200'
-        : 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:from-amber-100 hover:to-amber-200'
-    }`}>
-      <Coins className={`w-4 h-4 ${isNegative ? 'text-red-600' : 'text-amber-600'}`} />
-      <span className={`font-medium text-sm ${isNegative ? 'text-red-900' : 'text-amber-900'}`}>
-        {formatPointsShort(total)}
-      </span>
-    </div>
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors cursor-pointer min-h-[44px] touch-manipulation active:scale-95 ${
+          isNegative
+            ? 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 hover:from-red-100 hover:to-red-200'
+            : 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200 hover:from-amber-100 hover:to-amber-200'
+        }`}
+        aria-label="Открыть информацию о баллах"
+      >
+        <Coins className={`w-4 h-4 ${isNegative ? 'text-red-600' : 'text-amber-600'}`} />
+        <span className={`font-medium text-sm ${isNegative ? 'text-red-900' : 'text-amber-900'}`}>
+          {formatPointsShort(total)}
+        </span>
+      </button>
+      <PointsUsageModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }
 

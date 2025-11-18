@@ -248,3 +248,31 @@ function getMinuteWord(minutes: number): string {
   return 'минут';
 }
 
+/**
+ * Получить процент оставшегося времени до истечения бонусов
+ * Возвращает значение от 0 до 100, где 100 - только что получены, 0 - истекли
+ */
+export function getBonusExpiryProgress(expiresAt: Date | string | null): number {
+  if (!expiresAt) {
+    return 0;
+  }
+  
+  const now = new Date();
+  const expiry = typeof expiresAt === 'string' ? new Date(expiresAt) : expiresAt;
+  const diffMs = expiry.getTime() - now.getTime();
+  
+  // Если уже истекли
+  if (diffMs <= 0) {
+    return 0;
+  }
+  
+  // Бонусы действуют 7 дней (из PointsService.BONUS_EXPIRY_DAYS)
+  const totalMs = 7 * 24 * 60 * 60 * 1000;
+  
+  // Вычисляем процент оставшегося времени
+  const progress = (diffMs / totalMs) * 100;
+  
+  // Ограничиваем от 0 до 100
+  return Math.max(0, Math.min(100, Math.round(progress)));
+}
+
