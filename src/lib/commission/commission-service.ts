@@ -121,13 +121,13 @@ export class CommissionService {
       { purchaseId }
     )
 
-    // 3. Начисляем кешбэк клиенту (бонусные баллы)
+    // 3. Начисляем кешбэк клиенту (обычные баллы)
     await this.addPointsInTransaction(
       tx,
       clientUserId,
       breakdown.cashback,
       'cashback',
-      'bonusBalance',
+      'balance',
       `Кешбэк за покупку лид-магнита`,
       { purchaseId }
     )
@@ -198,13 +198,13 @@ export class CommissionService {
       return
     }
 
-    // 1. Начисляем кешбэк клиенту (бонусные баллы)
+    // 1. Начисляем кешбэк клиенту (обычные баллы)
     await this.addPointsInTransaction(
       tx,
       clientUserId,
       breakdown.cashback,
       'cashback',
-      'bonusBalance',
+      'balance',
       `Кешбэк за покупку услуги`,
       { orderId }
     )
