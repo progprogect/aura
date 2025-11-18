@@ -40,7 +40,7 @@ interface SpecialistRecommendationProps {
     yearsOfPractice?: number
     workFormats: string[]
     city?: string
-    priceFrom?: number
+    priceFromInPoints?: number
     verified: boolean
     similarity?: number | null
     matchReasons?: string[]

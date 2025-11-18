@@ -208,9 +208,9 @@ export function OrdersList({ orders: initialOrders }: OrdersListProps) {
                   <span className="text-xl">{order.service?.emoji}</span>
                   <p className="font-semibold text-gray-900">{order.service?.title}</p>
                 </div>
-                {isPaid && order.amountPaid && (
+                {isPaid && order.pointsPaid && (
                   <p className="text-lg font-bold text-green-700">
-                    {order.amountPaid} BYN
+                    {order.pointsPaid} баллов
                   </p>
                 )}
               </div>

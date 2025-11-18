@@ -217,7 +217,7 @@ export function ServicesList({ services: initialServices, onRefresh, specialistS
               {/* Price & Stats */}
               <div className="mb-4 p-2 lg:p-3 bg-green-50 rounded-lg">
                 <p className="text-lg lg:text-xl xl:text-2xl font-bold text-green-700 mb-2">
-                  {formatServicePrice(service.price, service.currency)}
+                  {formatServicePrice(service.price)}
                 </p>
                 <div className="flex items-center gap-3 text-xs text-gray-600">
                   <div className="flex items-center gap-1">

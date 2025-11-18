@@ -8,12 +8,12 @@
 import * as React from 'react'
 import { motion } from 'framer-motion'
 import { InlineInput } from './edit/InlineInput'
+import { formatPointsDisplay } from '@/lib/formatters/points-display'
 
 export interface SpecialistPricingContentProps {
   category: string
-  priceFrom?: number | null
-  priceTo?: number | null
-  currency: string
+  priceFromInPoints?: number | null
+  priceToInPoints?: number | null
   priceDescription?: string | null
   priceLabel?: string
   isEditMode?: boolean
@@ -22,31 +22,16 @@ export interface SpecialistPricingContentProps {
 
 export function SpecialistPricingContent({
   category,
-  priceFrom,
-  priceTo,
-  currency,
+  priceFromInPoints,
+  priceToInPoints,
   priceDescription,
   priceLabel = 'за услугу',
   isEditMode = false,
   onSave,
 }: SpecialistPricingContentProps) {
-  if (!priceFrom && !priceTo && !isEditMode) {
+  if (!priceFromInPoints && !priceToInPoints && !isEditMode) {
     return null
   }
-
-  // Форматируем цену из копеек в рубли для отображения
-  const formatPrice = (price: number) => {
-    const rubles = price / 100
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(rubles)
-  }
-
-  // Конвертируем копейки в рубли для редактирования
-  const priceFromRubles = priceFrom ? priceFrom / 100 : null
-  const priceToRubles = priceTo ? priceTo / 100 : null
 
   return (
     <motion.div
@@ -61,31 +46,23 @@ export function SpecialistPricingContent({
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InlineInput
-              value={priceFromRubles}
-              field="priceFrom"
-              onSave={async (field, value) => {
-                // Конвертируем рубли обратно в копейки
-                const priceInKopecks = typeof value === 'number' ? value * 100 : 0
-                return onSave(field, priceInKopecks)
-              }}
+              value={priceFromInPoints || ''}
+              field="priceFromInPoints"
+              onSave={onSave}
               isEditMode={isEditMode}
-              placeholder="3000"
+              placeholder="100"
               type="number"
-              label="Цена от (₽)"
+              label="Цена от (баллов)"
             />
             
             <InlineInput
-              value={priceToRubles}
-              field="priceTo"
-              onSave={async (field, value) => {
-                // Конвертируем рубли обратно в копейки
-                const priceInKopecks = typeof value === 'number' ? value * 100 : 0
-                return onSave(field, priceInKopecks)
-              }}
+              value={priceToInPoints || ''}
+              field="priceToInPoints"
+              onSave={onSave}
               isEditMode={isEditMode}
-              placeholder="5000"
+              placeholder="200"
               type="number"
-              label="Цена до (₽)"
+              label="Цена до (баллов)"
             />
           </div>
 
@@ -103,11 +80,11 @@ export function SpecialistPricingContent({
         <>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-gray-900">
-              {priceFrom && priceTo && priceFrom !== priceTo
-                ? `${formatPrice(priceFrom)} - ${formatPrice(priceTo)}`
-                : formatPrice(priceFrom || priceTo || 0)}
+              {priceFromInPoints && priceToInPoints && priceFromInPoints !== priceToInPoints
+                ? `${formatPointsDisplay(priceFromInPoints)} - ${formatPointsDisplay(priceToInPoints)}`
+                : formatPointsDisplay(priceFromInPoints || priceToInPoints || 0)}
             </span>
-            <span className="text-lg text-gray-600">₽</span>
+            <span className="text-lg text-gray-600">баллов</span>
           </div>
 
           {priceDescription && (

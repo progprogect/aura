@@ -48,13 +48,12 @@ async function getOrders() {
     },
     include: {
       service: {
-        select: {
-          id: true,
-          title: true,
-          emoji: true,
-          price: true,
-          currency: true,
-        }
+          select: {
+            id: true,
+            title: true,
+            emoji: true,
+            price: true,
+          }
       }
     },
     orderBy: {

@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
           clientUserId: user.id, // Связываем заказ с пользователем
           status: 'paid',
           pointsUsed,
+          pointsPaid: new Decimal(pointsUsed), // Сумма оплаты в баллах
           pointsFrozen: true,
           escrowReleased: false, // Средства на эскроу до подтверждения выполнения
           autoConfirmAt,

@@ -49,9 +49,8 @@ async function main() {
       yearsOfPractice: 8,
       telegram: '@anna_ivanova_psy',
       whatsapp: '+79991234567',
-      priceFrom: 300000,
-      priceTo: 500000,
-      currency: 'RUB',
+      priceFromInPoints: 3000,
+      priceToInPoints: 5000,
       priceDescription: 'за сессию 60 минут',
       customFields: {
         methods: ['КПТ', 'Майндфулнесс'],

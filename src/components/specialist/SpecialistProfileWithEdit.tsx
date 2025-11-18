@@ -109,9 +109,8 @@ interface SpecialistProfileWithEditProps {
       year: number
       fileUrl?: string | null
     }>
-    priceFrom?: number | null
-    priceTo?: number | null
-    currency: string
+    priceFromInPoints?: number | null
+    priceToInPoints?: number | null
     priceDescription?: string | null
     faqs: Array<{
       id: string
@@ -545,13 +544,12 @@ export function SpecialistProfileWithEdit({
 
           {/* Стоимость - убрана, теперь цены только в услугах */}
           {/* Показываем только для старых профилей, которые уже имеют цены */}
-          {false && (data.priceFrom || data.priceTo) && (
+          {false && (data.priceFromInPoints || data.priceToInPoints) && (
             <Section id="section-pricing" title="Стоимость услуг" icon="💰" iconBgColor="bg-emerald-100" iconTextColor="text-emerald-600">
               <SpecialistPricingContent
                 category={data.category}
-                priceFrom={data.priceFrom}
-                priceTo={data.priceTo}
-                currency={data.currency}
+                priceFromInPoints={data.priceFromInPoints}
+                priceToInPoints={data.priceToInPoints}
                 priceDescription={data.priceDescription}
                 isEditMode={isEditMode}
                 onSave={handleSaveField}

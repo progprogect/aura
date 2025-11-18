@@ -78,10 +78,9 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
   }
 
   if (filters.maxPrice) {
-    // ВАЖНО: Цена в БД в КОПЕЙКАХ! Конвертируем рубли → копейки
-    const maxPriceInKopecks = filters.maxPrice * 100
-    where.OR = [{ priceFrom: null }, { priceFrom: { lte: maxPriceInKopecks } }]
-    console.log('[Semantic Search] 💰 Price filter:', filters.maxPrice, '₽ =', maxPriceInKopecks, 'копеек')
+    // Фильтр по цене в баллах (maxPrice уже в баллах)
+    where.OR = [{ priceFromInPoints: null }, { priceFromInPoints: { lte: filters.maxPrice } }]
+    console.log('[Semantic Search] 💰 Price filter:', filters.maxPrice, 'баллов')
   }
 
   if (filters.verified) {
@@ -114,9 +113,8 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
       country: true,
       workFormats: true,
       yearsOfPractice: true,
-      priceFrom: true,
-      priceTo: true,
-      currency: true,
+      priceFromInPoints: true,
+      priceToInPoints: true,
       priceDescription: true,
       verified: true,
       customFields: true,
@@ -163,9 +161,8 @@ export async function searchSpecialistsBySemantic(options: SearchOptions): Promi
     country: profile.country,
     workFormats: profile.workFormats,
     yearsOfPractice: profile.yearsOfPractice,
-    priceFrom: profile.priceFrom,
-    priceTo: profile.priceTo,
-    currency: profile.currency,
+    priceFromInPoints: profile.priceFromInPoints,
+    priceToInPoints: profile.priceToInPoints,
     priceDescription: profile.priceDescription,
     verified: profile.verified,
     customFields: profile.customFields,
@@ -209,7 +206,7 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
     workFormats: filters.workFormats ? { hasSome: filters.workFormats as any } : undefined,
     city: filters.city,
     yearsOfPractice: filters.minExperience ? { gte: filters.minExperience } : undefined,
-    priceFrom: filters.maxPrice ? { lte: filters.maxPrice } : undefined,
+    priceFromInPoints: filters.maxPrice ? { lte: filters.maxPrice } : undefined,
   }
 
   // Поиск по тексту (расширяем тип для поиска)
@@ -239,9 +236,8 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
       country: true,
       workFormats: true,
       yearsOfPractice: true,
-      priceFrom: true,
-      priceTo: true,
-      currency: true,
+      priceFromInPoints: true,
+      priceToInPoints: true,
       priceDescription: true,
       verified: true,
       customFields: true,
@@ -282,9 +278,8 @@ export async function searchSpecialistsByKeyword(options: SearchOptions): Promis
     country: profile.country,
     workFormats: profile.workFormats,
     yearsOfPractice: profile.yearsOfPractice,
-    priceFrom: profile.priceFrom,
-    priceTo: profile.priceTo,
-    currency: profile.currency,
+    priceFromInPoints: profile.priceFromInPoints,
+    priceToInPoints: profile.priceToInPoints,
     priceDescription: profile.priceDescription,
     verified: profile.verified,
     customFields: profile.customFields,

@@ -254,7 +254,7 @@ export function ServiceForm({ service, onClose, onSuccess }: ServiceFormProps) {
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              {formData.price > 0 && `≈ ${formatServicePrice(formData.price, 'BYN')}`}
+              {formData.price > 0 && `≈ ${formatServicePrice(formData.price)}`}
             </p>
           </div>
           <div>
@@ -290,7 +290,7 @@ export function ServiceForm({ service, onClose, onSuccess }: ServiceFormProps) {
             </p>
             <div className="p-2 bg-green-50 rounded">
               <p className="text-lg font-bold text-green-700">
-                {formData.price > 0 ? formatServicePrice(formData.price, 'BYN') : '0 BYN'}
+                {formData.price > 0 ? formatServicePrice(formData.price) : '0 баллов'}
               </p>
             </div>
           </div>

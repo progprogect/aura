@@ -23,8 +23,8 @@ const UpdateProfileSchema = z.object({
     'telegram',
     'whatsapp',
     'website',
-    'priceFrom',
-    'priceTo',
+    'priceFromInPoints',
+    'priceToInPoints',
     'priceDescription',
     'yearsOfPractice',
     'videoUrl',
@@ -73,7 +73,7 @@ export async function PATCH(request: NextRequest) {
 
     // Специальная обработка для числовых полей
     let processedValue = value
-    if (field === 'priceFrom' || field === 'priceTo' || field === 'yearsOfPractice') {
+    if (field === 'priceFromInPoints' || field === 'priceToInPoints' || field === 'yearsOfPractice') {
       if (typeof value === 'string') {
         processedValue = value ? parseInt(value, 10) : null
       }
@@ -100,7 +100,7 @@ export async function PATCH(request: NextRequest) {
     const specialistFields = [
       'category', 'tagline', 'about', 'city', 'country',
       'telegram', 'whatsapp', 'website',
-      'priceFrom', 'priceTo', 'priceDescription',
+      'priceFromInPoints', 'priceToInPoints', 'priceDescription',
       'yearsOfPractice', 'videoUrl', 'acceptingClients', 'phoneVisible',
       // Поля для компаний
       'companyName', 'address', 'addressCoordinates', 'taxId'

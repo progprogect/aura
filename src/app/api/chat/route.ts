@@ -296,9 +296,8 @@ export async function POST(request: NextRequest) {
             country: true,
             workFormats: true,
             yearsOfPractice: true,
-            priceFrom: true,
-            priceTo: true,
-            currency: true,
+            priceFromInPoints: true,
+            priceToInPoints: true,
             priceDescription: true,
             verified: true,
             customFields: true,
@@ -336,9 +335,8 @@ export async function POST(request: NextRequest) {
           country: profile.country,
           workFormats: profile.workFormats,
           yearsOfPractice: profile.yearsOfPractice,
-          priceFrom: profile.priceFrom,
-          priceTo: profile.priceTo,
-          currency: profile.currency,
+          priceFromInPoints: profile.priceFromInPoints,
+          priceToInPoints: profile.priceToInPoints,
           priceDescription: profile.priceDescription,
           verified: profile.verified,
           customFields: profile.customFields,
@@ -513,7 +511,7 @@ export async function POST(request: NextRequest) {
         contextMessage = `\n\n✅ ВАЖНО: Система РАСШИРИЛА критерии поиска и нашла ${specialists.length} специалистов.
 
 Убранные фильтры для лучшего подбора:
-${extractedParams.maxPrice ? `- Бюджет (было: до ${extractedParams.maxPrice}₽)` : ''}
+${extractedParams.maxPrice ? `- Бюджет (было: до ${extractedParams.maxPrice} баллов)` : ''}
 ${extractedParams.minExperience ? `- Опыт (было: от ${extractedParams.minExperience} лет)` : ''}
 
 Вот найденные специалисты:
@@ -522,7 +520,7 @@ ${JSON.stringify(
             name: `${s.firstName} ${s.lastName}`,
             specializations: s.specializations,
             experience: s.yearsOfPractice,
-            price: s.priceFrom ? `от ${Math.floor(s.priceFrom / 100)}₽` : 'по запросу',
+            price: s.priceFromInPoints ? `от ${s.priceFromInPoints} баллов` : 'по запросу',
           })),
           null,
           2
@@ -542,7 +540,7 @@ ${JSON.stringify(
 Текущие фильтры:
 - Категория: ${extractedParams.category || 'не указана'}
 - Формат: ${extractedParams.workFormats?.join(', ') || 'не указан'}
-- Бюджет: ${extractedParams.maxPrice ? `до ${extractedParams.maxPrice}₽` : 'не указан'}
+- Бюджет: ${extractedParams.maxPrice ? `до ${extractedParams.maxPrice} баллов` : 'не указан'}
 - Опыт: ${extractedParams.minExperience ? `от ${extractedParams.minExperience} лет` : 'не указан'}
 - Методы: ${extractedParams.preferences?.methods?.join(', ') || 'не указаны'}
 
@@ -595,7 +593,7 @@ ${personalizedExplanation}
 Критерии поиска:
 - Категория: ${extractedParams.category || 'не указана'}
 - Формат: ${extractedParams.workFormats?.join(', ') || 'не указан'}
-- Бюджет: ${extractedParams.maxPrice ? `до ${extractedParams.maxPrice}₽` : 'не указан'}
+- Бюджет: ${extractedParams.maxPrice ? `до ${extractedParams.maxPrice} баллов` : 'не указан'}
 - Опыт: ${extractedParams.minExperience ? `от ${extractedParams.minExperience} лет` : 'не указан'}
 ${extractedParams.preferences?.methods ? `- Методы: ${extractedParams.preferences.methods.join(', ')}` : ''}
 
@@ -717,8 +715,8 @@ ${contextualHints.map(hint => `- ${hint}`).join('\n')}
                 yearsOfPractice: s.yearsOfPractice,
                 workFormats: s.workFormats,
                 city: s.city,
-                priceFrom: s.priceFrom,
-                priceTo: s.priceTo,
+                priceFromInPoints: s.priceFromInPoints,
+                priceToInPoints: s.priceToInPoints,
                 verified: s.verified,
                 similarity,
                 matchReasons,

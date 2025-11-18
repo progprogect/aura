@@ -3,9 +3,10 @@
  */
 
 export {
-  formatPrice,
-  formatPriceRange,
-} from './price'
+  formatPointsDisplay,
+  formatPointsRange,
+  formatPointsWithDescription,
+} from './points-display'
 
 export {
   formatExperience,

@@ -49,9 +49,8 @@ export interface Specialist {
   country: string
   workFormats: WorkFormat[]
   yearsOfPractice?: number
-  priceFrom?: number
-  priceTo?: number
-  currency: string
+  priceFromInPoints?: number
+  priceToInPoints?: number
   priceDescription?: string
   verified: boolean
   customFields?: CustomFields
@@ -111,8 +110,8 @@ export interface SpecialistWhereInput {
   workFormats?: { hasSome: WorkFormat[] }
   city?: string
   yearsOfPractice?: { gte: number }
-  priceFrom?: { lte: number } | null
+  priceFromInPoints?: { lte: number } | null
   verified?: boolean
-  OR?: Array<{ priceFrom: null } | { priceFrom: { lte: number } }>
+  OR?: Array<{ priceFromInPoints: null } | { priceFromInPoints: { lte: number } }>
 }
 

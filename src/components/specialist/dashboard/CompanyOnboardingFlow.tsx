@@ -91,7 +91,7 @@ export function CompanyOnboardingFlow({
             <ul className="space-y-2">
               <li className="flex gap-2">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-                <span>На старте у вас 50 бонусных баллов (1 балл = 1 BYN по курсу).</span>
+                <span>На старте у вас 50 бонусных баллов.</span>
               </li>
               <li className="flex gap-2">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />

@@ -152,7 +152,7 @@ export default async function ServicePage({ params }: PageProps) {
               <div className="mb-6 p-6 bg-green-50 rounded-lg border-2 border-green-200">
                 <p className="text-sm text-green-700 font-medium mb-1">Стоимость</p>
                 <p className="text-4xl font-bold text-green-700">
-                  {formatServicePrice(service.price, service.currency)}
+                  {formatServicePrice(service.price)}
                 </p>
               </div>
 
@@ -217,7 +217,6 @@ export default async function ServicePage({ params }: PageProps) {
                 serviceName={service.title}
                 specialistName={fullName}
                 servicePrice={service.price}
-                serviceCurrency={service.currency}
               />
             </div>
           </div>

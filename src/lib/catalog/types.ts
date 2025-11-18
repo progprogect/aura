@@ -91,9 +91,8 @@ export interface SpecialistDTO {
   country: string
   workFormats: string[]
   yearsOfPractice: number | null
-  priceFrom: number | null
-  priceTo: number | null
-  currency: string
+  priceFromInPoints: number | null
+  priceToInPoints: number | null
   priceDescription: string | null
   verified: boolean
   profileViews: number

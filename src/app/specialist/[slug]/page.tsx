@@ -137,9 +137,8 @@ async function getSpecialist(slug: string) {
     whatsapp: specialistProfile.whatsapp,
     website: specialistProfile.website,
     phoneVisible: specialistProfile.phoneVisible ?? true, // По умолчанию true для обратной совместимости
-    priceFrom: specialistProfile.priceFrom,
-    priceTo: specialistProfile.priceTo,
-    currency: specialistProfile.currency,
+    priceFromInPoints: specialistProfile.priceFromInPoints,
+    priceToInPoints: specialistProfile.priceToInPoints,
     priceDescription: specialistProfile.priceDescription,
     customFields: specialistProfile.customFields,
     videoUrl: specialistProfile.videoUrl,
@@ -324,7 +323,7 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
       ? { id: 'education', label: 'Образование', icon: 'academic-cap' }
       : null,
     // Убираем таб "Стоимость" - цены теперь только в услугах
-    // specialist.priceFrom || specialist.priceTo ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
+    // specialist.priceFromInPoints || specialist.priceToInPoints ? { id: 'pricing', label: 'Стоимость', icon: 'currency-dollar' } : null,
     specialist.services.length > 0 ? { id: 'services', label: 'Услуги', icon: 'shopping-cart' } : null,
     specialist.leadMagnets.length > 0 ? { id: 'lead-magnets', label: 'Материалы', icon: 'gift' } : null,
     specialist.totalReviews && specialist.totalReviews > 0 ? { id: 'reviews', label: 'Отзывы', icon: 'star' } : null,
@@ -418,9 +417,8 @@ export default async function SpecialistPage({ params, searchParams }: PageProps
               year: cert.year,
               fileUrl: cert.fileUrl,
             })),
-            priceFrom: specialist.priceFrom,
-            priceTo: specialist.priceTo,
-            currency: specialist.currency,
+            priceFromInPoints: specialist.priceFromInPoints,
+            priceToInPoints: specialist.priceToInPoints,
             priceDescription: specialist.priceDescription,
             faqs: specialist.faqs.map(faq => ({
               id: faq.id,

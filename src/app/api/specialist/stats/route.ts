@@ -67,8 +67,8 @@ export async function GET(request: NextRequest) {
       tagline: specialistProfile.tagline,
       about: specialistProfile.about,
       city: specialistProfile.city,
-      priceFrom: specialistProfile.priceFrom,
-      priceTo: specialistProfile.priceTo,
+      priceFromInPoints: specialistProfile.priceFromInPoints,
+      priceToInPoints: specialistProfile.priceToInPoints,
       yearsOfPractice: specialistProfile.yearsOfPractice,
       videoUrl: specialistProfile.videoUrl,
       education: specialistProfile.education,
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       tagline: specialist.tagline ? 5 : 0,
       city: specialist.city ? 5 : 0,
       email: specialist.email ? 5 : 0,
-      prices: (specialist.priceFrom || specialist.priceTo) ? 10 : 0,
+      prices: (specialist.priceFromInPoints || specialist.priceToInPoints) ? 10 : 0,
       yearsOfPractice: specialist.yearsOfPractice ? 5 : 0,
       education: specialist.education.length > 0 ? 15 : 0,
       certificates: specialist.certificates.length > 0 ? 20 : 0,
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    if (!specialist.priceFrom && !specialist.priceTo) {
+    if (!specialist.priceFromInPoints && !specialist.priceToInPoints) {
       tasks.push({
         id: 'pricing',
         title: 'Укажите цены',

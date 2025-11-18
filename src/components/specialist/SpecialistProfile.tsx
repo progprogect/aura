@@ -56,9 +56,8 @@ interface SpecialistProfileProps {
       year: number
       fileUrl?: string | null
     }>
-    priceFrom?: number | null
-    priceTo?: number | null
-    currency: string
+    priceFromInPoints?: number | null
+    priceToInPoints?: number | null
     priceDescription?: string | null
     faqs: Array<{
       id: string
@@ -137,12 +136,11 @@ export function SpecialistProfile({ tabs, categoryConfig, profileType, address, 
 
         {/* Стоимость - убрана, теперь цены только в услугах */}
         {/* Показываем только для старых профилей, которые уже имеют цены */}
-        {false && (data.priceFrom || data.priceTo || isEditMode) && (
+        {false && (data.priceFromInPoints || data.priceToInPoints || isEditMode) && (
           <SpecialistPricing
             category={data.category}
-            priceFrom={data.priceFrom}
-            priceTo={data.priceTo}
-            currency={data.currency}
+            priceFromInPoints={data.priceFromInPoints}
+            priceToInPoints={data.priceToInPoints}
             priceDescription={data.priceDescription}
             priceLabel={categoryConfig?.priceLabel}
             isEditMode={isEditMode}

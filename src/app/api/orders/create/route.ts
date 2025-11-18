@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         // TODO: После интеграции системы баллов:
         // 1. Проверить баланс пользователя
         // 2. Создать Transaction со статусом escrow
-        // 3. Установить amountPaid, paymentMethod, transactionId
+        // 3. Установить pointsPaid, paymentMethod, transactionId
         // 4. Изменить статус на 'paid'
         // 5. Если есть deliveryDays - установить deadline
       },

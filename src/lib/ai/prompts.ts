@@ -138,7 +138,7 @@ export function getExtractionPrompt(): string {
   "workFormats": ["online"] | ["offline"] | ["online", "offline"] | [],
   "city": "название города" | null,
   "minExperience": число лет | null,
-  "maxPrice": число в рублях (за сессию) | null,
+  "maxPrice": число в баллах (за сессию) | null,
   "personalProfile": {
     "gender": "male" | "female" | null,
     "age": "young" | "middle" | "mature" | null,
@@ -163,10 +163,10 @@ export function getExtractionPrompt(): string {
   * "неважно", "любой", "без разницы", "всё равно" → ["online", "offline"]
   * Если не указано → []
 - city — только если формат offline и город указан явно
-- maxPrice — бюджет ЗА СЕССИЮ в рублях (ТОЛЬКО если упомянут пользователем):
+- maxPrice — бюджет ЗА СЕССИЮ в баллах (ТОЛЬКО если упомянут пользователем):
   * "до 2000" → 2000
-  * "до 3000₽" → 3000
-  * "3-5 тысяч" → 5000
+  * "до 3000 баллов" → 3000
+  * "3-5 тысяч баллов" → 5000
   * "не важно" → null
 - minExperience — минимальный опыт:
   * "от 5 лет" → 5

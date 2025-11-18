@@ -15,10 +15,9 @@ interface OrderFormProps {
   serviceName: string
   specialistName: string
   servicePrice: number
-  serviceCurrency: string
 }
 
-export function OrderForm({ serviceId, serviceName, specialistName, servicePrice, serviceCurrency }: OrderFormProps) {
+export function OrderForm({ serviceId, serviceName, specialistName, servicePrice }: OrderFormProps) {
   const { user } = useUser()
   
   const [formData, setFormData] = useState({

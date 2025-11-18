@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
         orderBy = { yearsOfPractice: 'desc' }
         break
       case 'price':
-        orderBy = { priceFrom: 'asc' }
+        orderBy = { priceFromInPoints: 'asc' }
         break
       case 'relevance':
       default:
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
           if (ratingDiff !== 0) return ratingDiff
           return (b.totalReviews || 0) - (a.totalReviews || 0)
         case 'price':
-          return (a.priceFrom || 0) - (b.priceFrom || 0)
+          return (a.priceFromInPoints || 0) - (b.priceFromInPoints || 0)
         case 'relevance':
         default:
           // Сначала верифицированные, потом по просмотрам
@@ -221,9 +221,8 @@ export async function GET(request: NextRequest) {
         country: profile.country,
         workFormats: profile.workFormats,
         yearsOfPractice: profile.yearsOfPractice,
-        priceFrom: profile.priceFrom,
-        priceTo: profile.priceTo,
-        currency: profile.currency,
+        priceFromInPoints: profile.priceFromInPoints,
+        priceToInPoints: profile.priceToInPoints,
         priceDescription: profile.priceDescription,
         verified: profile.verified,
         profileViews: profile.profileViews,

@@ -99,11 +99,10 @@ model SpecialistProfile {
   website     String?
   phoneVisible Boolean @default(true) // Показывать ли телефон клиентам
 
-  // Стоимость
-  priceFrom        Int? // Цена от (в копейках для точности)
-  priceTo          Int? // Цена до
-  currency         String  @default("RUB")
-  priceDescription String? // "за сессию 60 мин" или "за программу 3 месяца"
+  // Стоимость (в баллах)
+  priceFromInPoints Int? // Цена от (в баллах)
+  priceToInPoints   Int? // Цена до (в баллах)
+  priceDescription  String? // "за сессию 60 мин" или "за программу 3 месяца"
 
   // Гибкие поля (специфичные для категории)
   customFields Json?
@@ -456,8 +455,7 @@ model Service {
   highlights String[] @default([]) // ["60 минут консультации", "Персональный план"]
 
   // Стоимость и сроки
-  price        Int // Цена в баллах (100 баллов = 1 BYN по умолчанию)
-  currency     String @default("BYN")
+  price        Int // Цена в баллах
   deliveryDays Int? // Срок выполнения (3, 7, 14 дней)
 
   // Настройки
@@ -515,8 +513,8 @@ model Order {
   // cancelled - отменен (возврат средств)
   // disputed - спор (эскалация)
 
-  // Платежные данные (пока NULL, будут использоваться после интеграции)
-  amountPaid    Decimal? @db.Decimal(15, 2) // Сумма оплаты
+  // Платежные данные
+  pointsPaid    Decimal? @db.Decimal(15, 4) // Сумма оплаты в баллах
   paymentMethod String? // "balance" | "bonusBalance"
   transactionId String? // ID транзакции из Transaction модели
 

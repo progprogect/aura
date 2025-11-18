@@ -14,16 +14,15 @@ export interface SpecialistPricingProps extends SpecialistPricingContentProps {
  */
 export function SpecialistPricing({
   category,
-  priceFrom,
-  priceTo,
-  currency,
+  priceFromInPoints,
+  priceToInPoints,
   priceDescription,
   priceLabel = 'за услугу',
   isEditMode = false,
   onSave,
   showTitle = true,
 }: SpecialistPricingProps) {
-  if (!priceFrom && !priceTo && !isEditMode) {
+  if (!priceFromInPoints && !priceToInPoints && !isEditMode) {
     return null
   }
 
@@ -39,9 +38,8 @@ export function SpecialistPricing({
       <CardContent>
         <SpecialistPricingContent
           category={category}
-          priceFrom={priceFrom}
-          priceTo={priceTo}
-          currency={currency}
+          priceFromInPoints={priceFromInPoints}
+          priceToInPoints={priceToInPoints}
           priceDescription={priceDescription}
           priceLabel={priceLabel}
           isEditMode={isEditMode}

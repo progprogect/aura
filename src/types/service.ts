@@ -10,7 +10,6 @@ export interface Service {
   slug: string
   highlights: string[]
   price: number
-  currency: string
   deliveryDays: number | null
   emoji: string
   order: number
@@ -30,7 +29,7 @@ export interface Order {
   clientContact: string
   clientMessage: string | null
   status: OrderStatus
-  amountPaid: number | null
+  pointsPaid: number | null
   paymentMethod: string | null
   transactionId: string | null
   escrowReleased: boolean

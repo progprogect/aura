@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
             title: true,
             emoji: true,
             price: true,
-            currency: true,
           }
         }
       },

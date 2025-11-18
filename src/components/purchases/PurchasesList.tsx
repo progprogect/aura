@@ -38,7 +38,6 @@ interface Order {
     emoji: string
     slug: string
     price: number
-    currency: string
   }
   specialistProfile: {
     slug: string

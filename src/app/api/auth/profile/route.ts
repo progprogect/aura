@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       tagline: specialistProfile.tagline,
       about: specialistProfile.about,
       city: specialistProfile.city,
-      priceFrom: specialistProfile.priceFrom,
-      priceTo: specialistProfile.priceTo,
+      priceFromInPoints: specialistProfile.priceFromInPoints,
+      priceToInPoints: specialistProfile.priceToInPoints,
       yearsOfPractice: specialistProfile.yearsOfPractice,
       videoUrl: specialistProfile.videoUrl,
     }

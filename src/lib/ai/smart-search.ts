@@ -318,7 +318,7 @@ function buildRankingPrompt(specialists: Specialist[], context: any): string {
     specializations: s.specializations,
     workFormats: s.workFormats,
     yearsOfPractice: s.yearsOfPractice,
-    priceFrom: s.priceFrom,
+    priceFromInPoints: s.priceFromInPoints,
     about: s.about.substring(0, 200) + '...'
   }))
 

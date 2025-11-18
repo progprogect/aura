@@ -19,8 +19,8 @@ export interface RankedSpecialist {
   yearsOfPractice?: number
   workFormats: string[]
   city?: string
-  priceFrom?: number
-  priceTo?: number
+  priceFromInPoints?: number
+  priceToInPoints?: number
   verified: boolean
   personalizationScore: number
   matchReasons: string[]
@@ -75,8 +75,8 @@ export function rankSpecialistsByPersonalization(
       yearsOfPractice: specialist.yearsOfPractice,
       workFormats: specialist.workFormats,
       city: specialist.city,
-      priceFrom: specialist.priceFrom,
-      priceTo: specialist.priceTo,
+      priceFromInPoints: specialist.priceFromInPoints,
+      priceToInPoints: specialist.priceToInPoints,
       verified: specialist.verified,
       personalizationScore: personalizationScore.overall,
       matchReasons,

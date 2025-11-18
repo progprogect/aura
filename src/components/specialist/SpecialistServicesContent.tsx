@@ -83,7 +83,7 @@ export function SpecialistServicesContent({ services, specialistSlug }: Speciali
                 {/* Price */}
                 <div className="mt-auto pt-4 border-t">
                   <p className="text-2xl font-bold text-green-700">
-                    {formatServicePrice(service.price, service.currency)}
+                    {formatServicePrice(service.price)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     за услугу

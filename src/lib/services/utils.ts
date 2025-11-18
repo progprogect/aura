@@ -72,7 +72,7 @@ export function canTransitionStatus(from: OrderStatus, to: OrderStatus): boolean
 /**
  * Форматирует цену для отображения в баллах
  */
-export function formatServicePrice(price: number, currency: string = 'BYN'): string {
+export function formatServicePrice(price: number): string {
   // Все услуги отображаются в баллах
   return `${price} баллов`
 }

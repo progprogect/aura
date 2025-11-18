@@ -171,7 +171,7 @@ async function getUserData() {
         tagline: profile.tagline ? 5 : 0,
         city: profile.city ? 5 : 0,
         email: user.email ? 5 : 0,
-        prices: (profile.priceFrom || profile.priceTo) ? 10 : 0,
+        prices: (profile.priceFromInPoints || profile.priceToInPoints) ? 10 : 0,
         yearsOfPractice: profile.yearsOfPractice ? 5 : 0,
         education: profile.education.length > 0 ? 15 : 0,
         certificates: profile.certificates.length > 0 ? 20 : 0,
@@ -270,7 +270,7 @@ async function getUserData() {
       }
       
       // Цены только для специалистов (для компаний цены в услугах)
-      if (!isCompany && !profile.priceFrom && !profile.priceTo) {
+      if (!isCompany && !profile.priceFromInPoints && !profile.priceToInPoints) {
         tasks.push({
           id: 'pricing',
           title: 'Укажите цены',
@@ -327,8 +327,8 @@ async function getUserData() {
         about: profile.about,
         tagline: profile.tagline,
         city: profile.city,
-        priceFrom: profile.priceFrom,
-        priceTo: profile.priceTo,
+        priceFromInPoints: profile.priceFromInPoints,
+        priceToInPoints: profile.priceToInPoints,
         yearsOfPractice: profile.yearsOfPractice,
         videoUrl: profile.videoUrl,
         profileViews: profile.profileViews,
