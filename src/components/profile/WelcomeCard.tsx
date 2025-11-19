@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Search, Gift, FileText, Edit, Package, X } from 'lucide-react'
+import { Search, Gift, FileText, Edit, Package, X, BookOpen, Users } from 'lucide-react'
 
 interface WelcomeAction {
   icon: React.ComponentType<{ className?: string }>
@@ -89,6 +89,18 @@ export function WelcomeCard({
           description: 'Начните получать заказы',
           href: '/profile?section=services',
         },
+        {
+          icon: BookOpen,
+          label: 'Найти полезные материалы',
+          description: 'Библиотека ресурсов от других экспертов',
+          href: '/library',
+        },
+        {
+          icon: Users,
+          label: 'Найти клиентов',
+          description: 'Просмотрите открытые заявки и откликнитесь',
+          href: '/find-work',
+        },
       ]
     : [
         {
@@ -98,16 +110,16 @@ export function WelcomeCard({
           href: '/catalog',
         },
         {
-          icon: Gift,
-          label: 'Просмотреть полезные материалы',
-          description: 'Бесплатные материалы от экспертов',
-          href: '/catalog',
+          icon: BookOpen,
+          label: 'Найти полезные материалы',
+          description: 'Библиотека ресурсов от экспертов',
+          href: '/library',
         },
         {
           icon: FileText,
-          label: 'Создать заявку',
-          description: 'Опишите задачу и получите отклики',
-          href: '/catalog',
+          label: 'Опубликовать задачу',
+          description: 'Опишите задачу и получите отклики специалистов',
+          href: '/requests/create',
         },
       ]
 
@@ -138,25 +150,25 @@ export function WelcomeCard({
         </p>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="space-y-3">
+        <div className="space-y-4">
           {actions.map((action, index) => {
             const Icon = action.icon
             return (
               <Link key={index} href={action.href}>
                 <Button
                   variant="outline"
-                  className="w-full h-auto py-3 px-4 flex items-start gap-3 text-left hover:bg-white/80 transition-colors border-blue-200 bg-white/50"
+                  className="w-full h-auto py-4 px-4 flex items-start gap-3 text-left hover:bg-white/90 transition-all border-blue-200 bg-white/50 hover:border-blue-300 hover:shadow-sm"
                 >
-                  <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
+                  <div className="p-2 rounded-lg bg-blue-100 flex-shrink-0">
                     <Icon className="w-4 h-4 text-blue-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-gray-900 mb-0.5">
+                    <div className="font-medium text-sm text-gray-900 mb-1">
                       {action.label}
                     </div>
-                    <div className="text-xs text-gray-600">{action.description}</div>
+                    <div className="text-xs text-gray-600 leading-relaxed">{action.description}</div>
                   </div>
-                  <div className="text-gray-400 flex-shrink-0">
+                  <div className="text-gray-400 flex-shrink-0 mt-1">
                     <svg
                       className="w-4 h-4"
                       fill="none"
