@@ -30,6 +30,8 @@ import { ProfileHero } from '@/components/specialist/dashboard/ProfileHero'
 import { RequestsAlert } from '@/components/specialist/dashboard/RequestsAlert'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 import { ProfileSectionScroll } from '@/components/profile/ProfileSectionScroll'
+import { WelcomeCard } from '@/components/profile/WelcomeCard'
+import { shouldShowWelcomeCard } from '@/lib/user/welcome-card-service'
 
 async function getUserData() {
   try {
@@ -99,6 +101,47 @@ async function getUserData() {
 
     const totalPurchases = purchasesStats.reduce((sum, stat) => sum + stat._count, 0)
 
+    // Проверяем, нужно ли показывать Welcome Card
+    // Передаем уже загруженные данные для оптимизации запросов
+    const welcomeCardData = await shouldShowWelcomeCard(
+      user.id,
+      hasSpecialistProfile,
+      user.createdAt,
+      user.phone, // Передаем телефон чтобы избежать дополнительного запроса
+      hasSpecialistProfile && user.specialistProfile
+        ? {
+            about: user.specialistProfile.about,
+            specializations: user.specialistProfile.specializations,
+            tagline: user.specialistProfile.tagline,
+            city: user.specialistProfile.city,
+            priceFromInPoints: user.specialistProfile.priceFromInPoints,
+            priceToInPoints: user.specialistProfile.priceToInPoints,
+            yearsOfPractice: user.specialistProfile.yearsOfPractice,
+            videoUrl: user.specialistProfile.videoUrl,
+            acceptingClients: user.specialistProfile.acceptingClients,
+            profileType: (user.specialistProfile.profileType || 'specialist') as 'specialist' | 'company',
+            companyName: user.specialistProfile.companyName,
+            address: user.specialistProfile.address,
+            taxId: user.specialistProfile.taxId,
+            website: user.specialistProfile.website,
+            education: user.specialistProfile.education.map(e => ({ id: e.id })),
+            certificates: user.specialistProfile.certificates.map(c => ({ id: c.id })),
+            gallery: user.specialistProfile.gallery.map(g => ({ id: g.id })),
+            faqs: user.specialistProfile.faqs.map(f => ({ id: f.id })),
+            leadMagnets: user.specialistProfile.leadMagnets.map(lm => ({ id: lm.id })),
+          }
+        : undefined,
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        email: user.email,
+      },
+      hasSpecialistProfile && user.specialistProfile
+        ? user.specialistProfile.services.length
+        : undefined
+    )
+
     // Базовые данные пользователя
     const userData: any = {
       id: user.id,
@@ -116,7 +159,9 @@ async function getUserData() {
         completed: purchasesStatusCounts.completed || 0,
         cancelled: purchasesStatusCounts.cancelled || 0,
         disputed: purchasesStatusCounts.disputed || 0
-      }
+      },
+      // Данные для Welcome Card
+      welcomeCard: welcomeCardData
     }
 
     // Если специалист - добавляем данные профиля специалиста
@@ -403,6 +448,19 @@ export default async function ProfilePage() {
               } : undefined}
             />
           </div>
+
+          {/* WelcomeCard - показывается только для новых пользователей */}
+          {user.welcomeCard?.shouldShow && (
+            <div className="mb-6">
+              <WelcomeCard
+                userId={user.id}
+                firstName={user.firstName}
+                hasSpecialistProfile={user.hasSpecialistProfile}
+                specialistSlug={user.hasSpecialistProfile ? user.specialistProfile?.slug : undefined}
+                profileType={user.hasSpecialistProfile ? user.specialistProfile?.profileType : undefined}
+              />
+            </div>
+          )}
 
           {/* RequestsAlert - показывается только если есть новые заявки */}
           {(user.newRequestsCount || 0) > 0 && (
