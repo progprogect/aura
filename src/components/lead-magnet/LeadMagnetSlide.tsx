@@ -11,6 +11,7 @@ interface LeadMagnetSlideProps {
   specialistId: string
   specialistSlug: string
   specialistName: string
+  hasPurchased?: boolean
   className?: string
 }
 
@@ -18,7 +19,8 @@ export function LeadMagnetSlide({
   leadMagnet, 
   specialistId, 
   specialistSlug, 
-  specialistName, 
+  specialistName,
+  hasPurchased = false,
   className 
 }: LeadMagnetSlideProps) {
   return (
@@ -40,6 +42,7 @@ export function LeadMagnetSlide({
                    leadMagnet={leadMagnet} 
                    specialistId={specialistId}
                    specialistName={specialistName}
+                   hasPurchased={hasPurchased}
                  />
           
           {/* Контент с интегрированной кнопкой */}
@@ -47,6 +50,7 @@ export function LeadMagnetSlide({
             leadMagnet={leadMagnet}
             specialistId={specialistId}
             specialistName={specialistName}
+            hasPurchased={hasPurchased}
           />
         </div>
 
@@ -58,11 +62,13 @@ export function LeadMagnetSlide({
                    leadMagnet={leadMagnet} 
                    specialistId={specialistId}
                    specialistName={specialistName}
+                   hasPurchased={hasPurchased}
                  />
             <SlideContent 
               leadMagnet={leadMagnet}
               specialistId={specialistId}
               specialistName={specialistName}
+              hasPurchased={hasPurchased}
             />
           </div>
         </div>
@@ -77,6 +83,7 @@ export function LeadMagnetSlide({
                    leadMagnet={leadMagnet} 
                    specialistId={specialistId}
                    specialistName={specialistName}
+                   hasPurchased={hasPurchased}
                  />
             </div>
             
@@ -86,6 +93,7 @@ export function LeadMagnetSlide({
                 leadMagnet={leadMagnet}
                 specialistId={specialistId}
                 specialistName={specialistName}
+                hasPurchased={hasPurchased}
               />
             </div>
           </div>

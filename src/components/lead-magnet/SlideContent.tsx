@@ -6,6 +6,7 @@ import { Download, ExternalLink, MessageCircle, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getLeadMagnetBadgeColor } from '@/lib/lead-magnets/preview'
 import { CTAButton } from './CTAButton'
+import { PriceCard } from './PriceCard'
 import { useUser } from '@/hooks/useUser'
 import type { LeadMagnet } from '@/types/lead-magnet'
 
@@ -13,6 +14,7 @@ interface SlideContentProps {
   leadMagnet: Pick<LeadMagnet, 'id' | 'title' | 'description' | 'type' | 'targetAudience' | 'fileSize' | 'downloadCount' | 'highlights' | 'fileUrl' | 'linkUrl' | 'priceInPoints' | 'emoji' | 'slug'>
   specialistId?: string
   specialistName?: string
+  hasPurchased?: boolean
   className?: string
 }
 
@@ -110,50 +112,7 @@ function HighlightsList({ highlights }: { highlights: string[] }) {
   )
 }
 
-// Компонент для отображения цены и баланса
-function PriceAndBalance({ 
-  priceInPoints,
-  balance 
-}: {
-  priceInPoints?: number | null
-  balance?: UserBalance | null
-}) {
-  const isPaid = typeof priceInPoints === 'number' && priceInPoints > 0
-  const totalBalance = balance ? parseFloat(balance.total) : 0
-
-  if (!isPaid && !balance) return null
-
-  return (
-    <div className="space-y-3">
-      {/* Цена */}
-      {isPaid && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-amber-900">Стоимость:</span>
-            <span className="text-lg font-bold text-amber-900 flex items-center gap-1">
-              <Coins className="w-5 h-5" />
-              {priceInPoints} баллов
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Баланс пользователя (если авторизован) */}
-      {balance && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Ваш баланс:</span>
-            <span className={`font-semibold ${totalBalance >= (priceInPoints || 0) ? 'text-green-600' : 'text-gray-900'}`}>
-              {totalBalance} баллов
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-export function SlideContent({ leadMagnet, specialistId, specialistName, className }: SlideContentProps) {
+export function SlideContent({ leadMagnet, specialistId, specialistName, hasPurchased = false, className }: SlideContentProps) {
   const { isAuthenticated } = useUser()
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(true)
@@ -209,14 +168,11 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
       </div>
 
       {/* Цена и баланс */}
-      {(typeof leadMagnet.priceInPoints === 'number' && leadMagnet.priceInPoints > 0) || balance ? (
-        <div>
-          <PriceAndBalance 
-            priceInPoints={leadMagnet.priceInPoints}
-            balance={balance}
-          />
-        </div>
-      ) : null}
+      <PriceCard
+        priceInPoints={leadMagnet.priceInPoints}
+        balance={balance}
+        isPurchased={hasPurchased}
+      />
 
       {/* Highlights (если есть) */}
       {leadMagnet.highlights && leadMagnet.highlights.length > 0 && (
@@ -232,6 +188,11 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, classNa
             leadMagnet={leadMagnet}
             specialistId={specialistId}
             specialistName={specialistName}
+            hasPurchased={hasPurchased}
+            onPurchaseSuccess={() => {
+              // Обновляем страницу после покупки для синхронизации состояния
+              window.location.reload()
+            }}
           />
         </div>
       )}

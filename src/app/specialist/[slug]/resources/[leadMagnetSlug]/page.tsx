@@ -11,6 +11,7 @@ import { LeadMagnetSlide } from '@/components/lead-magnet/LeadMagnetSlide'
 import { RelatedActions } from '@/components/lead-magnet/RelatedActions'
 import { shouldShowPreview, generateOGTags } from '@/lib/lead-magnets/utils'
 import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
+import { checkPurchaseStatus } from '@/lib/lead-magnets/purchase-utils'
 
 interface PageProps {
   params: {
@@ -69,6 +70,12 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
     .filter(lm => lm.id !== leadMagnet.id)
     .map(fromPrismaLeadMagnet)
 
+  // Проверяем покупку лид-магнита пользователем
+  const hasPurchased = await checkPurchaseStatus(
+    leadMagnet.id,
+    leadMagnet.priceInPoints
+  )
+
   return {
     specialist: {
       id: specialist.id,
@@ -78,7 +85,8 @@ const getLeadMagnetData = cache(async (slug: string, leadMagnetSlug: string) => 
       avatar: specialist.user.avatar,
     },
     leadMagnet: fromPrismaLeadMagnet(leadMagnet), // Конвертируем Prisma объект в типизированный
-    otherLeadMagnets
+    otherLeadMagnets,
+    hasPurchased
   }
 })
 
@@ -120,7 +128,7 @@ export default async function LeadMagnetPage({ params }: PageProps) {
     notFound()
   }
 
-  const { specialist, leadMagnet, otherLeadMagnets } = data
+  const { specialist, leadMagnet, otherLeadMagnets, hasPurchased } = data
   const specialistName = `${specialist.firstName} ${specialist.lastName}`
 
   return (
@@ -139,6 +147,7 @@ export default async function LeadMagnetPage({ params }: PageProps) {
           specialistId={specialist.id}
           specialistSlug={specialist.slug}
           specialistName={specialistName}
+          hasPurchased={hasPurchased}
         />
       </main>
 

@@ -16,7 +16,7 @@ interface PurchaseConfirmModalProps {
   isOpen: boolean
   onClose: () => void
   leadMagnet: Pick<LeadMagnetUI, 'id' | 'title' | 'description' | 'emoji' | 'priceInPoints'>
-  onSuccess: (accessUrl: string) => void
+  onSuccess: (accessUrl?: string | null) => void
 }
 
 interface UserBalance {

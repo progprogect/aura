@@ -130,11 +130,13 @@ export async function POST(
 
       if (existingPurchase) {
         // Если уже купил - возвращаем доступ без списания баллов
-        const accessUrl = leadMagnet.type === 'file' 
-          ? leadMagnet.fileUrl 
-          : leadMagnet.linkUrl
+        // Для типа service не требуется accessUrl
+        const accessUrl = leadMagnet.type === 'service'
+          ? null
+          : (leadMagnet.type === 'file' ? leadMagnet.fileUrl : leadMagnet.linkUrl)
 
-        if (!accessUrl) {
+        // Для типов file/link проверяем наличие URL
+        if (leadMagnet.type !== 'service' && !accessUrl) {
           throw new Error('URL доступа не найден')
         }
 
@@ -197,14 +199,20 @@ export async function POST(
         }
       }
 
+      // Для типа service не требуется accessUrl
+      const accessUrl = leadMagnet.type === 'service' 
+        ? null 
+        : (leadMagnet.type === 'file' ? leadMagnet.fileUrl : leadMagnet.linkUrl)
+
       return {
         purchase,
         transactionId,
-        accessUrl: leadMagnet.type === 'file' ? leadMagnet.fileUrl : leadMagnet.linkUrl
+        accessUrl
       }
     })
 
-    if (!result.accessUrl) {
+    // Для типа service accessUrl может быть null - это нормально
+    if (leadMagnet.type !== 'service' && !result.accessUrl) {
       return NextResponse.json(
         { success: false, error: 'URL доступа не найден' },
         { status: 404 }
@@ -213,7 +221,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      accessUrl: result.accessUrl,
+      accessUrl: result.accessUrl || null,
       transactionId: result.transactionId,
       purchaseId: result.purchase?.id,
       alreadyPurchased: result.alreadyPurchased || false
