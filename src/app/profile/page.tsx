@@ -18,7 +18,7 @@ import { ProfileCompletionCard } from '@/components/specialist/dashboard/Profile
 import { QuickActions } from '@/components/specialist/dashboard/QuickActions'
 import { ServicesList } from '@/components/specialist/dashboard/ServicesList'
 import { LeadMagnetsListWrapper } from '@/components/specialist/dashboard/LeadMagnetsListWrapper'
-import { LimitsWidget } from '@/components/specialist/dashboard/LimitsWidget'
+import { TariffsAndUsageWidget } from '@/components/specialist/dashboard/TariffsAndUsageWidget'
 import { LogoutButton } from '@/components/profile/LogoutButton'
 import { BalanceWidgetWrapper } from '@/components/points/BalanceWidgetWrapper'
 import { ensureSlugExists } from '@/lib/auth/server'
@@ -449,11 +449,6 @@ export default async function ProfilePage() {
               />
             )}
 
-            {/* Лимиты (для специалистов) */}
-            {user.hasSpecialistProfile && user.specialistProfile && (
-              <LimitsWidget specialistId={user.specialistProfile.id} />
-            )}
-
             {/* Услуги (для специалистов) - перенесено в основную колонку */}
             {user.hasSpecialistProfile && user.services && (
               <Card id="section-services">
@@ -565,6 +560,11 @@ export default async function ProfilePage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Тарифы и расходы (для специалистов) */}
+            {user.hasSpecialistProfile && user.specialistProfile && (
+              <TariffsAndUsageWidget specialistId={user.specialistProfile.id} />
+            )}
 
           </div>
 
