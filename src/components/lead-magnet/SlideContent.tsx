@@ -182,7 +182,8 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, hasPurc
       )}
 
       {/* CTA кнопка (используем обновленный компонент) */}
-      {specialistId && specialistName && (
+      {/* Для типа service после покупки или бесплатного - не показываем кнопку (форма уже слева) */}
+      {specialistId && specialistName && !(leadMagnet.type === 'service' && (hasPurchased || !leadMagnet.priceInPoints || leadMagnet.priceInPoints === 0)) && (
         <div className="pt-2">
           <CTAButton
             leadMagnet={leadMagnet}
