@@ -169,7 +169,7 @@ export function SlideContent({ leadMagnet, specialistId, specialistName, hasPurc
 
       {/* Цена и баланс */}
       <PriceCard
-        priceInPoints={leadMagnet.priceInPoints}
+        priceInPoints={leadMagnet.priceInPoints ?? null}
         balance={balance}
         isPurchased={hasPurchased}
       />
