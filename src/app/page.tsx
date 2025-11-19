@@ -50,9 +50,9 @@ export default function Home() {
           <HeroSection />
           <FeaturedSpecialists />
           <FeaturedResources />
+          <AdvantagesSection />
           <HowItWorksSection />
           <CategoriesSection />
-          <AdvantagesSection />
         </ErrorBoundary>
       </main>
     </>

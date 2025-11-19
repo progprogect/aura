@@ -8,33 +8,32 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icons/Icon'
-import { AdvantageIcon } from '@/components/ui/icons/AdvantageIcon'
-import { Shield } from 'lucide-react'
+import { ShieldCheck, LayoutGrid, Award, Users } from 'lucide-react'
 
 const advantages = [
   {
-    icon: 'target',
-    title: 'Только проверенные эксперты',
-    description: 'Мы отбираем топ-1% специалистов в своей области с проверенным образованием и опытом',
+    icon: LayoutGrid,
+    title: 'Экосистема роста',
+    description: 'Материалы, специалисты и услуги в одном окне. Не нужно искать информацию в разных источниках.',
     color: 'from-blue-500 to-blue-600'
   },
   {
-    icon: 'bot',
-    title: 'AI помогает найти идеального',
-    description: 'За 2 минуты вместо часов поиска и сомнений. Умный алгоритм подберет именно того, кто нужен',
+    icon: Award,
+    title: 'Эксперты топ-уровня',
+    description: 'Строгий отбор: проверяем дипломы и опыт каждого специалиста. Только подтвержденная квалификация.',
     color: 'from-purple-500 to-purple-600'
   },
   {
-    icon: 'zap',
-    title: 'Никаких посредников',
-    description: 'Прямая связь со специалистом без комиссий и лишних звонков. Нашли — связались — работаете',
+    icon: ShieldCheck,
+    title: 'Прозрачность и доверие',
+    description: 'Честные отзывы, безопасная оплата и поддержка. Мы гарантируем качество на каждом этапе.',
     color: 'from-green-500 to-green-600'
   }
 ]
 
 export function AdvantagesSection() {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           {/* Заголовок */}
@@ -46,10 +45,10 @@ export function AdvantagesSection() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Почему Эволюция&nbsp;360
+              Почему выбирают Эволюцию&nbsp;360
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Мы не просто каталог специалистов — мы помогаем найти именно того, кто решит вашу задачу
+              Мы создали среду, где каждый шаг к цели становится проще, безопаснее и эффективнее
             </p>
           </motion.div>
 
@@ -64,13 +63,13 @@ export function AdvantagesSection() {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 whileHover={{ y: -4 }}
               >
-                <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
+                <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
                   <CardContent className="p-8">
                     <div className="space-y-6">
                       {/* Иконка с градиентом */}
                       <div className={`w-16 h-16 bg-gradient-to-br ${advantage.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                        <AdvantageIcon 
-                          advantage={advantage.icon} 
+                        <Icon 
+                          icon={advantage.icon} 
                           size={32} 
                           className="text-white" 
                         />
@@ -100,22 +99,10 @@ export function AdvantagesSection() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-center mt-16"
           >
-            <Card className="max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-primary/5 to-primary-600/5">
-              <CardContent className="p-8">
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <div className="w-12 h-12 flex-shrink-0 bg-primary/20 rounded-xl flex items-center justify-center">
-                    <Icon icon={Shield} size={24} className="text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">
-                    Специализированный сервис для здоровья
-                  </h3>
-                </div>
-                <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-                  Мы понимаем специфику работы со здоровьем и психикой. Не просто &quot;найти специалиста&quot;, 
-                  а найти ПРАВИЛЬНОГО специалиста — того, кто действительно поможет решить вашу задачу.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-gray-50 border border-gray-100 text-sm text-muted-foreground">
+              <Users className="w-4 h-4 text-primary" />
+              <span>Более 500 проверенных специалистов уже с нами</span>
+            </div>
           </motion.div>
         </div>
       </div>

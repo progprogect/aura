@@ -5,32 +5,59 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UnifiedNavigation } from '../UnifiedNavigation'
 import { Button } from '@/components/ui/button'
-import { Grid3X3, X, ChevronRight } from 'lucide-react'
+import { BookOpen, Users, FileText, ChevronRight, X, Search } from 'lucide-react'
 import { RequestQuiz } from '@/components/requests/RequestQuiz'
+import { cn } from '@/lib/utils'
+
+const HERO_CARDS = [
+  {
+    title: 'Изучить материалы',
+    description: 'Гайды, чек-листы и статьи для самостоятельного развития',
+    icon: BookOpen,
+    href: '/library',
+    color: 'bg-blue-50 text-blue-600',
+    action: 'link'
+  },
+  {
+    title: 'Найти специалиста',
+    description: 'Каталог проверенных психологов, тренеров и коучей',
+    icon: Users,
+    href: '/catalog',
+    color: 'bg-purple-50 text-purple-600',
+    action: 'link'
+  },
+  {
+    title: 'Оставить заявку',
+    description: 'Опишите задачу, и эксперты сами предложат решение',
+    icon: FileText,
+    href: '#',
+    color: 'bg-green-50 text-green-600',
+    action: 'quiz'
+  }
+]
+
+const QUICK_CATEGORIES = [
+  { label: 'Психология', href: '/catalog?category=psychology' },
+  { label: 'Фитнес', href: '/catalog?category=fitness' },
+  { label: 'Нутрициология', href: '/catalog?category=nutrition' },
+  { label: 'Коучинг', href: '/catalog?category=coaching' },
+]
 
 export function HeroSection() {
   const [showRequestQuiz, setShowRequestQuiz] = useState(false)
-  const [quizInitialCategory, setQuizInitialCategory] = useState<string | undefined>()
-  const [quizInitialTitle, setQuizInitialTitle] = useState<string | undefined>()
   
-  // Состояние первого шага квиза на главной странице
-  const [heroQuizTitle, setHeroQuizTitle] = useState('')
-
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white pb-16">
       {/* Интегрированная навигация */}
       <UnifiedNavigation variant="hero" />
       
-      {/* Фоновый градиент */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative pt-20 pb-8">
-        <div className="max-w-5xl mx-auto text-center space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-12 md:pt-20 pb-8">
+        <div className="max-w-4xl mx-auto text-center space-y-12">
           {/* Заголовок */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -38,107 +65,67 @@ export function HeroSection() {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-              Эволюция 360 — пространство для{' '}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
+              Ваша экосистема <br className="hidden md:block" />
               <span className="bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                гармоничного развития
+                саморазвития
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Подберите специалистов и программы, которые помогут сбалансировать здоровье, карьеру и личный рост
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Находите экспертов, изучайте полезные материалы и достигайте целей. 
+              Всё необходимое для гармоничного роста — в одной платформе.
             </p>
           </motion.div>
 
-          {/* Встроенный первый шаг квиза */}
+          {/* Карточки действий */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-col gap-4 justify-center items-stretch max-w-2xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto"
           >
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-6 sm:p-8">
-              <div className="space-y-4">
-                <div className="text-center space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-                    Создайте заявку за 30 секунд
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Опишите, что вам нужно, и специалисты предложат свои услуги
-                  </p>
-                </div>
-                
-                <div>
-                  <label htmlFor="hero-quiz-title" className="block text-sm font-medium text-foreground mb-2">
-                    Что вам нужно?
-                  </label>
-                  <input
-                    id="hero-quiz-title"
-                    type="text"
-                    value={heroQuizTitle}
-                    onChange={(e) => setHeroQuizTitle(e.target.value)}
-                    placeholder="Например: Нужен психолог для работы с тревогой"
-                    maxLength={100}
-                    className="w-full h-12 px-4 rounded-lg border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-base touch-manipulation transition-all"
-                    style={{ fontSize: '16px' }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && heroQuizTitle.trim().length >= 5) {
-                        setQuizInitialTitle(heroQuizTitle.trim())
-                        setShowRequestQuiz(true)
-                      }
-                    }}
-                  />
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-muted-foreground">
-                      {heroQuizTitle.length}/100 символов
-                    </p>
-                    {heroQuizTitle.trim().length >= 5 && (
-                      <p className="text-xs text-primary font-medium">
-                        Нажмите Enter или кнопку ниже
-                      </p>
-                    )}
-                  </div>
-                </div>
-                
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    if (heroQuizTitle.trim().length >= 5) {
-                      setQuizInitialTitle(heroQuizTitle.trim())
-                      setShowRequestQuiz(true)
-                    }
-                  }}
-                  disabled={heroQuizTitle.trim().length < 5}
-                  className="w-full h-12 sm:h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all touch-manipulation min-h-[44px]"
-                >
-                  Продолжить
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="flex-1 h-12 sm:h-14 text-base font-semibold border-2 hover:bg-muted/50 transition-all touch-manipulation min-h-[44px]"
-                asChild
+            {HERO_CARDS.map((card, index) => (
+              <div
+                key={index}
+                className="group relative flex flex-col p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer text-left"
+                onClick={() => card.action === 'quiz' && setShowRequestQuiz(true)}
               >
-                <Link href="/catalog" className="flex items-center justify-center">
-                  <Grid3X3 className="w-5 h-5 mr-2" />
-                  Смотреть каталог
-                </Link>
-              </Button>
-            </div>
+                {card.action === 'link' ? (
+                  <Link href={card.href} className="absolute inset-0 z-10" aria-label={card.title} />
+                ) : null}
+                
+                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", card.color)}>
+                  <card.icon className="w-6 h-6" />
+                </div>
+                
+                <h3 className="text-lg font-bold text-foreground mb-2 flex items-center group-hover:text-primary transition-colors">
+                  {card.title}
+                  <ChevronRight className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {card.description}
+                </p>
+              </div>
+            ))}
           </motion.div>
 
-          {/* Дополнительная информация */}
+          {/* Быстрые категории */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-sm text-muted-foreground"
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             transition={{ duration: 0.6, delay: 0.4 }}
+             className="flex flex-wrap justify-center gap-2 items-center"
           >
-            <p>Персональный подбор • Без регистрации • Прямая связь со специалистом</p>
+            <span className="text-sm text-muted-foreground mr-2">Популярное:</span>
+            {QUICK_CATEGORIES.map((cat) => (
+              <Link 
+                key={cat.href} 
+                href={cat.href}
+                className="px-4 py-1.5 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+              >
+                {cat.label}
+              </Link>
+            ))}
           </motion.div>
         </div>
       </div>
@@ -176,15 +163,7 @@ export function HeroSection() {
                   <X className="h-4 w-4" />
                 </Button>
                 <RequestQuiz
-                  defaultCategory={quizInitialCategory}
-                  defaultTitle={quizInitialTitle || heroQuizTitle.trim()}
-                  onClose={() => {
-                    setShowRequestQuiz(false)
-                    // Очищаем данные только если пользователь закрыл модальное окно
-                    if (!quizInitialTitle) {
-                      setHeroQuizTitle('')
-                    }
-                  }}
+                  onClose={() => setShowRequestQuiz(false)}
                 />
               </div>
             </motion.div>
