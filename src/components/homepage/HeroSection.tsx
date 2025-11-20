@@ -52,11 +52,11 @@ export function HeroSection() {
   const [showRequestQuiz, setShowRequestQuiz] = useState(false)
   
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white pb-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-white pb-20 md:pb-24">
       {/* Интегрированная навигация */}
       <UnifiedNavigation variant="hero" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-12 md:pt-20 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-20 md:pt-24 pb-8">
         <div className="max-w-4xl mx-auto text-center space-y-12">
           {/* Заголовок */}
           <motion.div
@@ -153,7 +153,7 @@ export function HeroSection() {
               className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center pointer-events-none"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="relative w-full md:w-auto md:max-w-5xl lg:max-w-6xl xl:max-w-7xl max-h-[90vh] md:max-h-[90vh] overflow-y-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl pointer-events-auto safe-area-inset-bottom md:safe-area-inset-bottom-0">
+              <div className="relative w-full md:w-[800px] max-h-[90vh] md:max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl md:rounded-2xl shadow-2xl pointer-events-auto safe-area-inset-bottom md:safe-area-inset-bottom-0">
                 <Button
                   variant="ghost"
                   size="icon"
