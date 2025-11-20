@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
+import { useCategories } from '@/hooks/useCategories'
 
 interface OnboardingStep1Props {
   data: {
@@ -21,19 +22,36 @@ interface OnboardingStep1Props {
   isCompany?: boolean
 }
 
-// Категории с иконками
-const CATEGORIES = [
-  { id: 'psychology', name: 'Психология', emoji: '🧠', description: 'Психологи, психотерапевты' },
-  { id: 'fitness', name: 'Фитнес', emoji: '💪', description: 'Тренеры, инструкторы' },
-  { id: 'nutrition', name: 'Нутрициология', emoji: '🥗', description: 'Нутрициологи, диетологи' },
-  { id: 'massage', name: 'Массаж', emoji: '💆', description: 'Массажисты, остеопаты' },
-  { id: 'wellness', name: 'Wellness', emoji: '🌿', description: 'Wellness-коучи' },
-  { id: 'coaching', name: 'Коучинг', emoji: '🎯', description: 'Лайф-коучи, бизнес-коучи' },
-  { id: 'medicine', name: 'Медицина', emoji: '⚕️', description: 'Врачи, специалисты' },
-  { id: 'other', name: 'Другое', emoji: '✨', description: 'Другие направления' },
-]
-
 export function OnboardingStep1({ data, onChange, errors, isCompany = false }: OnboardingStep1Props) {
+  const { categories, loading } = useCategories()
+
+  // Формируем массив категорий для отображения
+  const displayCategories = categories.map((cat) => ({
+    id: cat.key,
+    name: cat.name,
+    emoji: cat.emoji,
+    description: getCategoryDescription(cat.key),
+  }))
+
+  // Функция для получения описания категории
+  function getCategoryDescription(key: string): string {
+    const descriptions: Record<string, string> = {
+      psychology: 'Психологи, психотерапевты',
+      fitness: 'Тренеры, инструкторы',
+      nutrition: 'Нутрициологи, диетологи',
+      massage: 'Массажисты, остеопаты',
+      wellness: 'Wellness-коучи',
+      coaching: 'Лайф-коучи, бизнес-коучи',
+      medicine: 'Врачи, специалисты',
+      marketing: 'Маркетологи, специалисты по продвижению',
+      sales: 'Специалисты по продажам и переговорам',
+      education: 'Преподаватели, тренеры',
+      'social-media': 'SMM-специалисты, эксперты по личному бренду',
+      'business-consulting': 'Бизнес-консультанты',
+      other: 'Другие направления',
+    }
+    return descriptions[key] || 'Специалисты'
+  }
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -157,9 +175,15 @@ export function OnboardingStep1({ data, onChange, errors, isCompany = false }: O
           Выберите категорию <span className="text-red-500">*</span>
         </Label>
         
-        {/* Десктоп: Grid */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {CATEGORIES.map((category) => (
+        {loading ? (
+          <div className="text-center py-8 text-gray-500">
+            Загрузка категорий...
+          </div>
+        ) : (
+          <>
+            {/* Десктоп: Grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {displayCategories.map((category) => (
             <Card
               key={category.id}
               onClick={() => onChange('category', category.id)}
@@ -184,9 +208,9 @@ export function OnboardingStep1({ data, onChange, errors, isCompany = false }: O
           ))}
         </div>
 
-        {/* Мобильный: Вертикальный список */}
-        <div className="md:hidden space-y-2">
-          {CATEGORIES.map((category) => (
+            {/* Мобильный: Вертикальный список */}
+            <div className="md:hidden space-y-2">
+              {displayCategories.map((category) => (
             <Card
               key={category.id}
               onClick={() => onChange('category', category.id)}
@@ -211,10 +235,12 @@ export function OnboardingStep1({ data, onChange, errors, isCompany = false }: O
                 {data.category === category.id && (
                   <div className="text-blue-600">✓</div>
                 )}
-              </div>
-            </Card>
-          ))}
-        </div>
+                </div>
+              </Card>
+            ))}
+            </div>
+          </>
+        )}
 
         {errors?.category && (
           <p className="text-sm text-red-500">{errors.category}</p>

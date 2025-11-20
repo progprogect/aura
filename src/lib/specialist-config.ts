@@ -8,6 +8,11 @@ export type SpecialistCategory =
   | 'wellness'
   | 'coaching'
   | 'medicine'
+  | 'marketing'
+  | 'sales'
+  | 'education'
+  | 'social-media'
+  | 'business-consulting'
   | 'other'
 
 export interface CategoryField {
@@ -220,6 +225,171 @@ export const CATEGORY_CONFIG: Record<SpecialistCategory, CategoryConfig> = {
       consultationTypes: {
         label: 'Тип консультаций',
         icon: '🩺',
+        type: 'array',
+      },
+    },
+  },
+
+  marketing: {
+    name: 'Маркетинг и продвижение',
+    emoji: '📢',
+    priceLabel: 'за консультацию',
+    fields: {
+      specializations: {
+        label: 'Специализация',
+        icon: '🎯',
+        type: 'array',
+      },
+      services: {
+        label: 'Услуги',
+        icon: '📋',
+        type: 'array',
+      },
+      platforms: {
+        label: 'Платформы',
+        icon: '📱',
+        type: 'array',
+      },
+      experience: {
+        label: 'Опыт работы',
+        icon: '💼',
+        type: 'string',
+      },
+      results: {
+        label: 'Результаты и кейсы',
+        icon: '📊',
+        type: 'array',
+      },
+    },
+  },
+
+  sales: {
+    name: 'Продажи и переговоры',
+    emoji: '💼',
+    priceLabel: 'за консультацию',
+    fields: {
+      specializations: {
+        label: 'Специализация',
+        icon: '🎯',
+        type: 'array',
+      },
+      industries: {
+        label: 'Отрасли',
+        icon: '🏢',
+        type: 'array',
+      },
+      methods: {
+        label: 'Методы продаж',
+        icon: '📈',
+        type: 'array',
+      },
+      tools: {
+        label: 'Инструменты',
+        icon: '🛠️',
+        type: 'array',
+      },
+      results: {
+        label: 'Кейсы и результаты',
+        icon: '📊',
+        type: 'array',
+      },
+    },
+  },
+
+  education: {
+    name: 'Образование и обучение',
+    emoji: '📚',
+    priceLabel: 'за урок/курс',
+    fields: {
+      subjects: {
+        label: 'Предметы/направления',
+        icon: '📖',
+        type: 'array',
+      },
+      formats: {
+        label: 'Форматы обучения',
+        icon: '👥',
+        type: 'array',
+      },
+      languages: {
+        label: 'Языки преподавания',
+        icon: '🌐',
+        type: 'array',
+      },
+      certifications: {
+        label: 'Сертификаты и квалификации',
+        icon: '🏆',
+        type: 'array',
+      },
+      experience: {
+        label: 'Опыт преподавания',
+        icon: '⏱',
+        type: 'number',
+      },
+    },
+  },
+
+  'social-media': {
+    name: 'Социальные сети и личный бренд',
+    emoji: '📱',
+    priceLabel: 'за консультацию/месяц',
+    fields: {
+      specializations: {
+        label: 'Специализация',
+        icon: '🎯',
+        type: 'array',
+      },
+      platforms: {
+        label: 'Платформы',
+        icon: '📱',
+        type: 'array',
+      },
+      services: {
+        label: 'Услуги',
+        icon: '📋',
+        type: 'array',
+      },
+      results: {
+        label: 'Результаты и кейсы',
+        icon: '📊',
+        type: 'array',
+      },
+      experience: {
+        label: 'Опыт работы',
+        icon: '💼',
+        type: 'string',
+      },
+    },
+  },
+
+  'business-consulting': {
+    name: 'Бизнес-консалтинг',
+    emoji: '💡',
+    priceLabel: 'за консультацию',
+    fields: {
+      specializations: {
+        label: 'Специализация',
+        icon: '🎯',
+        type: 'array',
+      },
+      industries: {
+        label: 'Отрасли',
+        icon: '🏢',
+        type: 'array',
+      },
+      methods: {
+        label: 'Методы работы',
+        icon: '📊',
+        type: 'array',
+      },
+      experience: {
+        label: 'Опыт работы',
+        icon: '💼',
+        type: 'string',
+      },
+      results: {
+        label: 'Результаты и кейсы',
+        icon: '📈',
         type: 'array',
       },
     },

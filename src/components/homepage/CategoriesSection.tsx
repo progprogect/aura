@@ -8,55 +8,42 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/icons/Icon'
-import { CategoryIcon } from '@/components/ui/icons/CategoryIcon'
 import { ArrowRight } from 'lucide-react'
+import { useCategories } from '@/hooks/useCategories'
 
-const categories = [
-  { 
-    name: 'Психология', 
-    description: 'Ментальное здоровье и терапия',
-    key: 'psychology',
-    href: '/catalog?category=psychology',
-    count: '45+'
-  },
-  { 
-    name: 'Фитнес', 
-    description: 'Физическая активность и тренировки',
-    key: 'fitness',
-    href: '/catalog?category=fitness',
-    count: '32+'
-  },
-  { 
-    name: 'Питание', 
-    description: 'Здоровое питание и нутрициология',
-    key: 'nutrition',
-    href: '/catalog?category=nutrition',
-    count: '28+'
-  },
-  { 
-    name: 'Массаж', 
-    description: 'Релаксация и восстановление',
-    key: 'massage',
-    href: '/catalog?category=massage',
-    count: '18+'
-  },
-  { 
-    name: 'Коучинг', 
-    description: 'Личностное развитие и карьера',
-    key: 'coaching',
-    href: '/catalog?category=coaching',
-    count: '22+'
-  },
-  { 
-    name: 'Медицина', 
-    description: 'Медицинские консультации',
-    key: 'medicine',
-    href: '/catalog?category=medicine',
-    count: '15+'
+// Функция для получения описания категории
+function getCategoryDescription(key: string): string {
+  const descriptions: Record<string, string> = {
+    psychology: 'Ментальное здоровье и терапия',
+    fitness: 'Физическая активность и тренировки',
+    nutrition: 'Здоровое питание и нутрициология',
+    massage: 'Релаксация и восстановление',
+    wellness: 'Холистические практики и wellness',
+    coaching: 'Личностное развитие и карьера',
+    medicine: 'Медицинские консультации',
+    marketing: 'Продвижение и маркетинг',
+    sales: 'Продажи и переговоры',
+    education: 'Обучение и образование',
+    'social-media': 'Социальные сети и личный бренд',
+    'business-consulting': 'Бизнес-консалтинг',
+    other: 'Другие направления',
   }
-]
+  return descriptions[key] || 'Специалисты'
+}
 
 export function CategoriesSection() {
+  const { categories, loading } = useCategories()
+
+  // Формируем массив категорий для отображения (показываем первые 6-8)
+  const displayCategories = categories
+    .slice(0, 8)
+    .map((cat) => ({
+      name: cat.name,
+      description: getCategoryDescription(cat.key),
+      key: cat.key,
+      href: `/catalog?category=${cat.key}`,
+      emoji: cat.emoji,
+    }))
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -70,16 +57,21 @@ export function CategoriesSection() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Все сферы вашего здоровья
+              Все категории специалистов
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Найдите специалиста для любой области саморазвития
+              Найдите специалиста для любой области развития и бизнеса
             </p>
           </motion.div>
 
           {/* Сетка категорий - 3 колонки на десктопе */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {categories.map((category, index) => (
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">
+              Загрузка категорий...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {displayCategories.map((category, index) => (
               <motion.div
                 key={category.key}
                 initial={{ opacity: 0, y: 20 }}
@@ -97,11 +89,7 @@ export function CategoriesSection() {
                   <div className="h-full bg-white rounded-2xl border border-gray-200 hover:border-primary/30 hover:shadow-2xl transition-all duration-300 p-8">
                     {/* Иконка с единым стилем */}
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                      <CategoryIcon 
-                        category={category.key} 
-                        size={32} 
-                        className="text-primary" 
-                      />
+                      <div className="text-3xl">{category.emoji}</div>
                     </div>
                     
                     {/* Контент */}
@@ -113,18 +101,6 @@ export function CategoriesSection() {
                         {category.description}
                       </p>
                       
-                      {/* Счетчик специалистов */}
-                      <div className="flex items-center gap-2 pt-2">
-                        <div className="flex -space-x-2">
-                          {/* Мини-аватары (декоративные) */}
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 border-2 border-white" />
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 border-2 border-white" />
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 border-2 border-white" />
-                        </div>
-                        <span className="text-sm font-medium text-muted-foreground">
-                          {category.count} специалистов
-                        </span>
-                      </div>
                     </div>
 
                     {/* Стрелка (появляется на hover) */}
@@ -139,8 +115,9 @@ export function CategoriesSection() {
                   </div>
                 </Link>
               </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Кнопка "Все категории" */}
           <motion.div
