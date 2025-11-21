@@ -29,7 +29,7 @@ export const PREVIEW_SIZES = {
  * Лимиты файлов превью
  */
 export const PREVIEW_FILE_LIMITS = {
-  MAX_SIZE: 5 * 1024 * 1024,  // 5MB в байтах
+  MAX_SIZE: 20 * 1024 * 1024,  // 20MB в байтах
   VALID_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'] as const,
   VALID_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.webp'] as const
 } as const

@@ -138,7 +138,7 @@ export function PreviewUploader({
                 {isDragging ? 'Отпустите файл' : 'Перетащите изображение или нажмите для выбора'}
               </p>
               <p className="text-xs text-gray-500">
-                JPG, PNG или WebP • Максимум 5MB
+                JPG, PNG или WebP • Максимум 20MB
               </p>
             </div>
           </div>

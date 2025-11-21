@@ -51,11 +51,11 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Проверка размера (макс 5MB)
+      // Проверка размера (макс 20MB)
       const base64Length = data.image.length * 0.75 / 1024 / 1024
-      if (base64Length > 5) {
+      if (base64Length > 20) {
         return NextResponse.json(
-          { success: false, error: 'Изображение слишком большое (макс 5MB)' },
+          { success: false, error: 'Изображение слишком большое (макс 20MB)' },
           { status: 400 }
         )
       }

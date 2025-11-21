@@ -52,9 +52,9 @@ export function AvatarUploader({ currentAvatar, onUploadSuccess }: AvatarUploade
       return
     }
 
-    // Валидация размера (макс 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Файл слишком большой (максимум 5 МБ)')
+    // Валидация размера (макс 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      setError('Файл слишком большой (максимум 20 МБ)')
       return
     }
 
@@ -186,7 +186,7 @@ export function AvatarUploader({ currentAvatar, onUploadSuccess }: AvatarUploade
                   Нажмите или перетащите изображение
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  JPG, PNG, GIF (макс 5 МБ)
+                  JPG, PNG, GIF (макс 20 МБ)
                 </p>
               </div>
 

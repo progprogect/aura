@@ -18,7 +18,7 @@ export interface UploadResult {
 }
 
 export class FileUploadService {
-  private static readonly DEFAULT_MAX_SIZE = 5 * 1024 * 1024 // 5MB
+  private static readonly DEFAULT_MAX_SIZE = 20 * 1024 * 1024 // 20MB
   private static readonly DEFAULT_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
   /**
