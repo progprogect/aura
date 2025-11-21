@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InlineInput } from './InlineInput'
 import { Mail, MessageCircle, Phone, Globe, Loader2 } from 'lucide-react'
@@ -30,13 +30,24 @@ export function ContactsEditor({
   onSave
 }: ContactsEditorProps) {
   const [isUpdatingPhoneVisible, setIsUpdatingPhoneVisible] = useState(false)
+  const [localPhoneVisible, setLocalPhoneVisible] = useState(phoneVisible)
+
+  // Синхронизируем локальное состояние с пропом при изменении
+  useEffect(() => {
+    setLocalPhoneVisible(phoneVisible)
+  }, [phoneVisible])
 
   const handleTogglePhoneVisible = async () => {
+    const newValue = !localPhoneVisible
     setIsUpdatingPhoneVisible(true)
+    // Оптимистичное обновление UI
+    setLocalPhoneVisible(newValue)
     try {
-      await onSave('phoneVisible', !phoneVisible)
+      await onSave('phoneVisible', newValue)
     } catch (error) {
       console.error('Ошибка обновления видимости телефона:', error)
+      // Откатываем изменение при ошибке
+      setLocalPhoneVisible(!newValue)
       alert('Ошибка обновления видимости телефона')
     } finally {
       setIsUpdatingPhoneVisible(false)
@@ -68,14 +79,14 @@ export function ContactsEditor({
                   className={`
                     relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ml-4
                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500
-                    ${phoneVisible 
+                    ${localPhoneVisible 
                       ? 'bg-blue-600' 
                       : 'bg-gray-300'
                     }
                     ${isUpdatingPhoneVisible ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
                   role="switch"
-                  aria-checked={phoneVisible}
+                  aria-checked={localPhoneVisible}
                   aria-label="Показать телефон клиентам"
                 >
                   {isUpdatingPhoneVisible ? (
@@ -88,7 +99,7 @@ export function ContactsEditor({
                         absolute top-0.5 left-0.5
                         block w-5 h-5 bg-white rounded-full shadow-sm
                         transform transition-transform duration-200
-                        ${phoneVisible ? 'translate-x-6' : 'translate-x-0'}
+                        ${localPhoneVisible ? 'translate-x-6' : 'translate-x-0'}
                       `}
                     />
                   )}
@@ -99,8 +110,8 @@ export function ContactsEditor({
               </div>
               <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-gray-500">Номер телефона из регистрации</p>
-                <p className={`text-xs ${phoneVisible ? 'text-green-600' : 'text-gray-400'}`}>
-                  {phoneVisible ? 'Виден клиентам' : 'Скрыт от клиентов'}
+                <p className={`text-xs ${localPhoneVisible ? 'text-green-600' : 'text-gray-400'}`}>
+                  {localPhoneVisible ? 'Виден клиентам' : 'Скрыт от клиентов'}
                 </p>
               </div>
             </div>
