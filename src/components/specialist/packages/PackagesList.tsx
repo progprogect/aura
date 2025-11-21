@@ -6,10 +6,11 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Package, Star } from 'lucide-react'
+import { Check, Package, Star, Info } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface PackageData {
   id: string
@@ -185,6 +186,27 @@ export function PackagesList({ specialistId }: PackagesListProps) {
           </motion.div>
         ))}
       </div>
+
+      {/* Информация о временной недоступности онлайн-оплаты */}
+      <Alert className="bg-blue-50 border-blue-200">
+        <Info className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-sm text-gray-700">
+          <p className="mb-2">
+            <strong>Внимание:</strong> В настоящее время ведётся работа над подключением онлайн-банкинга для оплаты пакетов баллов.
+          </p>
+          <p>
+            Если вам необходимо произвести оплату прямо сейчас, пожалуйста, свяжитесь с нами в Telegram:{' '}
+            <a
+              href="https://t.me/cherniavskaya_tatiana_business"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700 underline font-medium"
+            >
+              @cherniavskaya_tatiana_business
+            </a>
+          </p>
+        </AlertDescription>
+      </Alert>
 
       <div className="text-center text-sm text-gray-500">
         <p>
