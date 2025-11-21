@@ -21,6 +21,11 @@ const CATEGORIES: CategoryOption[] = [
   { value: 'wellness', label: 'Wellness и холистические практики', emoji: '🧘' },
   { value: 'coaching', label: 'Коучинг и наставничество', emoji: '🎯' },
   { value: 'medicine', label: 'Медицинские специалисты', emoji: '⚕️' },
+  { value: 'marketing', label: 'Маркетинг и продвижение', emoji: '📢' },
+  { value: 'sales', label: 'Продажи и переговоры', emoji: '💼' },
+  { value: 'education', label: 'Образование и обучение', emoji: '📚' },
+  { value: 'social-media', label: 'Социальные сети и личный бренд', emoji: '📱' },
+  { value: 'business-consulting', label: 'Бизнес-консалтинг', emoji: '💡' },
   { value: 'other', label: 'Другие специалисты', emoji: '✨' },
 ]
 
