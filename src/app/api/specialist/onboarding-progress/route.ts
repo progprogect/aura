@@ -5,7 +5,7 @@ import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { prisma } from '@/lib/db'
 
 const updateSchema = z.object({
-  step: z.number().int().min(0).max(4).optional(),
+  step: z.number().int().min(0).max(10).optional(), // До 10 шагов для запаса (сейчас 6)
   completed: z.boolean().optional(),
   seen: z.boolean().optional(),
 })

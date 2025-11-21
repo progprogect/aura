@@ -195,9 +195,12 @@ export function ExpertOnboardingFlow({
     Math.min(Math.max(initialStep, 0), steps.length - 1)
   )
   const [isCompleted, setIsCompleted] = useState(initialCompleted)
-  const [isOpen, setIsOpen] = useState(!initialCompleted && !initialSeen)
+  // Показываем автоматически ТОЛЬКО если пользователь никогда не видел онбординг
+  // Не зависим от initialCompleted - показываем один раз при первом входе
+  const [isOpen, setIsOpen] = useState(!initialSeen)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(initialSeen)
 
   const stepData = steps[currentStep]
   const progress = ((currentStep + 1) / steps.length) * 100
@@ -211,6 +214,26 @@ export function ExpertOnboardingFlow({
       })
     }
   }, [onOpenRequest])
+
+  // При первом открытии онбординга устанавливаем флаг "просмотрен"
+  // Это нужно сделать сразу при открытии, чтобы даже при закрытии без завершения
+  // онбординг больше не показывался автоматически
+  useEffect(() => {
+    if (isOpen && !hasSeenOnboarding) {
+      // Устанавливаем флаг локально сразу
+      setHasSeenOnboarding(true)
+      // Сохраняем в БД асинхронно (не блокируем UI)
+      fetch('/api/specialist/onboarding-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seen: true }),
+      }).catch((err) => {
+        console.error('Не удалось сохранить флаг просмотра онбординга:', err)
+        // Не критично - флаг уже установлен локально
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, hasSeenOnboarding])
 
   async function updateProgress(payload: { step?: number; completed?: boolean; seen?: boolean }) {
     try {
@@ -258,6 +281,8 @@ export function ExpertOnboardingFlow({
   }
 
   async function handleSkip() {
+    // Устанавливаем флаг просмотра при пропуске
+    setHasSeenOnboarding(true)
     await updateProgress({ step: currentStep, seen: true })
     setIsOpen(false)
   }
@@ -267,22 +292,9 @@ export function ExpertOnboardingFlow({
     setIsOpen(false)
   }
 
-  const ReminderCard = () =>
-    !isCompleted && !isOpen ? (
-      <div className="mb-6 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm md:flex md:items-center md:justify-between">
-        <div className="space-y-1">
-          <div className="text-sm font-semibold text-blue-700">
-            Продолжите знакомство с платформой
-          </div>
-          <p className="text-sm text-gray-600">
-            Мы сохранили последний шаг. Вернитесь, чтобы быстрее получить первых клиентов.
-          </p>
-        </div>
-        <Button className="mt-4 w-full md:mt-0 md:w-auto" onClick={() => setIsOpen(true)}>
-          Продолжить онбординг
-        </Button>
-      </div>
-    ) : null
+  // Убираем ReminderCard - онбординг показывается только один раз
+  // Пользователь может открыть его вручную через кнопку "Как работает платформа"
+  const ReminderCard = () => null
 
   return (
     <div className="mb-6">
@@ -292,8 +304,13 @@ export function ExpertOnboardingFlow({
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false)
-          if (!isCompleted) {
-            updateProgress({ step: currentStep, seen: true })
+          // При закрытии всегда устанавливаем флаг просмотра
+          // чтобы онбординг больше не показывался автоматически
+          if (!hasSeenOnboarding) {
+            setHasSeenOnboarding(true)
+            updateProgress({ step: currentStep, seen: true }).catch((err) => {
+              console.error('Не удалось сохранить флаг просмотра при закрытии:', err)
+            })
           }
         }}
         title={stepData.title}
