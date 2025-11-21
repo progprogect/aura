@@ -159,16 +159,6 @@ export async function GET(request: NextRequest) {
         completed: false
       })
     }
-    
-    if (!specialist.priceFromInPoints && !specialist.priceToInPoints) {
-      tasks.push({
-        id: 'pricing',
-        title: 'Укажите цены',
-        description: 'Клиентам важно знать стоимость заранее',
-        bonus: 10,
-        completed: false
-      })
-    }
 
     if (!specialist.videoUrl) {
       tasks.push({

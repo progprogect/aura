@@ -30,7 +30,6 @@ const taskToProfileSectionMap: Record<string, string> = {
   certificates: 'education',
   education: 'education',
   gallery: 'gallery',
-  pricing: 'pricing',
   video: 'video',
 }
 
@@ -94,7 +93,7 @@ export function ProfileCompletionCard({ completionPercentage, tasks, specialistS
         </div>
 
         {/* Задания */}
-        {tasks.length > 0 && (
+        {tasks.length > 0 && !isComplete && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-gray-700">Улучшите профиль:</h4>
             <div className="space-y-2">

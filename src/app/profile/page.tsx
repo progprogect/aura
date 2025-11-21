@@ -313,17 +313,6 @@ async function getUserData() {
           completed: false
         })
       }
-      
-      // Цены только для специалистов (для компаний цены в услугах)
-      if (!isCompany && !profile.priceFromInPoints && !profile.priceToInPoints) {
-        tasks.push({
-          id: 'pricing',
-          title: 'Укажите цены',
-          description: 'Клиентам важно знать стоимость заранее',
-          bonus: 10,
-          completed: false
-        })
-      }
 
       if (!profile.videoUrl) {
         tasks.push({
