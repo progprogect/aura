@@ -7,36 +7,34 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UnifiedNavigation } from '../UnifiedNavigation'
 import { Button } from '@/components/ui/button'
-import { BookOpen, Users, FileText, ChevronRight, X, Search } from 'lucide-react'
+import { ChevronRight, X, Search } from 'lucide-react'
 import { RequestQuiz } from '@/components/requests/RequestQuiz'
 import { cn } from '@/lib/utils'
 
 const HERO_CARDS = [
   {
     title: 'Изучить материалы',
-    description: 'Гайды, чек-листы и статьи для самостоятельного развития',
-    icon: BookOpen,
+    description: 'Библиотека экспертных материалов для вашего развития',
     href: '/library',
-    color: 'bg-blue-50 text-blue-600',
+    color: 'bg-blue-50',
     action: 'link'
   },
   {
     title: 'Найти специалиста',
     description: 'Каталог проверенных психологов, тренеров и коучей',
-    icon: Users,
     href: '/catalog',
-    color: 'bg-purple-50 text-purple-600',
+    color: 'bg-purple-50',
     action: 'link'
   },
   {
     title: 'Оставить заявку',
     description: 'Опишите задачу, и эксперты сами предложат решение',
-    icon: FileText,
     href: '#',
-    color: 'bg-green-50 text-green-600',
+    color: 'bg-green-50',
     action: 'quiz'
   }
 ]
@@ -95,7 +93,13 @@ export function HeroSection() {
                 ) : null}
                 
                 <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", card.color)}>
-                  <card.icon className="w-6 h-6" />
+                  <Image
+                    src="/icons/logo-evolutsia360.png"
+                    alt="Эволюция 360"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
                 </div>
                 
                 <h3 className="text-lg font-bold text-foreground mb-2 flex items-center group-hover:text-primary transition-colors">
