@@ -449,7 +449,10 @@ export function SpecialistProfileWithEdit({
           </div>
 
           {/* Специализация */}
-          {categoryConfig && (
+          {/* Скрыто, если нет полей в конфигурации категории (для будущего использования) */}
+          {categoryConfig && 
+           categoryConfig.fields && 
+           Object.keys(categoryConfig.fields).length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">

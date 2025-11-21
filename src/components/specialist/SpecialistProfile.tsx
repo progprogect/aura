@@ -108,7 +108,11 @@ export function SpecialistProfile({ tabs, categoryConfig, profileType, address, 
         )}
 
         {/* Специализация (условно) */}
-        {(data.customFields || isEditMode) && categoryConfig && (
+        {/* Скрыто, если нет полей в конфигурации категории (для будущего использования) */}
+        {(data.customFields || isEditMode) && 
+         categoryConfig && 
+         categoryConfig.fields && 
+         Object.keys(categoryConfig.fields).length > 0 && (
           <SpecialistSpecialization
             category={data.category}
             customFields={data.customFields}

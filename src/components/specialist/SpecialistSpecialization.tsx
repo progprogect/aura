@@ -25,7 +25,13 @@ export function SpecialistSpecialization({
 }: SpecialistSpecializationProps) {
   const config = categoryConfig
 
-  // В режиме редактирования показываем все доступные поля из конфигурации
+  // Проверка наличия полей в конфигурации категории
+  // Если полей нет - скрываем блок (для будущего использования)
+  if (!config.fields || Object.keys(config.fields).length === 0) {
+    return null
+  }
+
+  // В режиме просмотра скрываем, если нет заполненных данных
   if (!isEditMode && (!customFields || Object.keys(customFields).length === 0)) {
     return null
   }
@@ -50,10 +56,6 @@ export function SpecialistSpecialization({
           value: customFields[key],
         }))
     : [] // В режиме редактирования используем CustomFieldsEditor
-
-  if (!isEditMode && fields.length === 0) {
-    return null
-  }
 
   return (
     <motion.div
