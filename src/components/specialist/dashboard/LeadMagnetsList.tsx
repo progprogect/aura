@@ -4,7 +4,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, Gift, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { LeadMagnetModal } from '../edit/LeadMagnetModal'
 import { LEAD_MAGNET_LIMITS } from '@/lib/lead-magnets/constants'
+import { fromPrismaLeadMagnet } from '@/types/lead-magnet'
 import type { LeadMagnetUI, EditableLeadMagnet } from '@/types/lead-magnet'
 
 interface LeadMagnetsListProps {
@@ -26,6 +27,29 @@ export function LeadMagnetsList({ leadMagnets: initialLeadMagnets, onRefresh, sp
   const [editingMagnet, setEditingMagnet] = useState<EditableLeadMagnet | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  // Синхронизация с пропсами (если данные обновятся извне через router.refresh)
+  useEffect(() => {
+    setLeadMagnets(initialLeadMagnets)
+  }, [initialLeadMagnets])
+
+  // Функция для загрузки свежих данных через API
+  const fetchLeadMagnets = async () => {
+    try {
+      const response = await fetch('/api/specialist/lead-magnets')
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.leadMagnets) {
+          // Конвертируем Prisma объекты в типизированные LeadMagnetUI
+          const convertedLeadMagnets = data.leadMagnets.map((lm: any) => fromPrismaLeadMagnet(lm)) as LeadMagnetUI[]
+          setLeadMagnets(convertedLeadMagnets)
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка загрузки лид-магнитов:', error)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm('Удалить этот лид-магнит? Он больше не будет отображаться в профиле.')) {
       return
@@ -39,7 +63,11 @@ export function LeadMagnetsList({ leadMagnets: initialLeadMagnets, onRefresh, sp
       })
 
       if (response.ok) {
+        // Оптимистичное обновление UI
         setLeadMagnets(prev => prev.filter(m => m.id !== id))
+        // Загружаем свежие данные для консистентности
+        await fetchLeadMagnets()
+        // Обновляем кеш Next.js (onRefresh уже вызывает router.refresh)
         onRefresh?.()
       } else {
         alert('Ошибка удаления лид-магнита')
@@ -81,9 +109,14 @@ export function LeadMagnetsList({ leadMagnets: initialLeadMagnets, onRefresh, sp
     setEditingMagnet(null)
   }
 
-  const handleModalSuccess = () => {
+  const handleModalSuccess = async () => {
     setIsModalOpen(false)
     setEditingMagnet(null)
+    
+    // Загружаем свежие данные через API для мгновенного отображения
+    await fetchLeadMagnets()
+    
+    // Обновляем кеш Next.js (onRefresh уже вызывает router.refresh)
     onRefresh?.()
   }
 
