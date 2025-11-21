@@ -162,7 +162,7 @@ export function SpecialistProfileWithEdit({
 
   // Скролл к секции после включения режима редактирования
   useEffect(() => {
-    if (!isOwner || !isEditMode) return
+    if (!isOwner) return
 
     const sectionParam = searchParams.get('section')
     
@@ -171,21 +171,26 @@ export function SpecialistProfileWithEdit({
       const scrollToSection = (attempts = 0) => {
         const sectionElement = document.getElementById(`section-${sectionParam}`)
         if (sectionElement) {
-          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          // Небольшой отступ сверху для лучшей видимости
-          setTimeout(() => {
-            window.scrollBy(0, -20)
-          }, 100)
-        } else if (attempts < 5) {
-          // Повторяем попытку с задержкой, если элемент еще не отрендерился
-          setTimeout(() => scrollToSection(attempts + 1), 200)
+          // Используем более надёжный способ скролла с отступом
+          const elementPosition = sectionElement.getBoundingClientRect().top
+          const offsetPosition = elementPosition + window.pageYOffset - 100 // 100px отступ сверху
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        } else if (attempts < 10) {
+          // Увеличиваем количество попыток и интервал для более надёжного поиска
+          setTimeout(() => scrollToSection(attempts + 1), 300)
         }
       }
 
-      // Задержка для рендеринга секций в режиме редактирования
+      // Задержка для рендеринга секций (больше если режим редактирования только что включился)
+      // Если режим редактирования уже включен, скроллим быстрее
+      const delay = isEditMode ? 600 : 1000
       const timeoutId = setTimeout(() => {
         scrollToSection()
-      }, 600)
+      }, delay)
 
       return () => clearTimeout(timeoutId)
     }
