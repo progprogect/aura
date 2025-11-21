@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { generateSlug } from '@/lib/utils/slug'
 import { getAuthSession, UNAUTHORIZED_RESPONSE } from '@/lib/auth/api-auth'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { SpecialistCategory } from '@/lib/specialist-config'
 
 // Базовая схема для специалистов
 const SpecialistOnboardingSchema = z.object({
@@ -23,8 +24,13 @@ const SpecialistOnboardingSchema = z.object({
     'wellness',
     'coaching',
     'medicine',
+    'marketing',
+    'sales',
+    'education',
+    'social-media',
+    'business-consulting',
     'other'
-  ]),
+  ] as [SpecialistCategory, ...SpecialistCategory[]]),
   
   // Шаг 2: Описание
   tagline: z.string().min(10, 'Краткое описание должно содержать минимум 10 символов').max(200, 'Максимум 200 символов').optional(),
@@ -56,8 +62,13 @@ const CompanyOnboardingSchema = z.object({
     'wellness',
     'coaching',
     'medicine',
+    'marketing',
+    'sales',
+    'education',
+    'social-media',
+    'business-consulting',
     'other'
-  ]),
+  ] as [SpecialistCategory, ...SpecialistCategory[]]),
   
   // Шаг 2: Описание
   tagline: z.string().min(10, 'Краткое описание должно содержать минимум 10 символов').max(200, 'Максимум 200 символов').optional(),
