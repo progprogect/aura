@@ -37,7 +37,6 @@ export function PackagesList({ specialistId }: PackagesListProps) {
   const [packages, setPackages] = useState<PackageData[]>([])
   const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPackages()
@@ -61,39 +60,9 @@ export function PackagesList({ specialistId }: PackagesListProps) {
   }
 
   const handlePurchase = async (packageId: string, packagePrice: number) => {
-    if (currentBalance < packagePrice) {
-      alert('Недостаточно баллов для покупки пакета')
-      return
-    }
-
-    setPurchasing(packageId)
-
-    try {
-      const response = await fetch('/api/specialist/packages/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ packageId }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        alert(`Пакет "${data.package.name}" успешно куплен!`)
-        // Обновляем баланс
-        setCurrentBalance(data.newBalance.total)
-        // Обновляем список пакетов
-        fetchPackages()
-      } else {
-        alert(data.error || 'Ошибка покупки пакета')
-      }
-    } catch (error) {
-      console.error('Ошибка покупки пакета:', error)
-      alert('Ошибка покупки пакета')
-    } finally {
-      setPurchasing(null)
-    }
+    // TODO: Реализовать редирект на банковскую платёжную операцию
+    // Пока функционал оплаты через банк не реализован
+    console.log('Покупка пакета:', { packageId, packagePrice })
   }
 
   if (loading) {
@@ -170,17 +139,11 @@ export function PackagesList({ specialistId }: PackagesListProps) {
 
               <Button
                 onClick={() => handlePurchase(pkg.id, pkg.price)}
-                disabled={currentBalance < pkg.price || purchasing === pkg.id}
+                disabled={true}
                 className={`w-full ${pkg.popular ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                 variant={pkg.popular ? 'default' : 'outline'}
               >
-                {purchasing === pkg.id ? (
-                  'Покупка...'
-                ) : currentBalance < pkg.price ? (
-                  'Недостаточно баллов'
-                ) : (
-                  'Купить'
-                )}
+                Купить
               </Button>
             </Card>
           </motion.div>
